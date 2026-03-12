@@ -14,7 +14,6 @@ use Illuminate\Http\JsonResponse;
 
 class ClassSessionController extends Controller
 {
-    use ApiResponse;
 
     public function index(): JsonResponse
     {

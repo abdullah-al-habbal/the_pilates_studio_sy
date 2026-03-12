@@ -15,7 +15,6 @@ use Illuminate\Http\Request;
 
 class PackageController extends Controller
 {
-    use ApiResponse;
 
     public function show(Request $request, int $id): JsonResponse
     {

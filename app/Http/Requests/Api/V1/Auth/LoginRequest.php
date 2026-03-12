@@ -10,10 +10,6 @@ use App\Http\Requests\Api\BaseApiFormRequest;
 
 class LoginRequest extends BaseApiFormRequest
 {
-    public function authorize(): bool
-    {
-        return true;
-    }
 
     public function rules(): array
     {

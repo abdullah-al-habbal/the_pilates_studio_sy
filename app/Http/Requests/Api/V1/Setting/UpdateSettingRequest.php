@@ -10,10 +10,6 @@ use App\Http\Requests\Api\BaseApiFormRequest;
 
 class UpdateSettingRequest extends BaseApiFormRequest
 {
-    public function authorize(): bool
-    {
-        return true;
-    }
 
     public function rules(): array
     {

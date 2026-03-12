@@ -14,7 +14,6 @@ use Illuminate\Http\JsonResponse;
 
 class StaticPageController extends Controller
 {
-    use ApiResponse;
 
     public function showBySlug(string $slug): JsonResponse
     {

@@ -10,13 +10,11 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\V1\Notification\BulkMarkAsReadRequest;
 use App\Http\Resources\Api\V1\NotificationResource;
 use App\Models\AppNotification;
-use App\Traits\ApiResponse;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 class NotificationController extends Controller
 {
-    use ApiResponse;
 
     public function index(Request $request): JsonResponse
     {

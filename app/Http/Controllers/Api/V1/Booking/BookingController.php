@@ -14,7 +14,6 @@ use Illuminate\Http\Request;
 
 class BookingController extends Controller
 {
-    use ApiResponse;
 
     public function index(Request $request): JsonResponse
     {

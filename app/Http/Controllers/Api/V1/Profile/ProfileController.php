@@ -15,7 +15,6 @@ use Illuminate\Http\Request;
 
 class ProfileController extends Controller
 {
-    use ApiResponse;
 
     public function show(Request $request): JsonResponse
     {

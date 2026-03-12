@@ -14,7 +14,6 @@ use Illuminate\Http\JsonResponse;
 
 class InstructorController extends Controller
 {
-    use ApiResponse;
 
     public function show(int $id): JsonResponse
     {

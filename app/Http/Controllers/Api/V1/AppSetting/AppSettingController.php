@@ -14,7 +14,6 @@ use Illuminate\Http\JsonResponse;
 
 class AppSettingController extends Controller
 {
-    use ApiResponse;
 
     public function showByKey(string $key): JsonResponse
     {

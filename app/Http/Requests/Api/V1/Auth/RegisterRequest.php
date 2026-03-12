@@ -10,11 +10,6 @@ use App\Http\Requests\Api\BaseApiFormRequest;
 
 class RegisterRequest extends BaseApiFormRequest
 {
-    public function authorize(): bool
-    {
-        return true;
-    }
-
     public function rules(): array
     {
         return [

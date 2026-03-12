@@ -6,19 +6,16 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Api\V1\Auth;
 
-use App\Http\Controllers\Controller;
+use App\Http\Controllers\Api\BaseApiController;
 use App\Http\Requests\Api\V1\Auth\ResendOtpRequest;
 use App\Http\Requests\Api\V1\Auth\VerifyOtpRequest;
 use App\Http\Resources\Api\V1\UserResource;
 use App\Models\User;
-use App\Traits\ApiResponse;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Hash;
 
-class EmailVerificationController extends Controller
+class EmailVerificationController extends BaseApiController
 {
-    use ApiResponse;
-
     public function verify(VerifyOtpRequest $request): JsonResponse
     {
         /** @var User $user */

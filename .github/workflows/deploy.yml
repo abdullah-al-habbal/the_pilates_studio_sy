@@ -26,6 +26,11 @@ jobs:
           php-version: "8.4"
           extensions: mbstring, openssl, pdo_mysql, fileinfo, sodium, curl
 
+      - name: Create CI environment file
+        run: |
+          cp .env.example .env
+          echo "APP_KEY=base64:$(openssl rand -base64 32)" >> .env
+
       - name: Install Composer dependencies (prod)
         run: composer install --no-interaction --prefer-dist --optimize-autoloader --no-dev
 

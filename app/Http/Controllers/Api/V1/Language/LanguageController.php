@@ -15,7 +15,6 @@ use Illuminate\Http\Request;
 
 class LanguageController extends Controller
 {
-    use ApiResponse;
     public function index(): JsonResponse
     {
         $languages = Language::getActive();

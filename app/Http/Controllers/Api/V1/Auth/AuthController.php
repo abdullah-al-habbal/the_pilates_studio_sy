@@ -6,27 +6,25 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Api\V1\Auth;
 
-use App\Http\Controllers\Controller;
+use App\Http\Controllers\Api\BaseApiController;
 use App\Http\Requests\Api\V1\Auth\LoginRequest;
 use App\Http\Requests\Api\V1\Auth\RegisterRequest;
 use App\Http\Resources\Api\V1\UserResource;
 use App\Models\User;
-use App\Traits\ApiResponseTrait;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Laravel\Sanctum\PersonalAccessToken;
 
-class AuthController extends Controller
+class AuthController extends BaseApiController
 {
-    use ApiResponseTrait;
-
     public function register(RegisterRequest $request): JsonResponse
     {
         $user = User::create([
-            'fullname'      => $request->fullname,
-            'email'         => $request->email,
-            'phone_number'  => $request->phone_number,
-            'password'      => $request->password,
+            'fullname' => $request->fullname,
+            'email' => $request->email,
+            'phone_number' => $request->phone_number,
+            'password' => $request->password,
             'date_of_birth' => $request->date_of_birth,
         ]);
 
@@ -64,13 +62,16 @@ class AuthController extends Controller
 
         return $this->success([
             'token' => $token,
-            'user'  => new UserResource($user),
+            'user' => new UserResource($user),
         ], 'Login successful.');
     }
 
     public function logout(Request $request): JsonResponse
     {
-        $request->user()->currentAccessToken()->delete();
+        /** @var PersonalAccessToken $token */
+        $token = $request->user()->currentAccessToken();
+
+        $token?->delete();
 
         return $this->noContent('Logged out successfully.');
     }
@@ -85,7 +86,7 @@ class AuthController extends Controller
         $otp = (string) random_int(100000, 999999);
 
         $user->update([
-            'otp_code'       => Hash::make($otp),
+            'otp_code' => Hash::make($otp),
             'otp_expires_at' => now()->addMinutes(15),
         ]);
 
