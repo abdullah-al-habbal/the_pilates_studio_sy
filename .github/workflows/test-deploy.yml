@@ -1,0 +1,19 @@
+name: Test Deploy Connection
+
+on:
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Test SCP Upload
+        uses: appleboy/scp-action@v0.1.5
+        with:
+          host: ${{ secrets.HOSTINGER_SERVER_IP }}
+          username: ${{ secrets.HOSTINGER_SSH_USERNAME }}
+          key: ${{ secrets.HOSTINGER_SSH_PRIVATE_KEY }}
+          port: ${{ secrets.HOSTINGER_SSH_PORT }}
+          source: "README.md"
+          target: "/home/${{ secrets.HOSTINGER_SSH_USERNAME }}/domains/dev.pilatesstudiosy.com/public_html/dev/"
+          debug: true

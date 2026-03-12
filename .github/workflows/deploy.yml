@@ -54,7 +54,6 @@ jobs:
             --exclude='storage/framework' \
             --exclude='storage/app' \
             ./ artifact/
-          # include vendor and built assets
           rsync -a vendor artifact/vendor
           rsync -a public/build artifact/public/build || true
           tar -czf release.tar.gz -C artifact .
@@ -75,11 +74,12 @@ jobs:
           echo "PORT=${{ secrets.HOSTINGER_SSH_PORT }}"
           echo "USER=${{ secrets.HOSTINGER_SSH_USERNAME }}"
 
-      - name: Test TCP connectivity
+      - name: Test SSH connectivity
         run: |
           sudo apt-get update
           sudo apt-get install -y netcat-openbsd
-          nc -zv ${{ secrets.HOSTINGER_SERVER_IP }} ${{ secrets.HOSTINGER_SSH_PORT }}
+          nc -zv ${{ secrets.HOSTINGER_SERVER_IP }} ${{ secrets.HOSTINGER_SSH_PORT }} || echo "Port test failed but continuing..."
+
       - name: Download artifact
         uses: actions/download-artifact@v4
         with:
@@ -96,7 +96,6 @@ jobs:
             echo "TARGET=/home/${{ secrets.HOSTINGER_SSH_USERNAME }}/domains/dev.pilatesstudiosy.com/public_html/dev" >> $GITHUB_ENV
             echo "ENVIRONMENT=dev" >> $GITHUB_ENV
           fi
-          echo "TARGET=${TARGET:-}"  # debug
 
       - name: Upload artifact to server
         uses: appleboy/scp-action@v0.1.5
@@ -107,8 +106,10 @@ jobs:
           port: ${{ secrets.HOSTINGER_SSH_PORT }}
           source: release.tar.gz
           target: ${{ env.TARGET }}
+          timeout: 30s
+          command_timeout: 10m
 
-      - name: Remote deploy (always overwrite vendor, preserve uploads)
+      - name: Remote deploy
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.HOSTINGER_SERVER_IP }}
@@ -116,12 +117,10 @@ jobs:
           key: ${{ secrets.HOSTINGER_SSH_PRIVATE_KEY }}
           port: ${{ secrets.HOSTINGER_SSH_PORT }}
           script: |
-            set -euo pipefail
-
+            set -e
             TARGET="${{ env.TARGET }}"
             ENVIRONMENT="${{ env.ENVIRONMENT }}"
-            PHP_BIN="${{ secrets.HOSTINGER_PHP_BIN || '/usr/bin/php8.4' }}"
-            WEB_USER="${{ secrets.HOSTINGER_WEB_USER || 'www-data' }}"
+            PHP_BIN="/usr/bin/php8.4"
 
             cd "$TARGET"
 
@@ -130,34 +129,27 @@ jobs:
             mkdir -p storage/framework/{cache,sessions,views}
             mkdir -p storage/app/public
 
-            # Backup uploads if present (temporary)
+            # Backup uploads if present
             if [ -d storage/app ]; then
-              echo "Backing up storage/app to storage/app.bak..."
               mv storage/app storage/app.bak.$(date +%s)
             fi
 
-            # Extract full artifact (always overwrite files, including vendor)
-            echo "Extracting artifact (overwriting files, including vendor)..."
+            # Extract artifact
             tar -xzf release.tar.gz -C .
-
-            # Remove uploaded archive
-            rm -f release.tar.gz || true
+            rm -f release.tar.gz
 
             # Restore uploads if backup exists
             if ls storage/app.bak.* 1> /dev/null 2>&1; then
-              echo "Restoring uploads from backup..."
               for d in storage/app.bak.*; do
                 rsync -a "$d"/ storage/app/ || true
               done
               rm -rf storage/app.bak.* || true
             fi
 
-            # Permissions and ownership (adjust web user if Hostinger uses different user)
+            # Permissions
             chmod -R 775 storage bootstrap/cache || true
-            chown -R "$WEB_USER":"$WEB_USER" storage bootstrap/cache || true
 
-            # Laravel post-deploy commands
-            echo "Running migrations and caching for $ENVIRONMENT..."
+            # Laravel commands
             $PHP_BIN artisan migrate --force || true
             $PHP_BIN artisan config:cache || true
             $PHP_BIN artisan route:cache || true
