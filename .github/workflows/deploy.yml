@@ -1,0 +1,162 @@
+name: Build and Deploy (Laravel)
+
+on:
+  push:
+    branches: [dev, production]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deploy-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    outputs:
+      artifact-name: release.tar.gz
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up PHP 8.4
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.4"
+          extensions: mbstring, openssl, pdo_mysql, fileinfo, sodium, curl
+
+      - name: Install Composer dependencies (prod)
+        run: composer install --no-interaction --prefer-dist --optimize-autoloader --no-dev
+
+      - name: Build frontend
+        run: |
+          corepack enable
+          npm ci
+          npm run build
+
+      - name: Prepare artifact
+        run: |
+          rm -rf artifact release.tar.gz || true
+          mkdir -p artifact
+          rsync -a \
+            --exclude='.git' \
+            --exclude='.github' \
+            --exclude='.env' \
+            --exclude='node_modules' \
+            --exclude='tests' \
+            --exclude='storage/logs' \
+            --exclude='storage/framework' \
+            --exclude='storage/app' \
+            ./ artifact/
+          # include vendor and built assets
+          rsync -a vendor artifact/vendor
+          rsync -a public/build artifact/public/build || true
+          tar -czf release.tar.gz -C artifact .
+
+      - name: Upload artifact to workflow
+        uses: actions/upload-artifact@v4
+        with:
+          name: release
+          path: release.tar.gz
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Debug connection variables
+        run: |
+          echo "IP=${{ secrets.HOSTINGER_SERVER_IP }}"
+          echo "PORT=${{ secrets.HOSTINGER_SSH_PORT }}"
+          echo "USER=${{ secrets.HOSTINGER_SSH_USERNAME }}"
+
+      - name: Test TCP connectivity
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y netcat-openbsd
+          nc -zv ${{ secrets.HOSTINGER_SERVER_IP }} ${{ secrets.HOSTINGER_SSH_PORT }}
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: release
+          path: .
+
+      - name: Determine target path (dev or production)
+        id: target
+        run: |
+          if [ "${GITHUB_REF_NAME}" = "production" ]; then
+            echo "TARGET=/home/${{ secrets.HOSTINGER_SSH_USERNAME }}/domains/pilatesstudiosy.com/public_html/production" >> $GITHUB_ENV
+            echo "ENVIRONMENT=production" >> $GITHUB_ENV
+          else
+            echo "TARGET=/home/${{ secrets.HOSTINGER_SSH_USERNAME }}/domains/dev.pilatesstudiosy.com/public_html/dev" >> $GITHUB_ENV
+            echo "ENVIRONMENT=dev" >> $GITHUB_ENV
+          fi
+          echo "TARGET=${TARGET:-}"  # debug
+
+      - name: Upload artifact to server
+        uses: appleboy/scp-action@v0.1.5
+        with:
+          host: ${{ secrets.HOSTINGER_SERVER_IP }}
+          username: ${{ secrets.HOSTINGER_SSH_USERNAME }}
+          key: ${{ secrets.HOSTINGER_SSH_PRIVATE_KEY }}
+          port: ${{ secrets.HOSTINGER_SSH_PORT }}
+          source: release.tar.gz
+          target: ${{ env.TARGET }}
+
+      - name: Remote deploy (always overwrite vendor, preserve uploads)
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.HOSTINGER_SERVER_IP }}
+          username: ${{ secrets.HOSTINGER_SSH_USERNAME }}
+          key: ${{ secrets.HOSTINGER_SSH_PRIVATE_KEY }}
+          port: ${{ secrets.HOSTINGER_SSH_PORT }}
+          script: |
+            set -euo pipefail
+
+            TARGET="${{ env.TARGET }}"
+            ENVIRONMENT="${{ env.ENVIRONMENT }}"
+            PHP_BIN="${{ secrets.HOSTINGER_PHP_BIN || '/usr/bin/php8.4' }}"
+            WEB_USER="${{ secrets.HOSTINGER_WEB_USER || 'www-data' }}"
+
+            cd "$TARGET"
+
+            # Ensure storage structure exists
+            mkdir -p storage/logs
+            mkdir -p storage/framework/{cache,sessions,views}
+            mkdir -p storage/app/public
+
+            # Backup uploads if present (temporary)
+            if [ -d storage/app ]; then
+              echo "Backing up storage/app to storage/app.bak..."
+              mv storage/app storage/app.bak.$(date +%s)
+            fi
+
+            # Extract full artifact (always overwrite files, including vendor)
+            echo "Extracting artifact (overwriting files, including vendor)..."
+            tar -xzf release.tar.gz -C .
+
+            # Remove uploaded archive
+            rm -f release.tar.gz || true
+
+            # Restore uploads if backup exists
+            if ls storage/app.bak.* 1> /dev/null 2>&1; then
+              echo "Restoring uploads from backup..."
+              for d in storage/app.bak.*; do
+                rsync -a "$d"/ storage/app/ || true
+              done
+              rm -rf storage/app.bak.* || true
+            fi
+
+            # Permissions and ownership (adjust web user if Hostinger uses different user)
+            chmod -R 775 storage bootstrap/cache || true
+            chown -R "$WEB_USER":"$WEB_USER" storage bootstrap/cache || true
+
+            # Laravel post-deploy commands
+            echo "Running migrations and caching for $ENVIRONMENT..."
+            $PHP_BIN artisan migrate --force || true
+            $PHP_BIN artisan config:cache || true
+            $PHP_BIN artisan route:cache || true
+            $PHP_BIN artisan view:cache || true
+            $PHP_BIN artisan optimize || true
+
+            echo "✅ Deployment to $ENVIRONMENT complete."
