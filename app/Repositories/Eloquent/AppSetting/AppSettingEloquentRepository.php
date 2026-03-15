@@ -1,36 +1,26 @@
 <?php
-// filePath: app/Repositories/Eloquent/AppSetting/AppSettingEloquentRepository.php
+// filePath: app/Repositories/Eloquent/Setting/AppSettingEloquentRepository.php
 
 declare(strict_types=1);
 
-namespace App\Repositories\Eloquent\AppSetting;
+namespace App\Repositories\Eloquent\Setting;
 
-use App\Models\AppSetting;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
+use App\Models\UserSetting;
 
 class AppSettingEloquentRepository
 {
-    public function findByKey(string $key): ?AppSetting
+    public function firstOrCreateForUser(int $userId): UserSetting
     {
-        return AppSetting::where('key', $key)->first();
+        return UserSetting::firstOrCreate(
+            ['user_id' => $userId],
+            ['user_id' => $userId]
+        )->load('preferredLanguage');
     }
 
-    public function findByKeyOrFail(string $key): AppSetting
+    public function updateAndLoad(UserSetting $settings, array $data): UserSetting
     {
-        $setting = $this->findByKey($key);
+        $settings->update($data);
 
-        if (!$setting) {
-            throw (new ModelNotFoundException)->setModel(
-                AppSetting::class,
-                $key
-            );
-        }
-
-        return $setting;
-    }
-
-    public function exists(string $key): bool
-    {
-        return AppSetting::where('key', $key)->exists();
+        return $settings->fresh()->load('preferredLanguage');
     }
 }

@@ -80,8 +80,12 @@ class BookingSessionEloquentRepository
         return (bool) BookingSession::where('id', $id)->update(['cancelled_at' => now()]);
     }
 
-    public function find(int $id): ?BookingSession
+    public function find(int $id, bool $lockForUpdate = false): ?BookingSession
     {
-        return BookingSession::find($id);
+        $query = BookingSession::query()->where('id', $id);
+        if ($lockForUpdate) {
+            $query->lockForUpdate();
+        }
+        return $query->first();
     }
 }

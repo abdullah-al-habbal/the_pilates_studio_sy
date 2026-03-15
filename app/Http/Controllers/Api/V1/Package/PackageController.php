@@ -1,5 +1,4 @@
 <?php
-
 // filePath: app/Http/Controllers/Api/V1/Package/PackageController.php
 
 declare(strict_types=1);
@@ -8,7 +7,7 @@ namespace App\Http\Controllers\Api\V1\Package;
 
 use App\Http\Controllers\Controller;
 use App\Http\Resources\Api\V1\PackageResource;
-use App\Models\Package;
+use App\Services\Package\PackageService;
 use Dedoc\Scramble\Attributes\Endpoint;
 use Dedoc\Scramble\Attributes\Group;
 use Illuminate\Http\JsonResponse;
@@ -17,12 +16,14 @@ use Illuminate\Http\Request;
 #[Group('Packages')]
 class PackageController extends Controller
 {
+    public function __construct(
+        private readonly PackageService $packageService
+    ) {}
+
     #[Endpoint('Show Package', description: 'Retrieve a package that the authenticated user has booked.')]
     public function show(Request $request, int $id): JsonResponse
     {
-        $package = Package::whereHas('bookings', function ($query) use ($request) {
-            $query->where('user_id', $request->user()->id);
-        })->findOrFail($id);
+        $package = $this->packageService->getUserBookedPackage($request->user()->id, $id);
 
         return $this->success(new PackageResource($package));
     }

@@ -1,28 +1,28 @@
 <?php
-// filePath: app/Services/AppSetting/AppSettingService.php
+// filePath: app/Services/Setting/AppSettingService.php
 
 declare(strict_types=1);
 
-namespace App\Services\AppSetting;
+namespace App\Services\Setting;
 
-use App\Models\AppSetting;
-use App\Repositories\Eloquent\AppSetting\AppSettingEloquentRepository;
+use App\Models\UserSetting;
+use App\Repositories\Eloquent\Setting\AppSettingEloquentRepository;
 
 class AppSettingService
 {
     public function __construct(
-        private readonly AppSettingEloquentRepository $appSettingRepository
+        private readonly AppSettingEloquentRepository $repository
     ) {}
 
-    public function getByKey(string $key): AppSetting
+    public function getUserSettings(int $userId): UserSetting
     {
-        return $this->appSettingRepository->findByKeyOrFail($key);
+        return $this->repository->firstOrCreateForUser($userId);
     }
 
-    public function getValue(string $key, mixed $default = null): mixed
+    public function updateUserSettings(int $userId, array $data): UserSetting
     {
-        $setting = $this->appSettingRepository->findByKey($key);
+        $settings = $this->repository->firstOrCreateForUser($userId);
 
-        return $setting ? $setting->value : $default;
+        return $this->repository->updateAndLoad($settings, $data);
     }
 }

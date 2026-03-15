@@ -1,5 +1,4 @@
 <?php
-
 // filePath: app/Repositories/Eloquent/User/UserEloquentRepository.php
 
 declare(strict_types=1);
@@ -39,6 +38,16 @@ class UserEloquentRepository
         return User::find($id);
     }
 
+    public function findWithSettings(int $id): ?User
+    {
+        return User::with('settings.preferredLanguage')->find($id);
+    }
+
+    public function update(User $user, array $data): bool
+    {
+        return (bool) $user->update($data);
+    }
+
     public function updateOtp(User $user, string $hashedOtp): bool
     {
         return (bool) $user->update([
@@ -54,5 +63,14 @@ class UserEloquentRepository
             'otp_code' => null,
             'otp_expires_at' => null,
         ]);
+    }
+
+    public function deleteAccount(User $user): void
+    {
+        DB::transaction(function () use ($user) {
+            $user->tokens()->delete();
+            $user->update(['deleted_by' => $user->id]);
+            $user->delete();
+        });
     }
 }

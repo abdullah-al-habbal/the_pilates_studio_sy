@@ -1,3 +1,4 @@
+
 <?php
 
 // filePath: app/Services/User/UserService.php
@@ -9,6 +10,7 @@ namespace App\Services\User;
 use App\Events\User\UserRegisteredEvent;
 use App\Models\User;
 use App\Repositories\Eloquent\User\UserEloquentRepository;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 
@@ -70,5 +72,29 @@ class UserService
     public function generateOtp(): string
     {
         return (string) random_int(100000, 999999);
+    }
+
+        public function findByEmailOrFail(string $email): User
+    {
+        $user = $this->findByEmail($email);
+        if (! $user) {
+            throw new ModelNotFoundException();
+        }
+        return $user;
+    }
+
+    public function hasValidOtp(User $user): bool
+    {
+        return !is_null($user->otp_code) && !is_null($user->otp_expires_at);
+    }
+
+    public function isOtpExpired(User $user): bool
+    {
+        return $user->otp_expires_at && $user->otp_expires_at->isPast();
+    }
+
+    public function verifyOtp(User $user, string $otp): bool
+    {
+        return Hash::check($otp, $user->otp_code);
     }
 }

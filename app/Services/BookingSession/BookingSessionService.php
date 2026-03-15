@@ -43,11 +43,15 @@ class BookingSessionService
         $this->logger->info('Cancelling booking session', ['session_id' => $bookingSessionId]);
 
         DB::transaction(function () use ($bookingSessionId) {
-            $bookingSession = $this->findById($bookingSessionId);
-            $classSession = $this->classSessionService->find($bookingSession->class_session_id);
+            $bookingSession = $this->findById($bookingSessionId, true);
+            $classSession = $this->classSessionService->find($bookingSession->class_session_id, true);
+
+            $date = $classSession->date instanceof Carbon
+                ? $classSession->date
+                : Carbon::parse($classSession->date);
 
             $cutoff = Carbon::parse(
-                $classSession->date->format('Y-m-d') . ' ' . $classSession->start_time
+                $date->format('Y-m-d') . ' ' . $classSession->start_time
             )->subHours(24);
 
             if (now()->greaterThanOrEqualTo($cutoff)) {
@@ -74,9 +78,9 @@ class BookingSessionService
         $this->repository->updateStatus($bookingSessionId, BookingSessionStatusEnum::NO_SHOW->value);
     }
 
-    private function findById(int $id): BookingSession
+    private function findById(int $id, bool $lockForUpdate = false): BookingSession
     {
-        return $this->repository->find($id);
+        return $this->repository->find($id, $lockForUpdate);
     }
 
     public function reserve(int $bookingId, int $classSessionId): BookingSession
@@ -87,9 +91,9 @@ class BookingSessionService
     ]);
 
     return DB::transaction(function () use ($bookingId, $classSessionId) {
-        $booking = $this->bookingService->lockForUpdate($bookingId);
+        $booking = $this->bookingService->find($bookingId, true);
 
-        if (!$this->bookingService->hasCreditsRemaining($bookingId)) {
+        if (!$this->bookingService->hasCreditsRemaining($booking)) {
             throw ValidationException::withMessages([
                 'booking_id' => 'Booking has no credits remaining.',
             ]);
@@ -103,7 +107,7 @@ class BookingSessionService
             ]);
         }
 
-        $classSession = $this->classSessionService->lockForUpdate($classSessionId);
+        $classSession = $this->classSessionService->find($classSessionId, true);
 
         if (!$this->classSessionService->hasAvailableSpots($classSessionId)) {
             throw ValidationException::withMessages([
@@ -111,10 +115,10 @@ class BookingSessionService
             ]);
         }
 
-        $this->bookingService->decrementCredits($bookingId);
+        $this->bookingService->decrementCredits($booking);
 
-        if (!$this->bookingService->hasCreditsRemaining($bookingId)) {
-            $this->bookingService->updateStatus($bookingId, BookingStatusEnum::EXHAUSTED->value);
+        if (!$this->bookingService->hasCreditsRemaining($booking)) {
+            $this->bookingService->updateStatus($booking, BookingStatusEnum::EXHAUSTED);
         }
 
         return $this->repository->create([

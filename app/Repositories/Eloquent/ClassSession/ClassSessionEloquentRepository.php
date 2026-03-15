@@ -6,37 +6,26 @@ declare(strict_types=1);
 namespace App\Repositories\Eloquent\ClassSession;
 
 use App\Models\ClassSession;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
 class ClassSessionEloquentRepository
 {
-    public function find(int $id, bool $lockForUpdate = false, array $relations = []): ?ClassSession
+    public function listUpcomingSessions(int $perPage = 20): LengthAwarePaginator
     {
-        $query = ClassSession::query();
-
-        if ($lockForUpdate) {
-            $query->lockForUpdate();
-        }
-
-        if (!empty($relations)) {
-            $query->with($relations);
-        }
-
-        return $query->find($id);
+        return ClassSession::query()
+            ->with(['class.instructor', 'class.primaryImage'])
+            ->whereDate('date', '>=', now()->toDateString())
+            ->orderBy('date')
+            ->orderBy('start_time')
+            ->paginate($perPage);
     }
 
-    public function availableSpotsCount(int $id): int
+    public function findById(int $id): ?ClassSession
     {
-        $reserved = ClassSession::findOrFail($id)
-            ->bookingSessions()
-            ->whereIn('status', ['reserved', 'attended'])
-            ->count();
-
-        $session = ClassSession::findOrFail($id);
-        return max(0, $session->total_spots - $reserved);
-    }
-
-    public function isFull(int $id): bool
-    {
-        return $this->availableSpotsCount($id) <= 0;
+        return ClassSession::with([
+            'class.instructor',
+            'class.category',
+            'class.primaryImage',
+        ])->find($id);
     }
 }
