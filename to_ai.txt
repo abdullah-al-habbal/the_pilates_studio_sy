@@ -1,0 +1,1582 @@
+so, give me the full content of each file need to by edited or updated or added new.
+in the server I have:
+
+We must not have a method named "lock for update"; it must always be a "param" in the main "find," right?
+then, what about SendOtpJob? it must be via email, so, I must implement it. 
+laravel 12, php 8.4, Mysql,
+locally what to do?
+and in the server:
+we must send the otp via email, (like if one registerd with gmail, then we must send to its mail, if one with outlook etc ...)
+check the
+<?php
+// filePath: app/Http/Controllers/Api/V1/Auth/EmailVerificationController.php
+declare(strict_types=1);
+namespace App\Http\Controllers\Api\V1\Auth;
+use App\Http\Controllers\Api\BaseApiController;
+use App\Http\Requests\Api\V1\Auth\ResendOtpRequest;
+use App\Http\Requests\Api\V1\Auth\VerifyOtpRequest;
+use App\Http\Resources\Api\V1\UserResource;
+use App\Models\User;
+use Dedoc\Scramble\Attributes\Endpoint;
+use Dedoc\Scramble\Attributes\Group;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Hash;
+#[Group('Authentication')]
+class EmailVerificationController extends BaseApiController
+{
+    #[Endpoint('Verify Email OTP', description: 'Verify the OTP sent to the user email.')]
+    public function verify(VerifyOtpRequest $request): JsonResponse
+    {
+        /** @var User $user */
+        $user = User::where('email', $request->email)->firstOrFail();
+        if (! is_null($user->email_verified_at)) {
+            return $this->error('Email is already verified.', 422);
+        }
+        if (is_null($user->otp_code) || is_null($user->otp_expires_at)) {
+            return $this->error('No OTP found. Please request a new one.', 422);
+        }
+        if ($user->otp_expires_at->isPast()) {
+            return $this->error('OTP has expired. Please request a new one.', 422);
+        }
+        if (! Hash::check($request->otp, $user->otp_code)) {
+            return $this->error('Invalid OTP.', 422);
+        }
+        $user->update([
+            'email_verified_at' => now(),
+            'otp_code' => null,
+            'otp_expires_at' => null,
+        ]);
+        $token = $user->createToken('mobile')->plainTextToken;
+        return $this->success([
+            'token' => $token,
+            'user' => new UserResource($user),
+        ], 'Email verified successfully.');
+    }
+    #[Endpoint('Resend Email OTP', description: 'Resend a new OTP to the user email.')]
+    public function resend(ResendOtpRequest $request): JsonResponse
+    {
+        /** @var User $user */
+        $user = User::where('email', $request->email)->firstOrFail();
+        if (! is_null($user->email_verified_at)) {
+            return $this->error('Email is already verified.', 422);
+        }
+        $otp = (string) random_int(100000, 999999);
+        $user->update([
+            'otp_code' => Hash::make($otp),
+            'otp_expires_at' => now()->addMinutes(15),
+        ]);
+        // Dispatch: SendOtpJob::dispatch($user, $otp);
+        return $this->success(
+            ['email' => $user->email],
+            'OTP resent. Please check your email.',
+        );
+    }
+}
+and:
+<?php
+// filePath: app/Http/Controllers/Api/V1/Auth/AuthController.php
+declare(strict_types=1);
+namespace App\Http\Controllers\Api\V1\Auth;
+use App\Http\Controllers\Api\BaseApiController;
+use App\Http\Requests\Api\V1\Auth\LoginRequest;
+use App\Http\Requests\Api\V1\Auth\RegisterRequest;
+use App\Http\Resources\Api\V1\UserResource;
+use App\Services\Auth\AuthService;
+use Dedoc\Scramble\Attributes\Endpoint;
+use Dedoc\Scramble\Attributes\Group;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
+#[Group('Authentication')]
+class AuthController extends BaseApiController
+{
+    public function __construct(
+        private readonly AuthService $authService
+    ) {}
+    #[Endpoint('Register', description: 'Register a new user.')]
+    public function register(RegisterRequest $request): JsonResponse
+    {
+        $user = $this->authService->register($request->validated());
+        return $this->created(
+            ['email' => $user->email],
+            'Registration successful. Please verify your email.',
+        );
+    }
+    #[Endpoint('Login', description: 'Authenticate a user and return a token.')]
+    public function login(LoginRequest $request): JsonResponse
+    {
+        $data = $request->validated();
+        $user = $this->authService->attemptLogin($data['email'], $data['password']);
+        if (! $user) {
+            return $this->error('Invalid credentials.', 401);
+        }
+        if (! $user->isActive()) {
+            return $this->error('Your account has been deactivated.', 403);
+        }
+        if (is_null($user->email_verified_at)) {
+            $this->authService->sendOtp($user);
+            return $this->error(
+                'Email not verified. A new OTP has been sent to your email.',
+                403,
+                ['email_verified' => false],
+            );
+        }
+        $deviceName = $data['device_name'] ?? null;
+        $token = $this->authService->createToken($user, $deviceName);
+        return $this->success([
+            'token' => $token,
+            'user' => new UserResource($user),
+        ], 'Login successful.');
+    }
+    #[Endpoint('Logout', description: 'Logout the authenticated user.')]
+    public function logout(Request $request): JsonResponse
+    {
+        $this->authService->logout($request->user());
+        return $this->noContent('Logged out successfully.');
+    }
+    #[Endpoint('Me', description: 'Get the authenticated user profile.')]
+    public function me(Request $request): JsonResponse
+    {
+        return $this->success(new UserResource($request->user()));
+    }
+}
+and:
+<?php
+// filePath: app/Services/Auth/AuthService.php
+declare(strict_types=1);
+namespace App\Services\Auth;
+use App\Models\User;
+use App\Services\User\UserService;
+use Illuminate\Support\Carbon;
+class AuthService
+{
+    public function __construct(
+        private readonly UserService $userService
+    ) {}
+    public function register(array $data): User
+    {
+        $user = $this->userService->createUser($data);
+        $this->sendOtp($user);
+        return $user;
+    }
+    public function attemptLogin(string $email, string $password): ?User
+    {
+        $user = $this->userService->findByEmail($email);
+        if (! $user || ! $this->userService->validateCredentials($user, $password)) {
+            return null;
+        }
+        return $user;
+    }
+    public function createToken(User $user, ?string $deviceName = null): string
+    {
+        $tokenName = $deviceName ?? 'auth_token_'.Carbon::now()->timestamp;
+        return $user->createToken($tokenName)->plainTextToken;
+    }
+    public function sendOtp(User $user): void
+    {
+        $otp = $this->userService->generateOtp();
+        $this->userService->saveOtp($user, $otp);
+    }
+    public function logout(User $user): void
+    {
+        $user->currentAccessToken()?->delete();
+    }
+}
+and:
+<?php
+// filePath: app/Services/User/UserService.php
+declare(strict_types=1);
+namespace App\Services\User;
+use App\Events\User\UserRegisteredEvent;
+use App\Models\User;
+use App\Repositories\Eloquent\User\UserEloquentRepository;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
+class UserService
+{
+    public function __construct(
+        private readonly UserEloquentRepository $userRepository
+    ) {}
+    public function createUser(array $data): User
+    {
+        $user = DB::transaction(function () use ($data) {
+            $user = $this->userRepository->create([
+                'fullname' => $data['fullname'],
+                'email' => $data['email'],
+                'phone_number' => $data['phone_number'],
+                'password' => $data['password'],
+                'date_of_birth' => $data['date_of_birth'] ?? null,
+            ]);
+            UserRegisteredEvent::dispatch($user);
+            return $user;
+        });
+        return $user;
+    }
+    public function findByEmail(string $email): ?User
+    {
+        return $this->userRepository->findByEmail($email);
+    }
+    public function validateCredentials(User $user, string $password): bool
+    {
+        return Hash::check($password, $user->password);
+    }
+    public function isAccountActive(User $user): bool
+    {
+        return $user->isActive();
+    }
+    public function isEmailVerified(User $user): bool
+    {
+        return ! is_null($user->email_verified_at);
+    }
+    public function saveOtp(User $user, string $otp): void
+    {
+        $this->userRepository->updateOtp($user, Hash::make($otp));
+    }
+    public function verifyEmail(User $user): void
+    {
+        $this->userRepository->markEmailAsVerified($user);
+    }
+    public function generateOtp(): string
+    {
+        return (string) random_int(100000, 999999);
+    }
+}
+and:
+<?php
+// filePath: app/Repositories/Eloquent/User/UserEloquentRepository.php
+declare(strict_types=1);
+namespace App\Repositories\Eloquent\User;
+use App\Events\User\UserRegisteredEvent;
+use App\Models\User;
+use Illuminate\Support\Facades\DB;
+class UserEloquentRepository
+{
+    public function create(array $data): User
+    {
+        return DB::transaction(function () use ($data) {
+            $user = User::create($data);
+            UserRegisteredEvent::dispatch($user);
+            return $user;
+        });
+    }
+    public function createInTransaction(array $data): User
+    {
+        return DB::transaction(function () use ($data) {
+            return $this->create($data);
+        });
+    }
+    public function findByEmail(string $email): ?User
+    {
+        return User::where('email', $email)->first();
+    }
+    public function findById(int $id): ?User
+    {
+        return User::find($id);
+    }
+    public function updateOtp(User $user, string $hashedOtp): bool
+    {
+        return (bool) $user->update([
+            'otp_code' => $hashedOtp,
+            'otp_expires_at' => now()->addMinutes(15),
+        ]);
+    }
+    public function markEmailAsVerified(User $user): bool
+    {
+        return (bool) $user->update([
+            'email_verified_at' => now(),
+            'otp_code' => null,
+            'otp_expires_at' => null,
+        ]);
+    }
+}
+and:
+<?php
+// filePath: app\Models\User.php
+namespace App\Models;
+use App\Enums\BookingStatusEnum;
+use Illuminate\Database\Eloquent\Casts\Attribute;
+use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Notifications\Notifiable;
+use Laravel\Sanctum\HasApiTokens;
+use Laravel\Sanctum\PersonalAccessToken;
+/**
+ * @method PersonalAccessToken|null currentAccessToken()
+ */
+class User extends Authenticatable
+{
+    use HasApiTokens, HasFactory, Notifiable, SoftDeletes;
+    protected $fillable = [
+        'fullname',
+        'phone_number',
+        'email',
+        'password',
+        'date_of_birth',
+        'email_verified_at',
+        'otp_code',
+        'otp_expires_at',
+        'deactivated_at',
+        'deleted_by',
+    ];
+    protected $hidden = [
+        'password',
+        'otp_code',
+        'otp_expires_at',
+        'remember_token',
+    ];
+    protected function casts(): array
+    {
+        return [
+            'date_of_birth'     => 'date',
+            'email_verified_at' => 'datetime',
+            'otp_expires_at'    => 'datetime',
+            'deactivated_at'    => 'datetime',
+            'password'          => 'hashed',
+        ];
+    }
+    protected function name(): Attribute
+    {
+        return Attribute::make(get: fn() => $this->fullname);
+    }
+    public function isActive(): bool
+    {
+        return is_null($this->deactivated_at);
+    }
+    public function getTotalRemainingCreditsAttribute(): int
+    {
+        return $this->bookings()->where('status', BookingStatusEnum::ACTIVE->value)->sum('remaining_credits');
+    }
+    public function activeBooking(): HasOne
+    {
+        return $this->hasOne(Booking::class)->where('status', BookingStatusEnum::ACTIVE->value)->latest();
+    }
+    public function getAllowNotificationsAttribute(): bool
+    {
+        return (bool) $this->settings?->allow_notifications;
+    }
+    public function getFcmTokenAttribute(): ?string
+    {
+        return $this->settings?->fcm_token;
+    }
+    public function getPreferredLocaleAttribute(): string
+    {
+        return $this->settings?->resolvedLocale() ?? config('app.locale', 'en');
+    }
+    public function settings(): HasOne
+    {
+        return $this->hasOne(UserSetting::class);
+    }
+    public function bookings(): HasMany
+    {
+        return $this->hasMany(Booking::class);
+    }
+    public function bookingSessions(): HasManyThrough
+    {
+        return $this->hasManyThrough(BookingSession::class, Booking::class);
+    }
+    public function notifications(): HasMany
+    {
+        return $this->hasMany(AppNotification::class);
+    }
+    public function deletedBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'deleted_by');
+    }
+}
+and check:
+<?php
+// filePath: bootstrap/app.php
+declare(strict_types=1);
+use App\Http\Middleware\SetLocaleMiddleware;
+use Illuminate\Auth\Middleware\Authenticate;
+use Illuminate\Auth\Middleware\AuthenticateWithBasicAuth;
+use Illuminate\Auth\Middleware\Authorize;
+use Illuminate\Auth\Middleware\EnsureEmailIsVerified;
+use Illuminate\Auth\Middleware\RedirectIfAuthenticated;
+use Illuminate\Auth\Middleware\RequirePassword;
+use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
+use Illuminate\Cookie\Middleware\EncryptCookies;
+use Illuminate\Foundation\Application;
+use Illuminate\Foundation\Configuration\Exceptions;
+use Illuminate\Foundation\Configuration\Middleware;
+use Illuminate\Foundation\Http\Middleware\HandlePrecognitiveRequests;
+use Illuminate\Foundation\Http\Middleware\InvokeDeferredCallbacks;
+use Illuminate\Foundation\Http\Middleware\ValidateCsrfToken;
+use Illuminate\Http\Middleware\SetCacheHeaders;
+use Illuminate\Routing\Middleware\SubstituteBindings;
+use Illuminate\Routing\Middleware\ThrottleRequests;
+use Illuminate\Routing\Middleware\ValidateSignature;
+use Illuminate\Session\Middleware\AuthenticateSession;
+use Illuminate\Session\Middleware\StartSession;
+use Illuminate\View\Middleware\ShareErrorsFromSession;
+use Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Http\Request;
+use Illuminate\Validation\ValidationException;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+return Application::configure(basePath: dirname(__DIR__))
+    ->withRouting(
+        web: __DIR__.'/../routes/web/web.php',
+        api: __DIR__.'/../routes/api/api.php',
+        commands: __DIR__.'/../routes/console/console.php',
+        health: '/up',
+    )
+    ->withMiddleware(function (Middleware $middleware) {
+        $middleware->append(SetLocaleMiddleware::class);
+        $middleware->alias([
+            'auth' => Authenticate::class,
+            'auth.basic' => AuthenticateWithBasicAuth::class,
+            'auth.sanctum' => EnsureFrontendRequestsAreStateful::class,
+            'auth.session' => AuthenticateSession::class,
+            'cache.headers' => SetCacheHeaders::class,
+            'can' => Authorize::class,
+            'guest' => RedirectIfAuthenticated::class,
+            'password.confirm' => RequirePassword::class,
+            'precognitive' => HandlePrecognitiveRequests::class,
+            'signed' => ValidateSignature::class,
+            'throttle' => ThrottleRequests::class,
+            'verified' => EnsureEmailIsVerified::class,
+        ]);
+        $middleware->api(prepend: [
+            EnsureFrontendRequestsAreStateful::class,
+            'throttle:api',
+            SubstituteBindings::class,
+        ]);
+        $middleware->web(append: []);
+        $middleware->priority([
+            InvokeDeferredCallbacks::class,
+            EncryptCookies::class,
+            AddQueuedCookiesToResponse::class,
+            StartSession::class,
+            ShareErrorsFromSession::class,
+            ValidateCsrfToken::class,
+            EnsureFrontendRequestsAreStateful::class,
+            SubstituteBindings::class,
+            ThrottleRequests::class,
+            Authenticate::class,
+            Authorize::class,
+        ]);
+    })
+    ->withExceptions(function (Exceptions $exceptions): void {
+        $exceptions->render(function (ModelNotFoundException $e, Request $request) {
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Resource not found'
+                ], 404);
+            }
+        });
+        $exceptions->render(function (ValidationException $e, Request $request) {
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Validation failed',
+                    'errors' => $e->errors()
+                ], 422);
+            }
+        });
+        $exceptions->render(function (NotFoundHttpException $e, Request $request) {
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Endpoint not found'
+                ], 404);
+            }
+        });
+    })->create();
+and:
+<?php
+// filePath: bootstrap/providers.php
+use App\Providers\ApplicationServiceProvider;
+use App\Providers\EventServiceProvider;
+use App\Providers\Filament\AdminPanelProvider;
+use App\Providers\ScrambleServiceProvider;
+return [
+    ApplicationServiceProvider::class,
+    AdminPanelProvider::class,
+    ScrambleServiceProvider::class,
+    EventServiceProvider::class,
+];
+and:
+<?php
+// filePath: app/Providers/AppServiceProvider.php
+namespace App\Providers;
+use Illuminate\Cache\RateLimiting\Limit;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Support\Facades\URL;
+use Illuminate\Support\ServiceProvider;
+use Illuminate\Validation\Rules\Password;
+class ApplicationServiceProvider extends ServiceProvider
+{
+    public function register(): void {}
+    public function boot(): void
+    {
+        RateLimiter::for('api', function (Request $request) {
+            return Limit::perMinute(60)->by($request->user()?->id ?: $request->ip());
+        });
+        $this->configureModelProtections();
+        $this->configureDatabase();
+        $this->configurePasswordDefaults();
+    }
+    protected function configureModelProtections(): void
+    {
+        $isLocal = $this->app->environment('local', 'development');
+        Model::preventLazyLoading($isLocal);
+        Model::preventSilentlyDiscardingAttributes($isLocal);
+        Model::preventAccessingMissingAttributes($isLocal);
+        Model::shouldBeStrict($isLocal);
+        Model::unguard(false);
+    }
+    protected function configureDatabase(): void
+    {
+        DB::prohibitDestructiveCommands($this->app->isProduction());
+        if ($this->app->environment('production')) {
+            if (config('app.force_https', false)) {
+                URL::forceScheme('https');
+            }
+            DB::statement('SET SESSION sql_mode = STRICT_ALL_TABLES');
+            DB::statement('SET SESSION group_concat_max_len = 1000000');
+        } else {
+            DB::listen(function ($query) {
+                if ($query->time > 500) {
+                    logger()->warning('Slow query detected', [
+                        'sql' => $query->sql,
+                        'bindings' => $query->bindings,
+                        'time' => $query->time,
+                        'connection' => $query->connectionName,
+                    ]);
+                }
+            });
+        }
+    }
+    protected function configurePasswordDefaults(): void
+    {
+        Password::defaults(function () {
+            return Password::min(8)
+                ->mixedCase()
+                ->letters()
+                ->numbers()
+                ->symbols()
+                ->uncompromised();
+        });
+    }
+}
+and:
+<?php
+// filePath: app/Providers/EventServiceProvider.php
+declare(strict_types=1);
+namespace App\Providers;
+use App\Events\User\UserRegisteredEvent;
+use App\Listeners\User\CreateDefaultUserSettingListener;
+use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
+class EventServiceProvider extends ServiceProvider
+{
+    protected $listen = [
+        UserRegisteredEvent::class => [
+            CreateDefaultUserSettingListener::class,
+        ],
+    ];
+    public function boot(): void
+    {
+        parent::boot();
+    }
+    public function shouldDiscoverEvents(): bool
+    {
+        return true;
+    }
+}
+and:
+<?php
+// filePath: config/app.php
+declare(strict_types=1);
+return [
+    'name' => env('APP_NAME', 'Laravel'),
+    'env' => env('APP_ENV', 'production'),
+    'debug' => (bool) env('APP_DEBUG', false),
+    'url' => env('APP_URL', 'http://localhost'),
+    'timezone' => 'UTC',
+    'locale' => env('APP_LOCALE', 'en'),
+    'fallback_locale' => env('APP_FALLBACK_LOCALE', 'en'),
+    'faker_locale' => env('APP_FAKER_LOCALE', 'en_US'),
+    'cipher' => 'AES-256-CBC',
+    'key' => env('APP_KEY'),
+    'previous_keys' => [
+        ...array_filter(
+            explode(',', (string) env('APP_PREVIOUS_KEYS', ''))
+        ),
+    ],
+    'maintenance' => [
+        'driver' => env('APP_MAINTENANCE_DRIVER', 'file'),
+        'store' => env('APP_MAINTENANCE_STORE', 'database'),
+    ],
+    'force_https' => false,
+];
+check my current .env is:
+APP_NAME=Laravel
+APP_ENV=local
+APP_KEY=base64:BKnXCFKS+s+//11ZssPxea8DbkwEZi3hPxQkoUe4W6w=
+APP_DEBUG=true
+APP_URL=http://127.0.0.1:8000
+
+APP_LOCALE=en
+APP_FALLBACK_LOCALE=en
+APP_FAKER_LOCALE=en_US
+
+APP_MAINTENANCE_DRIVER=file
+# APP_MAINTENANCE_STORE=database
+
+# PHP_CLI_SERVER_WORKERS=4
+
+BCRYPT_ROUNDS=12
+
+LOG_CHANNEL=stack
+LOG_STACK=single
+LOG_DEPRECATIONS_CHANNEL=null
+LOG_LEVEL=debug
+
+# database
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=pilates_studio_backend_dev_db
+DB_USERNAME=root
+DB_PASSWORD=
+
+SESSION_DRIVER=database
+SESSION_LIFETIME=120
+SESSION_ENCRYPT=false
+SESSION_PATH=/
+SESSION_DOMAIN=null
+SESSION_COOKIE=pilates-session
+
+BROADCAST_CONNECTION=log
+FILESYSTEM_DISK=local
+QUEUE_CONNECTION=database
+
+CACHE_STORE=database
+# CACHE_PREFIX=
+
+MEMCACHED_HOST=127.0.0.1
+
+REDIS_CLIENT=phpredis
+REDIS_HOST=127.0.0.1
+REDIS_PASSWORD=null
+REDIS_PORT=6379
+
+MAIL_MAILER=log
+MAIL_SCHEME=null
+MAIL_HOST=127.0.0.1
+MAIL_PORT=2525
+MAIL_USERNAME=null
+MAIL_PASSWORD=null
+MAIL_FROM_ADDRESS="hello@example.com"
+MAIL_FROM_NAME="${APP_NAME}"
+
+AWS_ACCESS_KEY_ID=
+AWS_SECRET_ACCESS_KEY=
+AWS_DEFAULT_REGION=us-east-1
+AWS_BUCKET=
+AWS_USE_PATH_STYLE_ENDPOINT=false
+
+VITE_APP_NAME="${APP_NAME}"
+
+build a small "mindset" of my approach:
+check my approach of make for each model repo and service only and with strict boundaries
+check:
+<?php
+// filePath: app/Http/Controllers/Api/V1/Auth/AuthController.php
+declare(strict_types=1);
+namespace App\Http\Controllers\Api\V1\Auth;
+use App\Http\Controllers\Api\BaseApiController;
+use App\Http\Requests\Api\V1\Auth\LoginRequest;
+use App\Http\Requests\Api\V1\Auth\RegisterRequest;
+use App\Http\Resources\Api\V1\UserResource;
+use App\Services\Auth\AuthService;
+use Dedoc\Scramble\Attributes\Endpoint;
+use Dedoc\Scramble\Attributes\Group;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
+#[Group('Authentication')]
+class AuthController extends BaseApiController
+{
+    public function __construct(
+        private readonly AuthService $authService
+    ) {}
+    #[Endpoint('Register', description: 'Register a new user.')]
+    public function register(RegisterRequest $request): JsonResponse
+    {
+        $user = $this->authService->register($request->validated());
+        return $this->created(
+            ['email' => $user->email],
+            'Registration successful. Please verify your email.',
+        );
+    }
+    #[Endpoint('Login', description: 'Authenticate a user and return a token.')]
+    public function login(LoginRequest $request): JsonResponse
+    {
+        $data = $request->validated();
+        $user = $this->authService->attemptLogin($data['email'], $data['password']);
+        if (! $user) {
+            return $this->error('Invalid credentials.', 401);
+        }
+        if (! $user->isActive()) {
+            return $this->error('Your account has been deactivated.', 403);
+        }
+        if (is_null($user->email_verified_at)) {
+            $this->authService->sendOtp($user);
+            return $this->error(
+                'Email not verified. A new OTP has been sent to your email.',
+                403,
+                ['email_verified' => false],
+            );
+        }
+        $deviceName = $data['device_name'] ?? null;
+        $token = $this->authService->createToken($user, $deviceName);
+        return $this->success([
+            'token' => $token,
+            'user' => new UserResource($user),
+        ], 'Login successful.');
+    }
+    #[Endpoint('Logout', description: 'Logout the authenticated user.')]
+    public function logout(Request $request): JsonResponse
+    {
+        $this->authService->logout($request->user());
+        return $this->noContent('Logged out successfully.');
+    }
+    #[Endpoint('Me', description: 'Get the authenticated user profile.')]
+    public function me(Request $request): JsonResponse
+    {
+        return $this->success(new UserResource($request->user()));
+    }
+}
+and:
+<?php
+// filePath: app/Services/Auth/AuthService.php
+declare(strict_types=1);
+namespace App\Services\Auth;
+use App\Models\User;
+use App\Services\User\UserService;
+use Illuminate\Support\Carbon;
+class AuthService
+{
+    public function __construct(
+        private readonly UserService $userService
+    ) {}
+    public function register(array $data): User
+    {
+        $user = $this->userService->createUser($data);
+        $this->sendOtp($user);
+        return $user;
+    }
+    public function attemptLogin(string $email, string $password): ?User
+    {
+        $user = $this->userService->findByEmail($email);
+        if (! $user || ! $this->userService->validateCredentials($user, $password)) {
+            return null;
+        }
+        return $user;
+    }
+    public function createToken(User $user, ?string $deviceName = null): string
+    {
+        $tokenName = $deviceName ?? 'auth_token_'.Carbon::now()->timestamp;
+        return $user->createToken($tokenName)->plainTextToken;
+    }
+    public function sendOtp(User $user): void
+    {
+        $otp = $this->userService->generateOtp();
+        $this->userService->saveOtp($user, $otp);
+    }
+    public function logout(User $user): void
+    {
+        $user->currentAccessToken()?->delete();
+    }
+}
+and:
+<?php
+// filePath: app/Services/User/UserService.php
+declare(strict_types=1);
+namespace App\Services\User;
+use App\Events\User\UserRegisteredEvent;
+use App\Models\User;
+use App\Repositories\Eloquent\User\UserEloquentRepository;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
+class UserService
+{
+    public function __construct(
+        private readonly UserEloquentRepository $userRepository
+    ) {}
+    public function createUser(array $data): User
+    {
+        $user = DB::transaction(function () use ($data) {
+            $user = $this->userRepository->create([
+                'fullname' => $data['fullname'],
+                'email' => $data['email'],
+                'phone_number' => $data['phone_number'],
+                'password' => $data['password'],
+                'date_of_birth' => $data['date_of_birth'] ?? null,
+            ]);
+            UserRegisteredEvent::dispatch($user);
+            return $user;
+        });
+        return $user;
+    }
+    public function findByEmail(string $email): ?User
+    {
+        return $this->userRepository->findByEmail($email);
+    }
+    public function validateCredentials(User $user, string $password): bool
+    {
+        return Hash::check($password, $user->password);
+    }
+    public function isAccountActive(User $user): bool
+    {
+        return $user->isActive();
+    }
+    public function isEmailVerified(User $user): bool
+    {
+        return ! is_null($user->email_verified_at);
+    }
+    public function saveOtp(User $user, string $otp): void
+    {
+        $this->userRepository->updateOtp($user, Hash::make($otp));
+    }
+    public function verifyEmail(User $user): void
+    {
+        $this->userRepository->markEmailAsVerified($user);
+    }
+    public function generateOtp(): string
+    {
+        return (string) random_int(100000, 999999);
+    }
+}
+and:
+<?php
+// filePath: app/Repositories/Eloquent/User/UserEloquentRepository.php
+declare(strict_types=1);
+namespace App\Repositories\Eloquent\User;
+use App\Events\User\UserRegisteredEvent;
+use App\Models\User;
+use Illuminate\Support\Facades\DB;
+class UserEloquentRepository
+{
+    public function create(array $data): User
+    {
+        return DB::transaction(function () use ($data) {
+            $user = User::create($data);
+            UserRegisteredEvent::dispatch($user);
+            return $user;
+        });
+    }
+    public function createInTransaction(array $data): User
+    {
+        return DB::transaction(function () use ($data) {
+            return $this->create($data);
+        });
+    }
+    public function findByEmail(string $email): ?User
+    {
+        return User::where('email', $email)->first();
+    }
+    public function findById(int $id): ?User
+    {
+        return User::find($id);
+    }
+    public function updateOtp(User $user, string $hashedOtp): bool
+    {
+        return (bool) $user->update([
+            'otp_code' => $hashedOtp,
+            'otp_expires_at' => now()->addMinutes(15),
+        ]);
+    }
+    public function markEmailAsVerified(User $user): bool
+    {
+        return (bool) $user->update([
+            'email_verified_at' => now(),
+            'otp_code' => null,
+            'otp_expires_at' => null,
+        ]);
+    }
+}
+and for the UserEloquentRepository use construct,
+and using the <?php
+// filePath: app/Services/Log/LoggingService.php
+declare(strict_types=1);
+namespace App\Services\Log;
+use Illuminate\Support\Facades\Log;
+class LoggingService
+{
+    public function info(string $message, array $context = []): void
+    {
+        Log::info($message, $context);
+    }
+    public function error(string $message, array $context = []): void
+    {
+        Log::error($message, $context);
+    }
+    public function warning(string $message, array $context = []): void
+    {
+        Log::warning($message, $context);
+    }
+}
+and check my approach, of clean, readalbe, strict code etc ...
+
+and check:
+Today
+check the <?php
+// filePath: app/Http/Controllers/Api/V1/Auth/AuthController.php
+declare(strict_types=1);
+namespace App\Http\Controllers\Api\V1\Auth;
+use App\Http\Controllers\Api\BaseApiController;
+use App\Http\Requests\Api\V1\Auth\LoginRequest;
+use App\Http\Requests\Api\V1\Auth\RegisterRequest;
+use App\Http\Resources\Api\V1\UserResource;
+use App\Services\Auth\AuthService;
+use Dedoc\Scramble\Attributes\Endpoint;
+use Dedoc\Scramble\Attributes\Group;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
+#[Group('Authentication')]
+class AuthController extends BaseApiController
+{
+    public function __construct(
+        private readonly AuthService $authService
+    ) {}
+    #[Endpoint('Register', description: 'Register a new user.')]
+    public function register(RegisterRequest $request): JsonResponse
+    {
+        $user = $this->authService->register($request->validated());
+        return $this->created(
+            ['email' => $user->email],
+            'Registration successful. Please verify your email.',
+        );
+    }
+    #[Endpoint('Login', description: 'Authenticate a user and return a token.')]
+    public function login(LoginRequest $request): JsonResponse
+    {
+        $data = $request->validated();
+        $user = $this->authService->attemptLogin($data['email'], $data['password']);
+        if (! $user) {
+            return $this->error('Invalid credentials.', 401);
+        }
+        if (! $user->isActive()) {
+            return $this->error('Your account has been deactivated.', 403);
+        }
+        if (is_null($user->email_verified_at)) {
+            $this->authService->sendOtp($user);
+            return $this->error(
+                'Email not verified. A new OTP has been sent to your email.',
+                403,
+                ['email_verified' => false],
+            );
+        }
+        $deviceName = $data['device_name'] ?? null;
+        $token = $this->authService->createToken($user, $deviceName);
+        return $this->success([
+            'token' => $token,
+            'user' => new UserResource($user),
+        ], 'Login successful.');
+    }
+    #[Endpoint('Logout', description: 'Logout the authenticated user.')]
+    public function logout(Request $request): JsonResponse
+    {
+        $this->authService->logout($request->user());
+        return $this->noContent('Logged out successfully.');
+    }
+    #[Endpoint('Me', description: 'Get the authenticated user profile.')]
+    public function me(Request $request): JsonResponse
+    {
+        return $this->success(new UserResource($request->user()));
+    }
+}
+especially the:
+use Dedoc\Scramble\Attributes\Endpoint;
+use Dedoc\Scramble\Attributes\Group;
+then, make the same approach in (give me the fully updated file):
+<?php
+// filePath: app/Http/Controllers/Api/V1/Auth/EmailVerificationController.php
+declare(strict_types=1);
+namespace App\Http\Controllers\Api\V1\Auth;
+use App\Http\Controllers\Api\BaseApiController;
+use App\Http\Requests\Api\V1\Auth\ResendOtpRequest;
+use App\Http\Requests\Api\V1\Auth\VerifyOtpRequest;
+use App\Http\Resources\Api\V1\UserResource;
+use App\Models\User;
+use Dedoc\Scramble\Attributes\Group;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Hash;
+#[Group('Authentication')]
+class EmailVerificationController extends BaseApiController
+{
+    public function verify(VerifyOtpRequest $request): JsonResponse
+    {
+        /** @var User $user */
+        $user = User::where('email', $request->email)->firstOrFail();
+        if (! is_null($user->email_verified_at)) {
+            return $this->error('Email is already verified.', 422);
+        }
+        if (is_null($user->otp_code) || is_null($user->otp_expires_at)) {
+            return $this->error('No OTP found. Please request a new one.', 422);
+        }
+        if ($user->otp_expires_at->isPast()) {
+            return $this->error('OTP has expired. Please request a new one.', 422);
+        }
+        if (! Hash::check($request->otp, $user->otp_code)) {
+            return $this->error('Invalid OTP.', 422);
+        }
+        $user->update([
+            'email_verified_at' => now(),
+            'otp_code' => null,
+            'otp_expires_at' => null,
+        ]);
+        $token = $user->createToken('mobile')->plainTextToken;
+        return $this->success([
+            'token' => $token,
+            'user' => new UserResource($user),
+        ], 'Email verified successfully.');
+    }
+    public function resend(ResendOtpRequest $request): JsonResponse
+    {
+        /** @var User $user */
+        $user = User::where('email', $request->email)->firstOrFail();
+        if (! is_null($user->email_verified_at)) {
+            return $this->error('Email is already verified.', 422);
+        }
+        $otp = (string) random_int(100000, 999999);
+        $user->update([
+            'otp_code' => Hash::make($otp),
+            'otp_expires_at' => now()->addMinutes(15),
+        ]);
+        // Dispatch: SendOtpJob::dispatch($user, $otp);
+        return $this->success(
+            ['email' => $user->email],
+            'OTP resent. Please check your email.',
+        );
+    }
+}
+Here’s a clean, professional review of your first controller — and then the fully updated EmailVerificationController with the same Scramble API documentation attributes (#[Endpoint], #[Group]) applied consistently.
+✅ Review of Your AuthController
+You already did everything correctly:
+php
+use Dedoc\Scramble\Attributes\Endpoint;
+use Dedoc\Scramble\Attributes\Group;
+And each action is annotated with:
+php
+#[Endpoint('Name', description: '...')]
+Perfect. This is exactly how Scramble expects endpoint metadata.
+✅ Updated EmailVerificationController
+Below is the fully updated file, following the same structure and conventions as your AuthController:
+Added use Dedoc\Scramble\Attributes\Endpoint;
+Added #[Endpoint(...)] above each public method
+Kept the same #[Group('Authentication')] grouping
+No logic changes — only documentation attributes added
+📌 Updated File: EmailVerificationController.php
+php
+<?php
+// filePath: app/Http/Controllers/Api/V1/Auth/EmailVerificationController.php
+declare(strict_types=1);
+namespace App\Http\Controllers\Api\V1\Auth;
+use App\Http\Controllers\Api\BaseApiController;
+use App\Http\Requests\Api\V1\Auth\ResendOtpRequest;
+use App\Http\Requests\Api\V1\Auth\VerifyOtpRequest;
+use App\Http\Resources\Api\V1\UserResource;
+use App\Models\User;
+use Dedoc\Scramble\Attributes\Endpoint;
+use Dedoc\Scramble\Attributes\Group;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Hash;
+#[Group('Authentication')]
+class EmailVerificationController extends BaseApiController
+{
+    #[Endpoint('Verify Email OTP', description: 'Verify the OTP sent to the user email.')]
+    public function verify(VerifyOtpRequest $request): JsonResponse
+    {
+        /** @var User $user */
+        $user = User::where('email', $request->email)->firstOrFail();
+        if (! is_null($user->email_verified_at)) {
+            return $this->error('Email is already verified.', 422);
+        }
+        if (is_null($user->otp_code) || is_null($user->otp_expires_at)) {
+            return $this->error('No OTP found. Please request a new one.', 422);
+        }
+        if ($user->otp_expires_at->isPast()) {
+            return $this->error('OTP has expired. Please request a new one.', 422);
+        }
+        if (! Hash::check($request->otp, $user->otp_code)) {
+            return $this->error('Invalid OTP.', 422);
+        }
+        $user->update([
+            'email_verified_at' => now(),
+            'otp_code' => null,
+            'otp_expires_at' => null,
+        ]);
+        $token = $user->createToken('mobile')->plainTextToken;
+        return $this->success([
+            'token' => $token,
+            'user' => new UserResource($user),
+        ], 'Email verified successfully.');
+    }
+    #[Endpoint('Resend Email OTP', description: 'Resend a new OTP to the user email.')]
+    public function resend(ResendOtpRequest $request): JsonResponse
+    {
+        /** @var User $user */
+        $user = User::where('email', $request->email)->firstOrFail();
+        if (! is_null($user->email_verified_at)) {
+            return $this->error('Email is already verified.', 422);
+        }
+        $otp = (string) random_int(100000, 999999);
+        $user->update([
+            'otp_code' => Hash::make($otp),
+            'otp_expires_at' => now()->addMinutes(15),
+        ]);
+        // Dispatch: SendOtpJob::dispatch($user, $otp);
+        return $this->success(
+            ['email' => $user->email],
+            'OTP resent. Please check your email.',
+        );
+    }
+}
+🎯 Notes
+Your API documentation will now show:
+Authentication → Verify Email OTP
+Authentication → Resend Email OTP
+Both controllers now follow the same Scramble annotation style.
+This keeps your API docs clean, consistent, and professional.
+If you want, I can also:
+Add response schemas for Scramble
+Add tags, summaries, or parameter descriptions
+Generate OpenAPI examples for each endpoint
+Just tell me how deep you want the documentation to go.
+ok, now, for:
+<?php
+// filePath: app/Http/Controllers/Api/V1/Profile/ProfileController.php
+declare(strict_types=1);
+namespace App\Http\Controllers\Api\V1\Profile;
+use App\Http\Controllers\Controller;
+use App\Http\Requests\Api\V1\Profile\UpdateProfileRequest;
+use App\Http\Resources\Api\V1\UserResource;
+use Dedoc\Scramble\Attributes\Group;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
+#[Group('Profile')]
+class ProfileController extends Controller
+{
+    public function show(Request $request): JsonResponse
+    {
+        return $this->success(
+            new UserResource($request->user()->load('settings.preferredLanguage')),
+        );
+    }
+    public function update(UpdateProfileRequest $request): JsonResponse
+    {
+        $request->user()->update($request->validated());
+        return $this->success(
+            new UserResource($request->user()->fresh()),
+            'Profile updated successfully.',
+        );
+    }
+    public function destroy(Request $request): JsonResponse
+    {
+        $user = $request->user();
+        $user->tokens()->delete();
+        $user->update(['deleted_by' => $user->id]);
+        $user->delete();
+        return $this->noContent('Account deleted successfully.');
+    }
+}
+php
+<?php
+// filePath: app/Http/Controllers/Api/V1/Profile/ProfileController.php
+declare(strict_types=1);
+namespace App\Http\Controllers\Api\V1\Profile;
+use App\Http\Controllers\Controller;
+use App\Http\Requests\Api\V1\Profile\UpdateProfileRequest;
+use App\Http\Resources\Api\V1\UserResource;
+use Dedoc\Scramble\Attributes\Endpoint;
+use Dedoc\Scramble\Attributes\Group;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
+#[Group('Profile')]
+class ProfileController extends Controller
+{
+    #[Endpoint('Show Profile', description: 'Get the authenticated user profile with preferred language settings.')]
+    public function show(Request $request): JsonResponse
+    {
+        return $this->success(
+            new UserResource($request->user()->load('settings.preferredLanguage')),
+        );
+    }
+    #[Endpoint('Update Profile', description: 'Update the authenticated user profile.')]
+    public function update(UpdateProfileRequest $request): JsonResponse
+    {
+        $request->user()->update($request->validated());
+        return $this->success(
+            new UserResource($request->user()->fresh()),
+            'Profile updated successfully.',
+        );
+    }
+    #[Endpoint('Delete Account', description: 'Delete the authenticated user account and revoke tokens.')]
+    public function destroy(Request $request): JsonResponse
+    {
+        $user = $request->user();
+        $user->tokens()->delete();
+        $user->update(['deleted_by' => $user->id]);
+        $user->delete();
+        return $this->noContent('Account deleted successfully.');
+    }
+}
+check and make:
+<?php
+// filePath: app/Http/Controllers/Api/V1/Package/PackageController.php
+declare(strict_types=1);
+namespace App\Http\Controllers\Api\V1\Package;
+use App\Http\Controllers\Controller;
+use App\Http\Resources\Api\V1\PackageResource;
+use App\Models\Package;
+use Dedoc\Scramble\Attributes\Group;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
+#[Group('Packages')]
+class PackageController extends Controller
+{
+    public function show(Request $request, int $id): JsonResponse
+    {
+        $package = Package::whereHas('bookings', function ($query) use ($request) {
+            $query->where('user_id', $request->user()->id);
+        })->findOrFail($id);
+        return $this->success(new PackageResource($package));
+    }
+}
+php
+<?php
+// filePath: app/Http/Controllers/Api/V1/Package/PackageController.php
+declare(strict_types=1);
+namespace App\Http\Controllers\Api\V1\Package;
+use App\Http\Controllers\Controller;
+use App\Http\Resources\Api\V1\PackageResource;
+use App\Models\Package;
+use Dedoc\Scramble\Attributes\Endpoint;
+use Dedoc\Scramble\Attributes\Group;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
+#[Group('Packages')]
+class PackageController extends Controller
+{
+    #[Endpoint('Show Package', description: 'Retrieve a package that the authenticated user has booked.')]
+    public function show(Request $request, int $id): JsonResponse
+    {
+        $package = Package::whereHas('bookings', function ($query) use ($request) {
+            $query->where('user_id', $request->user()->id);
+        })->findOrFail($id);
+        return $this->success(new PackageResource($package));
+    }
+}
+now, check:
+<?php
+// filePath: app/Http/Controllers/Api/V1/Setting/SettingController.php
+declare(strict_types=1);
+namespace App\Http\Controllers\Api\V1\Setting;
+use App\Http\Controllers\Controller;
+use App\Http\Requests\Api\V1\Setting\UpdateSettingRequest;
+use App\Http\Resources\Api\V1\UserSettingResource;
+use Dedoc\Scramble\Attributes\Group;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
+#[Group('Settings')]
+class SettingController extends Controller
+{
+    public function show(Request $request): JsonResponse
+    {
+        $settings = $request->user()
+            ->settings()
+            ->with('preferredLanguage')
+            ->firstOrCreate(['user_id' => $request->user()->id]);
+        return $this->success(new UserSettingResource($settings));
+    }
+    public function update(UpdateSettingRequest $request): JsonResponse
+    {
+        $settings = $request->user()
+            ->settings()
+            ->firstOrCreate(['user_id' => $request->user()->id]);
+        $settings->update($request->validated());
+        return $this->success(
+            new UserSettingResource($settings->fresh()->load('preferredLanguage')),
+            'Settings updated successfully.',
+        );
+    }
+}
+php
+<?php
+// filePath: app/Http/Controllers/Api/V1/Setting/SettingController.php
+declare(strict_types=1);
+namespace App\Http\Controllers\Api\V1\Setting;
+use App\Http\Controllers\Controller;
+use App\Http\Requests\Api\V1\Setting\UpdateSettingRequest;
+use App\Http\Resources\Api\V1\UserSettingResource;
+use Dedoc\Scramble\Attributes\Endpoint;
+use Dedoc\Scramble\Attributes\Group;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
+#[Group('Settings')]
+class SettingController extends Controller
+{
+    #[Endpoint('Show Settings', description: 'Retrieve the authenticated user settings including preferred language.')]
+    public function show(Request $request): JsonResponse
+    {
+        $settings = $request->user()
+            ->settings()
+            ->with('preferredLanguage')
+            ->firstOrCreate(['user_id' => $request->user()->id]);
+        return $this->success(new UserSettingResource($settings));
+    }
+    #[Endpoint('Update Settings', description: 'Update the authenticated user settings.')]
+    public function update(UpdateSettingRequest $request): JsonResponse
+    {
+        $settings = $request->user()
+            ->settings()
+            ->firstOrCreate(['user_id' => $request->user()->id]);
+        $settings->update($request->validated());
+        return $this->success(
+            new UserSettingResource($settings->fresh()->load('preferredLanguage')),
+            'Settings updated successfully.',
+        );
+    }
+
+and:
+and use the "fully import statement " at the top of the file like:
+<?php
+// filePath: app/Services/ClassSession/ClassSessionService.php
+declare(strict_types=1);
+namespace App\Services\ClassSession;
+use App\Models\ClassSession;
+use App\Repositories\Eloquent\ClassSession\ClassSessionEloquentRepository;
+use App\Services\Log\LoggingService;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
+class ClassSessionService
+{
+    public function __construct(
+        private readonly ClassSessionEloquentRepository $repository,
+        private readonly LoggingService $logger
+    ) {}
+    public function find(int $id): ClassSession
+    {
+        $this->logger->info('Finding class session', ['id' => $id]);
+        $session = $this->repository->find($id);
+        return $session ?? throw new ModelNotFoundException;
+    }
+    public function lockForUpdate(int $id): ClassSession
+    {
+        $this->logger->info('Locking class session for update', ['id' => $id]);
+        return $this->repository->lockForUpdate($id);
+    }
+    public function hasAvailableSpots(int $id): bool
+    {
+        $this->logger->info('Checking available spots', ['id' => $id]);
+        return !$this->repository->isFull($id);
+    }
+}
+re-give me the files,
+note, not all the operations need transationsc,
+and don't add logs everwhere:
+note: make the find method have two more optional params, the bollean of (lockForUpdate) flag, so, it use the same find method, and the secnod is an array of "relations" so, eager loadding if provided
+ok, now, the same apprach for:
+give me the fully files:
+<?php
+// filePath: app/Services/Booking/BookingService.php
+declare(strict_types=1);
+namespace App\\\\Services\\\\Booking;
+use App\\\\Enums\\\\BookingStatusEnum;
+use App\\\\Models\\\\Booking;
+use App\\\\Models\\\\Package;
+use App\\\\Models\\\\User;
+use App\\\\Repositories\\\\Eloquent\\\\Booking\\\\BookingEloquentRepository;
+use App\\\\Services\\\\Log\\\\LoggingService;
+use Carbon\\\\Carbon;
+use Illuminate\\\\Contracts\\\\Pagination\\\\LengthAwarePaginator;
+use Illuminate\\\\Database\\\\Eloquent\\\\ModelNotFoundException;
+use Illuminate\\\\Support\\\\Facades\\\\DB;
+use Illuminate\\\\Validation\\\\ValidationException;
+class BookingService
+{
+    public function __construct(
+        private readonly BookingEloquentRepository $bookingRepository,
+        private readonly LoggingService $logger
+    ) {}
+    public function createFromPackage(User $user, Package $package, ?Carbon $expiresAt = null): Booking
+    {
+        return DB::transaction(function () use ($user, $package, $expiresAt) {
+            $this->logger->info('Creating booking from package', [
+                'user_id' => $user->id,
+                'package_id' => $package->id
+            ]);
+            $booking = Booking::create([
+                'user_id' => $user->id,
+                'package_id' => $package->id,
+                'total_credits' => $package->total_credits,
+                'remaining_credits' => $package->total_credits,
+                'status' => BookingStatusEnum::ACTIVE,
+                'expires_at' => $expiresAt,
+            ]);
+            $this->logger->info('Booking created successfully', ['booking_id' => $booking->id]);
+            return $booking;
+        });
+    }
+    public function listUserBookings(User $user, array $filters = []): LengthAwarePaginator
+    {
+        try {
+            return $this->bookingRepository->listUserBookings($user->id, $filters);
+        } catch (\\\\Exception $e) {
+            $this->logger->error('List user bookings failed', [
+                'user_id' => $user->id,
+                'error' => $e->getMessage()
+            ]);
+            throw $e;
+        }
+    }
+    public function findUserBooking(User $user, int $id): Booking
+    {
+        $booking = $this->bookingRepository->findByUser($user->id, $id);
+        return $booking ?? throw new ModelNotFoundException;
+    }
+    public function adjustCredits(Booking $booking, int $amount, string $reason = 'Manual adjustment'): void
+    {
+        DB::transaction(function () use ($booking, $amount, $reason) {
+            $this->logger->info('Adjusting booking credits', [
+                'booking_id' => $booking->id,
+                'amount' => $amount,
+                'reason' => $reason
+            ]);
+            $booking = Booking::lockForUpdate()->findOrFail($booking->id);
+            $newRemaining = $booking->remaining_credits + $amount;
+            if ($newRemaining < 0) {
+                throw ValidationException::withMessages([
+                    'remaining_credits' => 'Cannot reduce credits below zero.',
+                ]);
+            }
+            if ($newRemaining > $booking->total_credits) {
+                throw ValidationException::withMessages([
+                    'remaining_credits' => 'Cannot exceed total credits.',
+                ]);
+            }
+            $booking->update(['remaining_credits' => $newRemaining]);
+        });
+    }
+    public function expireBooking(Booking $booking): void
+    {
+        DB::transaction(function () use ($booking) {
+            $this->logger->info('Expiring booking', ['booking_id' => $booking->id]);
+            $booking->update([
+                'status' => BookingStatusEnum::EXPIRED,
+                'expires_at' => now(),
+            ]);
+        });
+    }
+    public function refundBooking(Booking $booking): void
+    {
+        DB::transaction(function () use ($booking) {
+            $this->logger->info('Refunding booking', ['booking_id' => $booking->id]);
+            $booking->update([
+                'status' => BookingStatusEnum::CANCELLED,
+                'remaining_credits' => $booking->total_credits,
+            ]);
+        });
+    }
+    public function lockForUpdate(int $bookingId): Booking
+    {
+        return $this->bookingRepository->lockForUpdate($bookingId);
+    }
+    public function hasCreditsRemaining(int $bookingId): bool
+    {
+        $booking = $this->bookingRepository->find($bookingId);
+        return $booking?->hasCreditsRemaining() ?? false;
+    }
+    public function decrementCredits(int $bookingId): void
+    {
+        DB::transaction(function () use ($bookingId) {
+            $this->bookingRepository->decrementCredits($bookingId);
+        });
+    }
+    public function updateStatus(int $bookingId, string $status): bool
+    {
+        return $this->bookingRepository->updateStatus($bookingId, $status);
+    }
+    public function refundCredit(int $bookingId): void
+    {
+        $this->bookingRepository->refundCredit($bookingId);
+    }
+}
+check:
+<?php
+// filePath: app/Repositories/Eloquent/Booking/BookingEloquentRepository.php
+declare(strict_types=1);
+namespace App\\\\Repositories\\\\Eloquent\\\\Booking;
+use App\\\\Models\\\\Booking;
+use App\\\\Services\\\\Log\\\\LoggingService;
+use Illuminate\\\\Contracts\\\\Pagination\\\\LengthAwarePaginator;
+use Illuminate\\\\Support\\\\Facades\\\\DB;
+class BookingEloquentRepository
+{
+    public function __construct(
+        private readonly LoggingService $logger
+    ) {}
+    public function listUserBookings(int $userId, array $filters = []): LengthAwarePaginator
+    {
+        return DB::transaction(function () use ($userId, $filters) {
+            $this->logger->info('Fetching user bookings', ['user_id' => $userId]);
+            return Booking::query()
+                ->where('user_id', $userId)
+                ->with(['package'])
+                ->when($filters['status'] ?? null, fn($q, $status) =>
+                    $q->where('status', $status))
+                ->latest()
+                ->paginate($filters['per_page'] ?? 20);
+        });
+    }
+    public function findByUser(int $userId, int $id): ?Booking
+    {
+        try {
+            return DB::transaction(function () use ($userId, $id) {
+                $this->logger->info('Finding booking', ['user_id' => $userId, 'booking_id' => $id]);
+                return Booking::query()
+                    ->where('user_id', $userId)
+                    ->with(['package'])
+                    ->find($id);
+            });
+        } catch (\\\\Exception $e) {
+            $this->logger->error('Booking find failed', [
+                'user_id' => $userId,
+                'id' => $id,
+                'error' => $e->getMessage()
+            ]);
+            throw $e;
+        }
+    }
+}
+and we must resolve all the issues: one by one:
+Architectural Review
+What you're doing well:
+
+Strict declare(strict_types=1) everywhere
+Clean DI via constructor promotion with readonly
+Proper layering: Controller → Service → Repository
+Feature-based namespace organization
+Scramble annotation consistency
+BaseApiController abstraction for response formatting
+
+Issues identified:
+UserEloquentRepository — UserRegisteredEvent::dispatch() is fired inside the repository. That's a domain concern leaking into the persistence layer. Events belong in the Service, not the repo. Also, createInTransaction wraps create() which already has its own transaction — double-wrapping.
+BookingEloquentRepository — listUserBookings and findByUser are wrapped in DB::transaction(). Read operations must never be in transactions. Transactions are for writes only.
+BookingService — adjustCredits, expireBooking, refundBooking each fire a transaction for a single update() call. No transaction needed for a single atomic write. Also, decrementCredits wraps a repo call in a transaction at the service layer — redundant if the repo handles it. lockForUpdate is a separate method but is also baked into adjustCredits directly with Booking::lockForUpdate() — bypasses the repository entirely, breaking SoC.
+ClassSessionService — find, lockForUpdate, hasAvailableSpots are three methods that can be collapsed as you suggested. Good instinct.
+LoggingService — Don't inject it into repositories. Logging is an application/service concern, not a persistence concern. Repositories should be thin data-access objects only.
+EmailVerificationController — Business logic (OTP validation, hashing, $user->update(...), token creation) lives directly in the controller. This must move to AuthService/UserService.
+ProfileController — $user->tokens()->delete() and $user->update(['deleted_by' => ...]) are business logic in the controller. Must move to a service.
+SettingController — firstOrCreate with business logic inline. Should be in a SettingService.
+

@@ -9,6 +9,7 @@ namespace App\Http\Controllers\Api\V1\Setting;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\V1\Setting\UpdateSettingRequest;
 use App\Http\Resources\Api\V1\UserSettingResource;
+use Dedoc\Scramble\Attributes\Endpoint;
 use Dedoc\Scramble\Attributes\Group;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -16,6 +17,7 @@ use Illuminate\Http\Request;
 #[Group('Settings')]
 class SettingController extends Controller
 {
+    #[Endpoint('Show Settings', description: 'Retrieve the authenticated user settings including preferred language.')]
     public function show(Request $request): JsonResponse
     {
         $settings = $request->user()
@@ -26,6 +28,7 @@ class SettingController extends Controller
         return $this->success(new UserSettingResource($settings));
     }
 
+    #[Endpoint('Update Settings', description: 'Update the authenticated user settings.')]
     public function update(UpdateSettingRequest $request): JsonResponse
     {
         $settings = $request->user()

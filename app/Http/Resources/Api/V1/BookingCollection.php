@@ -8,7 +8,7 @@ use Illuminate\Http\Resources\Json\ResourceCollection;
 
 class BookingCollection extends ResourceCollection
 {
-    public string $collects = BookingResource::class;
+    public $collects = BookingResource::class;
 
     public function toArray(Request $request): array
     {

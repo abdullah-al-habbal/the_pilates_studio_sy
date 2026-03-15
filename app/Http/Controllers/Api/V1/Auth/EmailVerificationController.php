@@ -11,6 +11,7 @@ use App\Http\Requests\Api\V1\Auth\ResendOtpRequest;
 use App\Http\Requests\Api\V1\Auth\VerifyOtpRequest;
 use App\Http\Resources\Api\V1\UserResource;
 use App\Models\User;
+use Dedoc\Scramble\Attributes\Endpoint;
 use Dedoc\Scramble\Attributes\Group;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Hash;
@@ -18,6 +19,7 @@ use Illuminate\Support\Facades\Hash;
 #[Group('Authentication')]
 class EmailVerificationController extends BaseApiController
 {
+    #[Endpoint('Verify Email OTP', description: 'Verify the OTP sent to the user email.')]
     public function verify(VerifyOtpRequest $request): JsonResponse
     {
         /** @var User $user */
@@ -53,6 +55,7 @@ class EmailVerificationController extends BaseApiController
         ], 'Email verified successfully.');
     }
 
+    #[Endpoint('Resend Email OTP', description: 'Resend a new OTP to the user email.')]
     public function resend(ResendOtpRequest $request): JsonResponse
     {
         /** @var User $user */
