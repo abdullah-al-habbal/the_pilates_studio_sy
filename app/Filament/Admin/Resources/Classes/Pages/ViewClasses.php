@@ -9,6 +9,7 @@ use Filament\Actions\EditAction;
 use Filament\Actions\ForceDeleteAction;
 use Filament\Actions\RestoreAction;
 use Filament\Actions\Action;
+use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ViewRecord;
 use Illuminate\Contracts\Support\Htmlable;
 
@@ -47,7 +48,7 @@ class ViewClasses extends ViewRecord
                 ->action(function (): void {
                     $this->getRecord()->update(['status' => ClassStatusEnum::ARCHIVED->value]);
                     $this->refreshFormData(['status']);
-                    \Filament\Notifications\Notification::make()
+                    Notification::make()
                         ->title('Class marked as completed.')
                         ->success()
                         ->send();
@@ -65,7 +66,7 @@ class ViewClasses extends ViewRecord
                 ->action(function (): void {
                     $this->getRecord()->update(['status' => ClassStatusEnum::INACTIVE->value]);
                     $this->refreshFormData(['status']);
-                    \Filament\Notifications\Notification::make()
+                    Notification::make()
                         ->title('Class has been cancelled.')
                         ->warning()
                         ->send();

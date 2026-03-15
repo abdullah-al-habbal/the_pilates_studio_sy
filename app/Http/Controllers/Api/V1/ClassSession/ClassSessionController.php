@@ -9,12 +9,14 @@ namespace App\Http\Controllers\Api\V1\ClassSession;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\Api\V1\ClassSessionResource;
 use App\Models\ClassSession;
-use App\Traits\ApiResponse;
+use Dedoc\Scramble\Attributes\Endpoint;
+use Dedoc\Scramble\Attributes\Group;
 use Illuminate\Http\JsonResponse;
 
+#[Group('Class Sessions')]
 class ClassSessionController extends Controller
 {
-
+    #[Endpoint('List class sessions', description: 'Returns a paginated list of upcoming class sessions.')]
     public function index(): JsonResponse
     {
         $sessions = ClassSession::query()
@@ -29,6 +31,7 @@ class ClassSessionController extends Controller
         );
     }
 
+    #[Endpoint('Get class session by ID', description: 'Returns a class session by its ID.')]
     public function show(int $id): JsonResponse
     {
         $session = ClassSession::with(

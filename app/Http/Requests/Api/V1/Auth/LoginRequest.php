@@ -10,13 +10,12 @@ use App\Http\Requests\Api\BaseApiFormRequest;
 
 class LoginRequest extends BaseApiFormRequest
 {
-
     public function rules(): array
     {
         return [
-            'email'       => ['required', 'email'],
-            'password'    => ['required', 'string'],
-            'device_name' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'email'],
+            'password' => ['required', 'string'],
+            'device_name' => ['nullable', 'string', 'max:255'],
         ];
     }
 }

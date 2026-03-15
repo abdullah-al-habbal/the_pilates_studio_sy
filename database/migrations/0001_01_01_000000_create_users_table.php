@@ -1,5 +1,5 @@
 <?php
-// filePath: database\migrations\0001_01_01_000000_create_users_table.php
+
 declare(strict_types=1);
 
 use Illuminate\Database\Migrations\Migration;
@@ -19,7 +19,7 @@ return new class extends Migration
             $table->rememberToken();
             $table->date('date_of_birth')->nullable();
             $table->timestamp('email_verified_at')->nullable();
-            $table->string('otp_code', 6)->nullable();
+            $table->string('otp_code')->nullable();
             $table->timestamp('otp_expires_at')->nullable();
             $table->timestamp('deactivated_at')->nullable();
             $table->foreignId('deleted_by')

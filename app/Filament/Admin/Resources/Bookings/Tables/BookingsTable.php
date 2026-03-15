@@ -3,6 +3,7 @@
 namespace App\Filament\Admin\Resources\Bookings\Tables;
 
 use App\Enums\BookingStatusEnum;
+use App\Models\User;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
@@ -34,7 +35,7 @@ class BookingsTable
                     })
                     ->sortable(query: function ($query, $direction) {
                         return $query->orderBy(
-                            \App\Models\User::select('fullname')
+                            User::select('fullname')
                                 ->whereColumn('users.id', 'bookings.user_id')
                                 ->limit(1),
                             $direction

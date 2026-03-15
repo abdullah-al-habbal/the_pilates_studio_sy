@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-
+use Illuminate\Database\Eloquent\Collection;
 class Language extends Model
 {
     use HasFactory;
@@ -41,7 +41,7 @@ class Language extends Model
         return static::where('is_default', true)->where('is_active', true)->first();
     }
 
-    public static function getActive(): \Illuminate\Database\Eloquent\Collection
+    public static function getActive(): Collection
     {
         return static::where('is_active', true)->orderBy('code')->get();
     }

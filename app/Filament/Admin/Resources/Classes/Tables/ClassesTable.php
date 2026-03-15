@@ -4,6 +4,7 @@
 namespace App\Filament\Admin\Resources\Classes\Tables;
 
 use App\Enums\ClassStatusEnum;
+use App\Models\Instructor;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
@@ -53,7 +54,7 @@ class ClassesTable
                     })
                     ->sortable(query: function (Builder $query, string $direction): Builder {
                         return $query->orderBy(
-                            \App\Models\Instructor::select('name')
+                            Instructor::select('name')
                                 ->whereColumn('instructors.id', 'classes.instructor_id')
                                 ->limit(1),
                             $direction

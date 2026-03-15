@@ -6,6 +6,7 @@ namespace App\Filament\Admin\Resources\BookingSessions\Tables;
 use App\Enums\BookingSessionStatusEnum;
 use App\Models\Classes;
 use App\Models\ClassSession;
+use App\Models\User;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
@@ -46,7 +47,7 @@ class BookingSessionsTable
                     })
                     ->sortable(query: function (Builder $query, string $direction): Builder {
                         return $query->orderBy(
-                            \App\Models\User::select('fullname')
+                            User::select('fullname')
                                 ->join('bookings', 'users.id', '=', 'bookings.user_id')
                                 ->whereColumn('bookings.id', 'booking_sessions.booking_id')
                                 ->limit(1),

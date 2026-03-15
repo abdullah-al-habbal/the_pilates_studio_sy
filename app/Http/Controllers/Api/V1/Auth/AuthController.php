@@ -10,25 +10,23 @@ use App\Http\Controllers\Api\BaseApiController;
 use App\Http\Requests\Api\V1\Auth\LoginRequest;
 use App\Http\Requests\Api\V1\Auth\RegisterRequest;
 use App\Http\Resources\Api\V1\UserResource;
-use App\Models\User;
+use App\Services\Auth\AuthService;
+use Dedoc\Scramble\Attributes\Endpoint;
+use Dedoc\Scramble\Attributes\Group;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Hash;
-use Laravel\Sanctum\PersonalAccessToken;
 
+#[Group('Authentication')]
 class AuthController extends BaseApiController
 {
+    public function __construct(
+        private readonly AuthService $authService
+    ) {}
+
+    #[Endpoint('Register', description: 'Register a new user.')]
     public function register(RegisterRequest $request): JsonResponse
     {
-        $user = User::create([
-            'fullname' => $request->fullname,
-            'email' => $request->email,
-            'phone_number' => $request->phone_number,
-            'password' => $request->password,
-            'date_of_birth' => $request->date_of_birth,
-        ]);
-
-        $this->sendOtp($user);
+        $user = $this->authService->register($request->validated());
 
         return $this->created(
             ['email' => $user->email],
@@ -36,11 +34,14 @@ class AuthController extends BaseApiController
         );
     }
 
+    #[Endpoint('Login', description: 'Authenticate a user and return a token.')]
     public function login(LoginRequest $request): JsonResponse
     {
-        $user = User::where('email', $request->email)->first();
+        $data = $request->validated();
 
-        if (! $user || ! Hash::check($request->password, $user->password)) {
+        $user = $this->authService->attemptLogin($data['email'], $data['password']);
+
+        if (! $user) {
             return $this->error('Invalid credentials.', 401);
         }
 
@@ -49,7 +50,7 @@ class AuthController extends BaseApiController
         }
 
         if (is_null($user->email_verified_at)) {
-            $this->sendOtp($user);
+            $this->authService->sendOtp($user);
 
             return $this->error(
                 'Email not verified. A new OTP has been sent to your email.',
@@ -58,7 +59,8 @@ class AuthController extends BaseApiController
             );
         }
 
-        $token = $user->createToken($request->device_name)->plainTextToken;
+        $deviceName = $data['device_name'] ?? null;
+        $token = $this->authService->createToken($user, $deviceName);
 
         return $this->success([
             'token' => $token,
@@ -66,30 +68,17 @@ class AuthController extends BaseApiController
         ], 'Login successful.');
     }
 
+    #[Endpoint('Logout', description: 'Logout the authenticated user.')]
     public function logout(Request $request): JsonResponse
     {
-        /** @var PersonalAccessToken $token */
-        $token = $request->user()->currentAccessToken();
-
-        $token?->delete();
+        $this->authService->logout($request->user());
 
         return $this->noContent('Logged out successfully.');
     }
 
+    #[Endpoint('Me', description: 'Get the authenticated user profile.')]
     public function me(Request $request): JsonResponse
     {
         return $this->success(new UserResource($request->user()));
-    }
-
-    private function sendOtp(User $user): void
-    {
-        $otp = (string) random_int(100000, 999999);
-
-        $user->update([
-            'otp_code' => Hash::make($otp),
-            'otp_expires_at' => now()->addMinutes(15),
-        ]);
-
-        // Dispatch: SendOtpJob::dispatch($user, $otp);
     }
 }

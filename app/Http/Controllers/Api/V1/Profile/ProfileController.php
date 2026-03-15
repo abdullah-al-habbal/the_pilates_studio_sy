@@ -9,13 +9,13 @@ namespace App\Http\Controllers\Api\V1\Profile;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\V1\Profile\UpdateProfileRequest;
 use App\Http\Resources\Api\V1\UserResource;
-use App\Traits\ApiResponse;
+use Dedoc\Scramble\Attributes\Group;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
+#[Group('Profile')]
 class ProfileController extends Controller
 {
-
     public function show(Request $request): JsonResponse
     {
         return $this->success(

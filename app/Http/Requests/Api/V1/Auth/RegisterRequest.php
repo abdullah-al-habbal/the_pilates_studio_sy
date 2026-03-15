@@ -13,10 +13,10 @@ class RegisterRequest extends BaseApiFormRequest
     public function rules(): array
     {
         return [
-            'fullname'      => ['required', 'string', 'max:255'],
-            'email'         => ['required', 'email', 'unique:users,email'],
-            'phone_number'  => ['required', 'string', 'max:20'],
-            'password'      => ['required', 'string', 'min:8', 'confirmed'],
+            'fullname' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'email', 'unique:users,email'],
+            'phone_number' => ['required', 'string', 'max:20'],
+            'password' => ['required', 'string', 'min:8', 'confirmed'],
             'date_of_birth' => ['nullable', 'date', 'before:today'],
         ];
     }

@@ -9,13 +9,13 @@ namespace App\Http\Controllers\Api\V1\Setting;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\V1\Setting\UpdateSettingRequest;
 use App\Http\Resources\Api\V1\UserSettingResource;
-use App\Traits\ApiResponse;
+use Dedoc\Scramble\Attributes\Group;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
+#[Group('Settings')]
 class SettingController extends Controller
 {
-
     public function show(Request $request): JsonResponse
     {
         $settings = $request->user()

@@ -13,6 +13,7 @@ use Illuminate\Database\Eloquent\Relations\{
     BelongsTo
 };
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use InvalidArgumentException;
 
 class Booking extends Model
 {
@@ -45,7 +46,7 @@ class Booking extends Model
     public function deductCredit(): void
     {
         if ($this->remaining_credits <= 0) {
-            throw new \InvalidArgumentException('Cannot deduct credit: no credits remaining.');
+            throw new InvalidArgumentException('Cannot deduct credit: no credits remaining.');
         }
 
         $this->decrement('remaining_credits');
