@@ -16,7 +16,7 @@ use Dedoc\Scramble\Attributes\Group;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
-#[Group('Authentication')]
+#[Group('authentication')]
 class AuthController extends BaseApiController
 {
     public function __construct(

@@ -5,7 +5,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Api\V1\Classes;
 
-use App\Http\Controllers\Controller;
+use App\Http\Controllers\Api\BaseApiController;
 use App\Http\Resources\Api\V1\ClassesResource;
 use App\Services\Classes\ClassesService;
 use Dedoc\Scramble\Attributes\Endpoint;
@@ -13,7 +13,7 @@ use Dedoc\Scramble\Attributes\Group;
 use Illuminate\Http\JsonResponse;
 
 #[Group('Classes')]
-class ClassesController extends Controller
+class ClassesController extends BaseApiController
 {
     public function __construct(
         private readonly ClassesService $classesService

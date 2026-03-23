@@ -3,6 +3,7 @@
 
 declare(strict_types=1);
 
+use App\Http\Middleware\MobileAppVersion\CheckAppVersionMiddleware;
 use App\Http\Middleware\SetLocaleMiddleware;
 use Illuminate\Auth\Middleware\Authenticate;
 use Illuminate\Auth\Middleware\AuthenticateWithBasicAuth;
@@ -59,6 +60,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->api(prepend: [
             EnsureFrontendRequestsAreStateful::class,
             'throttle:api',
+            CheckAppVersionMiddleware::class,
             SubstituteBindings::class,
         ]);
 

@@ -5,6 +5,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Api\V1\Package;
 
+use App\Http\Controllers\Api\BaseApiController;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\Api\V1\PackageResource;
 use App\Services\Package\PackageService;
@@ -14,7 +15,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 #[Group('Packages')]
-class PackageController extends Controller
+class PackageController extends BaseApiController
 {
     public function __construct(
         private readonly PackageService $packageService

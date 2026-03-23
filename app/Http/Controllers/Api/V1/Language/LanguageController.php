@@ -5,7 +5,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Api\V1\Language;
 
-use App\Http\Controllers\Controller;
+use App\Http\Controllers\Api\BaseApiController;
 use App\Http\Requests\Api\V1\Language\SetLocaleRequest;
 use App\Http\Resources\Api\V1\LanguageResource;
 use App\Services\Language\LanguageService;
@@ -14,7 +14,7 @@ use Dedoc\Scramble\Attributes\Group;
 use Illuminate\Http\JsonResponse;
 
 #[Group('Languages')]
-class LanguageController extends Controller
+class LanguageController extends BaseApiController
 {
     public function __construct(
         private readonly LanguageService $languageService

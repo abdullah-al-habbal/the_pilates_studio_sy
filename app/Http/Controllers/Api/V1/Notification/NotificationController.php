@@ -5,7 +5,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Api\V1\Notification;
 
-use App\Http\Controllers\Controller;
+use App\Http\Controllers\Api\BaseApiController;
 use App\Http\Requests\Api\V1\Notification\BulkMarkAsReadRequest;
 use App\Http\Resources\Api\V1\NotificationResource;
 use App\Models\User;
@@ -16,7 +16,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 #[Group('Notifications')]
-class NotificationController extends Controller
+class NotificationController extends BaseApiController
 {
     public function __construct(
         private readonly NotificationService $notificationService

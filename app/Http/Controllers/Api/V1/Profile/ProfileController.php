@@ -5,6 +5,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Api\V1\Profile;
 
+use App\Http\Controllers\Api\BaseApiController;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\V1\Profile\UpdateProfileRequest;
 use App\Http\Resources\Api\V1\UserResource;
@@ -15,7 +16,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 #[Group('Profile')]
-class ProfileController extends Controller
+class ProfileController extends BaseApiController
 {
     public function __construct(
         private readonly ProfileService $profileService

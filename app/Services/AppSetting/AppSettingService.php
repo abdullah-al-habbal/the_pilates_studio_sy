@@ -1,12 +1,13 @@
 <?php
-// filePath: app/Services/Setting/AppSettingService.php
+// filePath: app/Services/AppSetting/AppSettingService.php
 
 declare(strict_types=1);
 
-namespace App\Services\Setting;
+namespace App\Services\AppSetting;
 
-use App\Models\UserSetting;
-use App\Repositories\Eloquent\Setting\AppSettingEloquentRepository;
+use App\Models\AppSetting;
+use App\Repositories\Eloquent\AppSetting\AppSettingEloquentRepository;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class AppSettingService
 {
@@ -14,15 +15,16 @@ class AppSettingService
         private readonly AppSettingEloquentRepository $repository
     ) {}
 
-    public function getUserSettings(int $userId): UserSetting
+    public function getByKey(string $key): AppSetting
     {
-        return $this->repository->firstOrCreateForUser($userId);
-    }
+        $setting = $this->repository->getByKey($key);
 
-    public function updateUserSettings(int $userId, array $data): UserSetting
-    {
-        $settings = $this->repository->firstOrCreateForUser($userId);
+        if (!$setting) {
+            throw new ModelNotFoundException(
+                "App setting with key '{$key}' not found."
+            );
+        }
 
-        return $this->repository->updateAndLoad($settings, $data);
+        return $setting;
     }
 }

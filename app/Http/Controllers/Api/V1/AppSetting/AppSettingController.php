@@ -5,6 +5,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Api\V1\AppSetting;
 
+use App\Http\Controllers\Api\BaseApiController;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\Api\V1\AppSettingResource;
 use App\Services\AppSetting\AppSettingService;
@@ -13,8 +14,8 @@ use Dedoc\Scramble\Attributes\Group;
 use Dedoc\Scramble\Attributes\PathParameter;
 use Illuminate\Http\JsonResponse;
 
-#[Group('App Settings')]
-class AppSettingController extends Controller
+#[Group('app_settings')]
+class AppSettingController extends BaseApiController
 {
     public function __construct(
         private readonly AppSettingService $appSettingService

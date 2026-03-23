@@ -1,26 +1,17 @@
 <?php
-// filePath: app/Repositories/Eloquent/Setting/AppSettingEloquentRepository.php
+// filePath: app/Repositories/Eloquent/AppSetting/AppSettingEloquentRepository.php
 
 declare(strict_types=1);
 
-namespace App\Repositories\Eloquent\Setting;
+namespace App\Repositories\Eloquent\AppSetting;
 
-use App\Models\UserSetting;
+use App\Models\AppSetting;
 
 class AppSettingEloquentRepository
 {
-    public function firstOrCreateForUser(int $userId): UserSetting
+    public function getByKey(string $key): ?AppSetting
     {
-        return UserSetting::firstOrCreate(
-            ['user_id' => $userId],
-            ['user_id' => $userId]
-        )->load('preferredLanguage');
+        return AppSetting::where('key', $key)->first();
     }
 
-    public function updateAndLoad(UserSetting $settings, array $data): UserSetting
-    {
-        $settings->update($data);
-
-        return $settings->fresh()->load('preferredLanguage');
-    }
 }

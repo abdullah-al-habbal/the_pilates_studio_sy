@@ -5,7 +5,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Api\V1\ClassSession;
 
-use App\Http\Controllers\Controller;
+use App\Http\Controllers\Api\BaseApiController;
 use App\Http\Resources\Api\V1\ClassSessionResource;
 use App\Services\ClassSession\ClassSessionService;
 use Dedoc\Scramble\Attributes\Endpoint;
@@ -13,7 +13,7 @@ use Dedoc\Scramble\Attributes\Group;
 use Illuminate\Http\JsonResponse;
 
 #[Group('Class Sessions')]
-class ClassSessionController extends Controller
+class ClassSessionController extends BaseApiController
 {
     public function __construct(
         private readonly ClassSessionService $classSessionService
