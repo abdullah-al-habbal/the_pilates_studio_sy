@@ -35,13 +35,13 @@ class UserSettingController extends Controller
             return $this->success(
                 new UserSettingResource($settings),
                 SuccessCodeEnum::SUCCESS,
-                'Settings retrieved successfully'
+                SuccessCodeEnum::SUCCESS->getMessage()
             );
         } catch (\Exception $e) {
             return $this->error(
                 ErrorCodeEnum::BAD_REQUEST,
                 'Failed to retrieve settings',
-                400
+                ErrorCodeEnum::BAD_REQUEST->getStatusCode()
             );
         }
     }
@@ -58,13 +58,13 @@ class UserSettingController extends Controller
             return $this->updated(
                 new UserSettingResource($settings),
                 SuccessCodeEnum::SETTINGS_UPDATED,
-                'Settings updated successfully'
+                SuccessCodeEnum::SETTINGS_UPDATED->getMessage()
             );
         } catch (\Exception $e) {
             return $this->error(
                 ErrorCodeEnum::BAD_REQUEST,
                 'Failed to update settings',
-                400
+                ErrorCodeEnum::BAD_REQUEST->getStatusCode()
             );
         }
     }

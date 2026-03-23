@@ -8,6 +8,7 @@ namespace App\Http\Controllers\Api\V1\StaticPage;
 use App\Http\Controllers\Api\BaseApiController;
 use App\Http\Resources\Api\V1\StaticPageResource;
 use App\Services\StaticPage\StaticPageService;
+use App\Enums\Api\SuccessCodeEnum;
 use Dedoc\Scramble\Attributes\Endpoint;
 use Dedoc\Scramble\Attributes\Group;
 use Illuminate\Http\JsonResponse;
@@ -24,6 +25,10 @@ class StaticPageController extends BaseApiController
     {
         $page = $this->staticPageService->getPageBySlug($slug);
 
-        return $this->success(new StaticPageResource($page));
+        return $this->success(
+            new StaticPageResource($page),
+            SuccessCodeEnum::SUCCESS,
+            SuccessCodeEnum::SUCCESS->getMessage()
+        );
     }
 }

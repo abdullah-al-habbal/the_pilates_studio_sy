@@ -10,6 +10,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\V1\Profile\UpdateProfileRequest;
 use App\Http\Resources\Api\V1\UserResource;
 use App\Services\Profile\ProfileService;
+use App\Enums\Api\SuccessCodeEnum;
 use Dedoc\Scramble\Attributes\Endpoint;
 use Dedoc\Scramble\Attributes\Group;
 use Illuminate\Http\JsonResponse;
@@ -27,7 +28,11 @@ class ProfileController extends BaseApiController
     {
         $user = $this->profileService->getProfileWithSettings($request->user()->id);
 
-        return $this->success(new UserResource($user));
+        return $this->success(
+            new UserResource($user),
+            SuccessCodeEnum::SUCCESS,
+            SuccessCodeEnum::SUCCESS->getMessage()
+        );
     }
 
     #[Endpoint('Update Profile', description: 'Update the authenticated user profile.')]
@@ -35,7 +40,11 @@ class ProfileController extends BaseApiController
     {
         $user = $this->profileService->updateProfile($request->user()->id, $request->validated());
 
-        return $this->success(new UserResource($user), 'Profile updated successfully.');
+        return $this->success(
+            new UserResource($user),
+            SuccessCodeEnum::PROFILE_UPDATED,
+            SuccessCodeEnum::PROFILE_UPDATED->getMessage()
+        );
     }
 
     #[Endpoint('Delete Account', description: 'Delete the authenticated user account and revoke tokens.')]
@@ -43,6 +52,6 @@ class ProfileController extends BaseApiController
     {
         $this->profileService->deleteAccount($request->user()->id);
 
-        return $this->noContent('Account deleted successfully.');
+        return $this->noContent(SuccessCodeEnum::DELETED, SuccessCodeEnum::DELETED->getMessage());
     }
 }

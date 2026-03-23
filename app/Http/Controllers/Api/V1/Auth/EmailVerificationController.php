@@ -10,6 +10,8 @@ use App\Http\Requests\Api\V1\Auth\VerifyOtpRequest;
 use App\Http\Resources\Api\V1\UserResource;
 use App\Services\Auth\AuthService;
 use App\Services\User\UserService;
+use App\Enums\Api\ErrorCodeEnum;
+use App\Enums\Api\SuccessCodeEnum;
 use Dedoc\Scramble\Attributes\Endpoint;
 use Dedoc\Scramble\Attributes\Group;
 use Illuminate\Http\JsonResponse;
@@ -28,19 +30,35 @@ class EmailVerificationController extends BaseApiController
         $user = $this->userService->findByEmailOrFail($request->email);
 
         if ($this->userService->isEmailVerified($user)) {
-            return $this->error('Email is already verified.', 422);
+            return $this->error(
+                ErrorCodeEnum::EMAIL_NOT_VERIFIED,
+                'Email is already verified.',
+                ErrorCodeEnum::EMAIL_NOT_VERIFIED->getStatusCode()
+            );
         }
 
         if (! $this->userService->hasValidOtp($user)) {
-            return $this->error('No OTP found. Please request a new one.', 422);
+            return $this->error(
+                ErrorCodeEnum::INVALID_VERIFICATION_CODE,
+                'No OTP found. Please request a new one.',
+                ErrorCodeEnum::INVALID_VERIFICATION_CODE->getStatusCode()
+            );
         }
 
         if ($this->userService->isOtpExpired($user)) {
-            return $this->error('OTP has expired. Please request a new one.', 422);
+            return $this->error(
+                ErrorCodeEnum::INVALID_VERIFICATION_CODE,
+                'OTP has expired. Please request a new one.',
+                ErrorCodeEnum::INVALID_VERIFICATION_CODE->getStatusCode()
+            );
         }
 
         if (! $this->userService->verifyOtp($user, $request->otp)) {
-            return $this->error('Invalid OTP.', 422);
+            return $this->error(
+                ErrorCodeEnum::INVALID_VERIFICATION_CODE,
+                'Invalid OTP.',
+                ErrorCodeEnum::INVALID_VERIFICATION_CODE->getStatusCode()
+            );
         }
 
         $this->userService->verifyEmail($user);
@@ -50,7 +68,7 @@ class EmailVerificationController extends BaseApiController
         return $this->success([
             'token' => $token,
             'user'  => new UserResource($user),
-        ], 'Email verified successfully.');
+        ], SuccessCodeEnum::EMAIL_VERIFIED, SuccessCodeEnum::EMAIL_VERIFIED->getMessage());
     }
 
     #[Endpoint('Resend Email OTP', description: 'Resend a new OTP to the user email.')]
@@ -59,14 +77,19 @@ class EmailVerificationController extends BaseApiController
         $user = $this->userService->findByEmailOrFail($request->email);
 
         if ($this->userService->isEmailVerified($user)) {
-            return $this->error('Email is already verified.', 422);
+            return $this->error(
+                ErrorCodeEnum::EMAIL_NOT_VERIFIED,
+                'Email is already verified.',
+                ErrorCodeEnum::EMAIL_NOT_VERIFIED->getStatusCode()
+            );
         }
 
         $this->authService->sendOtp($user);
 
         return $this->success(
             ['email' => $user->email],
-            'OTP resent. Please check your email.',
+            SuccessCodeEnum::VERIFICATION_EMAIL_SENT,
+            SuccessCodeEnum::VERIFICATION_EMAIL_SENT->getMessage(),
         );
     }
 }
