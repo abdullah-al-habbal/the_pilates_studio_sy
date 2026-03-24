@@ -21,6 +21,14 @@ class AppSettingController extends BaseApiController
         private readonly AppSettingService $appSettingService
     ) {}
 
+    #[Endpoint('List all app settings', description: 'Returns a list of all app settings.')]
+    public function index(): JsonResponse
+    {
+        $settings = $this->appSettingService->getAll();
+        return $this->success(AppSettingResource::collection($settings));
+    }
+
+
     #[Endpoint('Get app setting by key', description: 'Returns an app setting by its key.')]
     #[PathParameter('key', description: 'The setting key (e.g., "app_name", "contact_email")', type: 'string')]
     public function showByKey(string $key): JsonResponse

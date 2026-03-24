@@ -36,6 +36,9 @@ class LanguageController extends BaseApiController
             $request->code
         );
 
+        // reload user settings to reflect change immediately
+        $request->user()->load('settings.preferredLanguage');
+
         return $this->success($data, 'Language updated successfully.');
     }
 }

@@ -73,4 +73,36 @@ class UserEloquentRepository
             $user->delete();
         });
     }
+
+    /**
+     * Find user by email including soft-deleted users
+     */
+    public function findByEmailWithTrashed(string $email): ?User
+    {
+        return User::withTrashed()->where('email', $email)->first();
+    }
+
+    /**
+     * Find user by phone number including soft-deleted users
+     */
+    public function findByPhoneWithTrashed(string $phoneNumber): ?User
+    {
+        return User::withTrashed()->where('phone_number', $phoneNumber)->first();
+    }
+
+    public function findByIdWithTrashed(int $id): ?User
+    {
+        return User::withTrashed()->find($id);
+    }
+
+    /**
+     * Permanently force delete a user
+     */
+    public function forceDeleteAccount(User $user): void
+    {
+        DB::transaction(function () use ($user) {
+            $user->tokens()->delete();
+            $user->forceDelete();
+        });
+    }
 }

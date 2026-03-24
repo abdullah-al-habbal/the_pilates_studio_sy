@@ -13,6 +13,7 @@ use Dedoc\Scramble\Attributes\Endpoint;
 use Dedoc\Scramble\Attributes\Group;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 #[Group('Bookings')]
 class BookingController extends BaseApiController
@@ -25,7 +26,7 @@ class BookingController extends BaseApiController
     public function index(Request $request): JsonResponse
     {
         $filters = $request->only(['status', 'per_page']);
-        $bookings = $this->bookingService->listUserBookings($request->user(), $filters);
+        $bookings = $this->bookingService->listUserBookings($request->user()->id, $filters);
 
         return $this->success(new BookingCollection($bookings));
     }
@@ -33,7 +34,19 @@ class BookingController extends BaseApiController
     #[Endpoint('Get booking by ID', description: 'Returns a booking by its ID.')]
     public function show(Request $request, int $id): JsonResponse
     {
-        $booking = $this->bookingService->findUserBooking($request->user(), $id);
-        return $this->success(new BookingResource($booking));
+        Log::info('BookingController@show called', ['user_id' => $request->user()?->id, 'id' => $id]);
+
+        try {
+            $booking = $this->bookingService->findByUser($request->user()->id, $id);
+            return $this->success(new BookingResource($booking));
+        } catch (\Throwable $e) {
+            Log::error('BookingController@show exception', [
+                'class' => get_class($e),
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+
+            throw $e;
+        }
     }
 }

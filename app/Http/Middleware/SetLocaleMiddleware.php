@@ -6,12 +6,15 @@ use App\Models\Language;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\App;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Symfony\Component\HttpFoundation\Response;
 
 class SetLocaleMiddleware
 {
     public function handle(Request $request, Closure $next): Response
     {
+        Log::info('Determining locale for incoming request.');
         $locale = $this->determineLocale($request);
 
         $this->applyLocale($locale);
@@ -38,7 +41,16 @@ class SetLocaleMiddleware
 
     private function getUserPreferredLocale(Request $request): ?string
     {
-        $userLocale = $request->user()?->settings?->preferredLanguage?->code;
+        $user = Auth::guard('sanctum')->user();
+
+        if (! $user) {
+            Log::info('No authenticated user found, skipping user preferred locale.');
+            return null;
+        }
+
+        $user->loadMissing('settings.preferredLanguage');
+        Log::info('Authenticated user found, checking preferred language.', ['user_id' => $user->id, 'preferred_language' => $user->settings?->preferredLanguage?->code]);
+        $userLocale = $user->settings?->preferredLanguage?->code;
 
         return $this->isActiveLocale($userLocale) ? $userLocale : null;
     }

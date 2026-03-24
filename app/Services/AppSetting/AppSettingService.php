@@ -27,4 +27,9 @@ class AppSettingService
 
         return $setting;
     }
+
+    public function getAll()
+    {
+        return $this->repository->index();
+    }
 }

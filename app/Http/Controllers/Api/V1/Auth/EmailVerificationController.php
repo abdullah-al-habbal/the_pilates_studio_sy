@@ -16,7 +16,7 @@ use Dedoc\Scramble\Attributes\Endpoint;
 use Dedoc\Scramble\Attributes\Group;
 use Illuminate\Http\JsonResponse;
 
-#[Group('Authentication')]
+#[Group('email_verification')]
 class EmailVerificationController extends BaseApiController
 {
     public function __construct(
@@ -31,9 +31,9 @@ class EmailVerificationController extends BaseApiController
 
         if ($this->userService->isEmailVerified($user)) {
             return $this->error(
-                ErrorCodeEnum::EMAIL_NOT_VERIFIED,
-                'Email is already verified.',
-                ErrorCodeEnum::EMAIL_NOT_VERIFIED->getStatusCode()
+                ErrorCodeEnum::EMAIL_ALREADY_VERIFIED,
+                ErrorCodeEnum::EMAIL_ALREADY_VERIFIED->getMessage(),
+                ErrorCodeEnum::EMAIL_ALREADY_VERIFIED->getStatusCode()
             );
         }
 
@@ -78,9 +78,9 @@ class EmailVerificationController extends BaseApiController
 
         if ($this->userService->isEmailVerified($user)) {
             return $this->error(
-                ErrorCodeEnum::EMAIL_NOT_VERIFIED,
-                'Email is already verified.',
-                ErrorCodeEnum::EMAIL_NOT_VERIFIED->getStatusCode()
+                ErrorCodeEnum::EMAIL_ALREADY_VERIFIED,
+                ErrorCodeEnum::EMAIL_ALREADY_VERIFIED->getMessage(),
+                ErrorCodeEnum::EMAIL_ALREADY_VERIFIED->getStatusCode()
             );
         }
 

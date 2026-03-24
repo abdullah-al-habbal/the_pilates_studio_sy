@@ -13,8 +13,8 @@ return new class extends Migration
         Schema::create('users', function (Blueprint $table) {
             $table->id();
             $table->string('fullname');
-            $table->string('phone_number')->unique();
-            $table->string('email')->unique();
+            $table->string('phone_number');
+            $table->string('email');
             $table->string('password');
             $table->rememberToken();
             $table->date('date_of_birth')->nullable();
@@ -28,6 +28,8 @@ return new class extends Migration
                 ->nullOnDelete();
             $table->timestamps();
             $table->softDeletes();
+            $table->unique(['email', 'deleted_at']);
+            $table->unique(['phone_number', 'deleted_at']);
         });
 
         Schema::create('password_reset_tokens', function (Blueprint $table) {

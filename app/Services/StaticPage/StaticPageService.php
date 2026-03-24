@@ -8,6 +8,7 @@ namespace App\Services\StaticPage;
 use App\Models\StaticPage;
 use App\Repositories\Eloquent\StaticPage\StaticPageEloquentRepository;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Support\Collection;
 
 class StaticPageService
 {
@@ -24,5 +25,13 @@ class StaticPageService
         }
 
         return $page;
+    }
+
+    /**
+     * Return all static pages.
+     */
+    public function getAllPages(): Collection
+    {
+        return $this->repository->getAll();
     }
 }

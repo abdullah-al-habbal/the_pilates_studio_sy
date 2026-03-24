@@ -24,15 +24,17 @@ class LanguageService
     {
         $language = $this->languageRepository->findActiveByCodeOrFail($code);
 
-        $user->settings()
-            ->firstOrCreate(['user_id' => $user->id])
-            ->update(['preferred_language_id' => $language->id]);
+        $user->settings()->updateOrCreate(
+            ['user_id' => $user->id],
+            ['preferred_language_id' => $language->id]
+        );
 
         return [
             'locale' => $language->code,
             'direction' => $language->direction,
         ];
     }
+
 
     public function isValidLocale(string $code): bool
     {

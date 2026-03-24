@@ -9,6 +9,8 @@ use Illuminate\Support\Facades\Route;
 Route::prefix('notifications')->name('notifications.')->group(function () {
     Route::get('/', [NotificationController::class, 'index'])->name('index');
     Route::get('{id}', [NotificationController::class, 'show'])->name('show');
-    Route::patch('{id}/read', [NotificationController::class, 'markAsRead'])->name('mark-read');
     Route::patch('bulk/read', [NotificationController::class, 'bulkMarkAsRead'])->name('bulk-read');
+    Route::patch('{id}/read', [NotificationController::class, 'markAsRead'])
+        ->whereNumber('id')
+        ->name('mark-read');
 });

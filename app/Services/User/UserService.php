@@ -96,4 +96,21 @@ class UserService
     {
         return Hash::check($otp, $user->otp_code);
     }
+
+
+    public function findByEmailWithTrashed(string $email): ?User
+    {
+        return $this->userRepository->findByEmailWithTrashed($email);
+    }
+    public function reactivateUser(User $user): void
+    {
+        DB::transaction(function () use ($user) {
+            $user->restore();
+            $user->update([
+                'deactivated_at' => null,
+                'deleted_by' => null,
+                'email_verified_at' => null,
+            ]);
+        });
+    }
 }

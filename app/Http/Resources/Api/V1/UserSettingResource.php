@@ -1,6 +1,4 @@
 <?php
-
-// filePath: app/Http/Resources/Api/V1/UserSettingResource.php
 declare(strict_types=1);
 
 namespace App\Http\Resources\Api\V1;
@@ -10,6 +8,16 @@ use Illuminate\Http\Resources\Json\JsonResource;
 
 class UserSettingResource extends JsonResource
 {
+    /**
+     * Ensure static analyzers recognize the inherited constructor.
+     *
+     * @param mixed $resource
+     */
+    public function __construct(mixed $resource)
+    {
+        parent::__construct($resource);
+    }
+
     public function toArray(Request $request): array
     {
         return [

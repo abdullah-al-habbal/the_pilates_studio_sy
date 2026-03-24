@@ -27,6 +27,7 @@ enum ErrorCodeEnum: string
     case TOKEN_INVALID = 'TOKEN_INVALID';
     case TOKEN_MISSING = 'TOKEN_MISSING';
     case EMAIL_NOT_VERIFIED = 'EMAIL_NOT_VERIFIED';
+    case EMAIL_ALREADY_VERIFIED = 'EMAIL_ALREADY_VERIFIED';
     case ACCOUNT_LOCKED = 'ACCOUNT_LOCKED';
     case INVALID_VERIFICATION_CODE = 'INVALID_VERIFICATION_CODE';
 
@@ -78,6 +79,7 @@ enum ErrorCodeEnum: string
             self::TOKEN_INVALID => 'Invalid authentication token',
             self::TOKEN_MISSING => 'Authentication token is missing',
             self::EMAIL_NOT_VERIFIED => 'Email address not verified',
+            self::EMAIL_ALREADY_VERIFIED => 'Email is already verified.',
             self::ACCOUNT_LOCKED => 'Account has been locked',
             self::INVALID_VERIFICATION_CODE => 'Invalid verification code',
 

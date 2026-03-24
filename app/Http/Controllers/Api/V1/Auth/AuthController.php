@@ -7,14 +7,11 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Api\V1\Auth;
 
 use App\Http\Controllers\Api\BaseApiController;
-use App\Http\Requests\Api\V1\Auth\LoginRequest;
-use App\Http\Requests\Api\V1\Auth\RegisterRequest;
+use App\Http\Requests\Api\V1\Auth\{LoginRequest, RegisterRequest};
 use App\Http\Resources\Api\V1\UserResource;
 use App\Services\Auth\AuthService;
-use App\Enums\Api\ErrorCodeEnum;
-use App\Enums\Api\SuccessCodeEnum;
-use Dedoc\Scramble\Attributes\Endpoint;
-use Dedoc\Scramble\Attributes\Group;
+use App\Enums\Api\{ErrorCodeEnum, SuccessCodeEnum};
+use Dedoc\Scramble\Attributes\{Endpoint, Group};
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -61,13 +58,18 @@ class AuthController extends BaseApiController
         }
 
         if (is_null($user->email_verified_at)) {
-            $this->authService->sendOtp($user);
+            $otp = $this->authService->sendOtp($user);
+
+            $extra = ['email_verified' => false];
+            if (app()->environment('local') || config('app.debug') || config('auth.return_otp_in_response')) {
+                $extra['otp'] = $otp;
+            }
 
             return $this->error(
                 ErrorCodeEnum::EMAIL_NOT_VERIFIED,
                 'Email not verified. A new OTP has been sent to your email.',
                 ErrorCodeEnum::EMAIL_NOT_VERIFIED->getStatusCode(),
-                ['email_verified' => false],
+                $extra,
             );
         }
 

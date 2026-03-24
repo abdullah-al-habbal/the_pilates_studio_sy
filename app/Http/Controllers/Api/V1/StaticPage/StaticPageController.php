@@ -20,6 +20,18 @@ class StaticPageController extends BaseApiController
         private readonly StaticPageService $staticPageService
     ) {}
 
+    #[Endpoint('Get all static pages', description: 'Returns a list of all static pages.')]
+    public function index(): JsonResponse
+    {
+        $pages = $this->staticPageService->getAllPages();
+
+        return $this->success(
+            StaticPageResource::collection($pages),
+            SuccessCodeEnum::SUCCESS,
+            SuccessCodeEnum::SUCCESS->getMessage()
+        );
+    }
+
     #[Endpoint('Get static page by slug', description: 'Returns a static page by its slug.')]
     public function showBySlug(string $slug): JsonResponse
     {

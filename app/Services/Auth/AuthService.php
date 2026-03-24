@@ -8,6 +8,7 @@ use App\Jobs\Auth\SendOtpJob;
 use App\Models\User;
 use App\Services\User\UserService;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Log;
 
 class AuthService
 {
@@ -23,14 +24,28 @@ class AuthService
         return $user;
     }
 
+
     public function attemptLogin(string $email, string $password): ?User
     {
-        $user = $this->userService->findByEmail($email);
+        $user = $this->userService->findByEmailWithTrashed($email);
 
         if (! $user || ! $this->userService->validateCredentials($user, $password)) {
             return null;
         }
+        if ($user->trashed()) {
+            return null;
+        }
+        return $user;
+    }
 
+    public function reactivateAccount(string $email, string $password): ?User
+    {
+        $user = $this->userService->findByEmailWithTrashed($email);
+        if (! $user || ! $user->trashed() || ! $this->userService->validateCredentials($user, $password)) {
+            return null;
+        }
+        $this->userService->reactivateUser($user);
+        $this->sendOtp($user);
         return $user;
     }
 
@@ -41,12 +56,18 @@ class AuthService
         return $user->createToken($tokenName)->plainTextToken;
     }
 
-    public function sendOtp(User $user): void
+    public function sendOtp(User $user): string
     {
         $otp = $this->userService->generateOtp();
         $this->userService->saveOtp($user, $otp);
 
         SendOtpJob::dispatch($user, $otp);
+
+        if (app()->environment('local') || config('app.debug') || config('auth.return_otp_in_response')) {
+            Log::info('OTP for user ' . $user->email . ': ' . $otp);
+        }
+
+        return $otp;
     }
 
     public function logout(User $user): void

@@ -15,9 +15,9 @@ class InstructorService
         private readonly InstructorEloquentRepository $repository
     ) {}
 
-    public function getInstructorWithActiveClasses(int $id): Instructor
+    public function getInstructor(int $id, array $includes = []): Instructor
     {
-        $instructor = $this->repository->findWithActiveClasses($id);
+        $instructor = $this->repository->find($id, $includes);
 
         if (! $instructor) {
             throw new ModelNotFoundException("Instructor with ID {$id} not found.");

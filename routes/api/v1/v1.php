@@ -10,10 +10,10 @@ Route::prefix('v1')->name('v1.')->middleware('api')->group(function () {
         require_once __DIR__.'/public/auth.php';
         require_once __DIR__.'/public/pages.php';
         require_once __DIR__.'/public/app_settings.php';
-        require_once __DIR__.'/public/languages.php';
         require_once __DIR__.'/public/classes.php';
         require_once __DIR__.'/public/class_sessions.php';
         require_once __DIR__.'/public/instructors.php';
+        require_once __DIR__.'/public/languages.php';
         require_once __DIR__.'/public/mobile_app_version.php';
     });
 
