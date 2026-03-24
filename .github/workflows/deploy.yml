@@ -120,7 +120,7 @@ jobs:
             set -e
             TARGET="${{ env.TARGET }}"
             ENVIRONMENT="${{ env.ENVIRONMENT }}"
-            PHP_BIN="/usr/bin/php8.4"
+            PHP_BIN="$(command -v php8.4 || command -v php8.3 || command -v php8.2 || command -v php || echo /usr/bin/php)"
 
             cd "$TARGET"
 
