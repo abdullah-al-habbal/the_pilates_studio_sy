@@ -117,7 +117,7 @@ return Application::configure(basePath: dirname(__DIR__))
         });
 
         $exceptions->render(function (NotFoundHttpException $e, Request $request) {
-            if (! $request->expectsJson()) {
+            if (!$request->expectsJson()) {
                 return null;
             }
 
@@ -125,23 +125,23 @@ return Application::configure(basePath: dirname(__DIR__))
 
             if ($previous instanceof ModelNotFoundException) {
                 $modelClass = $previous->getModel();
-                $modelBase  = class_basename($modelClass);
-                $modelSlug  = Str::upper(Str::snake($modelBase));
+                $modelBase = class_basename($modelClass);
+                $modelSlug = Str::upper(Str::snake($modelBase));
 
                 return response()->json([
-                    'success'     => false,
-                    'code'        => $modelSlug . '_NOT_FOUND',
-                    'message'     => $modelBase . ' not found',
-                    'timestamp'   => Carbon::now()->toISOString(),
+                    'success' => false,
+                    'code' => $modelSlug . '_NOT_FOUND',
+                    'message' => $modelBase . ' not found',
+                    'timestamp' => Carbon::now()->toISOString(),
                     'status_code' => 404,
                 ], 404);
             }
 
             return response()->json([
-                'success'     => false,
-                'code'        => 'ENDPOINT_NOT_FOUND',
-                'message'     => 'Endpoint not found',
-                'timestamp'   => Carbon::now()->toISOString(),
+                'success' => false,
+                'code' => 'ENDPOINT_NOT_FOUND',
+                'message' => 'Endpoint not found',
+                'timestamp' => Carbon::now()->toISOString(),
                 'status_code' => 404,
             ], 404);
         });

@@ -7,6 +7,6 @@ use App\Actions\V1\MobileAppVersion\GetCompatibility\GetCompatibilityAction;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('app-version')->name('app_version.')->group(function () {
-    Route::get('compatibility', GetCompatibilityAction::class)
+    Route::post('', GetCompatibilityAction::class)
         ->name('compatibility');
 });

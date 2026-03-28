@@ -26,6 +26,6 @@ class MobileAppVersion extends Model
     protected $casts = [
         'app_name' => AppNameEnum::class,
         'platform' => MobilePlatformEnum::class,
-        'active'   => 'bool',
+        'active' => 'bool',
     ];
 }

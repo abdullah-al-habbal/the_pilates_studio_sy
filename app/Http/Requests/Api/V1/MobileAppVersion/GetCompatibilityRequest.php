@@ -20,15 +20,24 @@ class GetCompatibilityRequest extends BaseApiFormRequest
     public function rules(): array
     {
         return [
-            'app_name' => ['nullable', new EnumRule(AppNameEnum::class)],
-            'platform' => ['required', new EnumRule(MobilePlatformEnum::class)],
-            'version'  => ['required', 'string', 'regex:/^\d+\.\d+\.\d+$/'],
+            'X-App-Name' => ['nullable', 'string'],
+            'X-App-Platform' => ['required', 'string', new EnumRule(MobilePlatformEnum::class)],
+            'X-App-Version' => ['required', 'string', 'regex:/^\d+\.\d+\.\d+$/'],
         ];
+    }
+
+    protected function prepareForValidation(): void
+    {
+        $this->merge([
+            'X-App-Name' => $this->header('X-App-Name'),
+            'X-App-Platform' => $this->header('X-App-Platform'),
+            'X-App-Version' => $this->header('X-App-Version'),
+        ]);
     }
 
     public function validatedAppName(): AppNameEnum
     {
-        $value = $this->input('app_name', AppNameEnum::CUSTOMER->value);
+        $value = $this->input('X-App-Name', AppNameEnum::CUSTOMER->value);
 
         try {
             return AppNameEnum::from($value);
@@ -39,14 +48,14 @@ class GetCompatibilityRequest extends BaseApiFormRequest
 
     public function validatedPlatform(): MobilePlatformEnum
     {
-        $value = (string) $this->input('platform');
+        $value = (string) $this->input('X-App-Platform');
 
         return MobilePlatformEnum::from(strtolower($value));
     }
 
     public function validatedVersion(): string
     {
-        $version = (string) $this->input('version');
+        $version = (string) $this->input('X-App-Version');
 
         return $version;
     }

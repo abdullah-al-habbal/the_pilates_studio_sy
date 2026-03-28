@@ -56,6 +56,9 @@ enum ErrorCodeEnum: string
     case MISSING_REQUIRED_HEADERS = 'MISSING_REQUIRED_HEADERS';
     case INVALID_HEADER_VALUE = 'INVALID_HEADER_VALUE';
 
+    case SERVER_CONFIGURATION_ERROR = 'SERVER_CONFIGURATION_ERROR';
+    case INTERNAL_SERVER_ERROR = 'INTERNAL_SERVER_ERROR';
+
     public function getMessage(): string
     {
         return match($this) {
@@ -107,6 +110,8 @@ enum ErrorCodeEnum: string
             // Header errors
             self::MISSING_REQUIRED_HEADERS => 'Required headers are missing',
             self::INVALID_HEADER_VALUE => 'Invalid header value',
+            self::SERVER_CONFIGURATION_ERROR => 'Server configuration error',
+            self::INTERNAL_SERVER_ERROR => 'Internal server error',
         };
     }
 
@@ -120,6 +125,17 @@ enum ErrorCodeEnum: string
             self::METHOD_NOT_ALLOWED => 405,
             self::UNPROCESSABLE_ENTITY => 422,
             self::TOO_MANY_REQUESTS => 429,
+            self::VALIDATION_FAILED => 422,
+            self::INVALID_INPUT => 422,
+            self::MISSING_REQUIRED_FIELD => 422,
+            self::INVALID_CREDENTIALS => 401,
+            self::TOKEN_EXPIRED => 401,
+            self::TOKEN_INVALID => 401,
+            self::TOKEN_MISSING => 401,
+            self::EMAIL_NOT_VERIFIED => 403,
+            self::EMAIL_ALREADY_VERIFIED => 400,
+            self::ACCOUNT_LOCKED => 403,
+            self::INVALID_VERIFICATION_CODE => 422,
             default => 400,
         };
     }
