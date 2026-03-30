@@ -15,7 +15,7 @@ class VerifyOtpRequest extends BaseApiFormRequest
     {
         return [
             'email' => ['required', 'email', 'exists:users,email'],
-            'otp'   => ['required', 'string', 'size:6'],
+            'otp'   => ['required', 'string', 'size:4'],
         ];
     }
 }

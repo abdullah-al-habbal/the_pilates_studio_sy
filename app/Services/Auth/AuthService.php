@@ -65,6 +65,9 @@ class AuthService
 
         if (app()->environment('local') || config('app.debug') || config('auth.return_otp_in_response')) {
             Log::info('OTP for user ' . $user->email . ': ' . $otp);
+            if (config('auth.return_otp_in_response')) {
+                cache()->put("test_otp_{$user->email}", $otp, now()->addMinutes(15));
+            }
         }
 
         return $otp;

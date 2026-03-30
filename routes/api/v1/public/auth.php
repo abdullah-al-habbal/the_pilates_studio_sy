@@ -2,8 +2,10 @@
 
 // filePath: routes\api\v1\public\auth.php
 
-use App\Http\Controllers\Api\V1\Auth\AuthController;
-use App\Http\Controllers\Api\V1\Auth\EmailVerificationController;
+use App\Http\Controllers\Api\V1\Auth\{
+    AuthController,
+    EmailVerificationController
+};
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('auth')->name('auth.')->group(function () {
