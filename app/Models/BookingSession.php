@@ -1,16 +1,14 @@
 <?php
+
 // filePath: app/Models/BookingSession.php
 
 namespace App\Models;
 
 use App\Enums\BookingSessionStatusEnum;
-use App\Observers\BookingSessionObserver;
-use Illuminate\Database\Eloquent\Attributes\ObservedBy;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 
-#[ObservedBy(BookingSessionObserver::class)]
 class BookingSession extends Model
 {
     use HasFactory;
@@ -26,7 +24,7 @@ class BookingSession extends Model
     {
         return [
             'cancelled_at' => 'datetime',
-            'status'       => BookingSessionStatusEnum::class,
+            'status' => BookingSessionStatusEnum::class,
         ];
     }
 

@@ -1,10 +1,12 @@
 <?php
+
 // filePath: app/Repositories/Eloquent/BookingSession/BookingSessionEloquentRepository.php
 
 declare(strict_types=1);
 
 namespace App\Repositories\Eloquent\BookingSession;
 
+use App\Enums\BookingSessionStatusEnum;
 use App\Models\BookingSession;
 use App\Services\Log\LoggingService;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
@@ -14,7 +16,8 @@ class BookingSessionEloquentRepository
 {
     public function __construct(
         private readonly LoggingService $logger
-    ) {}
+    ) {
+    }
 
     public function listUserSessions(int $userId, array $filters = []): LengthAwarePaginator
     {
@@ -24,8 +27,7 @@ class BookingSessionEloquentRepository
             return BookingSession::query()
                 ->whereHas('booking', fn($q) => $q->where('user_id', $userId))
                 ->with(['classSession.class.instructor', 'classSession.class.primaryImage'])
-                ->when($filters['status'] ?? null, fn($q, $status) =>
-                $q->where('status', $status))
+                ->when($filters['status'] ?? null, fn($q, $status) => $q->where('status', $status))
                 ->latest()
                 ->paginate($filters['per_page'] ?? 20);
         });
@@ -46,7 +48,7 @@ class BookingSessionEloquentRepository
             $this->logger->error('Booking session find failed', [
                 'user_id' => $userId,
                 'id' => $id,
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ]);
             throw $e;
         }
@@ -56,6 +58,7 @@ class BookingSessionEloquentRepository
     {
         return DB::transaction(function () use ($data) {
             $this->logger->info('Creating booking session', $data);
+
             return BookingSession::create($data);
         });
     }
@@ -64,6 +67,7 @@ class BookingSessionEloquentRepository
     {
         return DB::transaction(function () use ($id, $status) {
             $this->logger->info('Updating booking session status', ['id' => $id, 'status' => $status]);
+
             return (bool) BookingSession::where('id', $id)->update(['status' => $status]);
         });
     }
@@ -72,6 +76,18 @@ class BookingSessionEloquentRepository
     {
         return BookingSession::where('booking_id', $bookingId)
             ->where('class_session_id', $classSessionId)
+            ->exists();
+    }
+
+    public function existsForUserAndClassSession(int $userId, int $classSessionId): bool
+    {
+        return BookingSession::query()
+            ->whereIn('status', [
+                BookingSessionStatusEnum::RESERVED->value,
+                BookingSessionStatusEnum::ATTENDED->value,
+            ])
+            ->where('class_session_id', $classSessionId)
+            ->whereHas('booking', fn($q) => $q->where('user_id', $userId))
             ->exists();
     }
 
@@ -86,6 +102,7 @@ class BookingSessionEloquentRepository
         if ($lockForUpdate) {
             $query->lockForUpdate();
         }
+
         return $query->first();
     }
 }

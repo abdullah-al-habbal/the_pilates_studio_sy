@@ -24,6 +24,7 @@ class DatabaseSeeder extends Seeder
             BookingSessionSeeder::class,
             AppNotificationSeeder::class,
             AppSettingSeeder::class,
+            MobileAppVersionSeeder::class,
         ]);
     }
 }

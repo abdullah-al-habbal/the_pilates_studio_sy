@@ -1,4 +1,5 @@
 <?php
+
 // filePath: database/seeders/MobileAppVersionSeeder.php
 
 declare(strict_types=1);
@@ -14,7 +15,6 @@ class MobileAppVersionSeeder extends Seeder
 {
     public function run(): void
     {
-        // Ensure only one active configuration per app/platform
         MobileAppVersion::updateOrCreate(
             [
                 'app_name' => AppNameEnum::CUSTOMER,

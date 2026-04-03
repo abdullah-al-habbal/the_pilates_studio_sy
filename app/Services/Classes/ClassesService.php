@@ -1,11 +1,11 @@
 <?php
+
 // filePath: app/Services/Classes/ClassesService.php
 
 declare(strict_types=1);
 
 namespace App\Services\Classes;
 
-use App\Enums\ClassStatusEnum;
 use App\Models\Classes;
 use App\Repositories\Eloquent\Classes\ClassesEloquentRepository;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
@@ -17,10 +17,24 @@ class ClassesService
         private readonly ClassesEloquentRepository $repository
     ) {}
 
-    public function listActiveClasses(int $perPage = 20): LengthAwarePaginator
-    {
-        return $this->repository->listActiveClasses($perPage);
+    public function queryClasses(
+        ?string $date = null,
+        ?string $startAfter = null,
+        ?string $startBefore = null,
+        ?int $categoryId = null,
+        ?int $instructorId = null,
+        int $perPage = 20
+    ): LengthAwarePaginator {
+        return $this->repository->queryActiveClasses(
+            date: $date,
+            startAfter: $startAfter,
+            startBefore: $startBefore,
+            categoryId: $categoryId,
+            instructorId: $instructorId,
+            perPage: $perPage
+        );
     }
+
     public function getClassById(int $id): Classes
     {
         $class = $this->repository->findById($id);

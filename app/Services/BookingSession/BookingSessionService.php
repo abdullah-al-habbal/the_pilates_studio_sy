@@ -1,4 +1,5 @@
 <?php
+
 // filePath: app/Services/BookingSession/BookingSessionService.php
 
 declare(strict_types=1);
@@ -30,6 +31,7 @@ class BookingSessionService
     public function listUserSessions(int $userId, array $filters = []): LengthAwarePaginator
     {
         $this->logger->info('Listing user sessions', ['user_id' => $userId]);
+
         return $this->repository->listUserSessions($userId, $filters);
     }
 
@@ -38,12 +40,20 @@ class BookingSessionService
         return $this->repository->findByUser($userId, $id)
             ?? throw new ModelNotFoundException;
     }
+
     public function cancel(int $bookingSessionId): void
     {
         $this->logger->info('Cancelling booking session', ['session_id' => $bookingSessionId]);
 
         DB::transaction(function () use ($bookingSessionId) {
             $bookingSession = $this->findById($bookingSessionId, true);
+
+            if ($bookingSession->isCancelled()) {
+                throw ValidationException::withMessages([
+                    'status' => 'Session is already cancelled.',
+                ]);
+            }
+
             $classSession = $this->classSessionService->find($bookingSession->class_session_id, true);
 
             $date = $classSession->date instanceof Carbon
@@ -51,7 +61,7 @@ class BookingSessionService
                 : Carbon::parse($classSession->date);
 
             $cutoff = Carbon::parse(
-                $date->format('Y-m-d') . ' ' . $classSession->start_time
+                $date->format('Y-m-d').' '.$classSession->start_time
             )->subHours(24);
 
             if (now()->greaterThanOrEqualTo($cutoff)) {
@@ -62,7 +72,8 @@ class BookingSessionService
 
             $this->repository->updateStatus($bookingSessionId, BookingSessionStatusEnum::CANCELLED->value);
             $this->repository->setCancelledAt($bookingSessionId);
-            $this->bookingService->refundCredit($bookingSession->booking_id);
+            $booking = $this->bookingService->find($bookingSession->booking_id);
+            $this->bookingService->refundCredit($booking);
         });
     }
 
@@ -84,49 +95,59 @@ class BookingSessionService
     }
 
     public function reserve(int $bookingId, int $classSessionId): BookingSession
-{
-    $this->logger->info('Reserving session', [
-        'booking_id' => $bookingId,
-        'class_session_id' => $classSessionId
-    ]);
-
-    return DB::transaction(function () use ($bookingId, $classSessionId) {
-        $booking = $this->bookingService->find($bookingId, true);
-
-        if (!$this->bookingService->hasCreditsRemaining($booking)) {
-            throw ValidationException::withMessages([
-                'booking_id' => 'Booking has no credits remaining.',
-            ]);
-        }
-
-        $exists = $this->repository->existsForBookingAndClassSession($bookingId, $classSessionId);
-
-        if ($exists) {
-            throw ValidationException::withMessages([
-                'class_session_id' => 'Session already reserved.',
-            ]);
-        }
-
-        $classSession = $this->classSessionService->find($classSessionId, true);
-
-        if (!$this->classSessionService->hasAvailableSpots($classSessionId)) {
-            throw ValidationException::withMessages([
-                'class_session_id' => 'Session is full.',
-            ]);
-        }
-
-        $this->bookingService->decrementCredits($booking);
-
-        if (!$this->bookingService->hasCreditsRemaining($booking)) {
-            $this->bookingService->updateStatus($booking, BookingStatusEnum::EXHAUSTED);
-        }
-
-        return $this->repository->create([
+    {
+        $this->logger->info('Reserving session', [
             'booking_id' => $bookingId,
             'class_session_id' => $classSessionId,
-            'status' => BookingSessionStatusEnum::RESERVED,
         ]);
-    });
-}
 
+        return DB::transaction(function () use ($bookingId, $classSessionId) {
+            $booking = $this->bookingService->find($bookingId, true);
+
+            $this->assertBookingHasCredits($booking);
+            $this->assertNoDuplicateSessionForUser($booking->user_id, $classSessionId);
+            $this->assertSessionHasAvailableSpots($classSessionId);
+
+            $this->classSessionService->find($classSessionId, true);
+            $this->bookingService->decrementCredits($booking);
+            $booking->refresh();
+
+            if (! $this->bookingService->hasCreditsRemaining($booking)) {
+                $this->bookingService->updateStatus($booking, BookingStatusEnum::EXHAUSTED);
+            }
+
+            return $this->repository->create([
+                'booking_id' => $bookingId,
+                'class_session_id' => $classSessionId,
+                'status' => BookingSessionStatusEnum::RESERVED,
+            ]);
+        });
+    }
+
+    private function assertNoDuplicateSessionForUser(int $userId, int $classSessionId): void
+    {
+        if ($this->repository->existsForUserAndClassSession($userId, $classSessionId)) {
+            throw ValidationException::withMessages([
+                'class_session_id' => 'This user has already reserved this session.',
+            ]);
+        }
+    }
+
+    private function assertSessionHasAvailableSpots(int $classSessionId): void
+    {
+        if (! $this->classSessionService->hasAvailableSpots($classSessionId)) {
+            throw ValidationException::withMessages([
+                'class_session_id' => 'This session is fully booked.',
+            ]);
+        }
+    }
+
+    private function assertBookingHasCredits(\App\Models\Booking $booking): void
+    {
+        if (! $this->bookingService->hasCreditsRemaining($booking)) {
+            throw ValidationException::withMessages([
+                'booking_id' => 'This booking has no remaining credits.',
+            ]);
+        }
+    }
 }

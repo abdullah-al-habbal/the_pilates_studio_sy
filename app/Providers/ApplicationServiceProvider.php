@@ -4,10 +4,13 @@
 
 namespace App\Providers;
 
+use App\Models\BookingSession;
+use App\Policies\BookingSessionPolicy;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
@@ -15,16 +18,29 @@ use Illuminate\Validation\Rules\Password;
 
 class ApplicationServiceProvider extends ServiceProvider
 {
+    protected array $policies = [
+        BookingSession::class => BookingSessionPolicy::class,
+    ];
+
     public function register(): void {}
 
     public function boot(): void
     {
+        $this->registerPolicies();
+
         RateLimiter::for('api', function (Request $request) {
             return Limit::perMinute(60)->by($request->user()?->id ?: $request->ip());
         });
         $this->configureModelProtections();
         $this->configureDatabase();
         $this->configurePasswordDefaults();
+    }
+
+    protected function registerPolicies(): void
+    {
+        foreach ($this->policies as $model => $policy) {
+            Gate::policy($model, $policy);
+        }
     }
 
     protected function configureModelProtections(): void
@@ -41,7 +57,7 @@ class ApplicationServiceProvider extends ServiceProvider
     protected function configureDatabase(): void
     {
 
-        DB::prohibitDestructiveCommands($this->app->isProduction());
+        DB::prohibitDestructiveCommands($this->app->environment('production'));
 
         if ($this->app->environment('production')) {
             if (config('app.force_https', false)) {
