@@ -11,6 +11,10 @@ use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
 class ClassSessionEloquentRepository
 {
+    public function __construct(
+        private readonly ClassSession $model
+    ) {}
+
     public function queryUpcomingSessions(
         ?string $date,
         ?string $dateAfter,
@@ -19,7 +23,7 @@ class ClassSessionEloquentRepository
         ?int $classId,
         int $perPage
     ): LengthAwarePaginator {
-        return ClassSession::query()
+        return $this->model->newQuery()
             ->with(['class.instructor', 'class.primaryImage', 'class.category'])
             ->when($date, fn ($q) => $q->whereDate('date', $date))
             ->when($dateAfter, fn ($q) => $q->whereDate('date', '>=', $dateAfter))
@@ -34,10 +38,11 @@ class ClassSessionEloquentRepository
 
     public function findById(int $id): ?ClassSession
     {
-        return ClassSession::with([
-            'class.instructor',
-            'class.category',
-            'class.primaryImage',
-        ])->find($id);
+        return $this->model->newQuery()
+            ->with([
+                'class.instructor',
+                'class.category',
+                'class.primaryImage',
+            ])->find($id);
     }
 }

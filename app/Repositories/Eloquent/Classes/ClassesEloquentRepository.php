@@ -12,6 +12,10 @@ use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
 class ClassesEloquentRepository
 {
+    public function __construct(
+        private readonly Classes $model
+    ) {}
+
     public function queryActiveClasses(
         ?string $date,
         ?string $startAfter,
@@ -20,27 +24,36 @@ class ClassesEloquentRepository
         ?int $instructorId,
         int $perPage
     ): LengthAwarePaginator {
-        return Classes::query()
-            ->with(['instructor', 'category', 'primaryImage'])
+        $query = $this->model->newQuery()
+            ->with(['category', 'instructor', 'primaryImage'])
             ->where('status', ClassStatusEnum::ACTIVE)
-            ->when($date, fn ($q) => $q->whereDate('start_date', '<=', $date)
-                ->whereDate('end_date', '>=', $date))
-            ->when($startAfter, fn ($q, $time) => $q->where('start_time', '>=', $time))
-            ->when($startBefore, fn ($q, $time) => $q->where('start_time', '<=', $time))
             ->when($categoryId, fn ($q, $id) => $q->where('class_category_id', $id))
-            ->when($instructorId, fn ($q, $id) => $q->where('instructor_id', $id))
-            ->latest()
-            ->paginate($perPage);
+            ->when($instructorId, fn ($q, $id) => $q->where('instructor_id', $id));
+
+        if ($date) {
+            $query->whereHas('sessions', function ($q) use ($date, $startAfter, $startBefore) {
+                $q->whereDate('date', $date)
+                    ->when($startAfter, fn ($sq, $time) => $sq->where('start_time', '>=', $time))
+                    ->when($startBefore, fn ($sq, $time) => $sq->where('start_time', '<=', $time));
+            });
+        }
+
+        return $query->latest()->paginate($perPage);
     }
 
     public function findById(int $id): ?Classes
     {
-        return Classes::with([
-            'instructor',
-            'category',
-            'images',
-            'recurrencePattern',
-            'sessions',
-        ])->find($id);
+        return $this->model->newQuery()
+            ->with([
+                'instructor',
+                'category',
+                'images',
+                'recurrencePattern',
+                'sessions' => function ($query) {
+                    $query->whereDate('date', '>=', now()->toDateString())
+                        ->orderBy('date')
+                        ->orderBy('start_time');
+                },
+            ])->find($id);
     }
 }

@@ -5,7 +5,11 @@
 namespace App\Providers;
 
 use App\Models\BookingSession;
+use App\Models\Classes;
+use App\Models\ClassSession;
 use App\Policies\BookingSessionPolicy;
+use App\Repositories\Eloquent\Classes\ClassesEloquentRepository;
+use App\Repositories\Eloquent\ClassSession\ClassSessionEloquentRepository;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
@@ -22,7 +26,15 @@ class ApplicationServiceProvider extends ServiceProvider
         BookingSession::class => BookingSessionPolicy::class,
     ];
 
-    public function register(): void {}
+    public function register(): void
+    {
+        $this->app->bind(ClassesEloquentRepository::class, function ($app) {
+            return new ClassesEloquentRepository($app->make(Classes::class));
+        });
+        $this->app->bind(ClassSessionEloquentRepository::class, function ($app) {
+            return new ClassSessionEloquentRepository($app->make(ClassSession::class));
+        });
+    }
 
     public function boot(): void
     {
