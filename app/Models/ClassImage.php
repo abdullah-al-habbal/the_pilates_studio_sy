@@ -24,7 +24,7 @@ class ClassImage extends Model
         ];
     }
 
-    public function getFullUrlAttribute(): ?string
+    public function getImageUrlAttribute(): ?string
     {
         return $this->url ? url(Storage::url($this->url)) : null;
     }

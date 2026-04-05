@@ -18,7 +18,7 @@ class StaticPageResource extends JsonResource
             'slug' => $this->slug,
             'title' => $this->title,
             'content' => $this->content,
-            'image' => $this->image,
+            'image_url' => $this->image_url,
         ];
     }
 }
