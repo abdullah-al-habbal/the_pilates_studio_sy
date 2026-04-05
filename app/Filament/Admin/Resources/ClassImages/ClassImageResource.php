@@ -14,9 +14,9 @@ use BackedEnum;
 use UnitEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
-use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 
+// fix: Is better to use the relation manager, and delete the entire ClassImageResource
 class ClassImageResource extends Resource
 {
     protected static ?string $model = ClassImage::class;

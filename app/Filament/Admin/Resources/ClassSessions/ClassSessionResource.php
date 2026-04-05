@@ -19,6 +19,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use UnitEnum;
 
+// fix: is better to use relation manager and delete the ClassSessionResource entirlly.
 class ClassSessionResource extends Resource
 {
     protected static ?string $model = ClassSession::class;

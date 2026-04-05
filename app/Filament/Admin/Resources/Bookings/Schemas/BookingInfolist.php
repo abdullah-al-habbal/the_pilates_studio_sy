@@ -17,6 +17,7 @@ class BookingInfolist
         return $schema
             ->components([
 
+                // fix: make the booking information more beature and readable, and the "Expires At" now, must hande the empty state or it have an issue
                 Section::make(__('dashboard.resources.bookings.sections.information'))
                     ->description(__('dashboard.resources.bookings.sections.information_desc'))
                     ->icon('heroicon-o-information-circle')

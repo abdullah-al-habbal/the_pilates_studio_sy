@@ -41,6 +41,7 @@ class BookingsTable
                             $direction
                         );
                     }),
+                // fix: I think we have not ? check it correct? are there a real realtion? and if yes, then handle the empty state
                 TextColumn::make('booking_sessions_count')
                     ->label(__('dashboard.resources.booking_sessions.plural'))
                     ->badge()
@@ -57,9 +58,9 @@ class BookingsTable
                 TextColumn::make('status')
                     ->label(__('dashboard.resources.bookings.fields.status'))
                     ->badge()
-                    ->color(fn (BookingStatusEnum $state): string => $state->getColor())
-                    ->icon(fn (BookingStatusEnum $state): ?string => $state->getIcon())
-                    ->formatStateUsing(fn (BookingStatusEnum $state): string => $state->getLabel())
+                    ->color(fn(BookingStatusEnum $state): string => $state->getColor())
+                    ->icon(fn(BookingStatusEnum $state): ?string => $state->getIcon())
+                    ->formatStateUsing(fn(BookingStatusEnum $state): string => $state->getLabel())
                     ->sortable(),
 
                 TextColumn::make('total_credits')
@@ -71,13 +72,13 @@ class BookingsTable
                     ->label(__('dashboard.resources.bookings.fields.remaining_credits'))
                     ->numeric()
                     ->sortable()
-                    ->color(fn ($state): string => $state > 0 ? 'success' : 'danger'),
+                    ->color(fn($state): string => $state > 0 ? 'success' : 'danger'),
 
                 TextColumn::make('expires_at')
                     ->label(__('dashboard.resources.bookings.fields.expires_at'))
                     ->dateTime()
                     ->sortable()
-                    ->color(fn ($state): string => $state && $state->isPast() ? 'danger' : 'success')
+                    ->color(fn($state): string => $state && $state->isPast() ? 'danger' : 'success')
                     ->placeholder('—'),
 
                 TextColumn::make('created_at')
