@@ -2,9 +2,10 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Support\Facades\Storage;
 
 class ClassImage extends Model
 {
@@ -21,6 +22,11 @@ class ClassImage extends Model
         return [
             'is_primary' => 'boolean',
         ];
+    }
+
+    public function getFullUrlAttribute(): ?string
+    {
+        return $this->url ? url(Storage::url($this->url)) : null;
     }
 
     public function class(): BelongsTo

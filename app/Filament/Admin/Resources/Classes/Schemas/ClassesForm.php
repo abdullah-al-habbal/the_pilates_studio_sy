@@ -1,4 +1,5 @@
 <?php
+
 // filePath: app/Filament/Admin/Resources/Classes/Schemas/ClassesForm.php
 
 namespace App\Filament\Admin\Resources\Classes\Schemas;
@@ -18,7 +19,6 @@ use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
-use LaraZeus\SpatieTranslatable\Forms\Components\MultiLang;
 
 class ClassesForm
 {
@@ -40,7 +40,7 @@ class ClassesForm
                                         ->select('id', 'name')
                                         ->get()
                                         ->mapWithKeys(fn (Instructor $instructor) => [
-                                            $instructor->id => $instructor->getTranslation('name', $locale)
+                                            $instructor->id => $instructor->getTranslation('name', $locale),
                                         ]);
                                 })
                                 ->searchable()
@@ -58,7 +58,7 @@ class ClassesForm
                                         ->select('id', 'name')
                                         ->get()
                                         ->mapWithKeys(fn (ClassCategory $category) => [
-                                            $category->id => $category->getTranslation('name', $locale)
+                                            $category->id => $category->getTranslation('name', $locale),
                                         ]);
                                 })
                                 ->searchable()
@@ -67,7 +67,7 @@ class ClassesForm
                                 ->helperText(__('dashboard.resources.classes.helpers.category'))
                                 ->columnSpan(1),
 
-                            MultiLang::make('title')
+                            TextInput::make('title')
                                 ->label(__('dashboard.resources.classes.fields.title'))
                                 ->required()
                                 ->maxLength(255)
@@ -81,7 +81,7 @@ class ClassesForm
                                         ->select('id', 'name', 'label')
                                         ->get()
                                         ->mapWithKeys(fn (RecurrencePattern $pattern) => [
-                                            $pattern->id => $pattern->getTranslation('label', $locale) ?: $pattern->name
+                                            $pattern->id => $pattern->getTranslation('label', $locale) ?: $pattern->name,
                                         ]);
                                 })
                                 ->searchable()
@@ -90,10 +90,9 @@ class ClassesForm
                                 ->columnSpan(1),
                         ]),
 
-                        MultiLang::make('about')
+                        RichEditor::make('about')
                             ->label(__('dashboard.resources.classes.fields.about'))
                             ->required()
-                            ->field('rich')
                             ->columnSpanFull()
                             ->helperText(__('dashboard.resources.classes.helpers.about')),
                     ]),
@@ -177,27 +176,11 @@ class ClassesForm
                     ->icon('heroicon-o-photo')
                     ->collapsible()
                     ->schema([
-                        FileUpload::make('image')
-                            ->label(__('dashboard.resources.classes.fields.primary_image'))
-                            ->image()
-                            ->imageEditor()
-                            ->imageEditorAspectRatios([
-                                '16:9',
-                                '4:3',
-                                '1:1',
-                            ])
-                            ->maxSize(5120)
-                            ->maxFiles(1)
-                            ->directory('classes')
-                            ->visibility('public')
-                            ->helperText(__('dashboard.resources.classes.helpers.primary_image'))
-                            ->columnSpanFull(),
-
                         Repeater::make('images')
                             ->label(__('dashboard.resources.classes.fields.additional_images'))
                             ->relationship('images')
                             ->schema([
-                                FileUpload::make('image_path')
+                                FileUpload::make('url')
                                     ->label(__('dashboard.resources.classes.fields.image'))
                                     ->image()
                                     ->imageEditor()

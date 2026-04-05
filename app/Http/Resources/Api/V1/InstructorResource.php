@@ -14,10 +14,9 @@ class InstructorResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
-            'id'         => $this->id,
-            'name'       => $this->name,
-            'classes'    => ClassesResource::collection($this->whenLoaded('classes')),
-            'created_at' => $this->created_at->toISOString(),
+            'id' => $this->id,
+            'name' => $this->name,
+            'classes' => ClassesResource::collection($this->whenLoaded('classes')),
         ];
     }
 }

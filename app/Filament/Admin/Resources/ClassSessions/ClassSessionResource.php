@@ -6,26 +6,27 @@ use App\Filament\Admin\Resources\ClassSessions\Pages\CreateClassSession;
 use App\Filament\Admin\Resources\ClassSessions\Pages\EditClassSession;
 use App\Filament\Admin\Resources\ClassSessions\Pages\ListClassSessions;
 use App\Filament\Admin\Resources\ClassSessions\Pages\ViewClassSession;
+use App\Filament\Admin\Resources\ClassSessions\RelationManagers\BookingSessionsRelationManager;
 use App\Filament\Admin\Resources\ClassSessions\Schemas\ClassSessionForm;
 use App\Filament\Admin\Resources\ClassSessions\Schemas\ClassSessionInfolist;
 use App\Filament\Admin\Resources\ClassSessions\Tables\ClassSessionsTable;
 use App\Models\ClassSession;
 use BackedEnum;
-use UnitEnum;
-use App\Filament\Admin\Resources\ClassSessions\RelationManagers\BookingSessionsRelationManager;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
-use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use UnitEnum;
 
 class ClassSessionResource extends Resource
 {
     protected static ?string $model = ClassSession::class;
 
     protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-calendar-days';
+
     protected static string|UnitEnum|null $navigationGroup = 'Schedule';
+
     protected static ?int $navigationSort = 2;
 
     protected static ?string $recordTitleAttribute = 'class_id';

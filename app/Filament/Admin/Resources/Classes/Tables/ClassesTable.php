@@ -27,7 +27,7 @@ class ClassesTable
     {
         return $table
             ->columns([
-                ImageColumn::make('primaryImage.image_path')
+                ImageColumn::make('primaryImage.url')
                     ->label(__('dashboard.resources.classes.fields.image'))
                     ->circular()
                     ->defaultImageUrl(url('/images/placeholder-class.jpg'))
@@ -40,7 +40,8 @@ class ClassesTable
                     ->weight(\Filament\Support\Enums\FontWeight::Bold)
                     ->limit(30)
                     ->tooltip(fn($record) => $record->title)
-                    ->formatStateUsing(fn($state, $record) =>
+                    ->formatStateUsing(
+                        fn($state, $record) =>
                         $record->getTranslation('title', app()->getLocale())
                     ),
 

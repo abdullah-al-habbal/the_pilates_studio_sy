@@ -14,15 +14,14 @@ class BookingSessionResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
-            'id'            => $this->id,
-            'status'        => $this->status->value,
-            'cancelled_at'  => $this->cancelled_at?->toISOString(),
-            'is_cancelled'  => $this->isCancelled(),
-            'is_reserved'   => $this->isReserved(),
-            'is_attended'   => $this->isAttended(),
-            'is_no_show'    => $this->isNoShow(),
+            'id' => $this->id,
+            'status' => $this->status->value,
+            'cancelled_at' => $this->cancelled_at?->toISOString(),
+            'is_cancelled' => $this->isCancelled(),
+            'is_reserved' => $this->isReserved(),
+            'is_attended' => $this->isAttended(),
+            'is_no_show' => $this->isNoShow(),
             'class_session' => new ClassSessionResource($this->whenLoaded('classSession')),
-            'created_at'    => $this->created_at->toISOString(),
         ];
     }
 }

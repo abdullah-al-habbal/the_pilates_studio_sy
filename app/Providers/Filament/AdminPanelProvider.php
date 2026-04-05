@@ -1,4 +1,5 @@
 <?php
+
 // filePath: app\Providers\Filament\AdminPanelProvider.php
 declare(strict_types=1);
 
@@ -13,12 +14,6 @@ use Filament\Pages\Dashboard;
 use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Colors\Color;
-use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
-use Illuminate\Cookie\Middleware\EncryptCookies;
-use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
-use Illuminate\Routing\Middleware\SubstituteBindings;
-use Illuminate\Session\Middleware\StartSession;
-use Illuminate\View\Middleware\ShareErrorsFromSession;
 use LaraZeus\SpatieTranslatable\SpatieTranslatablePlugin;
 
 class AdminPanelProvider extends PanelProvider
@@ -38,7 +33,7 @@ class AdminPanelProvider extends PanelProvider
             ->pages([
                 Dashboard::class,
             ])
-              ->plugins([
+            ->plugins([
                 SpatieTranslatablePlugin::make()
                     ->persist()
                     ->defaultLocales([
@@ -46,23 +41,20 @@ class AdminPanelProvider extends PanelProvider
                         'ar',
                     ]),
             ])
-            // ->discoverWidgets(in: app_path('Filament/Admin/Widgets'), for: 'App\Filament\Admin\Widgets')
             ->widgets([])
-            ->middleware($this->getMiddleware(), isPersistent: true)
-            ->authMiddleware($this->getAuthMiddleware(), isPersistent: true)
-        ;
+            ->middleware($this->getMiddleware())
+            ->authMiddleware($this->getAuthMiddleware());
     }
 
     private function getMiddleware(): array
     {
         return [
-            EncryptCookies::class,
-            AddQueuedCookiesToResponse::class,
-            StartSession::class,
-            AuthenticateSession::class,
-            ShareErrorsFromSession::class,
-            VerifyCsrfToken::class,
-            SubstituteBindings::class,
+            \Illuminate\Cookie\Middleware\EncryptCookies::class,
+            \Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse::class,
+            \Illuminate\Session\Middleware\StartSession::class,
+            \Illuminate\View\Middleware\ShareErrorsFromSession::class,
+            \Illuminate\Foundation\Http\Middleware\ValidateCsrfToken::class,
+            \Illuminate\Routing\Middleware\SubstituteBindings::class,
             DisableBladeIconComponents::class,
             DispatchServingFilamentEvent::class,
         ];
@@ -72,6 +64,7 @@ class AdminPanelProvider extends PanelProvider
     {
         return [
             Authenticate::class,
+            AuthenticateSession::class,
         ];
     }
 }

@@ -1,53 +1,48 @@
 <?php
+
 // filePath: bootstrap/app.php
 
 declare(strict_types=1);
 
 use App\Http\Middleware\MobileAppVersion\CheckAppVersionMiddleware;
-use App\Http\Middleware\SetLocaleMiddleware;
-use Illuminate\Auth\Middleware\{
-    Authenticate,
-    AuthenticateWithBasicAuth,
-    Authorize,
-    EnsureEmailIsVerified,
-    RedirectIfAuthenticated,
-    RequirePassword
-};
+use Illuminate\Auth\AuthenticationException;
+use Illuminate\Auth\Middleware\Authenticate;
+use Illuminate\Auth\Middleware\AuthenticateWithBasicAuth;
+use Illuminate\Auth\Middleware\Authorize;
+use Illuminate\Auth\Middleware\EnsureEmailIsVerified;
+use Illuminate\Auth\Middleware\RedirectIfAuthenticated;
+use Illuminate\Auth\Middleware\RequirePassword;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
-use Illuminate\Foundation\Application;
-use Illuminate\Foundation\Configuration\{Exceptions, Middleware};
-use Illuminate\Foundation\Http\Middleware\{
-    HandlePrecognitiveRequests,
-    InvokeDeferredCallbacks,
-    ValidateCsrfToken
-};
-use Illuminate\Http\Middleware\SetCacheHeaders;
-use Illuminate\Routing\Middleware\{
-    SubstituteBindings,
-    ThrottleRequests,
-    ValidateSignature
-};
-use Illuminate\Session\Middleware\{AuthenticateSession, StartSession};
-use Illuminate\View\Middleware\ShareErrorsFromSession;
-use Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Foundation\Application;
+use Illuminate\Foundation\Configuration\Exceptions;
+use Illuminate\Foundation\Configuration\Middleware;
+use Illuminate\Foundation\Http\Middleware\HandlePrecognitiveRequests;
+use Illuminate\Foundation\Http\Middleware\InvokeDeferredCallbacks;
+use Illuminate\Foundation\Http\Middleware\ValidateCsrfToken;
+use Illuminate\Http\Middleware\SetCacheHeaders;
 use Illuminate\Http\Request;
-use Illuminate\Validation\ValidationException;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
-use Illuminate\Auth\AuthenticationException;
+use Illuminate\Routing\Middleware\SubstituteBindings;
+use Illuminate\Routing\Middleware\ThrottleRequests;
+use Illuminate\Routing\Middleware\ValidateSignature;
+use Illuminate\Session\Middleware\AuthenticateSession;
+use Illuminate\Session\Middleware\StartSession;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
+use Illuminate\View\Middleware\ShareErrorsFromSession;
+use Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
-        web: __DIR__ . '/../routes/web/web.php',
-        api: __DIR__ . '/../routes/api/api.php',
-        commands: __DIR__ . '/../routes/console/console.php',
+        web: __DIR__.'/../routes/web/web.php',
+        api: __DIR__.'/../routes/api/api.php',
+        commands: __DIR__.'/../routes/console/console.php',
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
-        $middleware->append(SetLocaleMiddleware::class);
 
         $middleware->alias([
             'auth' => Authenticate::class,
@@ -70,8 +65,6 @@ return Application::configure(basePath: dirname(__DIR__))
             CheckAppVersionMiddleware::class,
             SubstituteBindings::class,
         ]);
-
-        $middleware->web(append: []);
 
         $middleware->priority([
             InvokeDeferredCallbacks::class,
@@ -101,8 +94,6 @@ return Application::configure(basePath: dirname(__DIR__))
             }
         });
 
-
-
         $exceptions->render(function (ValidationException $e, Request $request) {
             if ($request->expectsJson()) {
                 return response()->json([
@@ -117,7 +108,7 @@ return Application::configure(basePath: dirname(__DIR__))
         });
 
         $exceptions->render(function (NotFoundHttpException $e, Request $request) {
-            if (!$request->expectsJson()) {
+            if (! $request->expectsJson()) {
                 return null;
             }
 
@@ -130,8 +121,8 @@ return Application::configure(basePath: dirname(__DIR__))
 
                 return response()->json([
                     'success' => false,
-                    'code' => $modelSlug . '_NOT_FOUND',
-                    'message' => $modelBase . ' not found',
+                    'code' => $modelSlug.'_NOT_FOUND',
+                    'message' => $modelBase.' not found',
                     'timestamp' => Carbon::now()->toISOString(),
                     'status_code' => 404,
                 ], 404);

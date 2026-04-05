@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Http\Resources\Api\V1;
@@ -8,11 +9,6 @@ use Illuminate\Http\Resources\Json\JsonResource;
 
 class UserSettingResource extends JsonResource
 {
-    /**
-     * Ensure static analyzers recognize the inherited constructor.
-     *
-     * @param mixed $resource
-     */
     public function __construct(mixed $resource)
     {
         parent::__construct($resource);
@@ -26,7 +22,6 @@ class UserSettingResource extends JsonResource
             'fcm_token' => $this->when($request->user()?->id === $this->resource->user_id, $this->fcm_token),
             'preferred_locale' => $this->resolvedLocale(),
             'preferred_language' => LanguageResource::make($this->whenLoaded('preferredLanguage')),
-            'updated_at' => $this->updated_at?->toISOString(),
         ];
     }
 }
