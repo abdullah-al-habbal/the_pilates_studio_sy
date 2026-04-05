@@ -36,17 +36,18 @@ class BookingInfolist
                                 ->iconPosition(IconPosition::After),
                             TextEntry::make('expires_at')
                                 ->label(__('dashboard.resources.bookings.fields.expires_at'))
+                                ->placeholder(__('dashboard.placeholders.not_set'))
                                 ->dateTime()
-                                ->color(fn($state) => $state && $state->isPast() ? 'danger' : 'success')
-                                ->suffix(fn($state) => $state && $state->isPast() ? ' (Expired)' : '')
-                                ->icon(fn($state) => $state && $state->isPast() ? 'heroicon-o-clock' : null),
+                                ->color(fn ($state) => $state && $state->isPast() ? 'danger' : 'success')
+                                ->suffix(fn ($state) => $state && $state->isPast() ? ' (Expired)' : '')
+                                ->icon(fn ($state) => $state && $state->isPast() ? 'heroicon-o-clock' : null),
                             Grid::make(1)->schema([
                                 TextEntry::make('credits_usage_percentage')
                                     ->label('Credits Usage')
-                                    ->state(fn(Booking $record) => $record->credits_usage_percentage . '% used')
+                                    ->state(fn (Booking $record) => $record->credits_usage_percentage.'% used')
                                     ->badge()
-                                    ->color(fn(Booking $record) => $record->credits_progress_color)
-                                    ->suffix(fn(Booking $record) => " ({$record->remaining_credits}/{$record->total_credits} remaining)"),
+                                    ->color(fn (Booking $record) => $record->credits_progress_color)
+                                    ->suffix(fn (Booking $record) => " ({$record->remaining_credits}/{$record->total_credits} remaining)"),
                             ]),
 
                             TextEntry::make('user.fullname')
@@ -54,7 +55,7 @@ class BookingInfolist
                                 ->color('primary')
                                 ->icon('heroicon-o-user')
                                 ->iconPosition(IconPosition::Before)
-                                ->state(fn(Booking $record) => $record->user?->fullname ?? '—'),
+                                ->state(fn (Booking $record) => $record->user?->fullname ?? '—'),
 
                             TextEntry::make('package.name')
                                 ->label(__('dashboard.resources.bookings.fields.package'))
@@ -63,16 +64,15 @@ class BookingInfolist
                                 ->icon('heroicon-o-cube')
                                 ->iconPosition(IconPosition::Before)
                                 ->formatStateUsing(
-                                    fn($state, Booking $record) =>
-                                    $record->package?->getTranslation('name', app()->getLocale()) ?? '—'
+                                    fn ($state, Booking $record) => $record->package?->getTranslation('name', app()->getLocale()) ?? '—'
                                 ),
 
                             TextEntry::make('status')
                                 ->label(__('dashboard.resources.bookings.fields.status'))
                                 ->badge()
-                                ->color(fn(Booking $record) => $record->status->getColor())
-                                ->icon(fn(Booking $record) => $record->status->getIcon())
-                                ->formatStateUsing(fn(Booking $record) => $record->status->getLabel()),
+                                ->color(fn (Booking $record) => $record->status->getColor())
+                                ->icon(fn (Booking $record) => $record->status->getIcon())
+                                ->formatStateUsing(fn (Booking $record) => $record->status->getLabel()),
                         ]),
 
                         Grid::make(3)->schema([
@@ -86,13 +86,12 @@ class BookingInfolist
                                 ->label(__('dashboard.resources.bookings.fields.remaining_credits'))
                                 ->numeric()
                                 ->weight(FontWeight::Bold)
-                                ->color(fn($state) => $state > 0 ? 'success' : 'danger'),
+                                ->color(fn ($state) => $state > 0 ? 'success' : 'danger'),
 
                             TextEntry::make('used_credits')
                                 ->label(__('dashboard.resources.bookings.fields.credits_used'))
                                 ->state(
-                                    fn(Booking $record) =>
-                                    $record->total_credits - $record->remaining_credits
+                                    fn (Booking $record) => $record->total_credits - $record->remaining_credits
                                 )
                                 ->numeric()
                                 ->color('warning'),
@@ -106,7 +105,7 @@ class BookingInfolist
                         ->schema([
                             TextEntry::make('booking_sessions_count')
                                 ->label(__('dashboard.resources.booking_sessions.plural'))
-                                ->state(fn(Booking $record) => $record->booking_sessions_count ?? 0)
+                                ->state(fn (Booking $record) => $record->booking_sessions_count ?? 0)
                                 ->badge()
                                 ->color('info'),
                         ]),

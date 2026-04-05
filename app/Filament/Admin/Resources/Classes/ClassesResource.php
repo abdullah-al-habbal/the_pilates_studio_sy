@@ -1,22 +1,18 @@
 <?php
+
 // filePath: app/Filament/Admin/Resources/Classes/ClassesResource.php
 
 namespace App\Filament\Admin\Resources\Classes;
 
-use App\Filament\Admin\Resources\Classes\Pages\{
-    CreateClasses,
-    EditClasses,
-    ListClasses,
-    ViewClasses
-};
-use App\Filament\Admin\Resources\Classes\RelationManagers\{
-    ImagesRelationManager,
-    SessionsRelationManager
-};
-use App\Filament\Admin\Resources\Classes\Schemas\{
-    ClassesForm,
-    ClassesInfolist,
-};
+use App\Filament\Admin\Resources\Classes\Pages\CreateClasses;
+use App\Filament\Admin\Resources\Classes\Pages\EditClasses;
+use App\Filament\Admin\Resources\Classes\Pages\ListClasses;
+use App\Filament\Admin\Resources\Classes\Pages\ViewClasses;
+use App\Filament\Admin\Resources\Classes\RelationManagers\BookingSessionsRelationManager;
+use App\Filament\Admin\Resources\Classes\RelationManagers\ImagesRelationManager;
+use App\Filament\Admin\Resources\Classes\RelationManagers\SessionsRelationManager;
+use App\Filament\Admin\Resources\Classes\Schemas\ClassesForm;
+use App\Filament\Admin\Resources\Classes\Schemas\ClassesInfolist;
 use App\Filament\Admin\Resources\Classes\Tables\ClassesTable;
 use App\Models\Classes;
 use BackedEnum;
@@ -100,6 +96,7 @@ class ClassesResource extends Resource
         return [
             ImagesRelationManager::class,
             SessionsRelationManager::class,
+            BookingSessionsRelationManager::class,
         ];
     }
 

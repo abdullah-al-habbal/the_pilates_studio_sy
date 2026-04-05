@@ -1,10 +1,10 @@
 <?php
+
 // filePath: app/Filament/Admin/Resources/Bookings/BookingResource.php
 
 namespace App\Filament\Admin\Resources\Bookings;
 
 use App\Enums\BookingSessionStatusEnum;
-use App\Enums\BookingStatusEnum;
 use App\Filament\Admin\Resources\Bookings\Pages\CreateBooking;
 use App\Filament\Admin\Resources\Bookings\Pages\EditBooking;
 use App\Filament\Admin\Resources\Bookings\Pages\ListBookings;
@@ -20,7 +20,6 @@ use Filament\Schemas\Schema;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
-use UnitEnum;
 
 class BookingResource extends Resource
 {
@@ -112,6 +111,7 @@ class BookingResource extends Resource
                 'package:id,name',
             ])
             ->withCount([
+                'bookingSessions',
                 'bookingSessions as reserved_sessions_count' => function ($query) {
                     $query->where('status', BookingSessionStatusEnum::RESERVED);
                 },

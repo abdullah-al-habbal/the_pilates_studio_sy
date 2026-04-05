@@ -4,13 +4,14 @@ namespace App\Models;
 
 use App\Enums\ClassStatusEnum;
 use Carbon\Carbon;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\HasOne;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Casts\Attribute;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
+use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Spatie\Translatable\HasTranslations;
 
 /**
@@ -19,7 +20,7 @@ use Spatie\Translatable\HasTranslations;
  */
 class Classes extends Model
 {
-    use HasFactory, SoftDeletes, HasTranslations;
+    use HasFactory, HasTranslations, SoftDeletes;
 
     public array $translatable = ['title', 'about'];
 
@@ -40,10 +41,10 @@ class Classes extends Model
     protected function casts(): array
     {
         return [
-            'start_date'  => 'date',
-            'end_date'    => 'date',
+            'start_date' => 'date',
+            'end_date' => 'date',
             'total_spots' => 'integer',
-            'status'      => ClassStatusEnum::class,
+            'status' => ClassStatusEnum::class,
         ];
     }
 
@@ -55,7 +56,7 @@ class Classes extends Model
     protected function durationMinutes(): Attribute
     {
         return Attribute::make(
-            get: fn() => (int) Carbon::parse($this->start_time)
+            get: fn () => (int) Carbon::parse($this->start_time)
                 ->diffInMinutes(Carbon::parse($this->end_time))
         );
     }
@@ -88,5 +89,17 @@ class Classes extends Model
     public function sessions(): HasMany
     {
         return $this->hasMany(ClassSession::class, 'class_id')->orderBy('date')->orderBy('start_time');
+    }
+
+    public function bookingSessions(): HasManyThrough
+    {
+        return $this->hasManyThrough(
+            BookingSession::class,
+            ClassSession::class,
+            'class_id', // Foreign key on ClassSession table...
+            'class_session_id', // Foreign key on BookingSession table...
+            'id', // Local key on Classes table...
+            'id' // Local key on ClassSession table...
+        );
     }
 }
