@@ -6,6 +6,7 @@ declare(strict_types=1);
 
 namespace App\Services\ClassSession;
 
+use App\Enums\BookingSessionStatusEnum;
 use App\Models\BookingSession;
 use App\Models\ClassSession;
 use App\Repositories\Eloquent\ClassSession\ClassSessionEloquentRepository;
@@ -83,5 +84,34 @@ class ClassSessionService
         }
 
         return $session;
+    }
+
+    public function getFillRate(): float
+    {
+        $sessions = ClassSession::withCount([
+            'bookingSessions' => function ($q) {
+                $q->whereIn('status', [
+                    BookingSessionStatusEnum::RESERVED->value,
+                    BookingSessionStatusEnum::ATTENDED->value,
+                ]);
+            },
+        ])->get();
+
+        if ($sessions->isEmpty()) {
+            return 0;
+        }
+
+        $totalFill = $sessions->sum(function ($session) {
+            return $session->total_spots > 0 ? ($session->booking_sessions_count / $session->total_spots) * 100 : 0;
+        });
+
+        return (float) round($totalFill / $sessions->count(), 1);
+    }
+
+    public function countUpcomingFullSessions(): int
+    {
+        $sessions = ClassSession::where('date', '>', now())->get();
+
+        return $sessions->filter(fn ($session) => $session->isFull())->count();
     }
 }

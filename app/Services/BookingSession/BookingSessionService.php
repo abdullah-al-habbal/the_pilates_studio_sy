@@ -124,6 +124,56 @@ class BookingSessionService
         });
     }
 
+    public function countAttended(): int
+    {
+        return BookingSession::where('status', BookingSessionStatusEnum::ATTENDED)->count();
+    }
+
+    public function countNoShows(): int
+    {
+        return BookingSession::where('status', BookingSessionStatusEnum::NO_SHOW)->count();
+    }
+
+    public function countNoShowsForMonth(int $month, ?int $year = null): int
+    {
+        $year = $year ?? now()->year;
+
+        return BookingSession::where('status', BookingSessionStatusEnum::NO_SHOW)
+            ->whereMonth('created_at', $month)
+            ->whereYear('created_at', $year)
+            ->count();
+    }
+
+    public function countCancelled(): int
+    {
+        return BookingSession::where('status', BookingSessionStatusEnum::CANCELLED)->count();
+    }
+
+    public function getAttendanceTrend(int $days = 30): \Illuminate\Support\Collection
+    {
+        $startDate = now()->subDays($days)->startOfDay();
+        $sessions = BookingSession::where('status', BookingSessionStatusEnum::ATTENDED)
+            ->where('created_at', '>=', $startDate)
+            ->selectRaw('DATE(created_at) as date, COUNT(*) as count')
+            ->groupBy('date')
+            ->orderBy('date')
+            ->get()
+            ->pluck('count', 'date');
+
+        $dates = collect();
+        for ($i = 0; $i <= $days; $i++) {
+            $date = now()->subDays($days - $i)->toDateString();
+            $dates->put($date, $sessions->get($date, 0));
+        }
+
+        return $dates;
+    }
+
+    public function totalSessionsCount(): int
+    {
+        return BookingSession::count();
+    }
+
     private function assertNoDuplicateSessionForUser(int $userId, int $classSessionId): void
     {
         if ($this->repository->existsForUserAndClassSession($userId, $classSessionId)) {

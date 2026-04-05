@@ -4,15 +4,29 @@
 
 namespace App\Providers;
 
+use App\Models\Booking;
 use App\Models\BookingSession;
 use App\Models\Classes;
 use App\Models\ClassSession;
 use App\Policies\BookingSessionPolicy;
+use App\Repositories\Eloquent\Booking\BookingEloquentRepository;
+use App\Repositories\Eloquent\BookingSession\BookingSessionEloquentRepository;
+use App\Repositories\Eloquent\ClassCategory\ClassCategoryEloquentRepository;
 use App\Repositories\Eloquent\Classes\ClassesEloquentRepository;
 use App\Repositories\Eloquent\ClassSession\ClassSessionEloquentRepository;
+use App\Repositories\Eloquent\Instructor\InstructorEloquentRepository;
+use App\Repositories\Eloquent\User\UserEloquentRepository;
+use App\Services\Booking\BookingService;
+use App\Services\BookingSession\BookingSessionService;
+use App\Services\ClassCategory\ClassCategoryService;
+use App\Services\ClassSession\ClassSessionService;
+use App\Services\Dashboard\StatsService;
+use App\Services\Instructor\InstructorService;
+use App\Services\User\UserService;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\RateLimiter;
@@ -34,6 +48,20 @@ class ApplicationServiceProvider extends ServiceProvider
         $this->app->bind(ClassSessionEloquentRepository::class, function ($app) {
             return new ClassSessionEloquentRepository($app->make(ClassSession::class));
         });
+
+        $this->app->bind(ClassCategoryEloquentRepository::class);
+        $this->app->bind(InstructorEloquentRepository::class);
+        $this->app->bind(UserEloquentRepository::class);
+        $this->app->bind(BookingEloquentRepository::class);
+        $this->app->bind(BookingSessionEloquentRepository::class);
+
+        $this->app->bind(BookingService::class);
+        $this->app->bind(BookingSessionService::class);
+        $this->app->bind(ClassCategoryService::class);
+        $this->app->bind(ClassSessionService::class);
+        $this->app->bind(InstructorService::class);
+        $this->app->bind(UserService::class);
+        $this->app->bind(StatsService::class);
     }
 
     public function boot(): void
@@ -46,6 +74,7 @@ class ApplicationServiceProvider extends ServiceProvider
         $this->configureModelProtections();
         $this->configureDatabase();
         $this->configurePasswordDefaults();
+        $this->configureDashboardCache();
     }
 
     protected function registerPolicies(): void
@@ -59,7 +88,7 @@ class ApplicationServiceProvider extends ServiceProvider
     {
         $isLocal = $this->app->environment('local', 'development');
 
-        Model::preventLazyLoading($isLocal);
+        Model::automaticallyEagerLoadRelationships();
         Model::preventSilentlyDiscardingAttributes($isLocal);
         Model::preventAccessingMissingAttributes($isLocal);
         Model::shouldBeStrict($isLocal);
@@ -102,5 +131,24 @@ class ApplicationServiceProvider extends ServiceProvider
                 ->symbols()
                 ->uncompromised();
         });
+    }
+
+    protected function configureDashboardCache(): void
+    {
+        $models = [Booking::class, BookingSession::class, ClassSession::class];
+        foreach ($models as $model) {
+            $model::saved(function () {
+                $this->invalidateDashboardCache();
+            });
+            $model::deleted(function () {
+                $this->invalidateDashboardCache();
+            });
+        }
+    }
+
+    protected function invalidateDashboardCache(): void
+    {
+        Cache::forget('dashboard.overview.stats');
+        Cache::forget('dashboard.attendance_trend.30');
     }
 }

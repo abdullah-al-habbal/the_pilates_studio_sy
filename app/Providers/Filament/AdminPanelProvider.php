@@ -5,6 +5,10 @@ declare(strict_types=1);
 
 namespace App\Providers\Filament;
 
+use App\Filament\Admin\Widgets\AttendanceTrendChart;
+use App\Filament\Admin\Widgets\CategoryPerformanceWidget;
+use App\Filament\Admin\Widgets\StatsOverview;
+use App\Filament\Admin\Widgets\TopInstructorsWidget;
 use Filament\Auth\Pages\EditProfile;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
@@ -14,13 +18,13 @@ use Filament\Pages\Dashboard;
 use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Colors\Color;
-use LaraZeus\SpatieTranslatable\SpatieTranslatablePlugin;
-use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
-use Illuminate\Session\Middleware\StartSession;
-use Illuminate\View\Middleware\ShareErrorsFromSession;
+use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Http\Middleware\ValidateCsrfToken;
 use Illuminate\Routing\Middleware\SubstituteBindings;
+use Illuminate\Session\Middleware\StartSession;
+use Illuminate\View\Middleware\ShareErrorsFromSession;
+use LaraZeus\SpatieTranslatable\SpatieTranslatablePlugin;
 
 class AdminPanelProvider extends PanelProvider
 {
@@ -47,7 +51,12 @@ class AdminPanelProvider extends PanelProvider
                         'ar',
                     ]),
             ])
-            ->widgets([])
+            ->widgets([
+                StatsOverview::class,
+                AttendanceTrendChart::class,
+                CategoryPerformanceWidget::class,
+                TopInstructorsWidget::class,
+            ])
             ->middleware($this->getMiddleware())
             ->authMiddleware($this->getAuthMiddleware());
     }

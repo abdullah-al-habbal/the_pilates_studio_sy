@@ -1,14 +1,48 @@
 <?php
+
 // filePath: app/Repositories/Eloquent/Booking/BookingEloquentRepository.php
 declare(strict_types=1);
 
 namespace App\Repositories\Eloquent\Booking;
 
+use App\Enums\BookingStatusEnum;
 use App\Models\Booking;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\DB;
 
 class BookingEloquentRepository
 {
+    public function countActive(): int
+    {
+        return Booking::where('status', BookingStatusEnum::ACTIVE)
+            ->where(function ($q) {
+                $q->whereNull('expires_at')->orWhere('expires_at', '>', now());
+            })
+            ->count();
+    }
+
+    public function sumTotalCredits(): int
+    {
+        return (int) Booking::sum('total_credits');
+    }
+
+    public function sumUsedCredits(): int
+    {
+        return (int) Booking::sum(DB::raw('total_credits - remaining_credits'));
+    }
+
+    public function getRevenueByPackage(): \Illuminate\Support\Collection
+    {
+        return Booking::with(['package' => fn ($q) => $q->withTrashed()])
+            ->selectRaw('package_id, COUNT(*) as bookings_count')
+            ->groupBy('package_id')
+            ->get()
+            ->map(fn ($item) => (object) [
+                'package_name' => $item->package?->getTranslation('name', app()->getLocale()) ?? 'Deleted Package',
+                'revenue' => $item->bookings_count * ($item->package?->price ?? 0),
+            ]);
+    }
+
     public function find(int $id, bool $lockForUpdate = false, array $relations = []): ?Booking
     {
         $query = Booking::query();
@@ -17,7 +51,7 @@ class BookingEloquentRepository
             $query->lockForUpdate();
         }
 
-        if (!empty($relations)) {
+        if (! empty($relations)) {
             $query->with($relations);
         }
 
@@ -28,7 +62,7 @@ class BookingEloquentRepository
     {
         $query = Booking::query()->where('user_id', $userId);
 
-        if (!empty($relations)) {
+        if (! empty($relations)) {
             $query->with($relations);
         }
 

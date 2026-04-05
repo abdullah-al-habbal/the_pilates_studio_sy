@@ -1,4 +1,5 @@
 <?php
+
 // filePath: lang/ar/dashboard.php
 
 return [
@@ -128,6 +129,40 @@ return [
                 'completed' => 'مكتملة',
                 'cancelled' => 'ملغاة',
             ],
+        ],
+    ],
+    'widgets' => [
+        'stats_overview' => [
+            'active_users' => 'المستخدمون النشطون',
+            'active_users_description' => 'مستخدمون لديهم حجوزات نشطة',
+            'active_bookings' => 'الحجوزات النشطة',
+            'active_bookings_description' => 'حجوزات غير منتهية الصلاحية',
+            'credits_sold' => 'الاعتمادات المباعة',
+            'credits_sold_description' => 'إجمالي جميع الحزم',
+            'credits_consumed' => 'الاعتمادات المستهلكة',
+            'credits_consumed_usage' => ':percentage% مستخدم',
+            'attendance_rate' => 'معدل الحضور',
+            'attendance_rate_description' => 'آخر ٣٠ يوماً',
+            'no_shows' => 'حالات الغياب',
+            'no_shows_description' => ':trend% مقارنة بالشهر الماضي',
+            'fill_rate' => 'معدل الإشغال',
+            'fill_rate_description' => 'متوسط إشغال الدروس',
+            'upcoming_full_sessions' => 'الجلسات القادمة المكتملة',
+            'upcoming_full_sessions_description' => 'دروس محجوزة بالكامل',
+        ],
+        'attendance_trend' => [
+            'heading' => 'اتجاه الحضور اليومي (آخر ٣٠ يوماً)',
+            'attended_sessions' => 'الجلسات التي تم حضورها',
+        ],
+        'top_instructors' => [
+            'heading' => 'المدربون الأفضل أداءً',
+            'table_heading' => 'أفضل ٥ مدربين حسب الحضور',
+            'instructor' => 'المدرب',
+            'attended_sessions' => 'الجلسات التي تم حضورها',
+        ],
+        'category_performance' => [
+            'heading' => 'الأقسام الأكثر حضوراً',
+            'attended_sessions' => 'الجلسات التي تم حضورها',
         ],
     ],
 ];

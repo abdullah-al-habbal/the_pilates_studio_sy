@@ -1,15 +1,40 @@
 <?php
+
 // filePath: app/Repositories/Eloquent/Instructor/InstructorEloquentRepository.php
 
 declare(strict_types=1);
 
 namespace App\Repositories\Eloquent\Instructor;
 
+use App\Enums\BookingSessionStatusEnum;
 use App\Enums\ClassStatusEnum;
 use App\Models\Instructor;
+use Illuminate\Database\Eloquent\Collection;
 
 class InstructorEloquentRepository
 {
+    public function getTopByAttendance(int $limit = 5): Collection
+    {
+        return Instructor::withCount([
+            'classes' => function ($query) {
+                $query->withCount([
+                    'sessions as attended_sessions_count' => function ($q) {
+                        $q->whereHas('bookingSessions', fn ($bsq) => $bsq->where('status', BookingSessionStatusEnum::ATTENDED));
+                    },
+                ]);
+            },
+        ])
+            ->get()
+            ->map(function ($instructor) {
+                $attendedCount = $instructor->classes->sum('attended_sessions_count');
+                $instructor->attended_count = $attendedCount;
+
+                return $instructor;
+            })
+            ->sortByDesc('attended_count')
+            ->take($limit);
+    }
+
     public function find(int $id, array $includes = []): ?Instructor
     {
         $includes = $this->normalize($includes);
@@ -54,7 +79,7 @@ class InstructorEloquentRepository
         if (in_array('classes', $includes)) {
             $relations['classes'] = function ($q) {
                 $q->where('status', ClassStatusEnum::ACTIVE)
-                  ->latest();
+                    ->latest();
             };
         }
 

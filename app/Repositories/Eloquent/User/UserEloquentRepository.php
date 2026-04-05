@@ -1,16 +1,28 @@
 <?php
+
 // filePath: app/Repositories/Eloquent/User/UserEloquentRepository.php
 
 declare(strict_types=1);
 
 namespace App\Repositories\Eloquent\User;
 
+use App\Enums\BookingStatusEnum;
 use App\Events\User\UserRegisteredEvent;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
 
 class UserEloquentRepository
 {
+    public function countActiveUsers(): int
+    {
+        return User::whereHas('bookings', function ($q) {
+            $q->where('status', BookingStatusEnum::ACTIVE)
+                ->where(function ($sq) {
+                    $sq->whereNull('expires_at')->orWhere('expires_at', '>', now());
+                });
+        })->count();
+    }
+
     public function create(array $data): User
     {
         return DB::transaction(function () use ($data) {

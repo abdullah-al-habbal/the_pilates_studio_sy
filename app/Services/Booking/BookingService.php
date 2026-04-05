@@ -1,4 +1,5 @@
 <?php
+
 // filePath: app/Services/Booking/BookingService.php
 declare(strict_types=1);
 
@@ -12,6 +13,7 @@ use App\Repositories\Eloquent\Booking\BookingEloquentRepository;
 use Carbon\Carbon;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
@@ -25,14 +27,14 @@ class BookingService
     {
         $booking = $this->repository->find($id, $lockForUpdate, $relations);
 
-        return $booking ?? throw new ModelNotFoundException();
+        return $booking ?? throw new ModelNotFoundException;
     }
 
     public function findByUser(int $userId, int $id, array $relations = []): Booking
     {
         $booking = $this->repository->findByUser($userId, $id, $relations);
 
-        return $booking ?? throw new ModelNotFoundException();
+        return $booking ?? throw new ModelNotFoundException;
     }
 
     public function listUserBookings(int $userId, array $filters = []): LengthAwarePaginator
@@ -44,12 +46,12 @@ class BookingService
     {
         return DB::transaction(function () use ($user, $package, $expiresAt): Booking {
             return Booking::create([
-                'user_id'            => $user->id,
-                'package_id'         => $package->id,
-                'total_credits'      => $package->total_credits,
-                'remaining_credits'  => $package->total_credits,
-                'status'             => BookingStatusEnum::ACTIVE,
-                'expires_at'         => $expiresAt,
+                'user_id' => $user->id,
+                'package_id' => $package->id,
+                'total_credits' => $package->total_credits,
+                'remaining_credits' => $package->total_credits,
+                'status' => BookingStatusEnum::ACTIVE,
+                'expires_at' => $expiresAt,
             ]);
         });
     }
@@ -94,7 +96,7 @@ class BookingService
     public function expireBooking(Booking $booking): void
     {
         $booking->update([
-            'status'     => BookingStatusEnum::EXPIRED,
+            'status' => BookingStatusEnum::EXPIRED,
             'expires_at' => now(),
         ]);
     }
@@ -102,8 +104,8 @@ class BookingService
     public function cancelBooking(Booking $booking): void
     {
         $booking->update([
-            'status'             => BookingStatusEnum::CANCELLED,
-            'remaining_credits'  => $booking->total_credits,
+            'status' => BookingStatusEnum::CANCELLED,
+            'remaining_credits' => $booking->total_credits,
         ]);
     }
 
@@ -115,5 +117,25 @@ class BookingService
     public function hasCreditsRemaining(Booking $booking): bool
     {
         return $booking->hasCreditsRemaining();
+    }
+
+    public function countActive(): int
+    {
+        return $this->repository->countActive();
+    }
+
+    public function sumTotalCredits(): int
+    {
+        return $this->repository->sumTotalCredits();
+    }
+
+    public function sumUsedCredits(): int
+    {
+        return $this->repository->sumUsedCredits();
+    }
+
+    public function getRevenueByPackage(): Collection
+    {
+        return $this->repository->getRevenueByPackage();
     }
 }

@@ -1,4 +1,5 @@
 <?php
+
 // filePath: lang/en/dashboard.php
 
 return [
@@ -331,6 +332,40 @@ return [
                 'created_at' => 'Created At',
                 'updated_at' => 'Updated At',
             ],
+        ],
+    ],
+    'widgets' => [
+        'stats_overview' => [
+            'active_users' => 'Active Users',
+            'active_users_description' => 'Users with active bookings',
+            'active_bookings' => 'Active Bookings',
+            'active_bookings_description' => 'Non-expired bookings',
+            'credits_sold' => 'Credits Sold',
+            'credits_sold_description' => 'Total across all packages',
+            'credits_consumed' => 'Credits Consumed',
+            'credits_consumed_usage' => ':percentage% used',
+            'attendance_rate' => 'Attendance Rate',
+            'attendance_rate_description' => 'Last 30 days',
+            'no_shows' => 'No-Shows',
+            'no_shows_description' => ':trend% vs last month',
+            'fill_rate' => 'Fill Rate',
+            'fill_rate_description' => 'Average class occupancy',
+            'upcoming_full_sessions' => 'Upcoming Full Sessions',
+            'upcoming_full_sessions_description' => 'Fully booked classes',
+        ],
+        'attendance_trend' => [
+            'heading' => 'Daily Attendance Trend (Last 30 Days)',
+            'attended_sessions' => 'Attended Sessions',
+        ],
+        'top_instructors' => [
+            'heading' => 'Top Performing Instructors',
+            'table_heading' => 'Top 5 Instructors by Attendance',
+            'instructor' => 'Instructor',
+            'attended_sessions' => 'Attended Sessions',
+        ],
+        'category_performance' => [
+            'heading' => 'Top Categories by Attendance',
+            'attended_sessions' => 'Attended Sessions',
         ],
     ],
 ];

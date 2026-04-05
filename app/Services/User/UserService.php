@@ -77,14 +77,15 @@ class UserService
     {
         $user = $this->findByEmail($email);
         if (! $user) {
-            throw new ModelNotFoundException();
+            throw new ModelNotFoundException;
         }
+
         return $user;
     }
 
     public function hasValidOtp(User $user): bool
     {
-        return !is_null($user->otp_code) && !is_null($user->otp_expires_at);
+        return ! is_null($user->otp_code) && ! is_null($user->otp_expires_at);
     }
 
     public function isOtpExpired(User $user): bool
@@ -97,11 +98,11 @@ class UserService
         return Hash::check($otp, $user->otp_code);
     }
 
-
     public function findByEmailWithTrashed(string $email): ?User
     {
         return $this->userRepository->findByEmailWithTrashed($email);
     }
+
     public function reactivateUser(User $user): void
     {
         DB::transaction(function () use ($user) {
@@ -112,5 +113,10 @@ class UserService
                 'email_verified_at' => null,
             ]);
         });
+    }
+
+    public function countActiveUsers(): int
+    {
+        return $this->userRepository->countActiveUsers();
     }
 }
