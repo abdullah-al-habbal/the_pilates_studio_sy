@@ -2,7 +2,7 @@
 // filePath: config/filament.php
 return [
     'broadcasting' => [],
-    'default_filesystem_disk' => env('FILESYSTEM_DISK', 'local'),
+    'default_filesystem_disk' => env('FILESYSTEM_DISK', 'public'),
     'assets_path' => null,
     'cache_path' => base_path('bootstrap/cache/filament'),
     'livewire_loading_delay' => 'default',
