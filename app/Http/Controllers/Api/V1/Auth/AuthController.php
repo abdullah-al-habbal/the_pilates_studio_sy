@@ -6,12 +6,15 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Api\V1\Auth;
 
+use App\Enums\Api\ErrorCodeEnum;
+use App\Enums\Api\SuccessCodeEnum;
 use App\Http\Controllers\Api\BaseApiController;
-use App\Http\Requests\Api\V1\Auth\{LoginRequest, RegisterRequest};
-use App\Http\Resources\Api\V1\UserResource;
+use App\Http\Requests\Api\V1\Auth\LoginRequest;
+use App\Http\Requests\Api\V1\Auth\RegisterRequest;
+use App\Http\Resources\Api\V1\RichUserResource;
 use App\Services\Auth\AuthService;
-use App\Enums\Api\{ErrorCodeEnum, SuccessCodeEnum};
-use Dedoc\Scramble\Attributes\{Endpoint, Group};
+use Dedoc\Scramble\Attributes\Endpoint;
+use Dedoc\Scramble\Attributes\Group;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -22,13 +25,13 @@ class AuthController extends BaseApiController
         private readonly AuthService $authService
     ) {}
 
-    #[Endpoint('Register', description: 'Register a new user.')]
     public function register(RegisterRequest $request): JsonResponse
     {
         $user = $this->authService->register($request->validated());
+        $user->load('activeCreditBooking.package');
 
         return $this->created(
-            ['email' => $user->email],
+            new RichUserResource($user),
             SuccessCodeEnum::REGISTER_SUCCESS,
             SuccessCodeEnum::REGISTER_SUCCESS->getMessage(),
         );
@@ -76,9 +79,11 @@ class AuthController extends BaseApiController
         $deviceName = $data['device_name'] ?? null;
         $token = $this->authService->createToken($user, $deviceName);
 
+        $user->load('activeCreditBooking.package');
+
         return $this->success([
             'token' => $token,
-            'user' => new UserResource($user),
+            'user' => new RichUserResource($user),
         ], SuccessCodeEnum::LOGIN_SUCCESS, SuccessCodeEnum::LOGIN_SUCCESS->getMessage());
     }
 
@@ -97,7 +102,7 @@ class AuthController extends BaseApiController
         $user->load('activeCreditBooking.package');
 
         return $this->success(
-            new UserResource($user),
+            new RichUserResource($user),
             SuccessCodeEnum::SUCCESS,
             SuccessCodeEnum::SUCCESS->getMessage()
         );

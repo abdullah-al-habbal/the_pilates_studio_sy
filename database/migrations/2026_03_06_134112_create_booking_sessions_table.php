@@ -39,6 +39,7 @@ return new class extends Migration
 
             $table->index(['class_session_id', 'status'], 'idx_session_status');
             $table->index(['booking_id', 'status'], 'idx_booking_status');
+            $table->index(['booking_id', 'class_session_id', 'status'], 'idx_booking_session_status');
         });
     }
 

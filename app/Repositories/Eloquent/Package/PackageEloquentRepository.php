@@ -1,4 +1,5 @@
 <?php
+
 // filePath: app/Repositories/Eloquent/Package/PackageEloquentRepository.php
 
 declare(strict_types=1);
@@ -9,6 +10,13 @@ use App\Models\Package;
 
 class PackageEloquentRepository
 {
+    public function getCheapestActivePackage(): ?Package
+    {
+        return Package::where('is_active', true)
+            ->orderBy('total_credits', 'asc')
+            ->first();
+    }
+
     public function findUserBookedPackage(int $userId, int $packageId): ?Package
     {
         return Package::whereHas('bookings', function ($query) use ($userId) {

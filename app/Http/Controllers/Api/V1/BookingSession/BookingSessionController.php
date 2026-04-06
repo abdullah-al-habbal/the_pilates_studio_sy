@@ -26,8 +26,10 @@ class BookingSessionController extends BaseApiController
     #[Endpoint('Reserve class session', description: 'Books a class session using booking credits. Requires active booking with credits.')]
     public function reserve(ReserveSessionRequest $request): JsonResponse
     {
+        $activeBooking = $request->attributes->get('active_booking');
+
         $bookingSession = $this->bookingSessionService->reserve(
-            bookingId: (int) $request->booking_id,
+            bookingId: (int) $activeBooking->id,
             classSessionId: (int) $request->class_session_id
         );
 

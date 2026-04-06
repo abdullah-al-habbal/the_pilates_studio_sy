@@ -1,15 +1,15 @@
 <?php
+
 // filePath: database\migrations\2026_03_17_095434_create_mobile_app_versions_table.php
 
 declare(strict_types=1);
 
-use App\Enums\AppNameEnum;
-use App\Enums\MobilePlatformEnum;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration {
+return new class extends Migration
+{
     public function up(): void
     {
         Schema::create('mobile_app_versions', function (Blueprint $table): void {

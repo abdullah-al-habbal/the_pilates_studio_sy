@@ -44,6 +44,18 @@ return new class extends Migration
                 ->comment('Soft deletion timestamp');
 
             $table->index(['user_id', 'status'], 'idx_user_status');
+            $table->index(['user_id', 'status', 'remaining_credits'], 'idx_user_status_credits');
+
+
+            $table->unsignedBigInteger('active_user_id')
+                ->nullable()
+                ->storedAs(
+                    "CASE WHEN status = '" . BookingStatusEnum::ACTIVE->value .
+                        "' AND remaining_credits > 0 THEN user_id ELSE NULL END"
+                )
+                ->comment('Used to enforce unique active booking per user');
+
+            $table->unique(['active_user_id'], 'unique_active_booking_per_user');
         });
     }
 

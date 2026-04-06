@@ -12,6 +12,14 @@ use Illuminate\Support\Facades\DB;
 
 class BookingEloquentRepository
 {
+    public function userHasActiveCreditBooking(int $userId): bool
+    {
+        return Booking::where('user_id', $userId)
+            ->where('status', BookingStatusEnum::ACTIVE)
+            ->where('remaining_credits', '>', 0)
+            ->exists();
+    }
+
     public function countActive(): int
     {
         return Booking::where('status', BookingStatusEnum::ACTIVE)

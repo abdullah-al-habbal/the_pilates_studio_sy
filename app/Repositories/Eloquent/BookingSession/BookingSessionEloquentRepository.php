@@ -1,6 +1,6 @@
 <?php
 
-// filePath: app/Repositories/Eloquent/BookingSession/BookingSessionEloquentRepository.php
+// app/Repositories/Eloquent/BookingSession/BookingSessionEloquentRepository.php
 
 declare(strict_types=1);
 
@@ -9,27 +9,28 @@ namespace App\Repositories\Eloquent\BookingSession;
 use App\Enums\BookingSessionStatusEnum;
 use App\Models\BookingSession;
 use App\Services\Log\LoggingService;
+use Carbon\Carbon;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
 
 class BookingSessionEloquentRepository
 {
     public function __construct(
+        private readonly BookingSession $model,
         private readonly LoggingService $logger
-    ) {
-    }
+    ) {}
 
     public function listUserSessions(int $userId, array $filters = []): LengthAwarePaginator
     {
         return DB::transaction(function () use ($userId, $filters) {
             $this->logger->info('Fetching user booking sessions', ['user_id' => $userId]);
 
-            return BookingSession::query()
-                ->whereHas('booking', fn($q) => $q->where('user_id', $userId))
-                ->with(['classSession.class.instructor', 'classSession.class.primaryImage'])
-                ->when($filters['status'] ?? null, fn($q, $status) => $q->where('status', $status))
-                ->latest()
-                ->paginate($filters['per_page'] ?? 20);
+            $query = $this->baseUserSessionsQuery($userId)
+                ->when($filters['status'] ?? null, fn ($q, $status) => $q->where('status', $status))
+                ->latest();
+
+            return $query->paginate($filters['per_page'] ?? 20);
         });
     }
 
@@ -39,9 +40,7 @@ class BookingSessionEloquentRepository
             return DB::transaction(function () use ($userId, $id) {
                 $this->logger->info('Finding booking session', ['user_id' => $userId, 'session_id' => $id]);
 
-                return BookingSession::query()
-                    ->whereHas('booking', fn($q) => $q->where('user_id', $userId))
-                    ->with(['classSession.class.instructor', 'classSession.class.primaryImage'])
+                return $this->baseUserSessionsQuery($userId)
                     ->find($id);
             });
         } catch (\Exception $e) {
@@ -59,7 +58,7 @@ class BookingSessionEloquentRepository
         return DB::transaction(function () use ($data) {
             $this->logger->info('Creating booking session', $data);
 
-            return BookingSession::create($data);
+            return $this->model->create($data);
         });
     }
 
@@ -68,41 +67,114 @@ class BookingSessionEloquentRepository
         return DB::transaction(function () use ($id, $status) {
             $this->logger->info('Updating booking session status', ['id' => $id, 'status' => $status]);
 
-            return (bool) BookingSession::where('id', $id)->update(['status' => $status]);
+            return (bool) $this->model->where('id', $id)->update(['status' => $status]);
         });
     }
 
     public function existsForBookingAndClassSession(int $bookingId, int $classSessionId): bool
     {
-        return BookingSession::where('booking_id', $bookingId)
+        return $this->model->where('booking_id', $bookingId)
             ->where('class_session_id', $classSessionId)
             ->exists();
     }
 
     public function existsForUserAndClassSession(int $userId, int $classSessionId): bool
     {
-        return BookingSession::query()
+        return $this->model->query()
             ->whereIn('status', [
                 BookingSessionStatusEnum::RESERVED->value,
                 BookingSessionStatusEnum::ATTENDED->value,
             ])
             ->where('class_session_id', $classSessionId)
-            ->whereHas('booking', fn($q) => $q->where('user_id', $userId))
+            ->whereHas('booking', fn ($q) => $q->where('user_id', $userId))
             ->exists();
     }
 
     public function setCancelledAt(int $id): bool
     {
-        return (bool) BookingSession::where('id', $id)->update(['cancelled_at' => now()]);
+        return (bool) $this->model->where('id', $id)->update(['cancelled_at' => now()]);
     }
 
     public function find(int $id, bool $lockForUpdate = false): ?BookingSession
     {
-        $query = BookingSession::query()->where('id', $id);
+        $query = $this->model->where('id', $id);
         if ($lockForUpdate) {
             $query->lockForUpdate();
         }
 
         return $query->first();
+    }
+
+    public function getUpcomingSessionsForUser(int $userId, int $perPage = 20): LengthAwarePaginator
+    {
+        $now = Carbon::now();
+
+        $query = $this->baseUserSessionsQuery($userId)
+            ->whereHas('classSession', fn ($q) => $this->upcomingCondition($q, $now))
+            ->whereIn('status', ['reserved']);
+
+        return $this->paginateWithEager($query, $perPage);
+    }
+
+    public function getPastSessionsForUser(int $userId, int $perPage = 20): LengthAwarePaginator
+    {
+        $now = Carbon::now();
+
+        $query = $this->baseUserSessionsQuery($userId)
+            ->whereHas('classSession', fn ($q) => $this->pastCondition($q, $now));
+
+        return $this->paginateWithEager($query, $perPage);
+    }
+
+    public function getBothSessionsForUser(int $userId, int $perPage = 20): LengthAwarePaginator
+    {
+        $now = Carbon::now();
+
+        $upcoming = $this->baseUserSessionsQuery($userId)
+            ->whereHas('classSession', fn ($q) => $this->upcomingCondition($q, $now))
+            ->whereIn('status', ['reserved']);
+
+        $past = $this->baseUserSessionsQuery($userId)
+            ->whereHas('classSession', fn ($q) => $this->pastCondition($q, $now));
+
+        $union = $upcoming->union($past);
+
+        return $this->paginateWithEager($union, $perPage);
+    }
+
+    private function baseUserSessionsQuery(int $userId): Builder
+    {
+        return $this->model->query()
+            ->whereHas('booking', fn ($q) => $q->where('user_id', $userId));
+    }
+
+    private function upcomingCondition(Builder $query, Carbon $now): void
+    {
+        $query->where(function ($sub) use ($now) {
+            $sub->whereDate('date', '>', $now->toDateString())
+                ->orWhere(function ($inner) use ($now) {
+                    $inner->whereDate('date', '=', $now->toDateString())
+                        ->whereTime('start_time', '>=', $now->toTimeString());
+                });
+        });
+    }
+
+    private function pastCondition(Builder $query, Carbon $now): void
+    {
+        $query->where(function ($sub) use ($now) {
+            $sub->whereDate('date', '<', $now->toDateString())
+                ->orWhere(function ($inner) use ($now) {
+                    $inner->whereDate('date', '=', $now->toDateString())
+                        ->whereTime('start_time', '<', $now->toTimeString());
+                });
+        });
+    }
+
+    private function paginateWithEager(Builder $query, int $perPage): LengthAwarePaginator
+    {
+        return $query
+            ->with(['classSession.class.instructor', 'classSession.class.primaryImage'])
+            ->latest()
+            ->paginate($perPage);
     }
 }

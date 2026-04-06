@@ -4,6 +4,8 @@
 
 declare(strict_types=1);
 
+use App\Http\Middleware\EnsureActiveBookingMiddleware;
+use App\Http\Middleware\EnsureActivePackageMiddleware;
 use App\Http\Middleware\MobileAppVersion\CheckAppVersionMiddleware;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Auth\Middleware\Authenticate;
@@ -51,6 +53,8 @@ return Application::configure(basePath: dirname(__DIR__))
             'auth.session' => AuthenticateSession::class,
             'cache.headers' => SetCacheHeaders::class,
             'can' => Authorize::class,
+            'ensure.active.booking' => EnsureActiveBookingMiddleware::class,
+            'ensure.active.package' => EnsureActivePackageMiddleware::class,
             'guest' => RedirectIfAuthenticated::class,
             'password.confirm' => RequirePassword::class,
             'precognitive' => HandlePrecognitiveRequests::class,
@@ -63,6 +67,7 @@ return Application::configure(basePath: dirname(__DIR__))
             EnsureFrontendRequestsAreStateful::class,
             'throttle:api',
             CheckAppVersionMiddleware::class,
+            EnsureActivePackageMiddleware::class,
             SubstituteBindings::class,
         ]);
 

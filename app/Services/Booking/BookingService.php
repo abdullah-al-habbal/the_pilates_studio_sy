@@ -19,9 +19,19 @@ use Illuminate\Validation\ValidationException;
 
 class BookingService
 {
+
     public function __construct(
         private readonly BookingEloquentRepository $repository,
     ) {}
+    public function userHasActiveCreditBooking(User $user): bool
+    {
+        return $this->repository->userHasActiveCreditBooking($user->id);
+    }
+
+    public function createBookingFromPackage(User $user, Package $package, ?Carbon $expiresAt = null): Booking
+    {
+        return $this->createFromPackage($user, $package, $expiresAt);
+    }
 
     public function find(int $id, bool $lockForUpdate = false, array $relations = []): Booking
     {

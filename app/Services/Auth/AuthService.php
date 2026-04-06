@@ -1,9 +1,11 @@
 <?php
+
 // filePath: app/Services/Auth/AuthService.php
 declare(strict_types=1);
 
 namespace App\Services\Auth;
 
+use App\Events\UserSuccessfullyRegisteredEvent;
 use App\Jobs\Auth\SendOtpJob;
 use App\Models\User;
 use App\Services\User\UserService;
@@ -21,9 +23,10 @@ class AuthService
         $user = $this->userService->createUser($data);
         $this->sendOtp($user);
 
+        event(new UserSuccessfullyRegisteredEvent($user));
+
         return $user;
     }
-
 
     public function attemptLogin(string $email, string $password): ?User
     {
@@ -35,6 +38,7 @@ class AuthService
         if ($user->trashed()) {
             return null;
         }
+
         return $user;
     }
 
@@ -46,12 +50,13 @@ class AuthService
         }
         $this->userService->reactivateUser($user);
         $this->sendOtp($user);
+
         return $user;
     }
 
     public function createToken(User $user, ?string $deviceName = null): string
     {
-        $tokenName = $deviceName ?? 'auth_token_' . Carbon::now()->timestamp;
+        $tokenName = $deviceName ?? 'auth_token_'.Carbon::now()->timestamp;
 
         return $user->createToken($tokenName)->plainTextToken;
     }
@@ -64,7 +69,7 @@ class AuthService
         SendOtpJob::dispatch($user, $otp);
 
         if (app()->environment('local') || config('app.debug') || config('auth.return_otp_in_response')) {
-            Log::info('OTP for user ' . $user->email . ': ' . $otp);
+            Log::info('OTP for user '.$user->email.': '.$otp);
             if (config('auth.return_otp_in_response')) {
                 cache()->put("test_otp_{$user->email}", $otp, now()->addMinutes(15));
             }

@@ -16,6 +16,9 @@ class EventServiceProvider extends ServiceProvider
         UserRegisteredEvent::class => [
             CreateDefaultUserSettingListener::class,
         ],
+        \App\Events\UserSuccessfullyRegisteredEvent::class => [
+            \App\Listeners\CreateInitialBookingForUserSuccessfullyRegisteredListener::class,
+        ],
     ];
 
     public function boot(): void

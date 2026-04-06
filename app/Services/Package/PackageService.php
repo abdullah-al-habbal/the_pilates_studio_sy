@@ -1,4 +1,5 @@
 <?php
+
 // filePath: app/Services/Package/PackageService.php
 
 declare(strict_types=1);
@@ -11,6 +12,11 @@ use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class PackageService
 {
+    public function getCheapestActivePackage(): ?Package
+    {
+        return $this->repository->getCheapestActivePackage();
+    }
+
     public function __construct(
         private readonly PackageEloquentRepository $repository
     ) {}

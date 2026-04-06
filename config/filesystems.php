@@ -1,15 +1,11 @@
 <?php
+
 // filePath:
 declare(strict_types=1);
+
 return [
-
-
-
     'default' => env('FILESYSTEM_DISK', 'public'),
-
-
     'disks' => [
-
         'local' => [
             'driver' => 'local',
             'root' => storage_path('app/private'),
@@ -17,16 +13,14 @@ return [
             'throw' => false,
             'report' => false,
         ],
-
         'public' => [
             'driver' => 'local',
             'root' => storage_path('app/public'),
-            'url' => rtrim(env('APP_URL', 'http://localhost'), '/') . '/storage',
+            'url' => rtrim(env('APP_URL', 'http://localhost'), '/').'/storage',
             'visibility' => 'public',
             'throw' => false,
             'report' => false,
         ],
-
         's3' => [
             'driver' => 's3',
             'key' => env('AWS_ACCESS_KEY_ID'),
@@ -39,12 +33,8 @@ return [
             'throw' => false,
             'report' => false,
         ],
-
     ],
-
-
     'links' => [
         public_path('storage') => storage_path('app/public'),
     ],
-
 ];

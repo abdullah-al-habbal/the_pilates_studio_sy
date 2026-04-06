@@ -1,18 +1,15 @@
 <?php
+
 // filePath: app/Models/Booking.php
 
 namespace App\Models;
 
 use App\Enums\BookingStatusEnum;
-use Illuminate\Database\Eloquent\{
-    Model,
-    SoftDeletes
-    };
-use Illuminate\Database\Eloquent\Relations\{
-    HasMany,
-    BelongsTo
-};
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use InvalidArgumentException;
 
 class Booking extends Model
@@ -31,10 +28,10 @@ class Booking extends Model
     protected function casts(): array
     {
         return [
-            'total_credits'     => 'integer',
+            'total_credits' => 'integer',
             'remaining_credits' => 'integer',
-            'expires_at'        => 'datetime',
-            'status'            => BookingStatusEnum::class,
+            'expires_at' => 'datetime',
+            'status' => BookingStatusEnum::class,
         ];
     }
 
@@ -73,7 +70,7 @@ class Booking extends Model
 
     public function isActive(): bool
     {
-        return $this->status === BookingStatusEnum::ACTIVE && !$this->isExpired();
+        return $this->status === BookingStatusEnum::ACTIVE && ! $this->isExpired();
     }
 
     public function user(): BelongsTo
