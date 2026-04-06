@@ -9,4 +9,5 @@ use Illuminate\Support\Facades\Route;
 Route::prefix('bookings')->name('bookings.')->group(function () {
     Route::get('/', [BookingController::class, 'index'])->name('index');
     Route::get('{id}', [BookingController::class, 'show'])->name('show');
+    Route::post('/', [BookingController::class, 'store'])->name('store');
 });

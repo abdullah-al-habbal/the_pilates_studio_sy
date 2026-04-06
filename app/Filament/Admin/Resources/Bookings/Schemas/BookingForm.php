@@ -4,6 +4,7 @@ namespace App\Filament\Admin\Resources\Bookings\Schemas;
 
 use App\Enums\BookingStatusEnum;
 use App\Models\Package;
+use App\Models\User;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Select;
@@ -23,7 +24,25 @@ class BookingForm
                     ->schema([
                         Select::make('user_id')
                             ->label(__('dashboard.resources.bookings.fields.user'))
-                            ->relationship('user', 'fullname')
+                            ->options(function () {
+                                return User::whereDoesntHave('bookings', function ($q) {
+                                    $q->where('status', BookingStatusEnum::ACTIVE)
+                                      ->where('remaining_credits', '>', 0);
+                                })->pluck('fullname', 'id');
+                            })
+                            ->rules([
+                                'required',
+                                'exists:users,id',
+                                function ($attribute, $value, $fail) {
+                                    $exists = Booking::where('user_id', $value)
+                                        ->where('status', BookingStatusEnum::ACTIVE)
+                                        ->where('remaining_credits', '>', 0)
+                                        ->exists();
+                                    if ($exists) {
+                                        $fail('This user already has an active booking with credits.');
+                                    }
+                                },
+                            ])
                             ->searchable()
                             ->preload()
                             ->required()

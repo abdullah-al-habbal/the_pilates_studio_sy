@@ -22,6 +22,8 @@ class UserResource extends JsonResource
             'email_verified' => ! is_null($this->email_verified_at),
             'is_active' => $this->isActive(),
             'total_remaining_credits' => $this->total_remaining_credits,
+            'active_booking' => $this->whenLoaded('activeCreditBooking', fn () => new BookingResource($this->activeCreditBooking)) 
+                ?? ($this->relationLoaded('activeCreditBooking') === false ? new BookingResource($this->activeCreditBooking) : null),
         ];
     }
 }

@@ -73,6 +73,14 @@ class User extends Authenticatable
         return $this->hasOne(Booking::class)->where('status', BookingStatusEnum::ACTIVE->value)->latest();
     }
 
+    public function activeCreditBooking(): HasOne
+    {
+        return $this->hasOne(Booking::class)
+            ->where('status', BookingStatusEnum::ACTIVE)
+            ->where('remaining_credits', '>', 0)
+            ->latest();
+    }
+
     public function getAllowNotificationsAttribute(): bool
     {
         return (bool) $this->settings?->allow_notifications;

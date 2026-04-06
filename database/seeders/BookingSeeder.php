@@ -25,14 +25,39 @@ class BookingSeeder extends Seeder
             [
                 'total_credits'     => $package->total_credits,
                 'remaining_credits' => 8,
-                'status'            => BookingStatusEnum::ACTIVE->value,
+                'status'            => BookingStatusEnum::ACTIVE,
                 'expires_at'        => now()->addMonths(6),
             ]
         );
 
-        Booking::factory(15)->create();
-        Booking::factory(5)->exhausted()->create();
-        Booking::factory(3)->expired()->create();
-        Booking::factory(2)->cancelled()->create();
+        $otherUsers = User::where('id', '!=', $adam->id)->get();
+        if ($otherUsers->isEmpty()) {
+            return;
+        }
+
+        $usersForActive = $otherUsers->filter(fn($user) => rand(1, 100) <= 30);
+
+        foreach ($usersForActive as $user) {
+            if ($user->bookings()->where('status', BookingStatusEnum::ACTIVE)
+                         ->where('remaining_credits', '>', 0)
+                         ->exists()) {
+                continue;
+            }
+            $randomPackage = Package::inRandomOrder()->first();
+            if ($randomPackage) {
+                Booking::create([
+                    'user_id'          => $user->id,
+                    'package_id'       => $randomPackage->id,
+                    'total_credits'    => $randomPackage->total_credits,
+                    'remaining_credits'=> rand(1, $randomPackage->total_credits),
+                    'status'           => BookingStatusEnum::ACTIVE,
+                    'expires_at'       => now()->addMonths(rand(1, 12)),
+                ]);
+            }
+        }
+
+        Booking::factory(15)->exhausted()->create();
+        Booking::factory(5)->expired()->create();
+        Booking::factory(3)->cancelled()->create();
     }
 }

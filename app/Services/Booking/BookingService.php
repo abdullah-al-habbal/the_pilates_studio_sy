@@ -42,8 +42,24 @@ class BookingService
         return $this->repository->listUserBookings($userId, $filters);
     }
 
+    public function assertNoActiveBooking(User $user): void
+    {
+        $hasActive = Booking::where('user_id', $user->id)
+            ->where('status', BookingStatusEnum::ACTIVE)
+            ->where('remaining_credits', '>', 0)
+            ->exists();
+
+        if ($hasActive) {
+            throw ValidationException::withMessages([
+                'user_id' => 'User already has an active booking with remaining credits.',
+            ]);
+        }
+    }
+
     public function createFromPackage(User $user, Package $package, ?Carbon $expiresAt = null): Booking
     {
+        $this->assertNoActiveBooking($user);
+
         return DB::transaction(function () use ($user, $package, $expiresAt): Booking {
             return Booking::create([
                 'user_id' => $user->id,

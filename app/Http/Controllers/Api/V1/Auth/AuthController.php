@@ -93,8 +93,11 @@ class AuthController extends BaseApiController
     #[Endpoint('Me', description: 'Get the authenticated user profile.')]
     public function me(Request $request): JsonResponse
     {
+        $user = $request->user();
+        $user->load('activeCreditBooking.package');
+
         return $this->success(
-            new UserResource($request->user()),
+            new UserResource($user),
             SuccessCodeEnum::SUCCESS,
             SuccessCodeEnum::SUCCESS->getMessage()
         );
