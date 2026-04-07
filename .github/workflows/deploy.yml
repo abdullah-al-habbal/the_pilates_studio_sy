@@ -31,8 +31,13 @@ jobs:
           cp .env.example .env
           echo "APP_KEY=base64:$(openssl rand -base64 32)" >> .env
 
-      - name: Install Composer dependencies (prod)
-        run: composer install --no-interaction --prefer-dist --optimize-autoloader --no-dev
+      - name: Install Composer dependencies
+        run: |
+          if [ "${GITHUB_REF_NAME}" = "production" ]; then
+            composer install --no-interaction --prefer-dist --optimize-autoloader --no-dev
+          else
+            composer install --no-interaction --prefer-dist --optimize-autoloader
+          fi
 
       - name: Build frontend
         run: |
@@ -145,6 +150,18 @@ jobs:
               done
               rm -rf storage/app.bak.* || true
             fi
+
+            # Clean up orphaned migration files
+            echo "Cleaning up orphaned migration files..."
+            find database/migrations -type f -name '*.php' ! -name '.*' -printf '%f\n' > /tmp/server_migrations.txt
+            find database/migrations -type f -name '*.php' ! -name '.*' -printf '%f\n' > /tmp/artifact_migrations.txt
+            comm -23 /tmp/server_migrations.txt /tmp/artifact_migrations.txt | while read -r orphan; do
+              if [ -n "$orphan" ]; then
+                echo "Removing orphaned migration: $orphan"
+                rm -f "database/migrations/$orphan"
+              fi
+            done
+            rm -f /tmp/server_migrations.txt /tmp/artifact_migrations.txt
 
             # Permissions
             chmod -R 775 storage bootstrap/cache || true
