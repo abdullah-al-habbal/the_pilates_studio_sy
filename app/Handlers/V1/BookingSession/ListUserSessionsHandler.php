@@ -13,12 +13,6 @@ final readonly class ListUserSessionsHandler
         private BookingSessionEloquentRepository $repository,
     ) {}
 
-    /**
-     * Handle listing user sessions by type.
-     *
-     * @param  string  $type  'upcoming', 'past', or 'both'
-     * @return LengthAwarePaginator|array<string, LengthAwarePaginator>
-     */
     public function handle(int $userId, string $type, int $perPage): LengthAwarePaginator|array
     {
         return match ($type) {

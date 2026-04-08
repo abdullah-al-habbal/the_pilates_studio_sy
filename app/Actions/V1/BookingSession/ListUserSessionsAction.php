@@ -35,21 +35,25 @@ final readonly class ListUserSessionsAction
             $upcomingCollection = new BookingSessionCollection($result['upcoming']);
             $pastCollection = new BookingSessionCollection($result['past']);
 
-            $data = [
+            return $this->success([
                 'upcoming' => [
-                    'data' => $upcomingCollection->toArray($request)['data'] ?? [],
+                    'items' => $upcomingCollection->toArray($request)['data'] ?? [],
                     'meta' => $this->extractPaginationMeta($result['upcoming']),
                 ],
                 'past' => [
-                    'data' => $pastCollection->toArray($request)['data'] ?? [],
+                    'items' => $pastCollection->toArray($request)['data'] ?? [],
                     'meta' => $this->extractPaginationMeta($result['past']),
                 ],
-            ];
-
-            return $this->success(['data' => $data]);
+            ]);
         }
 
-        return $this->success(new BookingSessionCollection($result));
+        $collection = new BookingSessionCollection($result);
+        $collectionArray = $collection->toArray($request);
+
+        return $this->success([
+            'items' => $collectionArray['data'] ?? [],
+            'meta' => $collectionArray['meta'] ?? [],
+        ]);
     }
 
     private function extractPaginationMeta(LengthAwarePaginator $paginator): array
