@@ -71,13 +71,6 @@ class BookingSessionEloquentRepository
         });
     }
 
-    public function existsForBookingAndClassSession(int $bookingId, int $classSessionId): bool
-    {
-        return $this->model->where('booking_id', $bookingId)
-            ->where('class_session_id', $classSessionId)
-            ->exists();
-    }
-
     public function existsForUserAndClassSession(int $userId, int $classSessionId): bool
     {
         return $this->model->query()
@@ -126,20 +119,12 @@ class BookingSessionEloquentRepository
         return $this->paginateWithEager($query, $perPage);
     }
 
-    public function getBothSessionsForUser(int $userId, int $perPage = 20): LengthAwarePaginator
+    public function getSeparateBothSessionsForUser(int $userId, int $perPage = 20): array
     {
-        $now = Carbon::now();
-
-        $upcoming = $this->baseUserSessionsQuery($userId)
-            ->whereHas('classSession', fn ($q) => $this->upcomingCondition($q, $now))
-            ->whereIn('status', ['reserved']);
-
-        $past = $this->baseUserSessionsQuery($userId)
-            ->whereHas('classSession', fn ($q) => $this->pastCondition($q, $now));
-
-        $union = $upcoming->union($past);
-
-        return $this->paginateWithEager($union, $perPage);
+        return [
+            'upcoming' => $this->getUpcomingSessionsForUser($userId, $perPage),
+            'past' => $this->getPastSessionsForUser($userId, $perPage),
+        ];
     }
 
     private function baseUserSessionsQuery(int $userId): Builder

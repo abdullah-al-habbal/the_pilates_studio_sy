@@ -1,6 +1,6 @@
 <?php
 
-// filePath: routes/api/v1/protected/booking_sessions.php
+// routes\api\v1\protected\booking_sessions.php
 declare(strict_types=1);
 
 use App\Actions\V1\BookingSession\ListUserSessionsAction;
@@ -12,9 +12,9 @@ Route::prefix('booking-sessions')->name('booking-sessions.')->group(function () 
     Route::post('reserve', [BookingSessionController::class, 'reserve'])
         ->middleware('ensure.active.booking')
         ->name('reserve');
-    Route::get('{id}', [BookingSessionController::class, 'show'])->name('show');
-    Route::post('{id}/cancel', [BookingSessionController::class, 'cancel'])->name('cancel');
 
-    Route::get('my-sessions', ListUserSessionsAction::class)
-        ->name('my-sessions');
+    Route::get('my-sessions', ListUserSessionsAction::class)->name('my-sessions');
+
+    Route::get('{id}', [BookingSessionController::class, 'show'])->where('id', '[0-9]+')->name('show');
+    Route::post('{id}/cancel', [BookingSessionController::class, 'cancel'])->name('cancel');
 });
