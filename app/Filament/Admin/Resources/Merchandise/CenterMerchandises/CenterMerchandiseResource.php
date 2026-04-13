@@ -1,19 +1,22 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Filament\Admin\Resources\Merchandise\CenterMerchandises;
 
 use App\Filament\Admin\Resources\Merchandise\CenterMerchandises\Pages\CreateCenterMerchandise;
 use App\Filament\Admin\Resources\Merchandise\CenterMerchandises\Pages\EditCenterMerchandise;
 use App\Filament\Admin\Resources\Merchandise\CenterMerchandises\Pages\ListCenterMerchandises;
+use App\Filament\Admin\Resources\Merchandise\CenterMerchandises\Pages\ViewCenterMerchandise;
 use App\Filament\Admin\Resources\Merchandise\CenterMerchandises\RelationManagers\ImagesRelationManager;
 use App\Filament\Admin\Resources\Merchandise\CenterMerchandises\Schemas\CenterMerchandiseForm;
+use App\Filament\Admin\Resources\Merchandise\CenterMerchandises\Schemas\CenterMerchandiseInfolist;
 use App\Filament\Admin\Resources\Merchandise\CenterMerchandises\Tables\CenterMerchandisesTable;
 use App\Models\CenterMerchandise;
 use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
-use UnitEnum;
 
 class CenterMerchandiseResource extends Resource
 {
@@ -21,13 +24,31 @@ class CenterMerchandiseResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-shopping-bag';
 
-    protected static string|UnitEnum|null $navigationGroup = 'Store';
-
     protected static ?int $navigationSort = 2;
+
+    public static function getNavigationGroup(): ?string
+    {
+        return __('dashboard.navigation.groups.store');
+    }
+
+    public static function getNavigationLabel(): string
+    {
+        return __('dashboard.resources.center_merchandises.plural');
+    }
+
+    public static function getModelLabel(): string
+    {
+        return __('dashboard.resources.center_merchandises.singular');
+    }
 
     public static function form(Schema $schema): Schema
     {
         return CenterMerchandiseForm::configure($schema);
+    }
+
+    public static function infolist(Schema $schema): Schema
+    {
+        return CenterMerchandiseInfolist::configure($schema);
     }
 
     public static function table(Table $table): Table
@@ -47,6 +68,7 @@ class CenterMerchandiseResource extends Resource
         return [
             'index' => ListCenterMerchandises::route('/'),
             'create' => CreateCenterMerchandise::route('/create'),
+            'view' => ViewCenterMerchandise::route('/{record}'),
             'edit' => EditCenterMerchandise::route('/{record}/edit'),
         ];
     }

@@ -25,25 +25,34 @@ class Reports extends Page implements HasInfolists
     use InteractsWithInfolists;
 
     protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-presentation-chart-bar';
+
     protected string $view = 'filament.admin.pages.reports';
+
     protected static ?int $navigationSort = 2;
 
-    public string $period      = 'daily';
-    public string $dailyDate   = '';
-    public string $month       = '';
-    public string $year        = '';
-    public string $customStart = '';
-    public string $customEnd   = '';
+    public string $period = 'daily';
 
-    private ?array      $_stats     = null;
-    private ?Collection $_classes   = null;
-    private ?Collection $_merch     = null;
+    public string $dailyDate = '';
+
+    public string $month = '';
+
+    public string $year = '';
+
+    public string $customStart = '';
+
+    public string $customEnd = '';
+
+    private ?array $_stats = null;
+
+    private ?Collection $_classes = null;
+
+    private ?Collection $_merch = null;
 
     public function mount(): void
     {
         $this->dailyDate = now()->toDateString();
-        $this->month     = now()->format('Y-m');
-        $this->year      = now()->format('Y');
+        $this->month = now()->format('Y-m');
+        $this->year = now()->format('Y');
     }
 
     public static function getNavigationLabel(): string
@@ -61,36 +70,34 @@ class Reports extends Page implements HasInfolists
         return __('dashboard.navigation.groups.operations');
     }
 
-
     public function getPeriodDates(): array
     {
         return match ($this->period) {
-            'daily'   => [
+            'daily' => [
                 Carbon::parse($this->dailyDate)->startOfDay(),
                 Carbon::parse($this->dailyDate)->endOfDay(),
             ],
             'monthly' => [
-                Carbon::parse($this->month . '-01')->startOfMonth(),
-                Carbon::parse($this->month . '-01')->endOfMonth(),
+                Carbon::parse($this->month.'-01')->startOfMonth(),
+                Carbon::parse($this->month.'-01')->endOfMonth(),
             ],
-            'yearly'  => [
+            'yearly' => [
                 Carbon::create((int) $this->year)->startOfYear(),
                 Carbon::create((int) $this->year)->endOfYear(),
             ],
-            'custom'  => [
+            'custom' => [
                 $this->customStart ? Carbon::parse($this->customStart)->startOfDay() : null,
-                $this->customEnd   ? Carbon::parse($this->customEnd)->endOfDay()     : null,
+                $this->customEnd ? Carbon::parse($this->customEnd)->endOfDay() : null,
             ],
-            default   => [null, null],
+            default => [null, null],
         };
     }
 
-
     public function reportsInfolist(Schema $schema): Schema
     {
-        $stats   = $this->stats();
+        $stats = $this->stats();
         $classes = $this->popularClasses();
-        $merch   = $this->merchandiseSales();
+        $merch = $this->merchandiseSales();
 
         return $schema->components([
 
@@ -100,7 +107,7 @@ class Reports extends Page implements HasInfolists
                         ->schema([
                             TextEntry::make('total_revenue')
                                 ->label(__('dashboard.pages.reports.stats.total_revenue'))
-                                ->state(number_format($stats['total_revenue']) . ' SYP')
+                                ->state(number_format($stats['total_revenue']).' SYP')
                                 ->icon('heroicon-o-currency-dollar')
                                 ->iconColor('primary')
                                 ->weight(FontWeight::Bold)
@@ -112,7 +119,7 @@ class Reports extends Page implements HasInfolists
                         ->schema([
                             TextEntry::make('booking_revenue')
                                 ->label(__('dashboard.pages.reports.stats.booking_revenue'))
-                                ->state(number_format($stats['booking_revenue']) . ' SYP')
+                                ->state(number_format($stats['booking_revenue']).' SYP')
                                 ->icon('heroicon-o-ticket')
                                 ->iconColor('success')
                                 ->weight(FontWeight::Bold),
@@ -122,7 +129,7 @@ class Reports extends Page implements HasInfolists
                         ->schema([
                             TextEntry::make('store_revenue')
                                 ->label(__('dashboard.pages.reports.stats.store_revenue'))
-                                ->state(number_format($stats['merchandise_revenue']) . ' SYP')
+                                ->state(number_format($stats['merchandise_revenue']).' SYP')
                                 ->icon('heroicon-o-shopping-bag')
                                 ->iconColor('warning')
                                 ->weight(FontWeight::Bold),
@@ -165,23 +172,26 @@ class Reports extends Page implements HasInfolists
                                 ]
                                 : $classes->values()->map(function ($class, int $i) use ($stats): TextEntry {
                                     $locale = app()->getLocale();
-                                    $title  = $class->title[$locale] ?? $class->title['en'] ?? '';
-                                    $pct    = $stats['total_bookings'] > 0
+                                    $title = is_array($class->title)
+                                        ? ($class->title[$locale] ?? $class->title['en'] ?? 'Unknown')
+                                        : ($class->title ?? 'Unknown');
+
+                                    $pct = $stats['total_bookings'] > 0
                                         ? min(100, round(($class->total_attendance / $stats['total_bookings']) * 100))
                                         : 0;
 
-                                    return TextEntry::make('class_' . $i)
+                                    return TextEntry::make('class_'.$i)
                                         ->label($title)
                                         ->state(
                                             __('dashboard.pages.reports.popular_classes.attendees', ['count' => $class->total_attendance])
-                                            . ' · '
-                                            . __('dashboard.pages.reports.popular_classes.sessions', ['count' => $class->sessions_count])
-                                            . ' · '
-                                            . __('dashboard.pages.reports.popular_classes.avg', ['count' => $class->avg_attendance])
+                                                .'   ·   '
+                                                .__('dashboard.pages.reports.popular_classes.sessions', ['count' => $class->sessions_count])
+                                                .'   ·   '
+                                                .__('dashboard.pages.reports.popular_classes.avg', ['count' => $class->avg_attendance])
                                         )
                                         ->badge()
                                         ->color('primary')
-                                        ->tooltip($pct . '% of total bookings');
+                                        ->tooltip($pct.'% of total bookings');
                                 })->toArray()
                         ),
 
@@ -198,14 +208,14 @@ class Reports extends Page implements HasInfolists
                                 ]
                                 : $merch->values()->map(function ($item, int $i): TextEntry {
                                     $locale = app()->getLocale();
-                                    $name   = $item->name[$locale] ?? $item->name['en'] ?? '';
+                                    $name = $item->name[$locale] ?? $item->name['en'] ?? '';
 
-                                    return TextEntry::make('merch_' . $i)
+                                    return TextEntry::make('merch_'.$i)
                                         ->label($name)
                                         ->state(
-                                            number_format($item->revenue) . ' SYP'
-                                            . ' · '
-                                            . __('dashboard.pages.reports.top_merchandise.sold', ['count' => $item->quantity])
+                                            number_format($item->revenue).' SYP'
+                                                .' · '
+                                                .__('dashboard.pages.reports.top_merchandise.sold', ['count' => $item->quantity])
                                         )
                                         ->badge()
                                         ->color('success')
@@ -216,26 +226,25 @@ class Reports extends Page implements HasInfolists
         ]);
     }
 
-
     private function stats(): array
     {
         if ($this->_stats !== null) {
             return $this->_stats;
         }
 
-        $bookingRepo     = App::make(BookingEloquentRepository::class);
+        $bookingRepo = App::make(BookingEloquentRepository::class);
         $merchandiseRepo = App::make(MerchandiseOrderEloquentRepository::class);
 
         [$startDate, $endDate] = $this->getPeriodDates();
 
-        $bookingRevenue     = $bookingRepo->getTotalRevenue($startDate, $endDate);
+        $bookingRevenue = $bookingRepo->getTotalRevenue($startDate, $endDate);
         $merchandiseRevenue = $merchandiseRepo->getTotalRevenue($startDate, $endDate);
 
         return $this->_stats = [
-            'booking_revenue'          => $bookingRevenue,
-            'merchandise_revenue'      => $merchandiseRevenue,
-            'total_revenue'            => $bookingRevenue + $merchandiseRevenue,
-            'total_bookings'           => $bookingRepo->getTotalCount($startDate, $endDate),
+            'booking_revenue' => $bookingRevenue,
+            'merchandise_revenue' => $merchandiseRevenue,
+            'total_revenue' => $bookingRevenue + $merchandiseRevenue,
+            'total_bookings' => $bookingRepo->getTotalCount($startDate, $endDate),
             'total_merchandise_orders' => $merchandiseRepo->getTotalCount($startDate, $endDate),
         ];
     }

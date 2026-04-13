@@ -50,13 +50,19 @@ return [
                 'yearly' => 'سنوي',
                 'monthly' => 'شهري',
                 'daily' => 'يومي',
+                'custom' => 'مخصص',
+                'select_date' => 'التاريخ',
+                'select_month' => 'الشهر',
+                'select_year' => 'السنة',
+                'start_date' => 'من',
+                'end_date' => 'إلى',
+                'custom_hint' => 'اختر نطاق تاريخ لتحميل التقرير.',
             ],
             'stats' => [
                 'total_revenue' => 'إجمالي الإيرادات',
                 'booking_revenue' => 'إيرادات الحجوزات',
                 'store_revenue' => 'إيرادات المتجر',
                 'total_bookings' => 'إجمالي الحجوزات',
-                'total_orders' => 'طلبات المتجر',
                 'total_merchandise_orders' => 'إجمالي طلبات المنتجات',
             ],
             'popular_classes' => [
@@ -64,14 +70,92 @@ return [
                 'attendees' => ':count حاضر',
                 'sessions' => ':count جلسة',
                 'avg' => 'المتوسط: :count لكل جلسة',
+                'empty' => 'لا توجد بيانات لهذه الفترة.',
             ],
             'top_merchandise' => [
                 'heading' => 'المنتجات الأكثر مبيعاً',
                 'sold' => 'تم بيع :count',
+                'empty' => 'لا توجد مبيعات لهذه الفترة.',
             ],
         ],
     ],
     'resources' => [
+        'center_merchandises' => [
+            'singular' => 'منتج',
+            'plural' => 'المنتجات',
+            'sections' => [
+                'information' => 'معلومات المنتج',
+                'pricing' => 'التسعير والمخزون',
+                'gallery' => 'معرض الصور',
+                'details' => 'التفاصيل',
+            ],
+            'fields' => [
+                'name' => 'الاسم',
+                'description' => 'الوصف',
+                'price' => 'السعر',
+                'stock_quantity' => 'الكمية المتوفرة',
+                'category' => 'الفئة',
+                'image' => 'صورة',
+                'is_primary' => 'صورة رئيسية',
+                'created_at' => 'تاريخ الإنشاء',
+            ],
+            'placeholders' => [
+                'no_description' => 'لا يوجد وصف.',
+            ],
+            'helpers' => [
+                'stock_min' => 'الحد الأدنى :min (المخزون الحالي). قلّل المخزون عبر الطلبات.',
+            ],
+            'labels' => [
+                'primary' => 'رئيسية',
+            ],
+            'actions' => [
+                'add_image' => 'إضافة صورة',
+            ],
+            'empty_state' => [
+                'heading' => 'لا توجد منتجات بعد',
+                'description' => 'أنشئ منتجك الأول للبدء.',
+            ],
+        ],
+
+        'merchandise_categories' => [
+            'singular' => 'فئة',
+            'plural' => 'فئات المنتجات',
+            'sections' => [
+                'details' => 'تفاصيل الفئة',
+            ],
+            'fields' => [
+                'name' => 'الاسم',
+                'merchandises_count' => 'المنتجات',
+                'created_at' => 'تاريخ الإنشاء',
+            ],
+            'empty_state' => [
+                'heading' => 'لا توجد فئات بعد',
+            ],
+        ],
+
+        'merchandise_orders' => [
+            'singular' => 'طلب',
+            'plural' => 'طلبات المنتجات',
+            'sections' => [
+                'order_details' => 'تفاصيل الطلب',
+                'customer' => 'العميل',
+            ],
+            'fields' => [
+                'merchandise' => 'المنتج',
+                'quantity' => 'الكمية',
+                'total_price' => 'الإجمالي (ل.س)',
+                'customer' => 'العميل',
+                'phone' => 'الهاتف',
+                'ordered_at' => 'تاريخ الطلب',
+            ],
+            'placeholders' => [
+                'walk_in' => 'عميل بدون حجز',
+            ],
+            'empty_state' => [
+                'heading' => 'لا توجد طلبات بعد',
+            ],
+        ],
+
         'bookings' => [
             'singular' => 'حجز',
             'plural' => 'الحجوزات',

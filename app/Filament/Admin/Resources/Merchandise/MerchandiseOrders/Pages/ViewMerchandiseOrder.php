@@ -4,17 +4,17 @@ namespace App\Filament\Admin\Resources\Merchandise\MerchandiseOrders\Pages;
 
 use App\Filament\Admin\Resources\Merchandise\MerchandiseOrders\MerchandiseOrderResource;
 use Filament\Actions\DeleteAction;
-use Filament\Actions\ViewAction;
-use Filament\Resources\Pages\EditRecord;
+use Filament\Actions\EditAction;
+use Filament\Resources\Pages\ViewRecord;
 
-class EditMerchandiseOrder extends EditRecord
+class ViewMerchandiseOrder extends ViewRecord
 {
     protected static string $resource = MerchandiseOrderResource::class;
 
     protected function getHeaderActions(): array
     {
         return [
-            ViewAction::make(),
+            EditAction::make(),
             DeleteAction::make(),
         ];
     }

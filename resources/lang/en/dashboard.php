@@ -7,6 +7,7 @@ return [
         'groups' => [
             'bookings' => 'Bookings',
             'schedule' => 'Schedule',
+            'store' => 'Store',
             'operations' => 'Operations',
         ],
         'scheduler' => 'Scheduler',
@@ -43,27 +44,38 @@ return [
             ],
         ],
         'reports' => [
-            'title' => 'Reports',
+            'title' => 'Business Reports',
             'filters' => [
                 'all_time' => 'All Time',
                 'yearly' => 'Yearly',
                 'monthly' => 'Monthly',
                 'daily' => 'Daily',
+                'custom' => 'Custom',
+                'select_date' => 'Date',
+                'select_month' => 'Month',
+                'select_year' => 'Year',
+                'start_date' => 'From',
+                'end_date' => 'To',
+                'custom_hint' => 'Select a date range to load the report.',
             ],
             'stats' => [
                 'total_revenue' => 'Total Revenue',
                 'booking_revenue' => 'Booking Revenue',
                 'store_revenue' => 'Store Revenue',
+                'total_bookings' => 'Total Bookings',
+                'total_merchandise_orders' => 'Total Merchandise Orders',
             ],
             'popular_classes' => [
                 'heading' => 'Popular Classes',
-                'attendees' => ':count Total Attendees',
-                'sessions' => ':count Sessions',
-                'avg' => ':count avg / session',
+                'attendees' => ':count attendees',
+                'sessions' => ':count sessions',
+                'avg' => 'Avg: :count per session',
+                'empty' => 'No data for this period.',
             ],
             'top_merchandise' => [
                 'heading' => 'Top Merchandise',
                 'sold' => ':count sold',
+                'empty' => 'No sales for this period.',
             ],
         ],
     ],
@@ -93,6 +105,82 @@ return [
         'delete_session_confirmation' => 'Are you sure you want to delete this session? This action cannot be undone.',
     ],
     'resources' => [
+        'center_merchandises' => [
+            'singular' => 'Product',
+            'plural' => 'Center Merchandises',
+            'sections' => [
+                'information' => 'Product Information',
+                'pricing' => 'Pricing & Stock',
+                'gallery' => 'Image Gallery',
+                'details' => 'Details',
+            ],
+            'fields' => [
+                'name' => 'Name',
+                'description' => 'Description',
+                'price' => 'Price',
+                'stock_quantity' => 'Stock Quantity',
+                'category' => 'Category',
+                'image' => 'Image',
+                'is_primary' => 'Primary Image',
+                'created_at' => 'Created At',
+            ],
+            'placeholders' => [
+                'no_description' => 'No description provided.',
+            ],
+            'helpers' => [
+                'stock_min' => 'Minimum :min (current stock). Decrease stock via orders.',
+            ],
+            'labels' => [
+                'primary' => 'Primary',
+            ],
+            'actions' => [
+                'add_image' => 'Add Image',
+            ],
+            'empty_state' => [
+                'heading' => 'No products yet',
+                'description' => 'Create your first product to get started.',
+            ],
+        ],
+
+        'merchandise_categories' => [
+            'singular' => 'Category',
+            'plural' => 'Center Merchandise Categories',
+            'sections' => [
+                'details' => 'Category Details',
+            ],
+            'fields' => [
+                'name' => 'Name',
+                'merchandises_count' => 'Products',
+                'created_at' => 'Created At',
+            ],
+            'empty_state' => [
+                'heading' => 'No categories yet',
+            ],
+        ],
+
+        'merchandise_orders' => [
+            'singular' => 'Order',
+            'plural' => 'Merchandise Orders',
+            'sections' => [
+                'order_details' => 'Order Details',
+                'customer' => 'Customer',
+            ],
+            'fields' => [
+                'merchandise' => 'Product',
+                'quantity' => 'Quantity',
+                'total_price' => 'Total (SYP)',
+                'customer' => 'Customer',
+                'phone' => 'Phone',
+                'ordered_at' => 'Ordered At',
+            ],
+            'placeholders' => [
+                'walk_in' => 'Walk-in Customer',
+            ],
+            'empty_state' => [
+                'heading' => 'No orders yet',
+            ],
+        ],
+
         'bookings' => [
             'singular' => 'Booking',
             'plural' => 'Bookings',
