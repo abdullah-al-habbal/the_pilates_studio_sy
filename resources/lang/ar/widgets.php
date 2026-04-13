@@ -32,8 +32,8 @@ return [
         'attended'            => 'حضر',
         'attended_desc'       => 'جلسات مكتملة',
         'cancelled_sessions'  => 'جلسات ملغاة',
-        'no_shows'            => 'غياب بدون إلغاء',
-        'no_shows_desc'       => 'محجوز ولم يحضر',
+        'missed'              => 'جلسات فائتة',
+        'missed_desc'         => 'محجوز ولم يحضر',
     ],
 
     'classes' => [

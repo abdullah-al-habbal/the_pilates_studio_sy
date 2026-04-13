@@ -28,9 +28,9 @@ class ClassSession extends Model
     protected function casts(): array
     {
         return [
-            'date'        => 'date',
+            'date' => 'date',
             'total_spots' => 'integer',
-            'status'      => ClassSessionStatusEnum::class,
+            'status' => ClassSessionStatusEnum::class,
         ];
     }
 
@@ -50,10 +50,7 @@ class ClassSession extends Model
     public function getAvailableSpotsAttribute(): int
     {
         $reserved = $this->bookingSessions()
-            ->whereIn('status', [
-                BookingSessionStatusEnum::RESERVED->value,
-                BookingSessionStatusEnum::ATTENDED->value,
-            ])
+            ->where('status', BookingSessionStatusEnum::RESERVED->value)
             ->count();
         return max(0, $this->total_spots - $reserved);
     }

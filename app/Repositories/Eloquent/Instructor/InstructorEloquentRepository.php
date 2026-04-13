@@ -6,6 +6,7 @@ declare(strict_types=1);
 
 namespace App\Repositories\Eloquent\Instructor;
 
+use App\Enums\AttendanceStatusEnum;
 use App\Enums\BookingSessionStatusEnum;
 use App\Enums\ClassStatusEnum;
 use App\Models\Instructor;
@@ -19,7 +20,7 @@ class InstructorEloquentRepository
             'classes' => function ($query) {
                 $query->withCount([
                     'sessions as attended_sessions_count' => function ($q) {
-                        $q->whereHas('bookingSessions', fn ($bsq) => $bsq->where('status', BookingSessionStatusEnum::ATTENDED));
+                        $q->whereHas('bookingSessions', fn($bsq) => $bsq->where('attendance_status', AttendanceStatusEnum::ATTENDED));
                     },
                 ]);
             },

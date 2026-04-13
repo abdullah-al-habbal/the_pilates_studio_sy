@@ -1,7 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Database\Seeders;
 
+use App\Enums\AttendanceStatusEnum;
 use App\Enums\BookingSessionStatusEnum;
 use App\Enums\BookingStatusEnum;
 use App\Enums\ClassSessionStatusEnum;
@@ -10,13 +13,21 @@ use App\Models\BookingSession;
 use App\Models\ClassSession;
 use App\Models\User;
 use Illuminate\Database\Seeder;
+use DomainException;
 
 class BookingSessionSeeder extends Seeder
 {
     public function run(): void
     {
-        $adam        = User::where('email', 'adam.kim@gmail.com')->first();
-        $adamBooking = Booking::where('user_id', $adam->id)->where('status', BookingStatusEnum::ACTIVE->value)->first();
+        $adam = User::where('email', 'adam.kim@gmail.com')->first();
+
+        if (!$adam) {
+            return;
+        }
+
+        $adamBooking = Booking::where('user_id', $adam->id)
+            ->where('status', BookingStatusEnum::ACTIVE->value)
+            ->first();
 
         $this->seedAdamSessions($adamBooking);
         $this->seedRandomReserved($adam->id);
@@ -25,7 +36,7 @@ class BookingSessionSeeder extends Seeder
 
     private function seedAdamSessions(?Booking $adamBooking): void
     {
-        if (! $adamBooking) {
+        if (!$adamBooking) {
             return;
         }
 
@@ -39,10 +50,17 @@ class BookingSessionSeeder extends Seeder
                 BookingSessionStatusEnum::RESERVED
             ));
 
-        $pastSession = ClassSession::where('status', ClassSessionStatusEnum::COMPLETED->value)->orderByDesc('date')->first();
+        $pastSession = ClassSession::where('status', ClassSessionStatusEnum::COMPLETED->value)
+            ->orderByDesc('date')
+            ->first();
 
         if ($pastSession) {
-            $this->insertSession($adamBooking->id, $pastSession->id, BookingSessionStatusEnum::ATTENDED);
+            $this->insertSession(
+                $adamBooking->id,
+                $pastSession->id,
+                BookingSessionStatusEnum::RESERVED,
+                AttendanceStatusEnum::ATTENDED
+            );
         }
     }
 
@@ -58,8 +76,12 @@ class BookingSessionSeeder extends Seeder
                     ->limit(rand(1, 3))
                     ->get()
                     ->each(function (ClassSession $session) use ($booking) {
-                        if (! $this->isAlreadyBooked($booking->user_id, $session->id)) {
-                            $this->insertSession($booking->id, $session->id, BookingSessionStatusEnum::RESERVED);
+                        if (!$this->isAlreadyBooked($booking->user_id, $session->id)) {
+                            $this->insertSession(
+                                $booking->id,
+                                $session->id,
+                                BookingSessionStatusEnum::RESERVED
+                            );
                         }
                     });
             });
@@ -73,24 +95,45 @@ class BookingSessionSeeder extends Seeder
             ->limit(5)
             ->get()
             ->each(function (Booking $booking) {
-                $session = ClassSession::where('status', ClassSessionStatusEnum::COMPLETED->value)->inRandomOrder()->first();
+                $session = ClassSession::where('status', ClassSessionStatusEnum::COMPLETED->value)
+                    ->inRandomOrder()
+                    ->first();
 
-                if (! $session) {
+                if (!$session) {
                     return;
                 }
 
-                if (! $this->isAlreadyBooked($booking->user_id, $session->id)) {
-                    $this->insertSession($booking->id, $session->id, BookingSessionStatusEnum::ATTENDED);
+                if (!$this->isAlreadyBooked($booking->user_id, $session->id)) {
+                    $this->insertSession(
+                        $booking->id,
+                        $session->id,
+                        BookingSessionStatusEnum::RESERVED,
+                        AttendanceStatusEnum::ATTENDED
+                    );
                 }
             });
     }
 
-    private function insertSession(int $bookingId, int $classSessionId, BookingSessionStatusEnum $status): void
-    {
-        BookingSession::withoutEvents(function () use ($bookingId, $classSessionId, $status) {
+    private function insertSession(
+        int $bookingId,
+        int $classSessionId,
+        BookingSessionStatusEnum $status,
+        ?AttendanceStatusEnum $attendanceStatus = null
+    ): void {
+        if ($attendanceStatus !== null && $status !== BookingSessionStatusEnum::RESERVED) {
+            throw new DomainException('Cannot attend a non-reserved session.');
+        }
+
+        BookingSession::withoutEvents(function () use ($bookingId, $classSessionId, $status, $attendanceStatus) {
             BookingSession::firstOrCreate(
-                ['booking_id' => $bookingId, 'class_session_id' => $classSessionId],
-                ['status' => $status->value]
+                [
+                    'booking_id' => $bookingId,
+                    'class_session_id' => $classSessionId,
+                ],
+                [
+                    'status' => $status->value,
+                    'attendance_status' => $attendanceStatus?->value ?? AttendanceStatusEnum::MISSED->value,
+                ]
             );
         });
     }
@@ -99,10 +142,7 @@ class BookingSessionSeeder extends Seeder
     {
         return BookingSession::whereHas('booking', fn($q) => $q->where('user_id', $userId))
             ->where('class_session_id', $classSessionId)
-            ->whereIn('status', [
-                BookingSessionStatusEnum::RESERVED->value,
-                BookingSessionStatusEnum::ATTENDED->value,
-            ])
+            ->where('status', BookingSessionStatusEnum::RESERVED->value)
             ->exists();
     }
 }

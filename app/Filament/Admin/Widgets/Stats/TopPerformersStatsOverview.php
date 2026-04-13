@@ -2,6 +2,7 @@
 
 namespace App\Filament\Admin\Widgets\Stats;
 
+use App\Enums\AttendanceStatusEnum;
 use App\Enums\BookingSessionStatusEnum;
 use App\Models\BookingSession;
 use App\Models\ClassCategory;
@@ -41,7 +42,7 @@ class TopPerformersStatsOverview extends BaseWidget
             $instructor = Instructor::withCount('classes')->orderByDesc('classes_count')->first();
 
             $attendance = $instructor
-                ? BookingSession::where('status', BookingSessionStatusEnum::ATTENDED->value)
+                ? BookingSession::where('attendance_status', AttendanceStatusEnum::ATTENDED->value)
                 ->whereHas('classSession.class', fn($q) => $q->where('instructor_id', $instructor->id))
                 ->count()
                 : 0;
@@ -71,7 +72,7 @@ class TopPerformersStatsOverview extends BaseWidget
         return Cache::remember('widget.top.class_attendance', now()->addMinutes(15), function () {
             $result = BookingSession::select('class_sessions.class_id', DB::raw('count(*) as attendance_count'))
                 ->join('class_sessions', 'booking_sessions.class_session_id', '=', 'class_sessions.id')
-                ->where('booking_sessions.status', BookingSessionStatusEnum::ATTENDED->value)
+                ->where('booking_sessions.attendance_status', AttendanceStatusEnum::ATTENDED->value)
                 ->groupBy('class_sessions.class_id')
                 ->orderByDesc('attendance_count')
                 ->first();
@@ -117,7 +118,7 @@ class TopPerformersStatsOverview extends BaseWidget
         return Cache::remember('widget.top.user_attendance', now()->addMinutes(15), function () {
             $result = BookingSession::select('bookings.user_id', DB::raw('count(*) as attended_count'))
                 ->join('bookings', 'booking_sessions.booking_id', '=', 'bookings.id')
-                ->where('booking_sessions.status', BookingSessionStatusEnum::ATTENDED->value)
+                ->where('booking_sessions.attendance_status', AttendanceStatusEnum::ATTENDED->value)
                 ->groupBy('bookings.user_id')
                 ->orderByDesc('attended_count')
                 ->first();

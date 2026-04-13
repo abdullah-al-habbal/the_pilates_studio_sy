@@ -19,7 +19,8 @@ class BookingSessionEloquentRepository
     public function __construct(
         private readonly BookingSession $model,
         private readonly LoggingService $logger
-    ) {}
+    ) {
+    }
 
     public function listUserSessions(int $userId, array $filters = []): LengthAwarePaginator
     {
@@ -27,7 +28,7 @@ class BookingSessionEloquentRepository
             $this->logger->info('Fetching user booking sessions', ['user_id' => $userId]);
 
             $query = $this->baseUserSessionsQuery($userId)
-                ->when($filters['status'] ?? null, fn ($q, $status) => $q->where('status', $status))
+                ->when($filters['status'] ?? null, fn($q, $status) => $q->where('status', $status))
                 ->latest();
 
             return $query->paginate($filters['per_page'] ?? 20);
@@ -74,12 +75,9 @@ class BookingSessionEloquentRepository
     public function existsForUserAndClassSession(int $userId, int $classSessionId): bool
     {
         return $this->model->query()
-            ->whereIn('status', [
-                BookingSessionStatusEnum::RESERVED->value,
-                BookingSessionStatusEnum::ATTENDED->value,
-            ])
+            ->where('status', BookingSessionStatusEnum::RESERVED->value)
             ->where('class_session_id', $classSessionId)
-            ->whereHas('booking', fn ($q) => $q->where('user_id', $userId))
+            ->whereHas('booking', fn($q) => $q->where('user_id', $userId))
             ->exists();
     }
 
@@ -103,7 +101,7 @@ class BookingSessionEloquentRepository
         $now = Carbon::now();
 
         $query = $this->baseUserSessionsQuery($userId)
-            ->whereHas('classSession', fn ($q) => $this->upcomingCondition($q, $now))
+            ->whereHas('classSession', fn($q) => $this->upcomingCondition($q, $now))
             ->whereIn('status', ['reserved']);
 
         return $this->paginateWithEager($query, $perPage);
@@ -114,7 +112,7 @@ class BookingSessionEloquentRepository
         $now = Carbon::now();
 
         $query = $this->baseUserSessionsQuery($userId)
-            ->whereHas('classSession', fn ($q) => $this->pastCondition($q, $now));
+            ->whereHas('classSession', fn($q) => $this->pastCondition($q, $now));
 
         return $this->paginateWithEager($query, $perPage);
     }
@@ -130,7 +128,7 @@ class BookingSessionEloquentRepository
     private function baseUserSessionsQuery(int $userId): Builder
     {
         return $this->model->query()
-            ->whereHas('booking', fn ($q) => $q->where('user_id', $userId));
+            ->whereHas('booking', fn($q) => $q->where('user_id', $userId));
     }
 
     private function upcomingCondition(Builder $query, Carbon $now): void

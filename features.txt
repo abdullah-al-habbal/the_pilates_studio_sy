@@ -1,0 +1,2285 @@
+the project is for a pilates Center in Damascus, Syria, for a real-world Center in Damascus.
+the client need from my to make new two things in the proejct,
+She has the center where we manage it.
+Check the project now; it is
+She needs in the filament dashboard the following things:
+a "page"—I think we need to make a db change; we must track that if the user (end user) attend the booking session (class session) or not.
+the filament dashboard will be treated as a software (to fully crud and management by the person in the reception of the pilates Center).
+so, what we need,
+she introduced a new thing: a small store in its center. She will have some items in the center, so it need to have an item with a name (JSON translatable), optional description, image table (or at least one), and it needs to be displayed in the filament as cards, not table, so, it has a name, images as relation, description, price, and a quantity of it, and we can have the category ID, but is optionally, so we need
+(Item or product | don't use generic one word) table, and the (item or product) category, and the (item images)—note, the item or product images will not have a specific filament resource; it will be managed by the relation manager.
+Then we need to have the (Product/Item) order table, which is a new tab only for listing what item is needed (a drop-down and the needed quantity of the order) and an optional customer ID. It's optional because the staff or the owner may take the item, so in this case it will be only for info, etc.
+so, we need three filament resources (category, item or product or the best name, and the order resource of it, note) with fully CRUD.
+after that,
+I don't need to user a "product, Item" keyword phrase; I need to be more related to the project scope and not generics
+a small accounting (like a report, not really accountings, and it aggregation not stored, I think)
+It needs to have a daily report tab (it's a filament page) and a monthly report tab page.
+and the annual report
+note here, we need to handle the empty state, like if there are no data, show a small, end-user-friendly message.
+in the daily report it can select a date, and in the month it can select the year and month (make the date, time, datetime pickers not show any future date).
+and the yearly tab page only select a year,
+how each page must work
+the "package" have a "price," and the "item or product will have a price."
+so we need for each one to calculate two things
+reports are the (how many packages are assigned to the user).
+and the orders
+Note, there may packages booked from a month ago, but the session is today, so, in the daily report we will not calculate the old bookings.
+so,
+reports are the (how many packages are assigned to the user today or in the selected date of the daily report).
+Can we track the booking and the package models? not the booking session
+and we must also calculate the order that made in this date
+and the same for the monthly and the yearly,
+and the last thing that we need is
+the scheduler and attendee are a page, and it need to have a new column, I think, in the BookingSession: the attended_status, missed or attended. The person who is in the real center will on the door of the center have to explore the today sessions, and for each session we have the booking sessions, so, we must group the booking sessions by the session and make a page in the filament. That page only return the today sessions as a list and each one of them is a collapsible row, and on click on a row it open a cards of the person's info that have booked the session and a small check button on each card, so, the person or the receptionist confirms that this person who booked the session has attended it or now missing it.
+and to make the project and the CMS fixable, for the schedular page that display the current date sessions as a collapsible row, and for each row on expand, it show the cards of the users that booked the selected session, at the header of the page, make a date picker, so, the content of the page by default for the current date, but the person who is in the relations can select a date to explore it in the dashboard
+and small things are also needed; we have the "make booking for session" tab in the dashboard. It has the list of packages and list of users.
+the project has APIs and flutter mobile, but the owner of the project told me that there are persons come once in a lifetime to the center in Damascus and she only need to make for them an account and manage its data, and may those customers not have the app or install it, or know about it, so, the main approach of the "book a session" is from the application, but for better flex and more productive center, it need to have also in the CMS.
+so,
+the current process is to make a new user, then going to make a package with total_credits as (1) then going to the create bookging tab and search for the user and search for the pacakge, 
+and this flow take a timmmmmmmmmme, 
+so, we need to make (in one page all operations)
+so, first we need to add a new action button that is (one time attend)
+so, we need the search dropdown of each of them to have the (+ create new modal), so it make a record in the same page,
+respect all the validation rules and respect the race condations
+<?php
+namespace App\Models;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDelete; s;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Spatie\Translatable\ HasTranslations;
+class Package extends Model
+{
+    use HasFactory, SoftDeletes, HasTranslations.
+    public array $translatable = ['name'];
+    protected $fillable = ['name', 'total_credits', 'price', 'is_active'];
+    protected function casts(): array
+    {
+        return [
+            'total_credits' => 'integer',
+            'price'         => 'integer',
+            'is_active'     => 'boolean',
+        ];
+    }
+    public function bookings(): HasMany
+    {
+        return $this->hasMany(Booking::class);
+    }
+}
+and:
+<?php
+// filePath: app\Models\User.php
+namespace App\Models;
+use App\Enums\BookingStatusEnum;
+use Illuminate\Database\Eloquent\Casts\ Attribute;
+use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Database\Eloquent\SoftDelete; s;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Notifications\Notifiable;
+use Laravel\Sanctum\HasApiTokens;
+use Laravel\Sanctum\PersonalAccessToken;
+/**
+ * @method PersonalAccessToken|null currentAccessToken()
+ */
+class User extends Authenticatable
+{
+    use HasApiTokens, HasFactory, Notifiable, SoftDelete s;
+    protected $fillable = [
+        'fullname,'
+        'phone_number',
+        'email',
+        'password',
+        'date_of_birth',
+        'email_verified_at',
+        'otp_code',
+        'otp_expires_at',
+        'deactivated_at',
+        'deleted_by',
+    ];
+    protected $hidden = [
+        'password',
+        'otp_code',
+        'otp_expires_at',
+        'remember_token',
+    ];
+    protected function casts(): array
+    {
+        return [
+            'date_of_birth'     => 'date',
+            'email_verified_at' => 'datetime',
+            'otp_expires_at'    => 'datetime',
+            'deactivated_at'    => 'datetime',
+            'password'          => 'hashed',
+        ];
+    }
+    protected function name(): Attribute
+    {
+        return Attribute::make(get: fn() => $this->fullname);
+    }
+    public function isActive(): bool
+    {
+        return is_null($this->deactivated_at);
+    }
+    public function get TotalRemainingCreditsAttribute(): int
+    {
+        return $this->bookings()->where('status', BookingStatusEnum::ACTIVE->value)->sum('remaining_credits');
+    }
+    public function activeBooking(): HasOne
+    {
+        return $this->hasOne(Booking::class)->where('status', BookingStatusEnum::ACTIVE->value)->latest();
+    }
+    public function activeCreditBooking(): HasOne
+    {
+        return $this->hasOne(Booking::class)
+            ->where('status', BookingStatusEnum::ACTIVE)
+            ->where('remaining_credits', '>', 0)
+            ->latest();
+    }
+    public function get AllowNotificationsAttribute(): bool
+    {
+        return (bool) $this->settings? ->allow_notifications;
+    }
+    public function getFcmTokenAttribute(): ?string
+    {
+        return $this->settings?->fcm_token;
+    }
+    public function get PreferredLocaleAttribute(): string
+    {
+        return $this->settings? ->resolvedLocale() ?? config('app.locale', 'en');
+    }
+    public function settings(): HasOne
+    {
+        return $this->hasOne(UserSetting::class);
+    }
+    public function bookings(): HasMany
+    {
+        return $this->hasMany(Booking::class);
+    }
+    public function bookingSessions(): HasManyThrough
+    {
+        return $this->hasManyThrough(BookingSession::class, Booking::class);
+    }
+    public function notifications(): HasMany
+    {
+        return $this->hasMany(AppNotification::class);
+    }
+    public function deletedBy(): BelongsTo
+    {
+        return $this->belongs To(User::class, 'deleted_by');
+    }
+}
+and:
+<?php
+namespace App\Models;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDelete; s;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Spatie\Translatable\ HasTranslations;
+class ClassCategory extends Model
+{
+    use HasFactory, SoftDeletes, HasTranslations.
+    public array $translatable = ['name'];
+    protected $fillable = [
+        'name',
+        'slug',
+        'color',
+    ];
+    public function classes(): HasMany
+    {
+        return $this->hasMany(Classes::class);
+    }
+}
+and:
+<?php
+namespace App\Models;
+use App\Enums\ClassStatusEnum;
+use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Casts\ Attribute;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
+use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\SoftDelete; s;
+use Spatie\Translatable\ HasTranslations;
+/**
+ * @method string getTranslation(string $key, string $locale = null)
+ * @method void setTranslation(string $key, string $locale, string $value)
+ */
+class Classes extends Model
+{
+    use HasFactory, HasTranslations, SoftDelete s;
+    public array $translatable = ['title', 'about'];
+    protected $fillable = [
+        'instructor_id',
+        'class_category_id',
+        'recurrence_pattern_id',
+        'title',
+        'about',
+        'start_time',
+        'end_time',
+        'start_date',
+        'end_date',
+        'total_spots',
+        'status',
+    ];
+    protected function casts(): array
+    {
+        return [
+            'start_date' => 'date',
+            'end_date' => 'date',
+            'total_spots' => 'integer',
+            'status' => ClassStatusEnum::class,
+        ];
+    }
+    public function isActive(): bool
+    {
+        return $this->status === ClassStatusEnum:: ACTIVE;
+    }
+    protected function duration Minutes(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => (int) Carbon::parse($this->start_time)
+                ->diffInMinutes(Carbon::parse($this->end_time))
+        );
+    }
+    public function instructor(): BelongsTo
+    {
+        return $this->belongs To(Instructor::class);
+    }
+    public function category(): BelongsTo
+    {
+        return $this->belongs To(ClassCategory::class, 'class_category_id');
+    }
+    public function recurrence Pattern(): BelongsTo
+    {
+        return $this->belongsTo(RecurrencePattern::class);
+    }
+    public function images(): HasMany
+    {
+        return $this->hasMany(ClassImage::class, 'class_id');
+    }
+    public function primaryImage(): HasOne
+    {
+        return $this->hasOne(ClassImage::class, 'class_id')->where('is_primary', true);
+    }
+    public function sessions(): HasMany
+    {
+        return $this->has Many(ClassSession::class, 'class_id') ->orderBy('date') ->orderBy('start_time');
+    }
+    public function bookingSessions(): HasManyThrough
+    {
+        return $this->has ManyThrough(
+            BookingSession::class,
+            ClassSession::class,
+            'class_id', // Foreign key on ClassSession table...
+            'class_session_id', // Foreign key on BookingSession table...
+            'id,' // Local key on Classes table...
+            'id' // Local key on ClassSession table...
+        );
+    }
+}
+and:
+<?php
+namespace App\Models;
+use App\Enums\BookingSessionStatusEnum;
+use App\Enums\ClassSessionStatusEnum;
+use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDelete; s;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Casts\ Attribute;
+class ClassSession extends Model
+{
+    use HasFactory, SoftDelete s;
+    protected $fillable = [
+        'class_id',
+        'date',
+        'start_time',
+        'end_time',
+        'total_spots',
+        'status',
+    ];
+    protected function casts(): array
+    {
+        return [
+            'date'        => 'date',
+            'total_spots' => 'integer',
+            'status'      => ClassSessionStatusEnum::class,
+        ];
+    }
+    public function isScheduled(): bool
+    {
+        return $this->status === ClassSessionStatus Enum::SCHEDULE D;
+    }
+    protected function duration Minutes(): Attribute
+    {
+        return Attribute::make(
+            get: fn() => (int) Carbon::parse($this->start_time)
+                ->diffInMinutes(Carbon::parse($this->end_time))
+        );
+    }
+    public function get AvailableSpotsAttribute(): int
+    {
+        $reserved = $this->bookingSessions()
+            ->whereIn('status', [
+                BookingSessionStatusEnum::RESERVED->value,
+                BookingSessionStatusEnum::ATTENDED->value,
+            ])
+            ->count();
+        return max(0, $this->total_spots - $reserved);
+    }
+    public function isFull(): bool
+    {
+        return $this->available_spots <= 0;
+    }
+    public function class(): BelongsTo
+    {
+        return $this->belongs To(Classes::class, 'class_id');
+    }
+    public function bookingSessions(): HasMany
+    {
+        return $this->hasMany(BookingSession::class, 'class_session_id');
+    }
+}
+and:
+(Note: booking is the user-paid package):
+<?php
+// filePath: app/Models/Booking.php
+namespace App\Models;
+use App\Enums\BookingStatusEnum;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use InvalidArgumentException;
+class Booking extends Model
+{
+    use HasFactory, SoftDeletes;
+    protected $fillable = [
+        'user_id',
+        'package_id',
+        'total_credits',
+        'remaining_credits',
+        'status',
+        'expires_at',
+    ];
+    protected function casts(): array
+    {
+        return [
+            'total_credits' => 'integer',
+            'remaining_credits' => 'integer',
+            'expires_at' => 'datetime',
+            'status' => BookingStatusEnum::class,
+        ];
+    }
+    public function hasCreditsRemaining(): bool
+    {
+        return $this->remaining_credits > 0;
+    }
+    public function deductCredit(): void
+    {
+        if ($this->remaining_credits <= 0) {
+            throw new InvalidArgumentException('Cannot deduct credit: no credits remaining.');
+        }
+        $this->decrement('remaining_credits');
+        if ($this->remaining_credits <= 0) {
+            $this->update(['status' => BookingStatusEnum::EXHAUSTED]);
+        }
+    }
+    public function refundCredit(): void
+    {
+        if ($this->remaining_credits < $this->total_credits) {
+            $this->increment('remaining_credits');
+            if ($this->status === BookingStatusEnum::EXHAUSTED) {
+                $this->update(['status' => BookingStatusEnum::ACTIVE]);
+            }
+        }
+    }
+    public function isExpired(): bool
+    {
+        return $this->expires_at?->isPast() ?? false;
+    }
+    public function isActive(): bool
+    {
+        return $this->status === BookingStatusEnum::ACTIVE && ! $this->isExpired();
+    }
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
+    }
+    public function package(): BelongsTo
+    {
+        return $this->belongsTo(Package::class);
+    }
+    public function bookingSessions(): HasMany
+    {
+        return $this->hasMany(BookingSession::class);
+    }
+    public function getUsedCreditsAttribute(): int
+    {
+        return $this->total_credits - $this->remaining_credits;
+    }
+    public function getCreditsUsagePercentageAttribute(): int
+    {
+        if ($this->total_credits === 0) {
+            return 0;
+        }
+        return (int) round(($this->used_credits / $this->total_credits) * 100);
+    }
+    public function getCreditsProgressColorAttribute(): string
+    {
+        $ratio = $this->remaining_credits / max($this->total_credits, 1);
+        return match (true) {
+            $ratio > 0.5 => 'success',
+            $ratio > 0.2 => 'warning',
+            default => 'danger',
+        };
+    }
+}
+and we have:
+<?php
+// filePath: app/Models/BookingSession.php
+namespace App\Models;
+use App\Enums\BookingSessionStatusEnum;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+class BookingSession extends Model
+{
+    use HasFactory;
+    protected $fillable = [
+        'booking_id',
+        'class_session_id',
+        'status',
+        'cancelled_at',
+    ];
+    protected function casts(): array
+    {
+        return [
+            'cancelled_at' => 'datetime',
+            'status' => BookingSessionStatusEnum::class,
+        ];
+    }
+    public function isCancelled(): bool
+    {
+        return $this->status === BookingSessionStatusEnum::CANCELLED;
+    }
+    public function isReserved(): bool
+    {
+        return $this->status === BookingSessionStatusEnum::RESERVED;
+    }
+    public function isAttended(): bool
+    {
+        return $this->status === BookingSessionStatusEnum::ATTENDED;
+    }
+    public function isNoShow(): bool
+    {
+        return $this->status === BookingSessionStatusEnum::NO_SHOW;
+    }
+    public function booking(): BelongsTo
+    {
+        return $this->belongsTo(Booking::class);
+    }
+    public function classSession(): BelongsTo
+    {
+        return $this->belongsTo(ClassSession::class, 'class_session_id');
+    }
+}
+
+another notes:
+in the user resource, we have the create user, it have the password and the otps ( we need to remove the otps, and we need to make the password autogenerated, )
+- make the password autogenerated and after create make a filament notification that display a copiable text so that the admin can copy and send like via whatsapp.
+- and in the class creation, we have the (Instructor) dropdown, we need to make the (Instructor id as nullable)
+check the 
+<?php
+
+declare(strict_types=1);
+
+use App\Enums\ClassStatusEnum;
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    public function up(): void
+    {
+        Schema::create('classes', function (Blueprint $table) {
+            $table->id();
+
+            $table->foreignId('instructor_id')
+                ->constrained('instructors')
+                ->restrictOnDelete();
+
+            $table->foreignId('class_category_id')
+                ->constrained('class_categories')
+                ->restrictOnDelete();
+
+            $table->foreignId('recurrence_pattern_id')
+                ->nullable()
+                ->constrained('recurrence_patterns')
+                ->nullOnDelete();
+
+            $table->json('title');
+            $table->json('about')->nullable();
+
+            $table->time('start_time');
+            $table->time('end_time');
+
+            $table->date('start_date');
+            $table->date('end_date')->nullable();
+
+            $table->unsignedSmallInteger('total_spots');
+
+            $table->string('status')
+                ->default(ClassStatusEnum::ACTIVE->value);
+
+            $table->timestamps();
+            $table->softDeletes();
+
+            $table->index(['status', 'start_date']);
+
+            $table->index(['status', 'start_date', 'end_date'], 'idx_classes_status_dates');
+            $table->index('start_time', 'idx_classes_start_time');
+            $table->index('class_category_id', 'idx_classes_category');
+            $table->index('instructor_id', 'idx_classes_instructor');
+        });
+    }
+
+    public function down(): void
+    {
+        Schema::dropIfExists('classes');
+    }
+};
+, we can update the existing migrations and make it nullable
+
+and check the 
+<?php
+
+declare(strict_types=1);
+
+use App\Enums\BookingSessionStatusEnum;
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    public function up(): void
+    {
+        Schema::create('booking_sessions', function (Blueprint $table) {
+            $table->id();
+
+            $table->foreignId('booking_id')
+                ->constrained('bookings')
+                ->cascadeOnDelete()
+                ->comment('Booking to which this session reservation belongs');
+
+            $table->foreignId('class_session_id')
+                ->constrained('class_sessions')
+                ->restrictOnDelete()
+                ->comment('The specific class session being reserved');
+
+            $table->string('status')
+                ->default(BookingSessionStatusEnum::RESERVED->value)
+                ->comment('Reservation status: reserved, attended, cancelled, or no_show');
+
+            $table->timestamp('cancelled_at')
+                ->nullable()
+                ->comment('Timestamp when the reservation was cancelled');
+
+            $table->timestamps();
+
+            $table->unique(['booking_id', 'class_session_id'], 'unique_booking_session')
+                ->comment('Prevents double-booking the same session within a single booking');
+
+            $table->index(['class_session_id', 'status'], 'idx_session_status');
+            $table->index(['booking_id', 'status'], 'idx_booking_status');
+            $table->index(['booking_id', 'class_session_id', 'status'], 'idx_booking_session_status');
+        });
+    }
+
+    public function down(): void
+    {
+        Schema::dropIfExists('booking_sessions');
+    }
+};
+and:
+
+<?php
+
+namespace App\Enums;
+
+use Filament\Support\Contracts\HasColor;
+use Filament\Support\Contracts\HasIcon;
+use Filament\Support\Contracts\HasLabel;
+
+enum BookingSessionStatusEnum: string implements HasColor, HasIcon, HasLabel
+{
+    case RESERVED = 'reserved';
+    case CANCELLED = 'cancelled';
+    case ATTENDED = 'attended';
+    case NO_SHOW = 'no_show';
+
+    public function getLabel(): ?string
+    {
+        return match ($this) {
+            self::RESERVED => __('dashboard.resources.booking_sessions.statuses.reserved'),
+            self::CANCELLED => __('dashboard.resources.booking_sessions.statuses.cancelled'),
+            self::ATTENDED => __('dashboard.resources.booking_sessions.statuses.attended'),
+            self::NO_SHOW => __('dashboard.resources.booking_sessions.statuses.no_show'),
+        };
+    }
+
+    public function getColor(): string|array|null
+    {
+        return match ($this) {
+            self::RESERVED => 'info',
+            self::CANCELLED => 'danger',
+            self::ATTENDED => 'success',
+            self::NO_SHOW => 'warning',
+        };
+    }
+
+    public function getIcon(): ?string
+    {
+        return match ($this) {
+            self::RESERVED => 'heroicon-o-calendar',
+            self::CANCELLED => 'heroicon-o-x-circle',
+            self::ATTENDED => 'heroicon-o-check-circle',
+            self::NO_SHOW => 'heroicon-o-question-mark-circle',
+        };
+    }
+
+    public static function toArray(): array
+    {
+        return array_column(self::cases(), 'value');
+    }
+
+    public static function values(): array
+    {
+        return array_column(self::cases(), 'value', 'value');
+    }
+
+    public static function options(): array
+    {
+        $options = [];
+        foreach (self::cases() as $case) {
+            $options[$case->value] = $case->getLabel();
+        }
+        return $options;
+    }
+}
+
+I think the BookingSessionStatusEnum only need to be reserved and cancelled, and we need a new status to the (attended or missing) by default is missing, and the admin make the booking_sessions in the schedular page (toggle between the atteneding and missing via a checkbox)
+
+check the 
+<?php
+
+namespace App\Filament\Admin\Resources\Users\Schemas;
+
+use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\DateTimePicker;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
+use Filament\Schemas\Schema;
+
+class UserForm
+{
+    public static function configure(Schema $schema): Schema
+    {
+        return $schema
+            ->components([
+                TextInput::make('fullname')
+                    ->required(),
+                TextInput::make('phone_number')
+                    ->tel()
+                    ->required(),
+                TextInput::make('email')
+                    ->label('Email address')
+                    ->email()
+                    ->required(),
+                TextInput::make('password')
+                    ->password()
+                    ->required(),
+                DatePicker::make('date_of_birth'),
+                Toggle::make('allow_notifications')
+                    ->required(),
+                DateTimePicker::make('email_verified_at'),
+                TextInput::make('otp_code'),
+                DateTimePicker::make('otp_expires_at'),
+                DateTimePicker::make('deactivated_at'),
+                TextInput::make('deleted_by')
+                    ->numeric(),
+            ]);
+    }
+}
+
+and:
+
+<?php
+
+namespace App\Filament\Admin\Resources\Users;
+
+use App\Filament\Admin\Resources\Users\Pages\CreateUser;
+use App\Filament\Admin\Resources\Users\Pages\EditUser;
+use App\Filament\Admin\Resources\Users\Pages\ListUsers;
+use App\Filament\Admin\Resources\Users\Pages\ViewUser;
+use App\Filament\Admin\Resources\Users\Schemas\UserForm;
+use App\Filament\Admin\Resources\Users\Schemas\UserInfolist;
+use App\Filament\Admin\Resources\Users\Tables\UsersTable;
+use App\Models\User;
+use BackedEnum;
+use UnitEnum;
+use App\Filament\Admin\Resources\Users\RelationManagers\BookingsRelationManager;
+use App\Filament\Admin\Resources\Users\RelationManagers\NotificationsRelationManager;
+use Filament\Resources\Resource;
+use Filament\Schemas\Schema;
+use Filament\Support\Icons\Heroicon;
+use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\SoftDeletingScope;
+
+class UserResource extends Resource
+{
+    protected static ?string $model = User::class;
+
+    protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-users';
+    protected static string|UnitEnum|null $navigationGroup = 'Users';
+    protected static ?int $navigationSort = 1;
+
+    protected static ?string $recordTitleAttribute = 'fullname';
+
+    public static function form(Schema $schema): Schema
+    {
+        return UserForm::configure($schema);
+    }
+
+    public static function infolist(Schema $schema): Schema
+    {
+        return UserInfolist::configure($schema);
+    }
+
+    public static function table(Table $table): Table
+    {
+        return UsersTable::configure($table);
+    }
+
+    public static function getRelations(): array
+    {
+        return [
+            BookingsRelationManager::class,
+            NotificationsRelationManager::class,
+        ];
+    }
+
+    public static function getPages(): array
+    {
+        return [
+            'index' => ListUsers::route('/'),
+            'create' => CreateUser::route('/create'),
+            'view' => ViewUser::route('/{record}'),
+            'edit' => EditUser::route('/{record}/edit'),
+        ];
+    }
+
+    public static function getRecordRouteBindingEloquentQuery(): Builder
+    {
+        return parent::getRecordRouteBindingEloquentQuery()
+            ->withoutGlobalScopes([
+                SoftDeletingScope::class,
+            ]);
+    }
+}
+
+and we have:
+
+<?php
+
+// filePath: app/Filament/Admin/Resources/Classes/Schemas/ClassesForm.php
+
+namespace App\Filament\Admin\Resources\Classes\Schemas;
+
+use App\Enums\ClassStatusEnum;
+use App\Models\ClassCategory;
+use App\Models\Instructor;
+use App\Models\RecurrencePattern;
+use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\Repeater;
+use Filament\Forms\Components\RichEditor;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\TimePicker;
+use Filament\Forms\Components\Toggle;
+use Filament\Schemas\Components\Grid;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Schema;
+
+class ClassesForm
+{
+    public static function configure(Schema $schema): Schema
+    {
+        $locale = app()->getLocale();
+
+        return $schema
+            ->components([
+                Section::make(__('dashboard.resources.classes.sections.basic_info'))
+                    ->description(__('dashboard.resources.classes.sections.basic_info_desc'))
+                    ->icon('heroicon-o-information-circle')
+                    ->schema([
+                        Grid::make(2)->schema([
+                            Select::make('instructor_id')
+                                ->label(__('dashboard.resources.classes.fields.instructor'))
+                                ->options(function () use ($locale) {
+                                    return Instructor::query()
+                                        ->select('id', 'name')
+                                        ->get()
+                                        ->mapWithKeys(fn (Instructor $instructor) => [
+                                            $instructor->id => $instructor->getTranslation('name', $locale),
+                                        ]);
+                                })
+                                ->searchable()
+                                ->preload()
+                                ->required()
+                                ->loadingMessage(__('dashboard.messages.loading'))
+                                ->searchPrompt(__('dashboard.messages.search_prompt'))
+                                ->helperText(__('dashboard.resources.classes.helpers.instructor'))
+                                ->columnSpan(1),
+
+                            Select::make('class_category_id')
+                                ->label(__('dashboard.resources.classes.fields.category'))
+                                ->options(function () use ($locale) {
+                                    return ClassCategory::query()
+                                        ->select('id', 'name')
+                                        ->get()
+                                        ->mapWithKeys(fn (ClassCategory $category) => [
+                                            $category->id => $category->getTranslation('name', $locale),
+                                        ]);
+                                })
+                                ->searchable()
+                                ->preload()
+                                ->required()
+                                ->helperText(__('dashboard.resources.classes.helpers.category'))
+                                ->columnSpan(1),
+
+                            TextInput::make('title')
+                                ->label(__('dashboard.resources.classes.fields.title'))
+                                ->required()
+                                ->maxLength(255)
+                                ->helperText(__('dashboard.resources.classes.helpers.title'))
+                                ->columnSpan(1),
+
+                            Select::make('recurrence_pattern_id')
+                                ->label(__('dashboard.resources.classes.fields.recurrence_pattern'))
+                                ->options(function () use ($locale) {
+                                    return RecurrencePattern::query()
+                                        ->select('id', 'name', 'label')
+                                        ->get()
+                                        ->mapWithKeys(fn (RecurrencePattern $pattern) => [
+                                            $pattern->id => $pattern->getTranslation('label', $locale) ?: $pattern->name,
+                                        ]);
+                                })
+                                ->searchable()
+                                ->nullable()
+                                ->helperText(__('dashboard.resources.classes.helpers.recurrence_pattern'))
+                                ->columnSpan(1),
+                        ]),
+
+                        RichEditor::make('about')
+                            ->label(__('dashboard.resources.classes.fields.about'))
+                            ->required()
+                            ->columnSpanFull()
+                            ->helperText(__('dashboard.resources.classes.helpers.about')),
+                    ]),
+
+                Section::make(__('dashboard.resources.classes.sections.schedule'))
+                    ->description(__('dashboard.resources.classes.sections.schedule_desc'))
+                    ->icon('heroicon-o-calendar')
+                    ->schema([
+                        Grid::make(3)->schema([
+                            DatePicker::make('start_date')
+                                ->label(__('dashboard.resources.classes.fields.start_date'))
+                                ->required()
+                                ->displayFormat('M d, Y')
+                                ->native(false)
+                                ->closeOnDateSelection()
+                                ->helperText(__('dashboard.resources.classes.helpers.start_date'))
+                                ->columnSpan(1),
+
+                            DatePicker::make('end_date')
+                                ->label(__('dashboard.resources.classes.fields.end_date'))
+                                ->required()
+                                ->displayFormat('M d, Y')
+                                ->native(false)
+                                ->closeOnDateSelection()
+                                ->afterOrEqual('start_date')
+                                ->helperText(__('dashboard.resources.classes.helpers.end_date'))
+                                ->columnSpan(1),
+
+                            Grid::make(2)->schema([
+                                TimePicker::make('start_time')
+                                    ->label(__('dashboard.resources.classes.fields.start_time'))
+                                    ->required()
+                                    ->displayFormat('H:i')
+                                    ->native(false)
+                                    ->seconds(false)
+                                    ->helperText(__('dashboard.resources.classes.helpers.start_time'))
+                                    ->columnSpan(1),
+
+                                TimePicker::make('end_time')
+                                    ->label(__('dashboard.resources.classes.fields.end_time'))
+                                    ->required()
+                                    ->displayFormat('H:i')
+                                    ->native(false)
+                                    ->seconds(false)
+                                    ->after('start_time')
+                                    ->helperText(__('dashboard.resources.classes.helpers.end_time'))
+                                    ->columnSpan(1),
+                            ])->columnSpan(1),
+                        ]),
+                    ]),
+
+                Section::make(__('dashboard.resources.classes.sections.capacity'))
+                    ->description(__('dashboard.resources.classes.sections.capacity_desc'))
+                    ->icon('heroicon-o-users')
+                    ->schema([
+                        Grid::make(2)->schema([
+                            TextInput::make('total_spots')
+                                ->label(__('dashboard.resources.classes.fields.total_spots'))
+                                ->required()
+                                ->numeric()
+                                ->minValue(1)
+                                ->maxValue(999)
+                                ->default(20)
+                                ->helperText(__('dashboard.resources.classes.helpers.total_spots'))
+                                ->suffix('spots')
+                                ->columnSpan(1),
+
+                            Select::make('status')
+                                ->label(__('dashboard.resources.classes.fields.status'))
+                                ->options(ClassStatusEnum::options())
+                                ->default(ClassStatusEnum::ACTIVE->value)
+                                ->required()
+                                ->native(false)
+                                ->helperText(__('dashboard.resources.classes.helpers.status'))
+                                ->columnSpan(1),
+                        ]),
+                    ]),
+
+                Section::make(__('dashboard.resources.classes.sections.images'))
+                    ->description(__('dashboard.resources.classes.sections.images_desc'))
+                    ->icon('heroicon-o-photo')
+                    ->collapsible()
+                    ->schema([
+                        Repeater::make('images')
+                            ->label(__('dashboard.resources.classes.fields.additional_images'))
+                            ->relationship('images')
+                            ->schema([
+                                FileUpload::make('url')
+                                    ->label(__('dashboard.resources.classes.fields.image'))
+                                    ->image()
+                                    ->imageEditor()
+                                    ->maxSize(5120)
+                                    ->directory('classes/gallery')
+                                    ->visibility('public')
+                                    ->required()
+                                    ->columnSpan(2),
+
+                                Toggle::make('is_primary')
+                                    ->label(__('dashboard.resources.classes.fields.is_primary'))
+                                    ->default(false)
+                                    ->inline(false)
+                                    ->columnSpan(1),
+                            ])
+                            ->columns(3)
+                            ->collapsible()
+                            ->itemLabel(fn (array $state): ?string => $state['is_primary'] ? 'Primary Image' : null)
+                            ->addActionLabel(__('dashboard.resources.classes.actions.add_image'))
+                            ->columnSpanFull(),
+                    ]),
+            ]);
+    }
+}
+and:
+
+<?php
+
+namespace App\Filament\Admin\Resources\Bookings\Schemas;
+
+use App\Enums\BookingStatusEnum;
+use App\Models\Package;
+use App\Models\User;
+use Filament\Forms\Components\DateTimePicker;
+use Filament\Forms\Components\Hidden;
+use Filament\Forms\Components\Select;
+use Filament\Schemas\Components\Grid;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Schema;
+
+class BookingForm
+{
+    public static function configure(Schema $schema): Schema
+    {
+        return $schema
+            ->components([
+                Section::make(__('dashboard.resources.bookings.sections.information'))
+                    ->icon('heroicon-o-credit-card')
+                    ->columns(2)
+                    ->schema([
+                        Select::make('user_id')
+                            ->label(__('dashboard.resources.bookings.fields.user'))
+                            ->options(function () {
+                                return User::whereDoesntHave('bookings', function ($q) {
+                                    $q->where('status', BookingStatusEnum::ACTIVE)
+                                      ->where('remaining_credits', '>', 0);
+                                })->pluck('fullname', 'id');
+                            })
+                            ->rules([
+                                'required',
+                                'exists:users,id',
+                                function ($attribute, $value, $fail) {
+                                    $exists = Booking::where('user_id', $value)
+                                        ->where('status', BookingStatusEnum::ACTIVE)
+                                        ->where('remaining_credits', '>', 0)
+                                        ->exists();
+                                    if ($exists) {
+                                        $fail('This user already has an active booking with credits.');
+                                    }
+                                },
+                            ])
+                            ->searchable()
+                            ->preload()
+                            ->required()
+                            ->columnSpan(1),
+
+                        Select::make('package_id')
+                            ->label(__('dashboard.resources.bookings.fields.package'))
+                            ->options(function () {
+                                $locale = app()->getLocale();
+                                return Package::query()
+                                    ->where('is_active', true)
+                                    ->get(['id', 'name'])
+                                    ->mapWithKeys(fn (Package $package) => [
+                                        $package->id => $package->getTranslation('name', $locale),
+                                    ]);
+                            })
+                            ->searchable()
+                            ->preload()
+                            ->required()
+                            ->afterStateUpdated(function ($state, callable $set) {
+                                if (blank($state)) {
+                                    return;
+                                }
+                                $package = Package::query()
+                                    ->select(['id', 'total_credits'])
+                                    ->find($state);
+                                if ($package) {
+                                    $set('total_credits', $package->total_credits);
+                                    $set('remaining_credits', $package->total_credits);
+                                }
+                            })
+                            ->loadingMessage('Loading packages...')
+                            ->searchPrompt('Search by package name...')
+                            ->columnSpan(1),
+
+                        DateTimePicker::make('expires_at')
+                            ->label(__('dashboard.resources.bookings.fields.expires_at'))
+                            ->withoutSeconds()
+                            ->displayFormat('M d, Y H:i')
+                            ->placeholder(__('dashboard.resources.bookings.placeholders.expires_at'))
+                            ->hint('Leave empty for no expiration')
+                            ->hintIcon('heroicon-m-information-circle')
+                            ->nullable()
+                            ->columnSpan(1)
+                            ->helperText(function ($state) {
+                                if ($state && $state->isPast()) {
+                                    return '⚠️ This date is in the past';
+                                }
+                                return null;
+                            }),
+
+                        Hidden::make('total_credits')
+                            ->default(0),
+
+                        Hidden::make('remaining_credits')
+                            ->default(0),
+
+                        Hidden::make('status')
+                            ->default(BookingStatusEnum::ACTIVE->value),
+                    ]),
+            ]);
+    }
+}
+
+and:
+<?php
+
+namespace App\Filament\Admin\Resources\Packages\Schemas;
+
+use Filament\Forms\Components\TextInput;
+use Filament\Schemas\Schema;
+
+class PackageForm
+{
+    public static function configure(Schema $schema): Schema
+    {
+        return $schema
+            ->components([
+                TextInput::make('name')
+                    ->required(),
+                TextInput::make('total_credits')
+                    ->required()
+                    ->numeric(),
+                TextInput::make('price')
+                    ->required()
+                    ->numeric()
+                    ->prefix('$'),
+            ]);
+    }
+}
+
+and:
+
+<?php
+
+namespace App\Filament\Admin\Resources\ClassCategories\Schemas;
+
+use Filament\Forms\Components\TextInput;
+use Filament\Schemas\Schema;
+
+class ClassCategoryForm
+{
+    public static function configure(Schema $schema): Schema
+    {
+        return $schema
+            ->components([
+                TextInput::make('name')
+                    ->required(),
+                TextInput::make('slug')
+                    ->required(),
+                TextInput::make('color'),
+            ]);
+    }
+}
+
+and:
+
+<?php
+// filePath: app/Filament/Admin/Resources/BookingSessions/Schemas/BookingSessionForm.php
+
+namespace App\Filament\Admin\Resources\BookingSessions\Schemas;
+
+use App\Enums\BookingSessionStatusEnum;
+use App\Models\Booking;
+use App\Models\ClassSession;
+use Filament\Forms\Components\DateTimePicker;
+use Filament\Forms\Components\Select;
+use Filament\Schemas\Components\Grid;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Schema;
+
+class BookingSessionForm
+{
+    public static function configure(Schema $schema): Schema
+    {
+        $locale = app()->getLocale();
+
+        return $schema
+            ->components([
+                Section::make(__('dashboard.resources.booking_sessions.sections.information'))
+                    ->description(__('dashboard.resources.booking_sessions.sections.information_desc'))
+                    ->icon('heroicon-o-ticket')
+                    ->schema([
+                        Grid::make(2)->schema([
+                            Select::make('booking_id')
+                                ->label(__('dashboard.resources.booking_sessions.fields.booking'))
+                                ->options(function () use ($locale) {
+                                    return Booking::query()
+                                        ->whereIn('status', ['active', 'exhausted'])
+                                        ->with('user:id,fullname')
+                                        ->get()
+                                        ->mapWithKeys(function (Booking $booking) use ($locale) {
+                                            return [
+                                                $booking->id => "#{$booking->id} - {$booking->user?->fullname} ({$booking->remaining_credits}/{$booking->total_credits} credits)"
+                                            ];
+                                        });
+                                })
+                                ->searchable()
+                                ->preload()
+                                ->required()
+                                ->loadingMessage(__('dashboard.messages.loading'))
+                                ->searchPrompt(__('dashboard.messages.search_prompt'))
+                                ->helperText(__('dashboard.resources.booking_sessions.helpers.booking'))
+                                ->columnSpan(1),
+
+                            Select::make('class_session_id')
+                                ->label(__('dashboard.resources.booking_sessions.fields.class_session'))
+                                ->options(function () use ($locale) {
+                                    return ClassSession::query()
+                                        ->where('status', 'scheduled')
+                                        ->where('date', '>=', now())
+                                        ->with('class')
+                                        ->get()
+                                        ->mapWithKeys(function (ClassSession $session) use ($locale) {
+                                            $classTitle = $session->class?->getTranslation('title', $locale) ?? __('dashboard.resources.booking_sessions.placeholders.unknown_class');
+                                            return [
+                                                $session->id => $classTitle . ' - ' .
+                                                    $session->date->format('M d, Y') . ' ' .
+                                                    substr($session->start_time, 0, 5) . '-' .
+                                                    substr($session->end_time, 0, 5) .
+                                                    " ({$session->available_spots} " . __('dashboard.resources.booking_sessions.units.spots_left') . ")"
+                                            ];
+                                        });
+                                })
+                                ->searchable()
+                                ->preload()
+                                ->required()
+                                ->loadingMessage(__('dashboard.messages.loading'))
+                                ->searchPrompt(__('dashboard.messages.search_prompt'))
+                                ->helperText(__('dashboard.resources.booking_sessions.helpers.class_session'))
+                                ->columnSpan(1),
+
+                            Select::make('status')
+                                ->label(__('dashboard.resources.booking_sessions.fields.status'))
+                                ->options(BookingSessionStatusEnum::options())
+                                ->default(BookingSessionStatusEnum::RESERVED->value)
+                                ->required()
+                                ->native(false)
+                                ->helperText(__('dashboard.resources.booking_sessions.helpers.status'))
+                                ->columnSpan(1),
+
+                            DateTimePicker::make('cancelled_at')
+                                ->label(__('dashboard.resources.booking_sessions.fields.cancelled_at'))
+                                ->displayFormat('M d, Y H:i')
+                                ->nullable()
+                                ->visible(function ($get) {
+                                    return $get('status') === BookingSessionStatusEnum::CANCELLED->value;
+                                })
+                                ->helperText(__('dashboard.resources.booking_sessions.helpers.cancelled_at'))
+                                ->columnSpan(1),
+                        ]),
+                    ]),
+            ]);
+    }
+}
+
+and check the other files like:
+
+<?php
+
+// filePath: bootstrap/app.php
+
+declare(strict_types=1);
+
+use App\Http\Middleware\EnsureActiveBookingMiddleware;
+use App\Http\Middleware\EnsureActivePackageMiddleware;
+use App\Http\Middleware\MobileAppVersion\CheckAppVersionMiddleware;
+use Illuminate\Auth\AuthenticationException;
+use Illuminate\Auth\Middleware\Authenticate;
+use Illuminate\Auth\Middleware\AuthenticateWithBasicAuth;
+use Illuminate\Auth\Middleware\Authorize;
+use Illuminate\Auth\Middleware\EnsureEmailIsVerified;
+use Illuminate\Auth\Middleware\RedirectIfAuthenticated;
+use Illuminate\Auth\Middleware\RequirePassword;
+use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
+use Illuminate\Cookie\Middleware\EncryptCookies;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Foundation\Application;
+use Illuminate\Foundation\Configuration\Exceptions;
+use Illuminate\Foundation\Configuration\Middleware;
+use Illuminate\Foundation\Http\Middleware\HandlePrecognitiveRequests;
+use Illuminate\Foundation\Http\Middleware\InvokeDeferredCallbacks;
+use Illuminate\Foundation\Http\Middleware\ValidateCsrfToken;
+use Illuminate\Http\Middleware\SetCacheHeaders;
+use Illuminate\Http\Request;
+use Illuminate\Routing\Middleware\SubstituteBindings;
+use Illuminate\Routing\Middleware\ThrottleRequests;
+use Illuminate\Routing\Middleware\ValidateSignature;
+use Illuminate\Session\Middleware\AuthenticateSession;
+use Illuminate\Session\Middleware\StartSession;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
+use Illuminate\View\Middleware\ShareErrorsFromSession;
+use Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+
+return Application::configure(basePath: dirname(__DIR__))
+    ->withRouting(
+        web: __DIR__.'/../routes/web/web.php',
+        api: __DIR__.'/../routes/api/api.php',
+        commands: __DIR__.'/../routes/console/console.php',
+        health: '/up',
+    )
+    ->withMiddleware(function (Middleware $middleware) {
+
+        $middleware->alias([
+            'auth' => Authenticate::class,
+            'auth.basic' => AuthenticateWithBasicAuth::class,
+            'auth.sanctum' => EnsureFrontendRequestsAreStateful::class,
+            'auth.session' => AuthenticateSession::class,
+            'cache.headers' => SetCacheHeaders::class,
+            'can' => Authorize::class,
+            'ensure.active.booking' => EnsureActiveBookingMiddleware::class,
+            'ensure.active.package' => EnsureActivePackageMiddleware::class,
+            'guest' => RedirectIfAuthenticated::class,
+            'password.confirm' => RequirePassword::class,
+            'precognitive' => HandlePrecognitiveRequests::class,
+            'signed' => ValidateSignature::class,
+            'throttle' => ThrottleRequests::class,
+            'verified' => EnsureEmailIsVerified::class,
+        ]);
+
+        $middleware->api(prepend: [
+            EnsureFrontendRequestsAreStateful::class,
+            'throttle:api',
+            CheckAppVersionMiddleware::class,
+            EnsureActivePackageMiddleware::class,
+            SubstituteBindings::class,
+        ]);
+
+        $middleware->priority([
+            InvokeDeferredCallbacks::class,
+            EncryptCookies::class,
+            AddQueuedCookiesToResponse::class,
+            StartSession::class,
+            ShareErrorsFromSession::class,
+            ValidateCsrfToken::class,
+            EnsureFrontendRequestsAreStateful::class,
+            SubstituteBindings::class,
+            ThrottleRequests::class,
+            Authenticate::class,
+            Authorize::class,
+        ]);
+    })
+    ->withExceptions(function (Exceptions $exceptions): void {
+
+        $exceptions->render(function (AuthenticationException $e, Request $request) {
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'code' => 'UNAUTHORIZED',
+                    'message' => 'Invalid or expired token',
+                    'timestamp' => Carbon::now()->toISOString(),
+                    'status_code' => 401,
+                ], 401);
+            }
+        });
+
+        $exceptions->render(function (ValidationException $e, Request $request) {
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'code' => 'VALIDATION_FAILED',
+                    'message' => 'Validation failed',
+                    'errors' => $e->errors(),
+                    'timestamp' => Carbon::now()->toISOString(),
+                    'status_code' => 422,
+                ], 422);
+            }
+        });
+
+        $exceptions->render(function (NotFoundHttpException $e, Request $request) {
+            if (! $request->expectsJson()) {
+                return null;
+            }
+
+            $previous = $e->getPrevious();
+
+            if ($previous instanceof ModelNotFoundException) {
+                $modelClass = $previous->getModel();
+                $modelBase = class_basename($modelClass);
+                $modelSlug = Str::upper(Str::snake($modelBase));
+
+                return response()->json([
+                    'success' => false,
+                    'code' => $modelSlug.'_NOT_FOUND',
+                    'message' => $modelBase.' not found',
+                    'timestamp' => Carbon::now()->toISOString(),
+                    'status_code' => 404,
+                ], 404);
+            }
+
+            return response()->json([
+                'success' => false,
+                'code' => 'ENDPOINT_NOT_FOUND',
+                'message' => 'Endpoint not found',
+                'timestamp' => Carbon::now()->toISOString(),
+                'status_code' => 404,
+            ], 404);
+        });
+
+    })->create();
+
+and:
+
+<?php
+
+// filePath: bootstrap/providers.php
+
+use App\Providers\ApplicationServiceProvider;
+use App\Providers\EventServiceProvider;
+use App\Providers\Filament\AdminPanelProvider;
+use App\Providers\ScrambleServiceProvider;
+
+return [
+    ApplicationServiceProvider::class,
+    AdminPanelProvider::class,
+    ScrambleServiceProvider::class,
+    EventServiceProvider::class,
+];
+
+and:
+
+<?php
+
+// filePath: app\Providers\Filament\AdminPanelProvider.php
+declare(strict_types=1);
+
+namespace App\Providers\Filament;
+
+use App\Filament\Admin\Widgets\AttendanceTrendChart;
+use App\Filament\Admin\Widgets\CategoryPerformanceWidget;
+use App\Filament\Admin\Widgets\StatsOverview;
+use App\Filament\Admin\Widgets\TopInstructorsWidget;
+use Filament\Auth\Pages\EditProfile;
+use Filament\Http\Middleware\Authenticate;
+use Filament\Http\Middleware\AuthenticateSession;
+use Filament\Http\Middleware\DisableBladeIconComponents;
+use Filament\Http\Middleware\DispatchServingFilamentEvent;
+use Filament\Pages\Dashboard;
+use Filament\Panel;
+use Filament\PanelProvider;
+use Filament\Support\Colors\Color;
+use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
+use Illuminate\Cookie\Middleware\EncryptCookies;
+use Illuminate\Foundation\Http\Middleware\ValidateCsrfToken;
+use Illuminate\Routing\Middleware\SubstituteBindings;
+use Illuminate\Session\Middleware\StartSession;
+use Illuminate\View\Middleware\ShareErrorsFromSession;
+use LaraZeus\SpatieTranslatable\SpatieTranslatablePlugin;
+
+class AdminPanelProvider extends PanelProvider
+{
+    public function panel(Panel $panel): Panel
+    {
+        return $panel
+            ->login()
+            ->id('admin')
+            ->path('admin')
+            ->colors([
+                'primary' => Color::Amber,
+            ])
+            ->profile(EditProfile::class)
+            ->discoverResources(in: app_path('Filament/Admin/Resources'), for: 'App\Filament\Admin\Resources')
+            ->discoverPages(in: app_path('Filament/Admin/Pages'), for: 'App\Filament\Admin\Pages')
+            ->pages([
+                Dashboard::class,
+            ])
+            ->plugins([
+                SpatieTranslatablePlugin::make()
+                    ->persist()
+                    ->defaultLocales([
+                        'en',
+                        'ar',
+                    ]),
+            ])
+            ->widgets([
+                StatsOverview::class,
+                AttendanceTrendChart::class,
+                CategoryPerformanceWidget::class,
+                TopInstructorsWidget::class,
+            ])
+            ->middleware($this->getMiddleware())
+            ->authMiddleware($this->getAuthMiddleware());
+    }
+
+    private function getMiddleware(): array
+    {
+        return [
+            EncryptCookies::class,
+            AddQueuedCookiesToResponse::class,
+            StartSession::class,
+            ShareErrorsFromSession::class,
+            ValidateCsrfToken::class,
+            SubstituteBindings::class,
+            DisableBladeIconComponents::class,
+            DispatchServingFilamentEvent::class,
+        ];
+    }
+
+    private function getAuthMiddleware(): array
+    {
+        return [
+            Authenticate::class,
+            AuthenticateSession::class,
+        ];
+    }
+}
+
+and check the existing endpints like:
+
+<?php
+
+// routes\api\v1\protected\booking_sessions.php
+declare(strict_types=1);
+
+use App\Actions\V1\BookingSession\ListUserSessionsAction;
+use App\Http\Controllers\Api\V1\BookingSession\BookingSessionController;
+use Illuminate\Support\Facades\Route;
+
+Route::prefix('booking-sessions')->name('booking-sessions.')->group(function () {
+    Route::get('/', [BookingSessionController::class, 'index'])->name('index');
+    Route::post('reserve', [BookingSessionController::class, 'reserve'])
+        ->middleware('ensure.active.booking')
+        ->name('reserve');
+
+    Route::get('my-sessions', ListUserSessionsAction::class)->name('my-sessions');
+
+    Route::get('{id}', [BookingSessionController::class, 'show'])->where('id', '[0-9]+')->name('show');
+    Route::post('{id}/cancel', [BookingSessionController::class, 'cancel'])->name('cancel');
+});
+
+and:
+
+<?php
+
+// filePath: app/Http/Controllers/Api/V1/BookingSession/BookingSessionController.php
+
+declare(strict_types=1);
+
+namespace App\Http\Controllers\Api\V1\BookingSession;
+
+use App\Http\Controllers\Api\BaseApiController;
+use App\Http\Requests\Api\V1\BookingSession\ReserveSessionRequest;
+use App\Http\Resources\Api\V1\BookingSessionCollection;
+use App\Http\Resources\Api\V1\BookingSessionResource;
+use App\Services\BookingSession\BookingSessionService;
+use Dedoc\Scramble\Attributes\Endpoint;
+use Dedoc\Scramble\Attributes\Group;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
+
+#[Group('Booking Sessions')]
+class BookingSessionController extends BaseApiController
+{
+    public function __construct(
+        private readonly BookingSessionService $bookingSessionService
+    ) {}
+
+    #[Endpoint('Reserve class session', description: 'Books a class session using booking credits. Requires active booking with credits.')]
+    public function reserve(ReserveSessionRequest $request): JsonResponse
+    {
+        $activeBooking = $request->attributes->get('active_booking');
+
+        $bookingSession = $this->bookingSessionService->reserve(
+            bookingId: (int) $activeBooking->id,
+            classSessionId: (int) $request->class_session_id
+        );
+
+        return $this->created(new BookingSessionResource($bookingSession));
+    }
+
+    #[Endpoint('List booking sessions', description: 'Returns a paginated list of user booking sessions.')]
+    public function index(Request $request): JsonResponse
+    {
+        $filters = $request->only(['status', 'per_page']);
+        $sessions = $this->bookingSessionService->listUserSessions($request->user()->id, $filters);
+
+        return $this->success(new BookingSessionCollection($sessions));
+    }
+
+    #[Endpoint('Get booking session by ID', description: 'Returns a booking session by its ID.')]
+    public function show(Request $request, int $id): JsonResponse
+    {
+        $session = $this->bookingSessionService->findUserSession($request->user()->id, $id);
+
+        return $this->success(new BookingSessionResource($session));
+    }
+
+    #[Endpoint('Cancel booking session', description: 'Cancels a reserved booking session and refunds credit if within policy.')]
+    public function cancel(Request $request, int $id): JsonResponse
+    {
+        $this->bookingSessionService->cancel($id);
+
+        return $this->success([
+            'id' => $id,
+            'status' => 'cancelled',
+            'is_cancelled' => true,
+        ]);
+    }
+}
+
+and 
+<?php
+
+declare(strict_types=1);
+
+namespace App\Http\Requests\Api\V1\BookingSession;
+
+use Illuminate\Foundation\Http\FormRequest;
+
+class ReserveSessionRequest extends FormRequest
+{
+    public function authorize(): bool
+    {
+        return true;
+    }
+
+    public function rules(): array
+    {
+        return [
+            'class_session_id' => [
+                'required',
+                'exists:class_sessions,id',
+                'bail',
+            ],
+        ];
+    }
+}
+and:
+<?php
+
+// filePath: app/Services/BookingSession/BookingSessionService.php
+
+declare(strict_types=1);
+
+namespace App\Services\BookingSession;
+
+use App\Enums\BookingSessionStatusEnum;
+use App\Enums\BookingStatusEnum;
+use App\Models\BookingSession;
+use App\Repositories\Eloquent\BookingSession\BookingSessionEloquentRepository;
+use App\Services\Booking\BookingService;
+use App\Services\ClassSession\ClassSessionService;
+use App\Services\Log\LoggingService;
+use Carbon\Carbon;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
+
+class BookingSessionService
+{
+    public function __construct(
+        private readonly BookingSessionEloquentRepository $repository,
+        private readonly BookingService $bookingService,
+        private readonly ClassSessionService $classSessionService,
+        private readonly LoggingService $logger
+    ) {}
+
+    public function listUserSessions(int $userId, array $filters = []): LengthAwarePaginator
+    {
+        $this->logger->info('Listing user sessions', ['user_id' => $userId]);
+
+        return $this->repository->listUserSessions($userId, $filters);
+    }
+
+    public function findUserSession(int $userId, int $id): BookingSession
+    {
+        return $this->repository->findByUser($userId, $id)
+            ?? throw new ModelNotFoundException;
+    }
+
+    public function cancel(int $bookingSessionId): void
+    {
+        $this->logger->info('Cancelling booking session', ['session_id' => $bookingSessionId]);
+
+        DB::transaction(function () use ($bookingSessionId) {
+            $bookingSession = $this->findById($bookingSessionId, true);
+
+            if ($bookingSession->isCancelled()) {
+                throw ValidationException::withMessages([
+                    'status' => 'Session is already cancelled.',
+                ]);
+            }
+
+            $classSession = $this->classSessionService->find($bookingSession->class_session_id, true);
+
+            $date = $classSession->date instanceof Carbon
+                ? $classSession->date
+                : Carbon::parse($classSession->date);
+
+            $cutoff = Carbon::parse(
+                $date->format('Y-m-d').' '.$classSession->start_time
+            )->subHours(24);
+
+            if (now()->greaterThanOrEqualTo($cutoff)) {
+                throw ValidationException::withMessages([
+                    'cancelled_at' => 'Cancellation window has passed (24h before session).',
+                ]);
+            }
+
+            $this->repository->updateStatus($bookingSessionId, BookingSessionStatusEnum::CANCELLED->value);
+            $this->repository->setCancelledAt($bookingSessionId);
+            $booking = $this->bookingService->find($bookingSession->booking_id);
+            $this->bookingService->refundCredit($booking);
+        });
+    }
+
+    public function markAttended(int $bookingSessionId): void
+    {
+        $this->logger->info('Marking session attended', ['session_id' => $bookingSessionId]);
+        $this->repository->updateStatus($bookingSessionId, BookingSessionStatusEnum::ATTENDED->value);
+    }
+
+    public function markNoShow(int $bookingSessionId): void
+    {
+        $this->logger->info('Marking session no-show', ['session_id' => $bookingSessionId]);
+        $this->repository->updateStatus($bookingSessionId, BookingSessionStatusEnum::NO_SHOW->value);
+    }
+
+    private function findById(int $id, bool $lockForUpdate = false): BookingSession
+    {
+        return $this->repository->find($id, $lockForUpdate);
+    }
+
+    public function reserve(int $bookingId, int $classSessionId): BookingSession
+    {
+        $this->logger->info('Reserving session', [
+            'booking_id' => $bookingId,
+            'class_session_id' => $classSessionId,
+        ]);
+
+        return DB::transaction(function () use ($bookingId, $classSessionId) {
+            $booking = $this->bookingService->find($bookingId, true);
+
+            $this->assertBookingHasCredits($booking);
+            $this->assertNoDuplicateSessionForUser($booking->user_id, $classSessionId);
+            $this->assertSessionHasAvailableSpots($classSessionId);
+
+            $this->classSessionService->find($classSessionId, true);
+            $this->bookingService->decrementCredits($booking);
+            $booking->refresh();
+
+            if (! $this->bookingService->hasCreditsRemaining($booking)) {
+                $this->bookingService->updateStatus($booking, BookingStatusEnum::EXHAUSTED);
+            }
+
+            return $this->repository->create([
+                'booking_id' => $bookingId,
+                'class_session_id' => $classSessionId,
+                'status' => BookingSessionStatusEnum::RESERVED,
+            ]);
+        });
+    }
+
+    public function countAttended(): int
+    {
+        return BookingSession::where('status', BookingSessionStatusEnum::ATTENDED)->count();
+    }
+
+    public function countNoShows(): int
+    {
+        return BookingSession::where('status', BookingSessionStatusEnum::NO_SHOW)->count();
+    }
+
+    public function countNoShowsForMonth(int $month, ?int $year = null): int
+    {
+        $year = $year ?? now()->year;
+
+        return BookingSession::where('status', BookingSessionStatusEnum::NO_SHOW)
+            ->whereMonth('created_at', $month)
+            ->whereYear('created_at', $year)
+            ->count();
+    }
+
+    public function countCancelled(): int
+    {
+        return BookingSession::where('status', BookingSessionStatusEnum::CANCELLED)->count();
+    }
+
+    public function getAttendanceTrend(int $days = 30): \Illuminate\Support\Collection
+    {
+        $startDate = now()->subDays($days)->startOfDay();
+        $sessions = BookingSession::where('status', BookingSessionStatusEnum::ATTENDED)
+            ->where('created_at', '>=', $startDate)
+            ->selectRaw('DATE(created_at) as date, COUNT(*) as count')
+            ->groupBy('date')
+            ->orderBy('date')
+            ->get()
+            ->pluck('count', 'date');
+
+        $dates = collect();
+        for ($i = 0; $i <= $days; $i++) {
+            $date = now()->subDays($days - $i)->toDateString();
+            $dates->put($date, $sessions->get($date, 0));
+        }
+
+        return $dates;
+    }
+
+    public function totalSessionsCount(): int
+    {
+        return BookingSession::count();
+    }
+
+    private function assertNoDuplicateSessionForUser(int $userId, int $classSessionId): void
+    {
+        if ($this->repository->existsForUserAndClassSession($userId, $classSessionId)) {
+            throw ValidationException::withMessages([
+                'class_session_id' => 'This user has already reserved this session.',
+            ]);
+        }
+    }
+
+    private function assertSessionHasAvailableSpots(int $classSessionId): void
+    {
+        if (! $this->classSessionService->hasAvailableSpots($classSessionId)) {
+            throw ValidationException::withMessages([
+                'class_session_id' => 'This session is fully booked.',
+            ]);
+        }
+    }
+
+    private function assertBookingHasCredits(\App\Models\Booking $booking): void
+    {
+        if (! $this->bookingService->hasCreditsRemaining($booking)) {
+            throw ValidationException::withMessages([
+                'booking_id' => 'This booking has no remaining credits.',
+            ]);
+        }
+    }
+}
+
+and:
+<?php
+
+// app/Repositories/Eloquent/BookingSession/BookingSessionEloquentRepository.php
+
+declare(strict_types=1);
+
+namespace App\Repositories\Eloquent\BookingSession;
+
+use App\Enums\BookingSessionStatusEnum;
+use App\Models\BookingSession;
+use App\Services\Log\LoggingService;
+use Carbon\Carbon;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\DB;
+
+class BookingSessionEloquentRepository
+{
+    public function __construct(
+        private readonly BookingSession $model,
+        private readonly LoggingService $logger
+    ) {
+    }
+
+    public function listUserSessions(int $userId, array $filters = []): LengthAwarePaginator
+    {
+        return DB::transaction(function () use ($userId, $filters) {
+            $this->logger->info('Fetching user booking sessions', ['user_id' => $userId]);
+
+            $query = $this->baseUserSessionsQuery($userId)
+                ->when($filters['status'] ?? null, fn($q, $status) => $q->where('status', $status))
+                ->latest();
+
+            return $query->paginate($filters['per_page'] ?? 20);
+        });
+    }
+
+    public function findByUser(int $userId, int $id): ?BookingSession
+    {
+        try {
+            return DB::transaction(function () use ($userId, $id) {
+                $this->logger->info('Finding booking session', ['user_id' => $userId, 'session_id' => $id]);
+
+                return $this->baseUserSessionsQuery($userId)
+                    ->find($id);
+            });
+        } catch (\Exception $e) {
+            $this->logger->error('Booking session find failed', [
+                'user_id' => $userId,
+                'id' => $id,
+                'error' => $e->getMessage(),
+            ]);
+            throw $e;
+        }
+    }
+
+    public function create(array $data): BookingSession
+    {
+        return DB::transaction(function () use ($data) {
+            $this->logger->info('Creating booking session', $data);
+
+            return $this->model->create($data);
+        });
+    }
+
+    public function updateStatus(int $id, string $status): bool
+    {
+        return DB::transaction(function () use ($id, $status) {
+            $this->logger->info('Updating booking session status', ['id' => $id, 'status' => $status]);
+
+            return (bool) $this->model->where('id', $id)->update(['status' => $status]);
+        });
+    }
+
+    public function existsForUserAndClassSession(int $userId, int $classSessionId): bool
+    {
+        return $this->model->query()
+            ->whereIn('status', [
+                BookingSessionStatusEnum::RESERVED->value,
+                BookingSessionStatusEnum::ATTENDED->value,
+            ])
+            ->where('class_session_id', $classSessionId)
+            ->whereHas('booking', fn($q) => $q->where('user_id', $userId))
+            ->exists();
+    }
+
+    public function setCancelledAt(int $id): bool
+    {
+        return (bool) $this->model->where('id', $id)->update(['cancelled_at' => now()]);
+    }
+
+    public function find(int $id, bool $lockForUpdate = false): ?BookingSession
+    {
+        $query = $this->model->where('id', $id);
+        if ($lockForUpdate) {
+            $query->lockForUpdate();
+        }
+
+        return $query->first();
+    }
+
+    public function getUpcomingSessionsForUser(int $userId, int $perPage = 20): LengthAwarePaginator
+    {
+        $now = Carbon::now();
+
+        $query = $this->baseUserSessionsQuery($userId)
+            ->whereHas('classSession', fn($q) => $this->upcomingCondition($q, $now))
+            ->whereIn('status', ['reserved']);
+
+        return $this->paginateWithEager($query, $perPage);
+    }
+
+    public function getPastSessionsForUser(int $userId, int $perPage = 20): LengthAwarePaginator
+    {
+        $now = Carbon::now();
+
+        $query = $this->baseUserSessionsQuery($userId)
+            ->whereHas('classSession', fn($q) => $this->pastCondition($q, $now));
+
+        return $this->paginateWithEager($query, $perPage);
+    }
+
+    public function getSeparateBothSessionsForUser(int $userId, int $perPage = 20): array
+    {
+        return [
+            'upcoming' => $this->getUpcomingSessionsForUser($userId, $perPage),
+            'past' => $this->getPastSessionsForUser($userId, $perPage),
+        ];
+    }
+
+    private function baseUserSessionsQuery(int $userId): Builder
+    {
+        return $this->model->query()
+            ->whereHas('booking', fn($q) => $q->where('user_id', $userId));
+    }
+
+    private function upcomingCondition(Builder $query, Carbon $now): void
+    {
+        $query->where(function ($sub) use ($now) {
+            $sub->whereDate('date', '>', $now->toDateString())
+                ->orWhere(function ($inner) use ($now) {
+                    $inner->whereDate('date', '=', $now->toDateString())
+                        ->whereTime('start_time', '>=', $now->toTimeString());
+                });
+        });
+    }
+
+    private function pastCondition(Builder $query, Carbon $now): void
+    {
+        $query->where(function ($sub) use ($now) {
+            $sub->whereDate('date', '<', $now->toDateString())
+                ->orWhere(function ($inner) use ($now) {
+                    $inner->whereDate('date', '=', $now->toDateString())
+                        ->whereTime('start_time', '<', $now->toTimeString());
+                });
+        });
+    }
+
+    private function paginateWithEager(Builder $query, int $perPage): LengthAwarePaginator
+    {
+        return $query
+            ->with(['classSession.class.instructor', 'classSession.class.primaryImage'])
+            ->latest()
+            ->paginate($perPage);
+    }
+}
+
+and check:
+<?php
+
+// filePath: routes/api/v1/public/class_sessions.php
+declare(strict_types=1);
+
+use App\Http\Controllers\Api\V1\ClassSession\ClassSessionController;
+use Illuminate\Support\Facades\Route;
+
+Route::get('class-sessions', [ClassSessionController::class, 'index'])->name('class-sessions.index');
+Route::get('class-sessions/{id}', [ClassSessionController::class, 'show'])->name('class-sessions.show');
+
+and:
+<?php
+
+// filePath: app/Http/Controllers/Api/V1/ClassSession/ClassSessionController.php
+
+declare(strict_types=1);
+
+namespace App\Http\Controllers\Api\V1\ClassSession;
+
+use App\Http\Controllers\Api\BaseApiController;
+use App\Http\Requests\Api\V1\ClassSession\QueryClassSessionsRequest;
+use App\Http\Resources\Api\V1\ClassSessionResource;
+use App\Services\ClassSession\ClassSessionService;
+use Dedoc\Scramble\Attributes\Endpoint;
+use Dedoc\Scramble\Attributes\Group;
+use Illuminate\Http\JsonResponse;
+
+#[Group('Class Sessions')]
+class ClassSessionController extends BaseApiController
+{
+    public function __construct(
+        private readonly ClassSessionService $classSessionService
+    ) {}
+
+    #[Endpoint('List class sessions', description: 'Returns filtered upcoming class sessions.')]
+    public function index(QueryClassSessionsRequest $request): JsonResponse
+    {
+
+        $sessions = $this->classSessionService->querySessions(
+            date: $request->date,
+            dateAfter: $request->date_after,
+            dateBefore: $request->date_before,
+            startAfter: $request->start_after,
+            classId: $request->integer('class_id') ?: null,
+            perPage: $request->integer('per_page') ?: 20
+        );
+
+        return $this->success(
+            ClassSessionResource::collection($sessions)->response()->getData(true)
+        );
+    }
+
+    #[Endpoint('Get class session by ID', description: 'Returns a class session by its ID.')]
+    public function show(int $id): JsonResponse
+    {
+        $session = $this->classSessionService->getSessionById($id);
+
+        return $this->success(new ClassSessionResource($session));
+    }
+}
+
+and:
+<?php
+
+declare(strict_types=1);
+
+namespace App\Http\Requests\Api\V1\ClassSession;
+
+use Illuminate\Foundation\Http\FormRequest;
+
+class QueryClassSessionsRequest extends FormRequest
+{
+    public function authorize(): bool
+    {
+        return true;
+    }
+
+    public function rules(): array
+    {
+        return [
+            'date' => 'nullable|date_format:Y-m-d',
+            'date_after' => 'nullable|date_format:Y-m-d',
+            'date_before' => 'nullable|date_format:Y-m-d',
+            'start_after' => 'nullable|date_format:H:i',
+            'class_id' => 'nullable|exists:classes,id',
+            'per_page' => 'integer|min:1|max:100',
+        ];
+    }
+}
+
+and:
+
+<?php
+
+// filePath: app/Services/ClassSession/ClassSessionService.php
+
+declare(strict_types=1);
+
+namespace App\Services\ClassSession;
+
+use App\Enums\BookingSessionStatusEnum;
+use App\Models\BookingSession;
+use App\Models\ClassSession;
+use App\Repositories\Eloquent\ClassSession\ClassSessionEloquentRepository;
+use App\Services\BookingSession\BookingSessionService;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
+
+class ClassSessionService
+{
+    public function __construct(
+        private readonly ClassSessionEloquentRepository $repository
+    ) {}
+
+    public function querySessions(
+        ?string $date = null,
+        ?string $dateAfter = null,
+        ?string $dateBefore = null,
+        ?string $startAfter = null,
+        ?int $classId = null,
+        int $perPage = 20
+    ): LengthAwarePaginator {
+        return $this->repository->queryUpcomingSessions(
+            date: $date,
+            dateAfter: $dateAfter,
+            dateBefore: $dateBefore,
+            startAfter: $startAfter,
+            classId: $classId,
+            perPage: $perPage
+        );
+    }
+
+    public function reserve(int $bookingId, int $classSessionId): BookingSession
+    {
+        return app(BookingSessionService::class)->reserve($bookingId, $classSessionId);
+    }
+
+    public function listUpcomingSessions(int $perPage = 20): LengthAwarePaginator
+    {
+        return $this->repository->queryUpcomingSessions(
+            date: null,
+            dateAfter: null,
+            dateBefore: null,
+            startAfter: null,
+            classId: null,
+            perPage: $perPage
+        );
+    }
+
+    public function find(int $id, bool $lockForUpdate = false): ClassSession
+    {
+        $session = $lockForUpdate
+            ? ClassSession::lockForUpdate()->find($id)
+            : $this->repository->findById($id);
+
+        if (! $session) {
+            throw new ModelNotFoundException("Class session with ID {$id} not found.");
+        }
+
+        return $session;
+    }
+
+    public function hasAvailableSpots(int $id): bool
+    {
+        $session = $this->repository->findById($id);
+
+        return $session && $session->available_spots > 0;
+    }
+
+    public function getSessionById(int $id): ClassSession
+    {
+        $session = $this->repository->findById($id);
+
+        if (! $session) {
+            throw new ModelNotFoundException("Class session with ID {$id} not found.");
+        }
+
+        return $session;
+    }
+
+    public function getFillRate(): float
+    {
+        $sessions = ClassSession::withCount([
+            'bookingSessions' => function ($q) {
+                $q->whereIn('status', [
+                    BookingSessionStatusEnum::RESERVED->value,
+                    BookingSessionStatusEnum::ATTENDED->value,
+                ]);
+            },
+        ])->get();
+
+        if ($sessions->isEmpty()) {
+            return 0;
+        }
+
+        $totalFill = $sessions->sum(function ($session) {
+            return $session->total_spots > 0 ? ($session->booking_sessions_count / $session->total_spots) * 100 : 0;
+        });
+
+        return (float) round($totalFill / $sessions->count(), 1);
+    }
+
+    public function countUpcomingFullSessions(): int
+    {
+        $sessions = ClassSession::where('date', '>', now())->get();
+
+        return $sessions->filter(fn ($session) => $session->isFull())->count();
+    }
+}
+
+and:
+
+<?php
+
+// filePath: app/Repositories/Eloquent/ClassSession/ClassSessionEloquentRepository.php
+
+declare(strict_types=1);
+
+namespace App\Repositories\Eloquent\ClassSession;
+
+use App\Models\ClassSession;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+
+class ClassSessionEloquentRepository
+{
+    public function __construct(
+        private readonly ClassSession $model
+    ) {}
+
+    public function queryUpcomingSessions(
+        ?string $date,
+        ?string $dateAfter,
+        ?string $dateBefore,
+        ?string $startAfter,
+        ?int $classId,
+        int $perPage
+    ): LengthAwarePaginator {
+        return $this->model->newQuery()
+            ->with(['class.instructor', 'class.primaryImage', 'class.category'])
+            ->when($date, fn ($q) => $q->whereDate('date', $date))
+            ->when($dateAfter, fn ($q) => $q->whereDate('date', '>=', $dateAfter))
+            ->when($dateBefore, fn ($q) => $q->whereDate('date', '<=', $dateBefore))
+            ->when($startAfter, fn ($q, $time) => $q->where('start_time', '>=', $time))
+            ->when($classId, fn ($q, $id) => $q->where('class_id', $id))
+            ->whereDate('date', '>=', now()->toDateString())
+            ->orderBy('date')
+            ->orderBy('start_time')
+            ->paginate($perPage);
+    }
+
+    public function findById(int $id): ?ClassSession
+    {
+        return $this->model->newQuery()
+            ->with([
+                'class.instructor',
+                'class.category',
+                'class.primaryImage',
+            ])->find($id);
+    }
+}

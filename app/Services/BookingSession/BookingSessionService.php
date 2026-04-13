@@ -6,6 +6,7 @@ declare(strict_types=1);
 
 namespace App\Services\BookingSession;
 
+use App\Enums\AttendanceStatusEnum;
 use App\Enums\BookingSessionStatusEnum;
 use App\Enums\BookingStatusEnum;
 use App\Models\BookingSession;
@@ -80,13 +81,15 @@ class BookingSessionService
     public function markAttended(int $bookingSessionId): void
     {
         $this->logger->info('Marking session attended', ['session_id' => $bookingSessionId]);
-        $this->repository->updateStatus($bookingSessionId, BookingSessionStatusEnum::ATTENDED->value);
+        $bookingSession = $this->findById($bookingSessionId);
+        $bookingSession->markAttended();
     }
 
-    public function markNoShow(int $bookingSessionId): void
+    public function markMissed(int $bookingSessionId): void
     {
-        $this->logger->info('Marking session no-show', ['session_id' => $bookingSessionId]);
-        $this->repository->updateStatus($bookingSessionId, BookingSessionStatusEnum::NO_SHOW->value);
+        $this->logger->info('Marking session missed', ['session_id' => $bookingSessionId]);
+        $bookingSession = $this->findById($bookingSessionId);
+        $bookingSession->markMissed();
     }
 
     private function findById(int $id, bool $lockForUpdate = false): BookingSession
@@ -126,19 +129,19 @@ class BookingSessionService
 
     public function countAttended(): int
     {
-        return BookingSession::where('status', BookingSessionStatusEnum::ATTENDED)->count();
+        return BookingSession::where('attendance_status', AttendanceStatusEnum::ATTENDED)->count();
     }
 
-    public function countNoShows(): int
+    public function countMissed(): int
     {
-        return BookingSession::where('status', BookingSessionStatusEnum::NO_SHOW)->count();
+        return BookingSession::where('attendance_status', AttendanceStatusEnum::MISSED)->count();
     }
 
-    public function countNoShowsForMonth(int $month, ?int $year = null): int
+    public function countMissedForMonth(int $month, ?int $year = null): int
     {
         $year = $year ?? now()->year;
 
-        return BookingSession::where('status', BookingSessionStatusEnum::NO_SHOW)
+        return BookingSession::where('attendance_status', AttendanceStatusEnum::MISSED)
             ->whereMonth('created_at', $month)
             ->whereYear('created_at', $year)
             ->count();
@@ -152,7 +155,7 @@ class BookingSessionService
     public function getAttendanceTrend(int $days = 30): \Illuminate\Support\Collection
     {
         $startDate = now()->subDays($days)->startOfDay();
-        $sessions = BookingSession::where('status', BookingSessionStatusEnum::ATTENDED)
+        $sessions = BookingSession::where('attendance_status', AttendanceStatusEnum::ATTENDED)
             ->where('created_at', '>=', $startDate)
             ->selectRaw('DATE(created_at) as date, COUNT(*) as count')
             ->groupBy('date')

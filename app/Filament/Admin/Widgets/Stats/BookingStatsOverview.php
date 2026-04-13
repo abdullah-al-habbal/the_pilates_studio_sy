@@ -2,6 +2,7 @@
 
 namespace App\Filament\Admin\Widgets\Stats;
 
+use App\Enums\AttendanceStatusEnum;
 use App\Enums\BookingSessionStatusEnum;
 use App\Enums\BookingStatusEnum;
 use App\Models\Booking;
@@ -34,7 +35,7 @@ class BookingStatsOverview extends BaseWidget
             $this->reservedStat(),
             $this->attendedStat(),
             $this->cancelledSessionsStat(),
-            $this->noShowStat(),
+            $this->missedStat(),
         ];
     }
 
@@ -42,12 +43,12 @@ class BookingStatsOverview extends BaseWidget
     {
         return Cache::remember('widget.bookings.stats', now()->addMinutes(10), function () {
             return [
-                'total'                         => Booking::withTrashed()->count(),
-                BookingStatusEnum::ACTIVE->value    => Booking::where('status', BookingStatusEnum::ACTIVE->value)->count(),
+                'total' => Booking::withTrashed()->count(),
+                BookingStatusEnum::ACTIVE->value => Booking::where('status', BookingStatusEnum::ACTIVE->value)->count(),
                 BookingStatusEnum::EXHAUSTED->value => Booking::where('status', BookingStatusEnum::EXHAUSTED->value)->count(),
-                BookingStatusEnum::EXPIRED->value   => Booking::where('status', BookingStatusEnum::EXPIRED->value)->count(),
+                BookingStatusEnum::EXPIRED->value => Booking::where('status', BookingStatusEnum::EXPIRED->value)->count(),
                 BookingStatusEnum::CANCELLED->value => Booking::where('status', BookingStatusEnum::CANCELLED->value)->count(),
-                'credits'                       => Booking::where('status', BookingStatusEnum::ACTIVE->value)->sum('remaining_credits'),
+                'credits' => Booking::where('status', BookingStatusEnum::ACTIVE->value)->sum('remaining_credits'),
             ];
         });
     }
@@ -56,11 +57,11 @@ class BookingStatsOverview extends BaseWidget
     {
         return Cache::remember('widget.booking_sessions.stats', now()->addMinutes(10), function () {
             return [
-                'total'                              => BookingSession::count(),
-                BookingSessionStatusEnum::RESERVED->value  => BookingSession::where('status', BookingSessionStatusEnum::RESERVED->value)->count(),
-                BookingSessionStatusEnum::ATTENDED->value  => BookingSession::where('status', BookingSessionStatusEnum::ATTENDED->value)->count(),
+                'total' => BookingSession::count(),
+                BookingSessionStatusEnum::RESERVED->value => BookingSession::where('status', BookingSessionStatusEnum::RESERVED->value)->count(),
+                'attended' => BookingSession::where('attendance_status', AttendanceStatusEnum::ATTENDED->value)->count(),
                 BookingSessionStatusEnum::CANCELLED->value => BookingSession::where('status', BookingSessionStatusEnum::CANCELLED->value)->count(),
-                BookingSessionStatusEnum::NO_SHOW->value   => BookingSession::where('status', BookingSessionStatusEnum::NO_SHOW->value)->count(),
+                'missed' => BookingSession::where('attendance_status', AttendanceStatusEnum::MISSED->value)->count(),
             ];
         });
     }
@@ -128,7 +129,7 @@ class BookingStatsOverview extends BaseWidget
 
     private function attendedStat(): Stat
     {
-        return Stat::make(__('widgets.bookings.attended'), $this->sessionData()[BookingSessionStatusEnum::ATTENDED->value])
+        return Stat::make(__('widgets.bookings.attended'), $this->sessionData()['attended'])
             ->description(__('widgets.bookings.attended_desc'))
             ->descriptionIcon('heroicon-m-check-badge')
             ->color('success');
@@ -141,10 +142,10 @@ class BookingStatsOverview extends BaseWidget
             ->color('warning');
     }
 
-    private function noShowStat(): Stat
+    private function missedStat(): Stat
     {
-        return Stat::make(__('widgets.bookings.no_shows'), $this->sessionData()[BookingSessionStatusEnum::NO_SHOW->value])
-            ->description(__('widgets.bookings.no_shows_desc'))
+        return Stat::make(__('widgets.bookings.missed'), $this->sessionData()['missed'])
+            ->description(__('widgets.bookings.missed_desc'))
             ->descriptionIcon('heroicon-m-user-minus')
             ->color('danger');
     }

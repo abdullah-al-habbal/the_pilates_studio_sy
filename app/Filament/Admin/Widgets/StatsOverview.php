@@ -45,10 +45,10 @@ class StatsOverview extends BaseWidget
                 ->chart($statsData['attendance_trend'])
                 ->color($statsData['attendance_rate'] >= 70 ? 'success' : 'danger'),
 
-            Stat::make(__('dashboard.widgets.stats_overview.no_shows'), $statsData['no_shows'])
-                ->description(__('dashboard.widgets.stats_overview.no_shows_description', ['trend' => ($statsData['no_show_trend'] > 0 ? '+' : '').$statsData['no_show_trend']]))
+            Stat::make(__('dashboard.widgets.stats_overview.missed'), $statsData['missed'])
+                ->description(__('dashboard.widgets.stats_overview.missed_description', ['trend' => ($statsData['missed_trend'] > 0 ? '+' : '').$statsData['missed_trend']]))
                 ->descriptionIcon('heroicon-m-arrow-trending-down')
-                ->color($statsData['no_show_trend'] > 0 ? 'danger' : 'success'),
+                ->color($statsData['missed_trend'] > 0 ? 'danger' : 'success'),
 
             Stat::make(__('dashboard.widgets.stats_overview.fill_rate'), $statsData['fill_rate'].'%')
                 ->description(__('dashboard.widgets.stats_overview.fill_rate_description'))

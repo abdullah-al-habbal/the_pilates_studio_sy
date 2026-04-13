@@ -30,9 +30,9 @@ class StatsService
             $totalCreditsSold = $this->bookingService->sumTotalCredits();
             $creditsConsumed = $this->bookingService->sumUsedCredits();
             $attendanceRate = $this->calculateAttendanceRate();
-            $noShowsCurrent = $this->bookingSessionService->countNoShowsForMonth(now()->month);
-            $noShowsPrevious = $this->bookingSessionService->countNoShowsForMonth(now()->subMonth()->month);
-            $noShowTrend = $noShowsPrevious > 0 ? (int) round((($noShowsCurrent - $noShowsPrevious) / $noShowsPrevious) * 100) : 0;
+            $missedCurrent = $this->bookingSessionService->countMissedForMonth(now()->month);
+            $missedPrevious = $this->bookingSessionService->countMissedForMonth(now()->subMonth()->month);
+            $missedTrend = $missedPrevious > 0 ? (int) round((($missedCurrent - $missedPrevious) / $missedPrevious) * 100) : 0;
             $cancellationRate = $this->calculateCancellationRate();
             $fillRate = $this->classSessionService->getFillRate();
             $upcomingFullSessions = $this->classSessionService->countUpcomingFullSessions();
@@ -45,8 +45,8 @@ class StatsService
                 'credits_consumed' => $creditsConsumed,
                 'attendance_rate' => $attendanceRate,
                 'attendance_trend' => $this->bookingSessionService->getAttendanceTrend(30)->values()->toArray(),
-                'no_shows' => $noShowsCurrent,
-                'no_show_trend' => $noShowTrend,
+                'missed' => $missedCurrent,
+                'missed_trend' => $missedTrend,
                 'cancellation_rate' => $cancellationRate,
                 'fill_rate' => $fillRate,
                 'upcoming_full_sessions' => $upcomingFullSessions,

@@ -20,7 +20,7 @@ class BookingSessionResource extends JsonResource
             'is_cancelled' => $this->isCancelled(),
             'is_reserved' => $this->isReserved(),
             'is_attended' => $this->isAttended(),
-            'is_no_show' => $this->isNoShow(),
+            'is_missed' => $this->isMissed(),
             'class_session' => new ClassSessionResource($this->whenLoaded('classSession')),
         ];
     }

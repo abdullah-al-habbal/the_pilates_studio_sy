@@ -32,8 +32,8 @@ return [
         'attended'            => 'Attended',
         'attended_desc'       => 'Completed sessions',
         'cancelled_sessions'  => 'Cancelled Sessions',
-        'no_shows'            => 'No Shows',
-        'no_shows_desc'       => 'Reserved but did not attend',
+        'missed'              => 'Missed Sessions',
+        'missed_desc'         => 'Reserved but did not attend',
     ],
 
     'classes' => [

@@ -90,10 +90,7 @@ class ClassSessionService
     {
         $sessions = ClassSession::withCount([
             'bookingSessions' => function ($q) {
-                $q->whereIn('status', [
-                    BookingSessionStatusEnum::RESERVED->value,
-                    BookingSessionStatusEnum::ATTENDED->value,
-                ]);
+                $q->where('status', BookingSessionStatusEnum::RESERVED->value);
             },
         ])->get();
 
@@ -110,8 +107,8 @@ class ClassSessionService
 
     public function countUpcomingFullSessions(): int
     {
-        $sessions = ClassSession::where('date', '>', now())->get();
+        $sessions = ClassSession::query()->where('date', '>', now())->get();
 
-        return $sessions->filter(fn ($session) => $session->isFull())->count();
+        return $sessions->filter(fn(ClassSession $session) => $session->isFull())->count();
     }
 }

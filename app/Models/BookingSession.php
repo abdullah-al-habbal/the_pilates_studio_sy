@@ -1,9 +1,8 @@
 <?php
-
-// filePath: app/Models/BookingSession.php
-
+declare(strict_types=1);
 namespace App\Models;
 
+use App\Enums\AttendanceStatusEnum;
 use App\Enums\BookingSessionStatusEnum;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -18,15 +17,20 @@ class BookingSession extends Model
         'class_session_id',
         'status',
         'cancelled_at',
+        'attendance_status',
+        'attended_at',
     ];
 
     protected function casts(): array
     {
         return [
             'cancelled_at' => 'datetime',
+            'attended_at' => 'datetime',
             'status' => BookingSessionStatusEnum::class,
+            'attendance_status' => AttendanceStatusEnum::class,
         ];
     }
+
 
     public function isCancelled(): bool
     {
@@ -38,15 +42,33 @@ class BookingSession extends Model
         return $this->status === BookingSessionStatusEnum::RESERVED;
     }
 
+
     public function isAttended(): bool
     {
-        return $this->status === BookingSessionStatusEnum::ATTENDED;
+        return $this->attendance_status === AttendanceStatusEnum::ATTENDED;
     }
 
-    public function isNoShow(): bool
+    public function isMissed(): bool
     {
-        return $this->status === BookingSessionStatusEnum::NO_SHOW;
+        return $this->attendance_status === AttendanceStatusEnum::MISSED;
     }
+
+    public function markAttended(): void
+    {
+        $this->update([
+            'attendance_status' => AttendanceStatusEnum::ATTENDED,
+            'attended_at' => now(),
+        ]);
+    }
+
+    public function markMissed(): void
+    {
+        $this->update([
+            'attendance_status' => AttendanceStatusEnum::MISSED,
+            'attended_at' => null,
+        ]);
+    }
+
 
     public function booking(): BelongsTo
     {

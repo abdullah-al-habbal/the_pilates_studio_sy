@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Enums\AttendanceStatusEnum;
 use App\Enums\BookingSessionStatusEnum;
 use App\Enums\BookingStatusEnum;
 use App\Enums\ClassSessionStatusEnum;
@@ -28,7 +29,10 @@ class BookingSessionFactory extends Factory
 
     public function attended(): static
     {
-        return $this->state(fn () => ['status' => BookingSessionStatusEnum::ATTENDED]);
+        return $this->state(fn () => [
+            'attendance_status' => AttendanceStatusEnum::ATTENDED,
+            'attended_at' => now(),
+        ]);
     }
 
     public function cancelled(): static
@@ -39,8 +43,10 @@ class BookingSessionFactory extends Factory
         ]);
     }
 
-    public function noShow(): static
+    public function missed(): static
     {
-        return $this->state(fn () => ['status' => BookingSessionStatusEnum::NO_SHOW]);
+        return $this->state(fn () => [
+            'attendance_status' => AttendanceStatusEnum::MISSED,
+        ]);
     }
 }

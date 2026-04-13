@@ -4,6 +4,7 @@
 
 namespace App\Filament\Admin\Resources\Bookings;
 
+use App\Enums\AttendanceStatusEnum;
 use App\Enums\BookingSessionStatusEnum;
 use App\Filament\Admin\Resources\Bookings\Pages\CreateBooking;
 use App\Filament\Admin\Resources\Bookings\Pages\EditBooking;
@@ -116,7 +117,7 @@ class BookingResource extends Resource
                     $query->where('status', BookingSessionStatusEnum::RESERVED);
                 },
                 'bookingSessions as attended_sessions_count' => function ($query) {
-                    $query->where('status', BookingSessionStatusEnum::ATTENDED);
+                    $query->where('attendance_status', AttendanceStatusEnum::ATTENDED);
                 },
             ]);
     }
