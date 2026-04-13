@@ -92,6 +92,34 @@ class BookingSessionService
         $bookingSession->markMissed();
     }
 
+    public function toggleAttendance(int $bookingSessionId, AttendanceStatusEnum $status): void
+    {
+        $this->logger->info('Toggling attendance', [
+            'session_id' => $bookingSessionId,
+            'status' => $status->value,
+        ]);
+
+        $bookingSession = $this->findById($bookingSessionId);
+        if ($status === AttendanceStatusEnum::ATTENDED) {
+            $bookingSession->markAttended();
+        } else {
+            $bookingSession->markMissed();
+        }
+    }
+
+    public function oneTimeAttend(int $userId, int $classSessionId): void
+    {
+        $this->logger->info('Processing one-time attendance', [
+            'user_id' => $userId,
+            'class_session_id' => $classSessionId,
+        ]);
+
+        DB::transaction(function () use ($userId, $classSessionId) {
+            $booking = $this->bookingService->createWalkInBooking($userId);
+            $this->reserve($booking->id, $classSessionId)->markAttended();
+        });
+    }
+
     private function findById(int $id, bool $lockForUpdate = false): BookingSession
     {
         return $this->repository->find($id, $lockForUpdate);

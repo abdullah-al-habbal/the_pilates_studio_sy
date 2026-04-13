@@ -19,10 +19,10 @@ use Illuminate\Validation\ValidationException;
 
 class BookingService
 {
-
     public function __construct(
         private readonly BookingEloquentRepository $repository,
     ) {}
+
     public function userHasActiveCreditBooking(User $user): bool
     {
         return $this->repository->userHasActiveCreditBooking($user->id);
@@ -158,6 +158,30 @@ class BookingService
     public function sumUsedCredits(): int
     {
         return $this->repository->sumUsedCredits();
+    }
+
+    public function createWalkInBooking(int $userId): Booking
+    {
+        return DB::transaction(function () use ($userId): Booking {
+            $package = Package::firstOrCreate(
+                ['name->en' => 'Walk-in Pass'],
+                [
+                    'name->ar' => 'خدمة لمرة واحدة',
+                    'total_credits' => 1,
+                    'price' => 0,
+                    'status' => 'active',
+                ]
+            );
+
+            return Booking::create([
+                'user_id' => $userId,
+                'package_id' => $package->id,
+                'total_credits' => 1,
+                'remaining_credits' => 1,
+                'status' => BookingStatusEnum::ACTIVE,
+                'expires_at' => now()->endOfDay(),
+            ]);
+        });
     }
 
     public function getRevenueByPackage(): Collection
