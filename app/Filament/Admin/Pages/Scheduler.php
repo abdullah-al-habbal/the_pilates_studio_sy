@@ -45,11 +45,11 @@ class Scheduler extends Page implements HasTable
                     ->sortable(),
                 TextColumn::make('time_range')
                     ->label('Time')
-                    ->state(fn (ClassSession $record) => substr($record->start_time, 0, 5).' - '.substr($record->end_time, 0, 5)),
+                    ->state(fn(ClassSession $record) => substr($record->start_time, 0, 5) . ' - ' . substr($record->end_time, 0, 5)),
                 TextColumn::make('attendance_summary')
                     ->label('Attendance')
                     ->state(
-                        fn (ClassSession $record) => $record->bookingSessions()->where('attendance_status', AttendanceStatusEnum::ATTENDED)->count().' / '.
+                        fn(ClassSession $record) => $record->bookingSessions()->where('attendance_status', AttendanceStatusEnum::ATTENDED)->count() . ' / ' .
                         $record->bookingSessions()->count()
                     )
                     ->badge()
@@ -62,8 +62,8 @@ class Scheduler extends Page implements HasTable
                     ->label('Manage Attendance')
                     ->icon('heroicon-o-user-check')
                     ->color('success')
-                    ->modalHeading(fn (ClassSession $record) => 'Attendance: '.($record->class?->title['en'] ?? 'Class').' ('.$record->date->format('M j').')')
-                    ->modalContent(fn (ClassSession $record) => view('filament.admin.pages.scheduler.attendance-modal', ['session' => $record]))
+                    ->modalHeading(fn(ClassSession $record) => 'Attendance: ' . ($record->class?->title['en'] ?? 'Class') . ' (' . $record->date->format('M j') . ')')
+                    ->modalContent(fn(ClassSession $record) => view('filament.admin.pages.scheduler.attendance-modal', ['session' => $record]))
                     ->modalSubmitAction(false)
                     ->modalCancelActionLabel('Close'),
             ])
@@ -102,7 +102,7 @@ class Scheduler extends Page implements HasTable
             Action::make('refresh')
                 ->label('Refresh Data')
                 ->icon('heroicon-o-arrow-path')
-                ->action(fn () => $this->redirect(static::getUrl())),
+                ->action(fn() => $this->redirect(static::getUrl())),
         ];
     }
 }
