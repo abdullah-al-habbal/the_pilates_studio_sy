@@ -5,12 +5,13 @@ namespace App\Filament\Admin\Pages;
 use App\Repositories\Eloquent\Booking\BookingEloquentRepository;
 use App\Repositories\Eloquent\Classes\ClassesEloquentRepository;
 use App\Repositories\Eloquent\Merchandise\MerchandiseOrderEloquentRepository;
+use BackedEnum;
 use Filament\Pages\Page;
 use Illuminate\Support\Facades\App;
 
 class Reports extends Page
 {
-    protected static ?string $navigationIcon = 'heroicon-o-presentation-chart-bar';
+    protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-presentation-chart-bar';
 
     public static function getNavigationLabel(): string
     {
@@ -29,7 +30,7 @@ class Reports extends Page
 
     protected static ?int $navigationSort = 2;
 
-    protected static string $view = 'filament.admin.pages.reports';
+    protected string $view = 'filament.admin.pages.reports';
 
     public string $period = 'all';
 

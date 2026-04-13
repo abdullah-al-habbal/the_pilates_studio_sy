@@ -45,6 +45,12 @@ return [
         ],
         'reports' => [
             'title' => 'تقارير العمل',
+            'filters' => [
+                'all_time' => 'كل الوقت',
+                'yearly' => 'سنوي',
+                'monthly' => 'شهري',
+                'daily' => 'يومي',
+            ],
             'stats' => [
                 'total_revenue' => 'إجمالي الإيرادات',
                 'booking_revenue' => 'إيرادات الحجوزات',

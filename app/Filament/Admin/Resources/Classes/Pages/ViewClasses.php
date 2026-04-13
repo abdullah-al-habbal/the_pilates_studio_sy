@@ -22,7 +22,7 @@ class ViewClasses extends ViewRecord
 
     protected static string $resource = ClassesResource::class;
 
-    public function getTitle(): string | Htmlable
+    public function getTitle(): string|Htmlable
     {
         return $this->getRecord()->title;
     }
@@ -38,7 +38,7 @@ class ViewClasses extends ViewRecord
             LocaleSwitcher::make(),
             Action::make('mark_completed')
                 ->label('Mark Completed')
-                ->icon('heroicon-o-check-circle')
+                ->icon('heroicon-s-check-circle')
                 ->color('success')
                 ->requiresConfirmation()
                 ->modalHeading('Mark Class as Completed')

@@ -6,10 +6,10 @@ use App\Enums\AttendanceStatusEnum;
 use App\Models\ClassSession;
 use App\Repositories\Eloquent\ClassSession\ClassSessionEloquentRepository;
 use App\Services\BookingSession\BookingSessionService;
+use BackedEnum;
 use Filament\Actions\Action;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
-use Filament\Tables\Actions\Action as TableAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Concerns\InteractsWithTable;
 use Filament\Tables\Contracts\HasTable;
@@ -20,7 +20,7 @@ class Scheduler extends Page implements HasTable
 {
     use InteractsWithTable;
 
-    protected static ?string $navigationIcon = 'heroicon-o-calendar-days';
+    protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-calendar-days';
 
     public static function getNavigationLabel(): string
     {
@@ -39,7 +39,7 @@ class Scheduler extends Page implements HasTable
 
     protected static ?int $navigationSort = 1;
 
-    protected static string $view = 'filament.admin.pages.scheduler';
+    protected string $view = 'filament.admin.pages.scheduler';
 
     public function table(Table $table): Table
     {
@@ -54,7 +54,7 @@ class Scheduler extends Page implements HasTable
                     ->searchable(),
                 TextColumn::make('class.title')
                     ->label(__('dashboard.pages.scheduler.class'))
-                    ->formatStateUsing(fn ($state) => $state[app()->getLocale()] ?? $state['en'] ?? '')
+                    ->formatStateUsing(fn($state) => $state[app()->getLocale()] ?? $state['en'] ?? '')
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('class.instructor.fullname')
@@ -63,11 +63,11 @@ class Scheduler extends Page implements HasTable
                     ->sortable(),
                 TextColumn::make('time_range')
                     ->label(__('dashboard.pages.scheduler.time'))
-                    ->state(fn (ClassSession $record) => substr($record->start_time, 0, 5).' - '.substr($record->end_time, 0, 5)),
+                    ->state(fn(ClassSession $record) => substr($record->start_time, 0, 5) . ' - ' . substr($record->end_time, 0, 5)),
                 TextColumn::make('attendance_summary')
                     ->label(__('dashboard.pages.scheduler.attendance_summary'))
                     ->state(
-                        fn (ClassSession $record) => $record->bookingSessions()->where('attendance_status', AttendanceStatusEnum::ATTENDED)->count().' / '.
+                        fn(ClassSession $record) => $record->bookingSessions()->where('attendance_status', AttendanceStatusEnum::ATTENDED)->count() . ' / ' .
                         $record->bookingSessions()->count()
                     )
                     ->badge()
@@ -76,7 +76,7 @@ class Scheduler extends Page implements HasTable
                     ->badge(),
             ])
             ->actions([
-                TableAction::make('attendance')
+                Action::make('attendance')
                     ->label(__('dashboard.pages.scheduler.attendance'))
                     ->icon('heroicon-o-user-check')
                     ->color('success')
@@ -88,7 +88,7 @@ class Scheduler extends Page implements HasTable
                             'date' => $record->date->format('M j'),
                         ]);
                     })
-                    ->modalContent(fn (ClassSession $record) => view('filament.admin.pages.scheduler.attendance-modal', ['session' => $record]))
+                    ->modalContent(fn(ClassSession $record) => view('filament.admin.pages.scheduler.attendance-modal', ['session' => $record]))
                     ->modalSubmitAction(false)
                     ->modalCancelActionLabel(__('dashboard.pages.scheduler.modal.close')),
             ])
@@ -127,7 +127,7 @@ class Scheduler extends Page implements HasTable
             Action::make('refresh')
                 ->label(__('dashboard.pages.scheduler.actions.refresh'))
                 ->icon('heroicon-o-arrow-path')
-                ->action(fn () => $this->redirect(static::getUrl())),
+                ->action(fn() => $this->redirect(static::getUrl())),
         ];
     }
 }

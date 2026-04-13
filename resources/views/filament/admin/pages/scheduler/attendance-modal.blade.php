@@ -1,5 +1,5 @@
+<!-- resources\views\filament\admin\pages\scheduler\attendance-modal.blade.php -->
 <div class="space-y-6 py-4">
-    {{-- Attendees List --}}
     <div class="space-y-4">
         <h3 class="text-lg font-bold flex items-center gap-2">
             <x-heroicon-o-users class="w-5 h-5 text-gray-400" />
@@ -55,7 +55,6 @@
         @endif
     </div>
 
-    {{-- Walk-in Section --}}
     <div class="pt-6 border-t border-gray-200 dark:border-gray-700 space-y-4">
         <h3 class="text-lg font-bold flex items-center gap-2 text-primary-600">
             <x-heroicon-o-user-plus class="w-5 h-5" />

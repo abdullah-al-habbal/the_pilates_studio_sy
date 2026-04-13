@@ -168,7 +168,7 @@ class ClassesInfolist
                         ->numeric()
                         ->badge()
                         ->color('warning')
-                        ->icon('heroicon-o-check-circle'),
+                        ->icon('heroicon-s-check-circle'),
                 ]),
 
             Section::make(__('dashboard.resources.classes.sections.gallery'))

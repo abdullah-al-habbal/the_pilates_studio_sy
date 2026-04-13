@@ -7,6 +7,55 @@ return [
         'groups' => [
             'bookings' => 'Bookings',
             'schedule' => 'Schedule',
+            'operations' => 'Operations',
+        ],
+        'scheduler' => 'Scheduler',
+        'reports' => 'Reports',
+    ],
+    'pages' => [
+        'scheduler' => [
+            'title' => 'Schedule',
+            'class' => 'Class',
+            'instructor' => 'Instructor',
+            'no_instructor' => 'No Instructor',
+            'time' => 'Time',
+            'attendance_summary' => 'Attendance Summary',
+            'attendance' => 'Attendance',
+            'modal' => [
+                'heading' => ':class on :date',
+                'close' => 'Close',
+            ],
+            'notifications' => [
+                'attendance_updated' => 'Attendance updated successfully.',
+                'walkin_added' => 'Walk-in added successfully.',
+            ],
+            'actions' => [
+                'refresh' => 'Refresh',
+            ],
+        ],
+        'reports' => [
+            'title' => 'Reports',
+            'filters' => [
+                'all_time' => 'All Time',
+                'yearly' => 'Yearly',
+                'monthly' => 'Monthly',
+                'daily' => 'Daily',
+            ],
+            'stats' => [
+                'total_revenue' => 'Total Revenue',
+                'booking_revenue' => 'Booking Revenue',
+                'store_revenue' => 'Store Revenue',
+            ],
+            'popular_classes' => [
+                'heading' => 'Popular Classes',
+                'attendees' => ':count Total Attendees',
+                'sessions' => ':count Sessions',
+                'avg' => ':count avg / session',
+            ],
+            'top_merchandise' => [
+                'heading' => 'Top Merchandise',
+                'sold' => ':count sold',
+            ],
         ],
     ],
     'messages' => [
