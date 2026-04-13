@@ -54,7 +54,7 @@ class Scheduler extends Page implements HasTable
                     ->searchable(),
                 TextColumn::make('class.title')
                     ->label(__('dashboard.pages.scheduler.class'))
-                    ->formatStateUsing(fn($state) => $state[app()->getLocale()] ?? $state['en'] ?? '')
+                    ->formatStateUsing(fn ($state) => $state[app()->getLocale()] ?? $state['en'] ?? '')
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('class.instructor.fullname')
@@ -63,11 +63,11 @@ class Scheduler extends Page implements HasTable
                     ->sortable(),
                 TextColumn::make('time_range')
                     ->label(__('dashboard.pages.scheduler.time'))
-                    ->state(fn(ClassSession $record) => substr($record->start_time, 0, 5) . ' - ' . substr($record->end_time, 0, 5)),
+                    ->state(fn (ClassSession $record) => substr($record->start_time, 0, 5).' - '.substr($record->end_time, 0, 5)),
                 TextColumn::make('attendance_summary')
                     ->label(__('dashboard.pages.scheduler.attendance_summary'))
                     ->state(
-                        fn(ClassSession $record) => $record->bookingSessions()->where('attendance_status', AttendanceStatusEnum::ATTENDED)->count() . ' / ' .
+                        fn (ClassSession $record) => $record->bookingSessions()->where('attendance_status', AttendanceStatusEnum::ATTENDED)->count().' / '.
                         $record->bookingSessions()->count()
                     )
                     ->badge()
@@ -78,7 +78,7 @@ class Scheduler extends Page implements HasTable
             ->actions([
                 Action::make('attendance')
                     ->label(__('dashboard.pages.scheduler.attendance'))
-                    ->icon('heroicon-o-user-check')
+                    ->icon('heroicon-o-clipboard-document-check')
                     ->color('success')
                     ->modalHeading(function (ClassSession $record) {
                         $title = $record->class?->title[app()->getLocale()] ?? $record->class?->title['en'] ?? '';
@@ -88,7 +88,7 @@ class Scheduler extends Page implements HasTable
                             'date' => $record->date->format('M j'),
                         ]);
                     })
-                    ->modalContent(fn(ClassSession $record) => view('filament.admin.pages.scheduler.attendance-modal', ['session' => $record]))
+                    ->modalContent(fn (ClassSession $record) => view('filament.admin.pages.scheduler.attendance-modal', ['session' => $record]))
                     ->modalSubmitAction(false)
                     ->modalCancelActionLabel(__('dashboard.pages.scheduler.modal.close')),
             ])
@@ -127,7 +127,7 @@ class Scheduler extends Page implements HasTable
             Action::make('refresh')
                 ->label(__('dashboard.pages.scheduler.actions.refresh'))
                 ->icon('heroicon-o-arrow-path')
-                ->action(fn() => $this->redirect(static::getUrl())),
+                ->action(fn () => $this->redirect(static::getUrl())),
         ];
     }
 }

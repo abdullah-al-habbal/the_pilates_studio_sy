@@ -57,6 +57,7 @@ return [
                 'store_revenue' => 'إيرادات المتجر',
                 'total_bookings' => 'إجمالي الحجوزات',
                 'total_orders' => 'طلبات المتجر',
+                'total_merchandise_orders' => 'إجمالي طلبات المنتجات',
             ],
             'popular_classes' => [
                 'heading' => 'الحصص الشائعة',

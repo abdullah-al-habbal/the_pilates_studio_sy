@@ -2,7 +2,7 @@
 <div class="space-y-6 py-4">
     <div class="space-y-4">
         <h3 class="text-lg font-bold flex items-center gap-2">
-            <x-heroicon-o-users class="w-5 h-5 text-gray-400" />
+            <x-heroicon-o-users style="width:1rem;height:1rem;" class="text-gray-400" />
             {{ __('dashboard.pages.scheduler.modal.confirmed_attendees') }}
         </h3>
 
@@ -57,7 +57,7 @@
 
     <div class="pt-6 border-t border-gray-200 dark:border-gray-700 space-y-4">
         <h3 class="text-lg font-bold flex items-center gap-2 text-primary-600">
-            <x-heroicon-o-user-plus class="w-5 h-5" />
+            <x-heroicon-o-user-plus style="width:1rem;height:1rem;" />
             {{ __('dashboard.pages.scheduler.modal.add_walkin') }}
         </h3>
 

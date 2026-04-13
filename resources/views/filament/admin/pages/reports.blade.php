@@ -1,164 +1,150 @@
 <x-filament-panels::page>
-    <div class="mb-4">
+
+    <div class="space-y-4">
         <x-filament::tabs>
-            <x-filament::tabs.item :active="$this->period === 'all'" wire:click="$set('period', 'all')">
-                {{ __('dashboard.pages.reports.filters.all_time', [], 'en') ?? 'All Time' }}
-            </x-filament::tabs.item>
-            <x-filament::tabs.item :active="$this->period === 'yearly'" wire:click="$set('period', 'yearly')">
-                {{ __('dashboard.pages.reports.filters.yearly', [], 'en') ?? 'Yearly' }}
-            </x-filament::tabs.item>
-            <x-filament::tabs.item :active="$this->period === 'monthly'" wire:click="$set('period', 'monthly')">
-                {{ __('dashboard.pages.reports.filters.monthly', [], 'en') ?? 'Monthly' }}
-            </x-filament::tabs.item>
-            <x-filament::tabs.item :active="$this->period === 'daily'" wire:click="$set('period', 'daily')">
+
+            <x-filament::tabs.item
+                :active="$this->period === 'daily'"
+                wire:click="$set('period', 'daily')"
+                icon="heroicon-o-sun">
                 {{ __('dashboard.pages.reports.filters.daily', [], 'en') ?? 'Daily' }}
             </x-filament::tabs.item>
+
+            <x-filament::tabs.item
+                :active="$this->period === 'monthly'"
+                wire:click="$set('period', 'monthly')"
+                icon="heroicon-o-calendar">
+                {{ __('dashboard.pages.reports.filters.monthly', [], 'en') ?? 'Monthly' }}
+            </x-filament::tabs.item>
+
+            <x-filament::tabs.item
+                :active="$this->period === 'yearly'"
+                wire:click="$set('period', 'yearly')"
+                icon="heroicon-o-chart-bar">
+                {{ __('dashboard.pages.reports.filters.yearly', [], 'en') ?? 'Yearly' }}
+            </x-filament::tabs.item>
+
+            <x-filament::tabs.item
+                :active="$this->period === 'custom'"
+                wire:click="$set('period', 'custom')"
+                icon="heroicon-o-clock">
+                {{ __('dashboard.pages.reports.filters.custom', [], 'en') ?? 'Custom' }}
+            </x-filament::tabs.item>
+
         </x-filament::tabs>
+
+        @if($this->period === 'daily')
+            <x-filament::section compact>
+                <div class="flex items-center gap-3">
+                    <x-heroicon-o-calendar-days style="width:1rem;height:1rem;" class="text-gray-400 shrink-0" />
+                    <label class="text-sm font-medium text-gray-600 dark:text-gray-400 shrink-0">
+                        {{ __('dashboard.pages.reports.filters.select_date', [], 'en') ?? 'Date' }}
+                    </label>
+                    <input
+                        type="date"
+                        wire:model.live="dailyDate"
+                        max="{{ now()->toDateString() }}"
+                        class="rounded-lg border border-gray-300 dark:border-gray-600
+                               bg-white dark:bg-gray-800 text-sm text-gray-900 dark:text-gray-100
+                               px-3 py-1.5 shadow-sm focus:border-primary-500 focus:ring-primary-500" />
+                </div>
+            </x-filament::section>
+        @endif
+
+        @if($this->period === 'monthly')
+            <x-filament::section compact>
+                <div class="flex items-center gap-3">
+                    <x-heroicon-o-calendar style="width:1rem;height:1rem;" class="text-gray-400 shrink-0" />
+                    <label class="text-sm font-medium text-gray-600 dark:text-gray-400 shrink-0">
+                        {{ __('dashboard.pages.reports.filters.select_month', [], 'en') ?? 'Month' }}
+                    </label>
+                    <input
+                        type="month"
+                        wire:model.live="month"
+                        max="{{ now()->format('Y-m') }}"
+                        class="rounded-lg border border-gray-300 dark:border-gray-600
+                               bg-white dark:bg-gray-800 text-sm text-gray-900 dark:text-gray-100
+                               px-3 py-1.5 shadow-sm focus:border-primary-500 focus:ring-primary-500" />
+                </div>
+            </x-filament::section>
+        @endif
+
+        @if($this->period === 'yearly')
+            <x-filament::section compact>
+                <div class="flex items-center gap-3">
+                    <x-heroicon-o-chart-bar style="width:1rem;height:1rem;" class="text-gray-400 shrink-0" />
+                    <label class="text-sm font-medium text-gray-600 dark:text-gray-400 shrink-0">
+                        {{ __('dashboard.pages.reports.filters.select_year', [], 'en') ?? 'Year' }}
+                    </label>
+                    <select
+                        wire:model.live="year"
+                        class="rounded-lg border border-gray-300 dark:border-gray-600
+                               bg-white dark:bg-gray-800 text-sm text-gray-900 dark:text-gray-100
+                               px-3 py-1.5 shadow-sm focus:border-primary-500 focus:ring-primary-500">
+                        @foreach(range(now()->year, now()->year - 5) as $y)
+                            <option value="{{ $y }}">{{ $y }}</option>
+                        @endforeach
+                    </select>
+                </div>
+            </x-filament::section>
+        @endif
+
+        @if($this->period === 'custom')
+            <x-filament::section compact>
+                <div class="flex flex-wrap items-center gap-6">
+                    <div class="flex items-center gap-3">
+                        <x-heroicon-o-clock style="width:1rem;height:1rem;" class="text-gray-400 shrink-0" />
+                        <label class="text-sm font-medium text-gray-600 dark:text-gray-400 shrink-0">
+                            {{ __('dashboard.pages.reports.filters.start_date', [], 'en') ?? 'From' }}
+                        </label>
+                        <input
+                            type="date"
+                            wire:model.live="customStart"
+                            max="{{ $this->customEnd ?: now()->toDateString() }}"
+                            class="rounded-lg border border-gray-300 dark:border-gray-600
+                                   bg-white dark:bg-gray-800 text-sm text-gray-900 dark:text-gray-100
+                                   px-3 py-1.5 shadow-sm focus:border-primary-500 focus:ring-primary-500" />
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <x-heroicon-o-arrow-right style="width:1rem;height:1rem;" class="text-gray-400 shrink-0" />
+                        <label class="text-sm font-medium text-gray-600 dark:text-gray-400 shrink-0">
+                            {{ __('dashboard.pages.reports.filters.end_date', [], 'en') ?? 'To' }}
+                        </label>
+                        <input
+                            type="date"
+                            wire:model.live="customEnd"
+                            min="{{ $this->customStart ?: '' }}"
+                            max="{{ now()->toDateString() }}"
+                            class="rounded-lg border border-gray-300 dark:border-gray-600
+                                   bg-white dark:bg-gray-800 text-sm text-gray-900 dark:text-gray-100
+                                   px-3 py-1.5 shadow-sm focus:border-primary-500 focus:ring-primary-500" />
+                    </div>
+                </div>
+            </x-filament::section>
+        @endif
     </div>
 
-    <div class="space-y-8">
-        {{-- Stats Cards --}}
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div
-                class="bg-white dark:bg-gray-900 overflow-hidden shadow rounded-lg border border-gray-200 dark:border-gray-800">
-                <div class="p-5">
-                    <div class="flex items-center">
-                        <div class="shrink-0 bg-primary-500 rounded-md p-3">
-                            <x-heroicon-o-currency-dollar class="h-6 w-6 text-white" />
-                        </div>
-                        <div class="ml-5 w-0 flex-1">
-                            <dl>
-                                <dt class="text-sm font-medium text-gray-500 truncate">
-                                    {{ __('dashboard.pages.reports.stats.total_revenue') }}
-                                </dt>
-                                <dd class="flex items-baseline">
-                                    <div class="text-2xl font-semibold text-gray-900 dark:text-gray-100">
-                                        {{ number_format($stats['total_revenue']) }} SYP
-                                    </div>
-                                </dd>
-                            </dl>
-                        </div>
-                    </div>
-                </div>
-            </div>
+    @if($this->period === 'custom' && (!$this->customStart || !$this->customEnd))
 
-            <div
-                class="bg-white dark:bg-gray-900 overflow-hidden shadow rounded-lg border border-gray-200 dark:border-gray-800">
-                <div class="p-5">
-                    <div class="flex items-center">
-                        <div class="shrink-0 bg-success-500 rounded-md p-3">
-                            <x-heroicon-o-ticket class="h-6 w-6 text-white" />
-                        </div>
-                        <div class="ml-5 w-0 flex-1">
-                            <dl>
-                                <dt class="text-sm font-medium text-gray-500 truncate">
-                                    {{ __('dashboard.pages.reports.stats.booking_revenue') }}
-                                </dt>
-                                <dd class="flex items-baseline">
-                                    <div class="text-2xl font-semibold text-gray-900 dark:text-gray-100">
-                                        {{ number_format($stats['booking_revenue']) }} SYP
-                                    </div>
-                                </dd>
-                            </dl>
-                        </div>
-                    </div>
+        <x-filament::section>
+            <div class="flex flex-col items-center justify-center py-12 gap-4
+                        text-gray-400 dark:text-gray-600">
+                <x-heroicon-o-clock style="width:3rem;height:3rem;" />
+                <div class="text-center">
+                    <p class="text-base font-medium">
+                        {{ __('dashboard.pages.reports.filters.custom_hint', [], 'en') ?? 'Select a date range to generate the report.' }}
+                    </p>
+                    <p class="text-sm mt-1">
+                        {{ __('Pick a start and end date using the controls above.', [], 'en') }}
+                    </p>
                 </div>
             </div>
+        </x-filament::section>
 
-            <div
-                class="bg-white dark:bg-gray-900 overflow-hidden shadow rounded-lg border border-gray-200 dark:border-gray-800">
-                <div class="p-5">
-                    <div class="flex items-center">
-                        <div class="shrink-0 bg-amber-500 rounded-md p-3">
-                            <x-heroicon-o-shopping-bag class="h-6 w-6 text-white" />
-                        </div>
-                        <div class="ml-5 w-0 flex-1">
-                            <dl>
-                                <dt class="text-sm font-medium text-gray-500 truncate">
-                                    {{ __('dashboard.pages.reports.stats.store_revenue') }}
-                                </dt>
-                                <dd class="flex items-baseline">
-                                    <div class="text-2xl font-semibold text-gray-900 dark:text-gray-100">
-                                        {{ number_format($stats['merchandise_revenue']) }} SYP
-                                    </div>
-                                </dd>
-                            </dl>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+    @else
 
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            {{-- Popular Classes --}}
-            <div class="bg-white dark:bg-gray-900 shadow rounded-lg border border-gray-200 dark:border-gray-800">
-                <div class="p-6 border-b border-gray-200 dark:border-gray-800">
-                    <h3 class="text-lg font-bold flex items-center gap-2">
-                        <x-heroicon-o-fire class="w-5 h-5 text-amber-500" />
-                        {{ __('dashboard.pages.reports.popular_classes.heading') }}
-                    </h3>
-                </div>
-                <div class="p-6">
-                    <div class="space-y-6">
-                        @foreach($popularClasses as $class)
-                            @php
-                                $classTitle = $class->title[app()->getLocale()] ?? $class->title['en'] ?? '';
-                            @endphp
-                            <div class="space-y-2">
-                                <div class="flex items-center justify-between">
-                                    <span class="font-medium text-gray-700 dark:text-gray-300">{{ $classTitle }}</span>
-                                    <span class="text-sm text-gray-500">
-                                        {{ __('dashboard.pages.reports.popular_classes.attendees', ['count' => $class->total_attendance]) }}
-                                    </span>
-                                </div>
-                                <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 text-right">
-                                    <div class="bg-primary-600 h-2 rounded-full"
-                                        style="width: {{ min(100, ($class->total_attendance / max(1, $stats['total_bookings'])) * 500) }}%">
-                                    </div>
-                                </div>
-                                <div class="flex justify-between text-xs text-gray-400">
-                                    <span>{{ __('dashboard.pages.reports.popular_classes.sessions', ['count' => $class->sessions_count]) }}</span>
-                                    <span>{{ __('dashboard.pages.reports.popular_classes.avg', ['count' => $class->avg_attendance]) }}</span>
-                                </div>
-                            </div>
-                        @endforeach
-                    </div>
-                </div>
-            </div>
+        {{ $this->reportsInfolist }}
 
-            {{-- Top Merchandise --}}
-            <div class="bg-white dark:bg-gray-900 shadow rounded-lg border border-gray-200 dark:border-gray-800">
-                <div class="p-6 border-b border-gray-200 dark:border-gray-800">
-                    <h3 class="text-lg font-bold flex items-center gap-2">
-                        <x-heroicon-o-chart-bar-square class="w-5 h-5 text-success-500" />
-                        {{ __('dashboard.pages.reports.top_merchandise.heading') }}
-                    </h3>
-                </div>
-                <div class="p-6">
-                    <div class="space-y-4">
-                        @foreach($merchandiseSales as $item)
-                            @php
-                                $itemName = $item->name[app()->getLocale()] ?? $item->name['en'] ?? '';
-                            @endphp
-                            <div class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                                <div class="flex items-center gap-3">
-                                    <div class="p-2 bg-white dark:bg-gray-700 rounded-md shadow-sm shrink-0">
-                                        <x-heroicon-o-cube class="w-5 h-5 text-gray-400" />
-                                    </div>
-                                    <span class="font-medium text-gray-900 dark:text-gray-100">{{ $itemName }}</span>
-                                </div>
-                                <div class="text-right">
-                                    <p class="font-bold text-gray-900 dark:text-gray-100">
-                                        {{ number_format($item->revenue) }} SYP</p>
-                                    <p class="text-xs text-gray-500">
-                                        {{ __('dashboard.pages.reports.top_merchandise.sold', ['count' => $item->quantity]) }}
-                                    </p>
-                                </div>
-                            </div>
-                        @endforeach
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+    @endif
+
 </x-filament-panels::page>

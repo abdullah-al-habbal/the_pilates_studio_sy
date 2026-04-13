@@ -23,6 +23,15 @@ return [
             'attendance' => 'Attendance',
             'modal' => [
                 'heading' => ':class on :date',
+                'confirmed_attendees' => 'Confirmed Attendees',
+                'no_reservations' => 'No reservations yet for this session.',
+                'attended' => 'Attended',
+                'missed' => 'Missed',
+                'add_walkin' => 'Add Walk-in',
+                'search_member' => 'Search Member',
+                'select_member' => 'Select a member...',
+                'attend_now' => 'Attend Now',
+                'note' => 'Note: "Attend Now" will automatically create a one-time session booking and mark the user as attended.',
                 'close' => 'Close',
             ],
             'notifications' => [
