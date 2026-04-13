@@ -1,4 +1,21 @@
 <x-filament-panels::page>
+    <div class="mb-4">
+        <x-filament::tabs>
+            <x-filament::tabs.item :active="$this->period === 'all'" wire:click="$set('period', 'all')">
+                {{ __('dashboard.pages.reports.filters.all_time', [], 'en') ?? 'All Time' }}
+            </x-filament::tabs.item>
+            <x-filament::tabs.item :active="$this->period === 'yearly'" wire:click="$set('period', 'yearly')">
+                {{ __('dashboard.pages.reports.filters.yearly', [], 'en') ?? 'Yearly' }}
+            </x-filament::tabs.item>
+            <x-filament::tabs.item :active="$this->period === 'monthly'" wire:click="$set('period', 'monthly')">
+                {{ __('dashboard.pages.reports.filters.monthly', [], 'en') ?? 'Monthly' }}
+            </x-filament::tabs.item>
+            <x-filament::tabs.item :active="$this->period === 'daily'" wire:click="$set('period', 'daily')">
+                {{ __('dashboard.pages.reports.filters.daily', [], 'en') ?? 'Daily' }}
+            </x-filament::tabs.item>
+        </x-filament::tabs>
+    </div>
+
     <div class="space-y-8">
         {{-- Stats Cards --}}
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">

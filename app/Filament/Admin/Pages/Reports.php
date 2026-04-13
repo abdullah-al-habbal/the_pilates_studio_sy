@@ -31,6 +31,18 @@ class Reports extends Page
 
     protected static string $view = 'filament.admin.pages.reports';
 
+    public string $period = 'all';
+
+    public function getPeriodDates(): array
+    {
+        return match ($this->period) {
+            'daily' => [now()->startOfDay(), now()->endOfDay()],
+            'monthly' => [now()->startOfMonth(), now()->endOfMonth()],
+            'yearly' => [now()->startOfYear(), now()->endOfYear()],
+            default => [null, null],
+        };
+    }
+
     public function getViewData(): array
     {
         return [
@@ -45,15 +57,17 @@ class Reports extends Page
         $bookingRepo = App::make(BookingEloquentRepository::class);
         $merchandiseRepo = App::make(MerchandiseOrderEloquentRepository::class);
 
-        $bookingRevenue = $bookingRepo->getTotalRevenue();
-        $merchandiseRevenue = $merchandiseRepo->getTotalRevenue();
+        [$startDate, $endDate] = $this->getPeriodDates();
+
+        $bookingRevenue = $bookingRepo->getTotalRevenue($startDate, $endDate);
+        $merchandiseRevenue = $merchandiseRepo->getTotalRevenue($startDate, $endDate);
 
         return [
             'booking_revenue' => $bookingRevenue,
             'merchandise_revenue' => $merchandiseRevenue,
             'total_revenue' => $bookingRevenue + $merchandiseRevenue,
-            'total_bookings' => $bookingRepo->getTotalCount(),
-            'total_merchandise_orders' => $merchandiseRepo->getTotalCount(),
+            'total_bookings' => $bookingRepo->getTotalCount($startDate, $endDate),
+            'total_merchandise_orders' => $merchandiseRepo->getTotalCount($startDate, $endDate),
         ];
     }
 
@@ -61,13 +75,17 @@ class Reports extends Page
     {
         $classesRepo = App::make(ClassesEloquentRepository::class);
 
-        return $classesRepo->getPopularClassesSummary(5);
+        [$startDate, $endDate] = $this->getPeriodDates();
+
+        return $classesRepo->getPopularClassesSummary(5, $startDate, $endDate);
     }
 
     protected function getMerchandiseSales(): \Illuminate\Support\Collection
     {
         $merchandiseRepo = App::make(MerchandiseOrderEloquentRepository::class);
 
-        return $merchandiseRepo->getTopSellingSummary(5);
+        [$startDate, $endDate] = $this->getPeriodDates();
+
+        return $merchandiseRepo->getTopSellingSummary(5, $startDate, $endDate);
     }
 }
