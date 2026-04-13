@@ -8,6 +8,7 @@ namespace App\Repositories\Eloquent\ClassSession;
 
 use App\Models\ClassSession;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Database\Eloquent\Builder;
 
 class ClassSessionEloquentRepository
 {
@@ -34,6 +35,13 @@ class ClassSessionEloquentRepository
             ->orderBy('date')
             ->orderBy('start_time')
             ->paginate($perPage);
+    }
+
+    public function getSchedulerQuery(): Builder
+    {
+        return $this->model->newQuery()
+            ->with(['class.instructor', 'bookingSessions'])
+            ->latest('date');
     }
 
     public function findById(int $id): ?ClassSession

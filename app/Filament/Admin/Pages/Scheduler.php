@@ -4,10 +4,12 @@ namespace App\Filament\Admin\Pages;
 
 use App\Enums\AttendanceStatusEnum;
 use App\Models\ClassSession;
+use App\Repositories\Eloquent\ClassSession\ClassSessionEloquentRepository;
 use App\Services\BookingSession\BookingSessionService;
 use Filament\Actions\Action;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
+use Filament\Tables\Actions\Action as TableAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Concerns\InteractsWithTable;
 use Filament\Tables\Contracts\HasTable;
@@ -20,7 +22,20 @@ class Scheduler extends Page implements HasTable
 
     protected static ?string $navigationIcon = 'heroicon-o-calendar-days';
 
-    protected static ?string $navigationGroup = 'Operations';
+    public static function getNavigationLabel(): string
+    {
+        return __('dashboard.navigation.scheduler');
+    }
+
+    public function getHeading(): string
+    {
+        return __('dashboard.pages.scheduler.title');
+    }
+
+    public static function getNavigationGroup(): ?string
+    {
+        return __('dashboard.navigation.groups.operations');
+    }
 
     protected static ?int $navigationSort = 1;
 
@@ -28,28 +43,31 @@ class Scheduler extends Page implements HasTable
 
     public function table(Table $table): Table
     {
+        $repository = App::make(ClassSessionEloquentRepository::class);
+
         return $table
-            ->query(ClassSession::query()->latest('date'))
+            ->query($repository->getSchedulerQuery())
             ->columns([
                 TextColumn::make('date')
                     ->date('l, M j, Y')
                     ->sortable()
                     ->searchable(),
                 TextColumn::make('class.title')
-                    ->label('Class')
+                    ->label(__('dashboard.pages.scheduler.class'))
+                    ->formatStateUsing(fn ($state) => $state[app()->getLocale()] ?? $state['en'] ?? '')
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('class.instructor.fullname')
-                    ->label('Instructor')
-                    ->placeholder('No Instructor')
+                    ->label(__('dashboard.pages.scheduler.instructor'))
+                    ->placeholder(__('dashboard.pages.scheduler.no_instructor'))
                     ->sortable(),
                 TextColumn::make('time_range')
-                    ->label('Time')
-                    ->state(fn(ClassSession $record) => substr($record->start_time, 0, 5) . ' - ' . substr($record->end_time, 0, 5)),
+                    ->label(__('dashboard.pages.scheduler.time'))
+                    ->state(fn (ClassSession $record) => substr($record->start_time, 0, 5).' - '.substr($record->end_time, 0, 5)),
                 TextColumn::make('attendance_summary')
-                    ->label('Attendance')
+                    ->label(__('dashboard.pages.scheduler.attendance_summary'))
                     ->state(
-                        fn(ClassSession $record) => $record->bookingSessions()->where('attendance_status', AttendanceStatusEnum::ATTENDED)->count() . ' / ' .
+                        fn (ClassSession $record) => $record->bookingSessions()->where('attendance_status', AttendanceStatusEnum::ATTENDED)->count().' / '.
                         $record->bookingSessions()->count()
                     )
                     ->badge()
@@ -59,13 +77,20 @@ class Scheduler extends Page implements HasTable
             ])
             ->actions([
                 TableAction::make('attendance')
-                    ->label('Manage Attendance')
+                    ->label(__('dashboard.pages.scheduler.attendance'))
                     ->icon('heroicon-o-user-check')
                     ->color('success')
-                    ->modalHeading(fn(ClassSession $record) => 'Attendance: ' . ($record->class?->title['en'] ?? 'Class') . ' (' . $record->date->format('M j') . ')')
-                    ->modalContent(fn(ClassSession $record) => view('filament.admin.pages.scheduler.attendance-modal', ['session' => $record]))
+                    ->modalHeading(function (ClassSession $record) {
+                        $title = $record->class?->title[app()->getLocale()] ?? $record->class?->title['en'] ?? '';
+
+                        return __('dashboard.pages.scheduler.modal.heading', [
+                            'class' => $title,
+                            'date' => $record->date->format('M j'),
+                        ]);
+                    })
+                    ->modalContent(fn (ClassSession $record) => view('filament.admin.pages.scheduler.attendance-modal', ['session' => $record]))
                     ->modalSubmitAction(false)
-                    ->modalCancelActionLabel('Close'),
+                    ->modalCancelActionLabel(__('dashboard.pages.scheduler.modal.close')),
             ])
             ->groups([
                 'date',
@@ -80,7 +105,7 @@ class Scheduler extends Page implements HasTable
         $service->toggleAttendance($bookingSessionId, AttendanceStatusEnum::from($status));
 
         Notification::make()
-            ->title('Attendance updated')
+            ->title(__('dashboard.pages.scheduler.notifications.attendance_updated'))
             ->success()
             ->send();
     }
@@ -91,7 +116,7 @@ class Scheduler extends Page implements HasTable
         $service->oneTimeAttend($userId, $sessionId);
 
         Notification::make()
-            ->title('Walk-in attendee added')
+            ->title(__('dashboard.pages.scheduler.notifications.walkin_added'))
             ->success()
             ->send();
     }
@@ -100,9 +125,9 @@ class Scheduler extends Page implements HasTable
     {
         return [
             Action::make('refresh')
-                ->label('Refresh Data')
+                ->label(__('dashboard.pages.scheduler.actions.refresh'))
                 ->icon('heroicon-o-arrow-path')
-                ->action(fn() => $this->redirect(static::getUrl())),
+                ->action(fn () => $this->redirect(static::getUrl())),
         ];
     }
 }

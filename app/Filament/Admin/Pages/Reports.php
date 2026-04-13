@@ -2,17 +2,30 @@
 
 namespace App\Filament\Admin\Pages;
 
-use App\Models\Booking;
-use App\Models\Classes;
-use App\Models\MerchandiseOrder;
+use App\Repositories\Eloquent\Booking\BookingEloquentRepository;
+use App\Repositories\Eloquent\Classes\ClassesEloquentRepository;
+use App\Repositories\Eloquent\Merchandise\MerchandiseOrderEloquentRepository;
 use Filament\Pages\Page;
-use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\App;
 
 class Reports extends Page
 {
     protected static ?string $navigationIcon = 'heroicon-o-presentation-chart-bar';
 
-    protected static ?string $navigationGroup = 'Operations';
+    public static function getNavigationLabel(): string
+    {
+        return __('dashboard.navigation.reports');
+    }
+
+    public function getHeading(): string
+    {
+        return __('dashboard.pages.reports.title');
+    }
+
+    public static function getNavigationGroup(): ?string
+    {
+        return __('dashboard.navigation.groups.operations');
+    }
 
     protected static ?int $navigationSort = 2;
 
@@ -29,56 +42,32 @@ class Reports extends Page
 
     protected function getStats(): array
     {
-        $bookingRevenue = Booking::join('packages', 'bookings.package_id', '=', 'packages.id')
-            ->sum('packages.price');
+        $bookingRepo = App::make(BookingEloquentRepository::class);
+        $merchandiseRepo = App::make(MerchandiseOrderEloquentRepository::class);
 
-        $merchandiseRevenue = MerchandiseOrder::join('center_merchandises', 'merchandise_orders.merchandise_id', '=', 'center_merchandises.id')
-            ->sum(DB::raw('center_merchandises.price * merchandise_orders.quantity'));
+        $bookingRevenue = $bookingRepo->getTotalRevenue();
+        $merchandiseRevenue = $merchandiseRepo->getTotalRevenue();
 
         return [
             'booking_revenue' => $bookingRevenue,
             'merchandise_revenue' => $merchandiseRevenue,
             'total_revenue' => $bookingRevenue + $merchandiseRevenue,
-            'total_bookings' => Booking::count(),
-            'total_merchandise_orders' => MerchandiseOrder::count(),
+            'total_bookings' => $bookingRepo->getTotalCount(),
+            'total_merchandise_orders' => $merchandiseRepo->getTotalCount(),
         ];
     }
 
     protected function getPopularClasses(): \Illuminate\Support\Collection
     {
-        return Classes::withCount('sessions')
-            ->get()
-            ->map(function ($class) {
-                $totalSessions = $class->sessions->count();
-                $totalAttendance = $class->sessions->sum(function ($session) {
-                    return $session->bookingSessions()->count();
-                });
+        $classesRepo = App::make(ClassesEloquentRepository::class);
 
-                return [
-                    'title' => $class->title['en'] ?? 'Class',
-                    'sessions_count' => $totalSessions,
-                    'total_attendance' => $totalAttendance,
-                    'avg_attendance' => $totalSessions > 0 ? round($totalAttendance / $totalSessions, 1) : 0,
-                ];
-            })
-            ->sortByDesc('total_attendance')
-            ->take(5);
+        return $classesRepo->getPopularClassesSummary(5);
     }
 
     protected function getMerchandiseSales(): \Illuminate\Support\Collection
     {
-        return MerchandiseOrder::with('merchandise')
-            ->select('merchandise_id', DB::raw('SUM(quantity) as total_quantity'))
-            ->groupBy('merchandise_id')
-            ->get()
-            ->map(function ($order) {
-                return [
-                    'name' => $order->merchandise?->name['en'] ?? 'Product',
-                    'quantity' => $order->total_quantity,
-                    'revenue' => $order->total_quantity * ($order->merchandise?->price ?? 0),
-                ];
-            })
-            ->sortByDesc('revenue')
-            ->take(5);
+        $merchandiseRepo = App::make(MerchandiseOrderEloquentRepository::class);
+
+        return $merchandiseRepo->getTopSellingSummary(5);
     }
 }

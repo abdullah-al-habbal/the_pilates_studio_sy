@@ -6,8 +6,63 @@ return [
     'navigation' => [
         'groups' => [
             'bookings' => 'الحجوزات',
+            'store' => 'المتجر',
+            'operations' => 'العمليات',
         ],
         'bookings' => 'الحجوزات',
+        'scheduler' => 'الجدول الزمني',
+        'reports' => 'التقارير',
+    ],
+    'pages' => [
+        'scheduler' => [
+            'title' => 'جدول الحضور',
+            'attendance' => 'إدارة الحضور',
+            'class' => 'الحصة',
+            'instructor' => 'المدرب',
+            'no_instructor' => 'لا يوجد مدرب',
+            'time' => 'الوقت',
+            'attendance_summary' => 'الحضور',
+            'modal' => [
+                'heading' => 'الحضور: :class (:date)',
+                'confirmed_attendees' => 'الحضور المؤكدون',
+                'no_reservations' => 'لا توجد حجوزات لهذه الجلسة بعد.',
+                'attended' => 'حضر',
+                'missed' => 'غاب',
+                'add_walkin' => 'إضافة حاضر بدون حجز',
+                'search_member' => 'البحث عن عضو',
+                'select_member' => 'اختر عضواً...',
+                'attend_now' => 'تحضير الآن',
+                'note' => 'ملاحظة: "تحضير الآن" سيقوم تلقائياً بإنشاء اشتراك جلسة واحدة وتسجيل المستخدم كحاضر.',
+                'close' => 'إغلاق',
+            ],
+            'notifications' => [
+                'attendance_updated' => 'تم تحديث الحضور',
+                'walkin_added' => 'تم إضافة الحاضر بدون حجز',
+            ],
+            'actions' => [
+                'refresh' => 'تحديث البيانات',
+            ],
+        ],
+        'reports' => [
+            'title' => 'تقارير العمل',
+            'stats' => [
+                'total_revenue' => 'إجمالي الإيرادات',
+                'booking_revenue' => 'إيرادات الحجوزات',
+                'store_revenue' => 'إيرادات المتجر',
+                'total_bookings' => 'إجمالي الحجوزات',
+                'total_orders' => 'طلبات المتجر',
+            ],
+            'popular_classes' => [
+                'heading' => 'الحصص الشائعة',
+                'attendees' => ':count حاضر',
+                'sessions' => ':count جلسة',
+                'avg' => 'المتوسط: :count لكل جلسة',
+            ],
+            'top_merchandise' => [
+                'heading' => 'المنتجات الأكثر مبيعاً',
+                'sold' => 'تم بيع :count',
+            ],
+        ],
     ],
     'resources' => [
         'bookings' => [

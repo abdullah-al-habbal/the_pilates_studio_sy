@@ -8,7 +8,10 @@ namespace App\Repositories\Eloquent\Classes;
 
 use App\Enums\ClassStatusEnum;
 use App\Models\Classes;
+use App\Models\Classes;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Collection;
 
 class ClassesEloquentRepository
 {
@@ -39,6 +42,34 @@ class ClassesEloquentRepository
         }
 
         return $query->latest()->paginate($perPage);
+    }
+
+    public function getPopularClassesSummary(int $limit = 5, ?Carbon $startDate = null, ?Carbon $endDate = null): Collection
+    {
+        return $this->model->newQuery()
+            ->with(['sessions' => function ($query) use ($startDate, $endDate) {
+                $query->when($startDate, fn ($q) => $q->where('date', '>=', $startDate))
+                    ->when($endDate, fn ($q) => $q->where('date', '<=', $endDate))
+                    ->with('bookingSessions');
+            }])
+            ->get()
+            ->map(function ($class) {
+                $totalSessions = $class->sessions->count();
+                $totalAttendance = $class->sessions->sum(function ($session) {
+                    return $session->bookingSessions->count();
+                });
+
+                return (object) [
+                    'id' => $class->id,
+                    'title' => $class->title,
+                    'sessions_count' => $totalSessions,
+                    'total_attendance' => $totalAttendance,
+                    'avg_attendance' => $totalSessions > 0 ? round($totalAttendance / $totalSessions, 1) : 0,
+                ];
+            })
+            ->filter(fn ($item) => $item->total_attendance > 0)
+            ->sortByDesc('total_attendance')
+            ->take($limit);
     }
 
     public function findById(int $id): ?Classes
