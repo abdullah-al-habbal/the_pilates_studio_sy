@@ -1,16 +1,18 @@
 <?php
+
 // filePath: app\Models\User.php
+
 namespace App\Models;
 
 use App\Enums\BookingStatusEnum;
 use Illuminate\Database\Eloquent\Casts\Attribute;
-use Illuminate\Foundation\Auth\User as Authenticatable;
-use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\HasOne;
-use Illuminate\Database\Eloquent\Relations\HasManyThrough;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
+use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use Laravel\Sanctum\PersonalAccessToken;
@@ -45,17 +47,17 @@ class User extends Authenticatable
     protected function casts(): array
     {
         return [
-            'date_of_birth'     => 'date',
+            'date_of_birth' => 'date',
             'email_verified_at' => 'datetime',
-            'otp_expires_at'    => 'datetime',
-            'deactivated_at'    => 'datetime',
-            'password'          => 'hashed',
+            'otp_expires_at' => 'datetime',
+            'deactivated_at' => 'datetime',
+            'password' => 'hashed',
         ];
     }
 
     protected function name(): Attribute
     {
-        return Attribute::make(get: fn() => $this->fullname);
+        return Attribute::make(get: fn () => $this->fullname);
     }
 
     public function isActive(): bool
@@ -109,6 +111,11 @@ class User extends Authenticatable
     public function bookingSessions(): HasManyThrough
     {
         return $this->hasManyThrough(BookingSession::class, Booking::class);
+    }
+
+    public function merchandiseOrders(): HasMany
+    {
+        return $this->hasMany(MerchandiseOrder::class, 'customer_id');
     }
 
     public function notifications(): HasMany

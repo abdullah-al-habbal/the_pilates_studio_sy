@@ -1,52 +1,126 @@
-<!-- resources\views\filament\admin\pages\scheduler\attendance-modal.blade.php -->
-<div class="space-y-6 py-4">
-    <div class="space-y-4">
-        <h3 class="text-lg font-bold flex items-center gap-2">
-            <x-heroicon-o-users style="width:1rem;height:1rem;" class="text-gray-400" />
+@php
+    $bookings = $session->bookingSessions()->with([
+        'booking.user.bookings' => fn ($q) =>
+            $q->where('status', 'active')->where('remaining_credits', '>', 0),
+    ])->get();
+
+    $allUsers = \App\Models\User::orderBy('fullname')->get(['id', 'fullname', 'phone_number']);
+@endphp
+
+<div class="space-y-6 py-2" x-data="{
+    tab: 'attendees',
+    walkInMode: 'existing',   {{-- 'existing' | 'new' --}}
+    userId: null,
+    newUser: { fullname: '', phone_number: '', email: '', password: '' },
+    loading: false,
+
+    attend() {
+        if (this.loading) return;
+        this.loading = true;
+
+        if (this.walkInMode === 'existing' && this.userId) {
+            $wire.addWalkIn({{ $session->id }}, this.userId).then(() => {
+                this.userId  = null;
+                this.loading = false;
+            });
+        } else if (this.walkInMode === 'new' && this.newUser.fullname && this.newUser.phone_number) {
+            $wire.createAndAttend({{ $session->id }}, this.newUser).then(() => {
+                this.newUser = { fullname: '', phone_number: '', email: '', password: '' };
+                this.loading = false;
+            });
+        } else {
+            this.loading = false;
+        }
+    }
+}">
+
+    {{-- ── Tab switcher ── --}}
+    <div class="flex rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
+        <button type="button"
+            @click="tab = 'attendees'"
+            :class="tab === 'attendees'
+                ? 'bg-primary-600 text-white'
+                : 'bg-white dark:bg-gray-900 text-gray-600 dark:text-gray-400 hover:bg-gray-50'"
+            class="flex-1 px-4 py-2.5 text-sm font-medium flex items-center justify-center gap-2 transition-colors">
+            <x-heroicon-o-users style="width:1rem;height:1rem;" />
             {{ __('dashboard.pages.scheduler.modal.confirmed_attendees') }}
-        </h3>
+            <span class="text-xs opacity-75">({{ $bookings->count() }})</span>
+        </button>
+        <button type="button"
+            @click="tab = 'walkin'"
+            :class="tab === 'walkin'
+                ? 'bg-primary-600 text-white'
+                : 'bg-white dark:bg-gray-900 text-gray-600 dark:text-gray-400 hover:bg-gray-50'"
+            class="flex-1 px-4 py-2.5 text-sm font-medium flex items-center justify-center gap-2 transition-colors">
+            <x-heroicon-o-user-plus style="width:1rem;height:1rem;" />
+            {{ __('dashboard.pages.scheduler.modal.add_walkin') }}
+        </button>
+    </div>
 
-        @php
-            $bookings = $session->bookingSessions()->with('booking.user')->get();
-        @endphp
-
+    {{-- ── Confirmed attendees tab ── --}}
+    <div x-show="tab === 'attendees'" x-cloak>
         @if($bookings->isEmpty())
-            <div
-                class="text-center py-6 bg-gray-50 dark:bg-gray-800 rounded-lg border border-dashed border-gray-300 dark:border-gray-700">
-                <p class="text-gray-500">{{ __('dashboard.pages.scheduler.modal.no_reservations') }}</p>
+            <div class="flex flex-col items-center justify-center py-10 gap-3 rounded-xl border border-dashed border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-800">
+                <x-heroicon-o-users style="width:2rem;height:2rem;" class="text-gray-300 dark:text-gray-600" />
+                <p class="text-sm text-gray-500">{{ __('dashboard.pages.scheduler.modal.no_reservations') }}</p>
             </div>
         @else
-            <div
-                class="divide-y divide-gray-200 dark:divide-gray-700 border rounded-lg overflow-hidden bg-white dark:bg-gray-900 shadow-sm">
+            <div class="divide-y divide-gray-100 dark:divide-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden">
                 @foreach($bookings as $bookingSession)
-                    <div
-                        class="flex items-center justify-between p-4 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
-                        <div class="flex items-center gap-3">
-                            <div
-                                class="w-10 h-10 rounded-full bg-primary-100 flex items-center justify-center text-primary-700 font-bold shrink-0">
-                                {{ substr($bookingSession->booking->user->fullname, 0, 1) }}
+                    @php
+                        $user            = $bookingSession->booking?->user;
+                        $activeBooking   = $user?->bookings->first();   // eager-loaded active only
+                        $credits         = $activeBooking?->remaining_credits ?? 0;
+                        $hasCredits      = $credits > 0;
+                        $currentStatus   = $bookingSession->attendance_status?->value ?? 'missed';
+                    @endphp
+
+                    <div class="flex items-center justify-between px-4 py-3 bg-white dark:bg-gray-900 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                        x-data="{ status: '{{ $currentStatus }}' }">
+
+                        {{-- Avatar + info --}}
+                        <div class="flex items-center gap-3 min-w-0">
+                            <div class="w-9 h-9 rounded-full bg-primary-100 dark:bg-primary-900 flex items-center justify-center text-primary-700 dark:text-primary-300 font-bold text-sm shrink-0">
+                                {{ substr($user?->fullname ?? '?', 0, 1) }}
                             </div>
-                            <div>
-                                <p class="font-medium text-gray-900 dark:text-gray-100">
-                                    {{ $bookingSession->booking->user->fullname }}
+                            <div class="min-w-0">
+                                <p class="font-medium text-sm text-gray-900 dark:text-gray-100 truncate">
+                                    {{ $user?->fullname ?? '—' }}
                                 </p>
-                                <p class="text-xs text-gray-500">{{ $bookingSession->booking->user->phone_number }}</p>
+                                <div class="flex items-center gap-2 mt-0.5">
+                                    <p class="text-xs text-gray-500 truncate">{{ $user?->phone_number }}</p>
+                                    {{-- Credits badge --}}
+                                    @if($hasCredits)
+                                        <span class="inline-flex items-center gap-1 text-xs bg-success-100 dark:bg-success-900 text-success-700 dark:text-success-300 px-1.5 py-0.5 rounded-full font-medium">
+                                            <x-heroicon-o-ticket style="width:.7rem;height:.7rem;" />
+                                            {{ $credits }} {{ __('dashboard.pages.scheduler.credits_remaining') }}
+                                        </span>
+                                    @else
+                                        <span class="inline-flex items-center gap-1 text-xs bg-gray-100 dark:bg-gray-700 text-gray-500 px-1.5 py-0.5 rounded-full">
+                                            {{ __('dashboard.pages.scheduler.no_credits') }}
+                                        </span>
+                                    @endif
+                                </div>
                             </div>
                         </div>
 
-                        <div class="flex items-center gap-2"
-                            x-data="{ status: '{{ $bookingSession->attendance_status->value ?? 'missed' }}' }">
+                        {{-- Attended / Missed toggles --}}
+                        <div class="flex items-center gap-1.5 shrink-0">
                             <button type="button"
                                 @click="$wire.toggleAttendance({{ $bookingSession->id }}, 'attended'); status = 'attended'"
-                                :class="status === 'attended' ? 'bg-success-600 text-white shadow-sm' : 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400'"
-                                class="px-3 py-1.5 rounded-md text-sm font-medium transition-all hover:scale-105 active:scale-95">
-                                {{ __('dashboard.pages.scheduler.modal.attended') }}
+                                :class="status === 'attended'
+                                    ? 'bg-success-600 text-white shadow-sm'
+                                    : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-success-50'"
+                                class="px-3 py-1.5 rounded-md text-xs font-medium transition-all">
+                                ✓ {{ __('dashboard.pages.scheduler.modal.attended') }}
                             </button>
                             <button type="button"
                                 @click="$wire.toggleAttendance({{ $bookingSession->id }}, 'missed'); status = 'missed'"
-                                :class="status === 'missed' ? 'bg-danger-600 text-white shadow-sm' : 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400'"
-                                class="px-3 py-1.5 rounded-md text-sm font-medium transition-all hover:scale-105 active:scale-95">
-                                {{ __('dashboard.pages.scheduler.modal.missed') }}
+                                :class="status === 'missed'
+                                    ? 'bg-danger-600 text-white shadow-sm'
+                                    : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-danger-50'"
+                                class="px-3 py-1.5 rounded-md text-xs font-medium transition-all">
+                                ✗ {{ __('dashboard.pages.scheduler.modal.missed') }}
                             </button>
                         </div>
                     </div>
@@ -55,34 +129,103 @@
         @endif
     </div>
 
-    <div class="pt-6 border-t border-gray-200 dark:border-gray-700 space-y-4">
-        <h3 class="text-lg font-bold flex items-center gap-2 text-primary-600">
-            <x-heroicon-o-user-plus style="width:1rem;height:1rem;" />
-            {{ __('dashboard.pages.scheduler.modal.add_walkin') }}
-        </h3>
+    {{-- ── Walk-in tab ── --}}
+    <div x-show="tab === 'walkin'" x-cloak class="space-y-4">
 
-        <div class="flex items-end gap-3" x-data="{ userId: null }">
-            <div class="flex-1">
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    {{ __('dashboard.pages.scheduler.modal.search_member') }}
-                </label>
+        @if($isFull)
+            {{-- Full capacity notice --}}
+            <div class="flex items-center gap-3 p-4 rounded-xl bg-danger-50 dark:bg-danger-900/30 border border-danger-200 dark:border-danger-700 text-danger-700 dark:text-danger-300">
+                <x-heroicon-o-no-symbol style="width:1.25rem;height:1.25rem;" class="shrink-0" />
+                <p class="text-sm font-medium">{{ __('dashboard.pages.scheduler.session_full_notice') }}</p>
+            </div>
+        @else
+
+            {{-- Mode switcher: existing vs new user --}}
+            <div class="flex rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden text-sm">
+                <button type="button"
+                    @click="walkInMode = 'existing'"
+                    :class="walkInMode === 'existing' ? 'bg-gray-100 dark:bg-gray-700 font-semibold' : 'bg-white dark:bg-gray-900 text-gray-500'"
+                    class="flex-1 px-3 py-2 transition-colors">
+                    {{ __('dashboard.pages.scheduler.modal.existing_member') }}
+                </button>
+                <button type="button"
+                    @click="walkInMode = 'new'"
+                    :class="walkInMode === 'new' ? 'bg-gray-100 dark:bg-gray-700 font-semibold' : 'bg-white dark:bg-gray-900 text-gray-500'"
+                    class="flex-1 px-3 py-2 transition-colors">
+                    {{ __('dashboard.pages.scheduler.modal.new_member') }}
+                </button>
+            </div>
+
+            {{-- Existing user select --}}
+            <div x-show="walkInMode === 'existing'" class="space-y-3">
                 <select x-model="userId"
-                    class="block w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-800 shadow-sm focus:border-primary-500 focus:ring-primary-500">
+                    class="block w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-sm text-gray-900 dark:text-gray-100 px-3 py-2 shadow-sm focus:border-primary-500 focus:ring-primary-500">
                     <option value="">{{ __('dashboard.pages.scheduler.modal.select_member') }}</option>
-                    @foreach(\App\Models\User::all() as $user)
-                        <option value="{{ $user->id }}">{{ $user->fullname }} ({{ $user->phone_number }})</option>
+                    @foreach($allUsers as $user)
+                        <option value="{{ $user->id }}">
+                            {{ $user->fullname }} · {{ $user->phone_number }}
+                        </option>
                     @endforeach
                 </select>
             </div>
 
-            <button type="button" @click="if(userId) { $wire.addWalkIn({{ $session->id }}, userId); userId = null; }"
-                :disabled="!userId"
-                class="px-4 py-2 bg-primary-600 text-white rounded-md font-medium hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors shrink-0">
+            {{-- New user form --}}
+            <div x-show="walkInMode === 'new'" class="space-y-3">
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+                            {{ __('dashboard.resources.users.fields.fullname') }} *
+                        </label>
+                        <input type="text" x-model="newUser.fullname"
+                            class="block w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-sm px-3 py-2 focus:border-primary-500 focus:ring-primary-500" />
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+                            {{ __('dashboard.resources.users.fields.phone_number') }} *
+                        </label>
+                        <input type="tel" x-model="newUser.phone_number"
+                            class="block w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-sm px-3 py-2 focus:border-primary-500 focus:ring-primary-500" />
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+                            {{ __('dashboard.resources.users.fields.email') }}
+                        </label>
+                        <input type="email" x-model="newUser.email"
+                            class="block w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-sm px-3 py-2 focus:border-primary-500 focus:ring-primary-500" />
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+                            {{ __('dashboard.resources.users.fields.password') }}
+                        </label>
+                        <input type="password" x-model="newUser.password"
+                            :placeholder="'{{ __('dashboard.resources.users.helpers.password_default') }}'"
+                            class="block w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-sm px-3 py-2 focus:border-primary-500 focus:ring-primary-500" />
+                    </div>
+                </div>
+            </div>
+
+            {{-- Attend Now button --}}
+            <button type="button"
+                @click="attend()"
+                :disabled="loading ||
+                    (walkInMode === 'existing' && !userId) ||
+                    (walkInMode === 'new' && (!newUser.fullname || !newUser.phone_number))"
+                class="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium
+                       bg-primary-600 text-white hover:bg-primary-700
+                       disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
+                <template x-if="loading">
+                    <x-heroicon-o-arrow-path style="width:1rem;height:1rem;" class="animate-spin" />
+                </template>
+                <template x-if="!loading">
+                    <x-heroicon-o-user-plus style="width:1rem;height:1rem;" />
+                </template>
                 {{ __('dashboard.pages.scheduler.modal.attend_now') }}
             </button>
-        </div>
-        <p class="text-xs text-gray-500">
-            {{ __('dashboard.pages.scheduler.modal.note') }}
-        </p>
+
+            <p class="text-xs text-gray-400 text-center">
+                {{ __('dashboard.pages.scheduler.modal.note') }}
+            </p>
+        @endif
     </div>
+
 </div>

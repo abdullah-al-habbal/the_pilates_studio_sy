@@ -15,6 +15,7 @@ class DatabaseSeeder extends Seeder
             InstructorSeeder::class,
             PackageSeeder::class,
             StaticPageSeeder::class,
+            CenterMerchandiseCategorySeeder::class,
             UserSeeder::class,
             UserSettingSeeder::class,
             ClassesSeeder::class,

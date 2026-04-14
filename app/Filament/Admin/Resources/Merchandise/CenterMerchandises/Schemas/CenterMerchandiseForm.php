@@ -22,15 +22,25 @@ class CenterMerchandiseForm
 
             Section::make(__('dashboard.resources.center_merchandises.sections.information'))
                 ->icon('heroicon-o-shopping-bag')
+                ->columns(2)
                 ->schema([
-                    TextInput::make('name')
-                        ->label(__('dashboard.resources.center_merchandises.fields.name'))
+                    TextInput::make('name.en')
+                        ->label(__('dashboard.resources.center_merchandises.fields.name').' (EN)')
                         ->required()
-                        ->maxLength(255)
+                        ->maxLength(255),
+
+                    TextInput::make('name.ar')
+                        ->label(__('dashboard.resources.center_merchandises.fields.name').' (AR)')
+                        ->maxLength(255),
+
+                    Textarea::make('description.en')
+                        ->label(__('dashboard.resources.center_merchandises.fields.description').' (EN)')
+                        ->rows(3)
+                        ->maxLength(65535)
                         ->columnSpanFull(),
 
-                    Textarea::make('description')
-                        ->label(__('dashboard.resources.center_merchandises.fields.description'))
+                    Textarea::make('description.ar')
+                        ->label(__('dashboard.resources.center_merchandises.fields.description').' (AR)')
                         ->rows(3)
                         ->maxLength(65535)
                         ->columnSpanFull(),
@@ -55,10 +65,8 @@ class CenterMerchandiseForm
                             ->minValue(fn ($record): int => $record?->stock_quantity ?? 0)
                             ->helperText(
                                 fn ($record): ?string => $record
-                                    ? __('dashboard.resources.center_merchandises.helpers.stock_min', [
-                                        'min' => $record->stock_quantity,
-                                    ])
-                                    : null
+                                ? __('dashboard.resources.center_merchandises.helpers.stock_min', ['min' => $record->stock_quantity])
+                                : null
                             ),
 
                         Select::make('category_id')
@@ -66,7 +74,10 @@ class CenterMerchandiseForm
                             ->relationship('category', 'name')
                             ->required()
                             ->searchable()
-                            ->preload(),
+                            ->preload()
+                            ->getOptionLabelFromRecordUsing(
+                                fn ($record) => $record->getTranslation('name', app()->getLocale())
+                            ),
                     ]),
                 ]),
 
@@ -96,7 +107,10 @@ class CenterMerchandiseForm
                         ->collapsible()
                         ->defaultItems(0)
                         ->reorderable()
-                        ->columnSpanFull(),
+                        ->columnSpanFull()
+                        ->mutateRelationshipDataBeforeCreateUsing(function (array $data): array {
+                            return $data;
+                        }),
                 ]),
         ]);
     }

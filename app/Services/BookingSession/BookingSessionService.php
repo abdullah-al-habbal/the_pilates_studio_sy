@@ -9,7 +9,11 @@ namespace App\Services\BookingSession;
 use App\Enums\AttendanceStatusEnum;
 use App\Enums\BookingSessionStatusEnum;
 use App\Enums\BookingStatusEnum;
+use App\Models\Booking;
 use App\Models\BookingSession;
+use App\Models\ClassSession;
+use App\Models\Package;
+use App\Models\User;
 use App\Repositories\Eloquent\BookingSession\BookingSessionEloquentRepository;
 use App\Services\Booking\BookingService;
 use App\Services\ClassSession\ClassSessionService;
@@ -107,17 +111,77 @@ class BookingSessionService
         }
     }
 
+    /**
+     * Walk-in transaction:
+     * 1. Resolve or create user
+     * 2. Find active booking with credits, or provision one-credit package + booking
+     * 3. Create BookingSession marked as ATTENDED, deduct credit
+     */
     public function oneTimeAttend(int $userId, int $classSessionId): void
     {
-        $this->logger->info('Processing one-time attendance', [
-            'user_id' => $userId,
-            'class_session_id' => $classSessionId,
-        ]);
+        DB::transaction(function () use ($userId, $classSessionId): void {
 
-        DB::transaction(function () use ($userId, $classSessionId) {
-            $booking = $this->bookingService->createWalkInBooking($userId);
-            $this->reserve($booking->id, $classSessionId)->markAttended();
+            $session = ClassSession::lockForUpdate()->findOrFail($classSessionId);
+
+            // Duplicate guard
+            $alreadyAttending = BookingSession::whereHas('booking', fn ($q) => $q->where('user_id', $userId))
+                ->where('class_session_id', $classSessionId)
+                ->exists();
+
+            if ($alreadyAttending) {
+                return;
+            }
+
+            // Resolve active booking with credits
+            $booking = Booking::where('user_id', $userId)
+                ->where('status', BookingStatusEnum::ACTIVE)
+                ->where('remaining_credits', '>', 0)
+                ->lockForUpdate()
+                ->first();
+
+            if (! $booking) {
+                // Find or create a 1-credit walk-in package
+                $package = Package::where('total_credits', 1)
+                    ->where('is_active', true)
+                    ->first();
+
+                if (! $package) {
+                    $package = Package::create([
+                        'name' => ['en' => 'Walk-in Session', 'ar' => 'جلسة مباشرة'],
+                        'total_credits' => 1,
+                        'price' => 0,
+                        'is_active' => true,
+                    ]);
+                }
+
+                $booking = Booking::create([
+                    'user_id' => $userId,
+                    'package_id' => $package->id,
+                    'total_credits' => 1,
+                    'remaining_credits' => 1,
+                    'status' => BookingStatusEnum::ACTIVE,
+                ]);
+            }
+
+            $booking->deductCredit();
+
+            BookingSession::create([
+                'booking_id' => $booking->id,
+                'class_session_id' => $classSessionId,
+                'status' => 'reserved',
+                'attendance_status' => AttendanceStatusEnum::ATTENDED,
+            ]);
         });
+    }
+
+    public function createWalkInUser(array $data): User
+    {
+        return User::create([
+            'fullname' => $data['fullname'],
+            'phone_number' => $data['phone_number'],
+            'email' => $data['email'] ?? null,
+            'password' => bcrypt($data['password'] ?? '12345678'),
+        ]);
     }
 
     private function findById(int $id, bool $lockForUpdate = false): BookingSession

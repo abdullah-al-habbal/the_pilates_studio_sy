@@ -17,6 +17,14 @@ return [
         'scheduler' => [
             'title' => 'جدول الحضور',
             'attendance' => 'إدارة الحضور',
+            'empty' => [
+                'title' => 'لا توجد جلسات اليوم',
+                'description' => 'لا توجد حصص مجدولة لهذا اليوم.',
+            ],
+            'session_full' => 'ممتلئة',
+            'session_full_notice' => 'وصلت هذه الجلسة إلى الطاقة الاستيعابية الكاملة.',
+            'credits_remaining' => 'رصيد متبقٍ',
+            'no_credits' => 'لا يوجد رصيد',
             'class' => 'الحصة',
             'instructor' => 'المدرب',
             'no_instructor' => 'لا يوجد مدرب',
@@ -34,6 +42,8 @@ return [
                 'attend_now' => 'تحضير الآن',
                 'note' => 'ملاحظة: "تحضير الآن" سيقوم تلقائياً بإنشاء اشتراك جلسة واحدة وتسجيل المستخدم كحاضر.',
                 'close' => 'إغلاق',
+                'existing_member' => 'عضو موجود',
+                'new_member' => 'عضو جديد',
             ],
             'notifications' => [
                 'attendance_updated' => 'تم تحديث الحضور',
@@ -41,6 +51,7 @@ return [
             ],
             'actions' => [
                 'refresh' => 'تحديث البيانات',
+                'today' => 'اليوم',
             ],
         ],
         'reports' => [
@@ -154,6 +165,12 @@ return [
             'empty_state' => [
                 'heading' => 'لا توجد طلبات بعد',
             ],
+            'actions' => [
+                'create_customer' => 'إنشاء عميل جديد',
+            ],
+            'helpers' => [
+                'max_stock' => 'الحد الأقصى المتاح: :max وحدة',
+            ],
         ],
 
         'bookings' => [
@@ -222,6 +239,8 @@ return [
                 'delete' => 'حذف الحجز',
                 'restore' => 'استعادة الحجز',
                 'force_delete' => 'حذف نهائي',
+                'create_customer' => 'إنشاء عميل جديد',
+                'create_package' => 'إنشاء حزمة جديدة',
             ],
         ],
         'booking_sessions' => [
@@ -274,6 +293,14 @@ return [
                 'scheduled' => 'مجدولة',
                 'completed' => 'مكتملة',
                 'cancelled' => 'ملغاة',
+            ],
+        ],
+        'users' => [
+            'fields' => [
+                'password' => 'كلمة المرور',
+            ],
+            'helpers' => [
+                'password_default' => 'اتركه فارغاً لتعيين كلمة المرور الافتراضية 12345678',
             ],
         ],
     ],

@@ -9,6 +9,7 @@ namespace App\Repositories\Eloquent\ClassSession;
 use App\Models\ClassSession;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 
 class ClassSessionEloquentRepository
 {
@@ -52,5 +53,18 @@ class ClassSessionEloquentRepository
                 'class.category',
                 'class.primaryImage',
             ])->find($id);
+    }
+
+    public function getSessionsByDate($date): Collection
+    {
+        return $this->model->newQuery()
+            ->whereDate('date', $date)
+            ->where('status', 'scheduled')
+            ->with([
+                'class.instructor',
+                'bookingSessions.booking.user.bookings' => fn ($q) => $q->where('status', 'active')->where('remaining_credits', '>', 0),
+            ])
+            ->orderBy('start_time')
+            ->get();
     }
 }

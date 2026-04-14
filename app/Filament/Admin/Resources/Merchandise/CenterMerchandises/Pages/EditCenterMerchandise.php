@@ -1,5 +1,7 @@
 <?php
 
+// Pages/EditCenterMerchandise.php
+
 namespace App\Filament\Admin\Resources\Merchandise\CenterMerchandises\Pages;
 
 use App\Filament\Admin\Resources\Merchandise\CenterMerchandises\CenterMerchandiseResource;
@@ -11,11 +13,24 @@ class EditCenterMerchandise extends EditRecord
 {
     protected static string $resource = CenterMerchandiseResource::class;
 
+    protected function mutateFormDataBeforeSave(array $data): array
+    {
+        if (isset($data['images'])) {
+            $primaryFound = false;
+            foreach ($data['images'] as &$image) {
+                if (($image['is_primary'] ?? false) && ! $primaryFound) {
+                    $primaryFound = true;
+                } else {
+                    $image['is_primary'] = false;
+                }
+            }
+        }
+
+        return $data;
+    }
+
     protected function getHeaderActions(): array
     {
-        return [
-            ViewAction::make(),
-            DeleteAction::make(),
-        ];
+        return [ViewAction::make(), DeleteAction::make()];
     }
 }

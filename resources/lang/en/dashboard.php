@@ -22,6 +22,14 @@ return [
             'time' => 'Time',
             'attendance_summary' => 'Attendance Summary',
             'attendance' => 'Attendance',
+            'empty' => [
+                'title' => 'No sessions today',
+                'description' => 'There are no scheduled classes for today.',
+            ],
+            'session_full' => 'Full',
+            'session_full_notice' => 'This session has reached full capacity. Walk-ins are not allowed.',
+            'credits_remaining' => 'credits left',
+            'no_credits' => 'No credits',
             'modal' => [
                 'heading' => ':class on :date',
                 'confirmed_attendees' => 'Confirmed Attendees',
@@ -34,6 +42,8 @@ return [
                 'attend_now' => 'Attend Now',
                 'note' => 'Note: "Attend Now" will automatically create a one-time session booking and mark the user as attended.',
                 'close' => 'Close',
+                'existing_member' => 'Existing member',
+                'new_member' => 'New member',
             ],
             'notifications' => [
                 'attendance_updated' => 'Attendance updated successfully.',
@@ -41,6 +51,7 @@ return [
             ],
             'actions' => [
                 'refresh' => 'Refresh',
+                'today' => 'Today',
             ],
         ],
         'reports' => [
@@ -179,6 +190,12 @@ return [
             'empty_state' => [
                 'heading' => 'No orders yet',
             ],
+            'actions' => [
+                'create_customer' => 'Create New Customer',
+            ],
+            'helpers' => [
+                'max_stock' => 'Maximum available: :max units',
+            ],
         ],
 
         'bookings' => [
@@ -247,6 +264,8 @@ return [
                 'delete' => 'Delete Booking',
                 'restore' => 'Restore Booking',
                 'force_delete' => 'Force Delete',
+                'create_customer' => 'Create New Customer',
+                'create_package' => 'Create New Package',
             ],
         ],
         'booking_sessions' => [
@@ -439,6 +458,7 @@ return [
             'fields' => [
                 'fullname' => 'Full Name',
                 'email' => 'Email',
+                'password' => 'Password',
                 'phone_number' => 'Phone Number',
                 'date_of_birth' => 'Date of Birth',
                 'is_active' => 'Active',
@@ -446,6 +466,9 @@ return [
                 'created_at' => 'Created At',
                 'updated_at' => 'Updated At',
                 'deleted_at' => 'Deleted At',
+            ],
+            'helpers' => [
+                'password_default' => 'Leave empty to set password as 12345678',
             ],
         ],
         'instructors' => [
