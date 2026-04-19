@@ -5,6 +5,7 @@
 namespace App\Models;
 
 use App\Enums\BookingStatusEnum;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -35,10 +36,6 @@ class Booking extends Model
         ];
     }
 
-    public function hasCreditsRemaining(): bool
-    {
-        return $this->remaining_credits > 0;
-    }
 
     public function deductCredit(): void
     {
@@ -70,7 +67,7 @@ class Booking extends Model
 
     public function isActive(): bool
     {
-        return $this->status === BookingStatusEnum::ACTIVE && ! $this->isExpired();
+        return $this->status === BookingStatusEnum::ACTIVE && !$this->isExpired();
     }
 
     public function user(): BelongsTo
@@ -111,5 +108,49 @@ class Booking extends Model
             $ratio > 0.2 => 'warning',
             default => 'danger',
         };
+    }
+
+    protected function hasCreditsRemaining(): Attribute
+    {
+        return Attribute::make(
+            get: fn() => $this->remaining_credits > 0
+        );
+    }
+
+    protected function canDeductCredit(): Attribute
+    {
+        return Attribute::make(
+            get: fn() => $this->isActive() && $this->remaining_credits > 0
+        );
+    }
+
+    protected function canBeCancelled(): Attribute
+    {
+        return Attribute::make(
+            get: fn() => $this->status === BookingStatusEnum::ACTIVE
+            && $this->remaining_credits === $this->total_credits
+        );
+    }
+
+    protected function isExhausted(): Attribute
+    {
+        return Attribute::make(
+            get: fn() => $this->status === BookingStatusEnum::EXHAUSTED
+            || $this->remaining_credits <= 0
+        );
+    }
+
+    protected function isWithinValidity(): Attribute
+    {
+        return Attribute::make(
+            get: fn() => !$this->isExpired() && $this->isActive()
+        );
+    }
+
+    protected function creditsNearEmpty(): Attribute
+    {
+        return Attribute::make(
+            get: fn() => $this->remaining_credits > 0 && $this->remaining_credits <= 2
+        );
     }
 }

@@ -5,12 +5,12 @@ namespace App\Models;
 use App\Enums\BookingSessionStatusEnum;
 use App\Enums\ClassSessionStatusEnum;
 use Carbon\Carbon;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Casts\Attribute;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class ClassSession extends Model
 {
@@ -42,9 +42,67 @@ class ClassSession extends Model
     protected function durationMinutes(): Attribute
     {
         return Attribute::make(
-            get: fn() => (int) Carbon::parse($this->start_time)
+            get: fn () => (int) Carbon::parse($this->start_time)
                 ->diffInMinutes(Carbon::parse($this->end_time))
         );
+    }
+
+    protected function isPast(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => Carbon::parse("{$this->date} {$this->end_time}")->isPast()
+        );
+    }
+
+    protected function isUpcoming(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => Carbon::parse("{$this->date} {$this->start_time}")->isFuture()
+        );
+    }
+
+    protected function isAvailable(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => $this->isScheduled() && ! $this->isFull() && ! $this->is_past
+        );
+    }
+
+    protected function isWithinCancellationWindow(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => now()->greaterThanOrEqualTo(
+                Carbon::parse("{$this->date} {$this->start_time}")->subHours(24)
+            )
+        );
+    }
+
+    protected function startsSoon(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => Carbon::parse("{$this->date} {$this->start_time}")
+                ->between(now(), now()->addHour())
+        );
+    }
+
+    /**
+     * Check if this session is bookable for a specific user
+     * Call as: $classSession->isBookableForUser($user)
+     */
+    public function isBookableForUser(User $user): bool
+    {
+        return $this->is_available && $user->total_remaining_credits > 0;
+    }
+
+    /**
+     * Check if a specific booking session can be cancelled
+     * Call as: $classSession->isCancelableByUser($bookingSession)
+     */
+    public function isCancelableByUser(BookingSession $bookingSession): bool
+    {
+        return $bookingSession->isReserved()
+            && ! $this->is_within_cancellation_window
+            && ! $this->is_past;
     }
 
     public function getAvailableSpotsAttribute(): int
@@ -52,6 +110,7 @@ class ClassSession extends Model
         $reserved = $this->bookingSessions()
             ->where('status', BookingSessionStatusEnum::RESERVED->value)
             ->count();
+
         return max(0, $this->total_spots - $reserved);
     }
 

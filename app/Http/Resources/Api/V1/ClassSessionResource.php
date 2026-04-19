@@ -24,6 +24,12 @@ class ClassSessionResource extends JsonResource
             'is_full' => $this->isFull(),
             'status' => $this->status->value,
             'is_scheduled' => $this->isScheduled(),
+            'is_past' => $this->is_past,
+            'is_upcoming' => $this->is_upcoming,
+            'is_available' => $this->is_available,
+            'is_within_cancellation_window' => $this->is_within_cancellation_window,
+            'starts_soon' => $this->starts_soon,
+            'is_bookable_for_current_user' => $request->user()?->can_reserve_class && $this->is_available,
             'class' => new ClassesResource($this->whenLoaded('class')),
         ];
     }

@@ -19,6 +19,8 @@ class PackageResource extends JsonResource
             'total_credits' => $this->total_credits,
             'price' => $this->price,
             'is_active' => $this->is_active,
+            'is_available_for_purchase' => $this->is_available_for_purchase,
+            'is_cheapest_option' => $this->is_cheapest_option,
         ];
     }
 }

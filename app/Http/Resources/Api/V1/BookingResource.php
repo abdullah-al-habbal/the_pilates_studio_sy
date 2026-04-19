@@ -24,6 +24,12 @@ class BookingResource extends JsonResource
             'expires_at' => $this->expires_at?->toISOString(),
             'is_active' => $this->isActive(),
             'is_expired' => $this->isExpired(),
+            'has_credits_remaining' => $this->has_credits_remaining,
+            'can_deduct_credit' => $this->can_deduct_credit,
+            'can_be_cancelled' => $this->can_be_cancelled,
+            'is_exhausted' => $this->is_exhausted,
+            'is_within_validity' => $this->is_within_validity,
+            'credits_near_empty' => $this->credits_near_empty,
             'package' => new PackageResource($this->whenLoaded('package')),
         ];
     }

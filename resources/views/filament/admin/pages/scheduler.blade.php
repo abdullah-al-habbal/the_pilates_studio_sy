@@ -18,7 +18,6 @@
                          onDayCreate: function(dObj, dStr, fp, dayElem) {
                              if (!dayElem.dateObj) return;
                              
-                             // Format local date Y-m-d safely
                              let year = dayElem.dateObj.getFullYear();
                              let month = String(dayElem.dateObj.getMonth() + 1).padStart(2, '0');
                              let day = String(dayElem.dateObj.getDate()).padStart(2, '0');

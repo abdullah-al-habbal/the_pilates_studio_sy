@@ -60,6 +60,51 @@ class User extends Authenticatable
         return Attribute::make(get: fn () => $this->fullname);
     }
 
+    protected function hasCredits(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => $this->total_remaining_credits > 0
+        );
+    }
+
+    protected function canBookNewPackage(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => ! $this->bookings()
+                ->where('status', BookingStatusEnum::ACTIVE)
+                ->where('remaining_credits', '>', 0)
+                ->exists()
+        );
+    }
+
+    protected function canReserveClass(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => $this->total_remaining_credits > 0 && $this->isActive()
+        );
+    }
+
+    protected function isVerified(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => ! is_null($this->email_verified_at)
+        );
+    }
+
+    protected function isDeactivated(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => ! is_null($this->deactivated_at)
+        );
+    }
+
+    protected function hasActiveBooking(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => ! is_null($this->activeCreditBooking)
+        );
+    }
+
     public function isActive(): bool
     {
         return is_null($this->deactivated_at);
