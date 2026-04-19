@@ -28,6 +28,7 @@ class BookingSessionEloquentRepository
             $this->logger->info('Fetching user booking sessions', ['user_id' => $userId]);
 
             $query = $this->baseUserSessionsQuery($userId)
+                ->with(['classSession.class'])
                 ->when($filters['status'] ?? null, fn($q, $status) => $q->where('status', $status))
                 ->latest();
 

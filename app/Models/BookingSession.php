@@ -75,12 +75,15 @@ class BookingSession extends Model
     {
         return Attribute::make(
             get: function () {
-                if (! $this->isReserved() || ! $this->classSession) {
+                try {
+                    if (!$this->isReserved() || !$this->classSession) {
+                        return false;
+                    }
+                    return !$this->classSession->is_within_cancellation_window
+                        && !$this->classSession->is_past;
+                } catch (\Exception) {
                     return false;
                 }
-
-                return ! $this->classSession->is_within_cancellation_window
-                    && ! $this->classSession->is_past;
             }
         );
     }
@@ -89,11 +92,22 @@ class BookingSession extends Model
     {
         return Attribute::make(
             get: function () {
-                if (! $this->isReserved() || ! $this->classSession) {
+                try {
+                    if (!$this->isReserved() || !$this->classSession) {
+                        return false;
+                    }
+                    $startDateTime = Carbon::create(
+                        $this->classSession->date?->year ?? null,
+                        $this->classSession->date?->month ?? null,
+                        $this->classSession->date?->day ?? null,
+                        (int) explode(':', $this->classSession->start_time)[0],
+                        (int) explode(':', $this->classSession->start_time)[1] ?? 0
+                    );
+
+                    return $startDateTime->isPast();
+                } catch (\Exception) {
                     return false;
                 }
-
-                return Carbon::parse("{$this->classSession->date} {$this->classSession->start_time}")->isPast();
             }
         );
     }
@@ -102,11 +116,22 @@ class BookingSession extends Model
     {
         return Attribute::make(
             get: function () {
-                if (! $this->isReserved() || ! $this->classSession) {
+                try {
+                    if (!$this->isReserved() || !$this->classSession) {
+                        return false;
+                    }
+                    $endDateTime = Carbon::create(
+                        $this->classSession->date?->year ?? null,
+                        $this->classSession->date?->month ?? null,
+                        $this->classSession->date?->day ?? null,
+                        (int) explode(':', $this->classSession->end_time)[0],
+                        (int) explode(':', $this->classSession->end_time)[1] ?? 0
+                    );
+
+                    return $endDateTime->isPast();
+                } catch (\Exception) {
                     return false;
                 }
-
-                return Carbon::parse("{$this->classSession->date} {$this->classSession->end_time}")->isPast();
             }
         );
     }
@@ -114,7 +139,7 @@ class BookingSession extends Model
     protected function isRefundable(): Attribute
     {
         return Attribute::make(
-            get: fn () => $this->can_cancel
+            get: fn() => $this->can_cancel
         );
     }
 
@@ -122,11 +147,15 @@ class BookingSession extends Model
     {
         return Attribute::make(
             get: function () {
-                if (! $this->classSession) {
+                try {
+                    if (!$this->classSession) {
+                        return false;
+                    }
+
+                    return $this->is_reserved && $this->classSession->starts_soon;
+                } catch (\Exception) {
                     return false;
                 }
-
-                return $this->is_reserved && $this->classSession->starts_soon;
             }
         );
     }

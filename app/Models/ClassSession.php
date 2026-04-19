@@ -42,7 +42,7 @@ class ClassSession extends Model
     protected function durationMinutes(): Attribute
     {
         return Attribute::make(
-            get: fn () => (int) Carbon::parse($this->start_time)
+            get: fn() => (int) Carbon::parse($this->start_time)
                 ->diffInMinutes(Carbon::parse($this->end_time))
         );
     }
@@ -50,38 +50,92 @@ class ClassSession extends Model
     protected function isPast(): Attribute
     {
         return Attribute::make(
-            get: fn () => Carbon::parse("{$this->date} {$this->end_time}")->isPast()
+            get: function () {
+                try {
+                    $endDateTime = Carbon::create(
+                        $this->date?->year ?? null,
+                        $this->date?->month ?? null,
+                        $this->date?->day ?? null,
+                        (int) explode(':', $this->end_time)[0],
+                        (int) explode(':', $this->end_time)[1] ?? 0
+                    );
+
+                    return $endDateTime->isPast();
+                } catch (\Exception) {
+                    return false;
+                }
+            }
         );
     }
 
     protected function isUpcoming(): Attribute
     {
         return Attribute::make(
-            get: fn () => Carbon::parse("{$this->date} {$this->start_time}")->isFuture()
+            get: function () {
+                try {
+                    $startDateTime = Carbon::create(
+                        $this->date?->year ?? null,
+                        $this->date?->month ?? null,
+                        $this->date?->day ?? null,
+                        (int) explode(':', $this->start_time)[0],
+                        (int) explode(':', $this->start_time)[1] ?? 0
+                    );
+
+                    return $startDateTime->isFuture();
+                } catch (\Exception) {
+                    return false;
+                }
+            }
         );
     }
 
     protected function isAvailable(): Attribute
     {
         return Attribute::make(
-            get: fn () => $this->isScheduled() && ! $this->isFull() && ! $this->is_past
+            get: fn() => $this->isScheduled() && !$this->isFull() && !$this->is_past
         );
     }
 
     protected function isWithinCancellationWindow(): Attribute
     {
         return Attribute::make(
-            get: fn () => now()->greaterThanOrEqualTo(
-                Carbon::parse("{$this->date} {$this->start_time}")->subHours(24)
-            )
+            get: function () {
+                try {
+                    $startDateTime = Carbon::create(
+                        $this->date?->year ?? null,
+                        $this->date?->month ?? null,
+                        $this->date?->day ?? null,
+                        (int) explode(':', $this->start_time)[0],
+                        (int) explode(':', $this->start_time)[1] ?? 0
+                    );
+                    $cutoff = $startDateTime->subHours(24);
+
+                    return now()->greaterThanOrEqualTo($cutoff);
+                } catch (\Exception) {
+                    return true;
+                }
+            }
         );
     }
 
     protected function startsSoon(): Attribute
     {
         return Attribute::make(
-            get: fn () => Carbon::parse("{$this->date} {$this->start_time}")
-                ->between(now(), now()->addHour())
+            get: function () {
+                try {
+                    $startDateTime = Carbon::create(
+                        $this->date?->year ?? null,
+                        $this->date?->month ?? null,
+                        $this->date?->day ?? null,
+                        (int) explode(':', $this->start_time)[0],
+                        (int) explode(':', $this->start_time)[1] ?? 0
+                    );
+
+                    return $startDateTime->between(now(), now()->addHour());
+                } catch (\Exception) {
+                    return false;
+                }
+            }
         );
     }
 
@@ -101,8 +155,8 @@ class ClassSession extends Model
     public function isCancelableByUser(BookingSession $bookingSession): bool
     {
         return $bookingSession->isReserved()
-            && ! $this->is_within_cancellation_window
-            && ! $this->is_past;
+            && !$this->is_within_cancellation_window
+            && !$this->is_past;
     }
 
     public function getAvailableSpotsAttribute(): int
