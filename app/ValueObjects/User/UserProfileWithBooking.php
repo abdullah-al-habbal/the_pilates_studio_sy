@@ -38,7 +38,6 @@ final readonly class UserProfileWithBooking
             'phone_number' => $this->user->phone_number,
             'date_of_birth' => $dateOfBirth,
             'email_verified' => $this->user->is_verified,
-            'is_active' => $this->user->isActive(),
             'is_deactivated' => $this->user->is_deactivated,
             'has_credits' => $this->user->has_credits,
             'can_book_new_package' => $this->user->can_book_new_package,
