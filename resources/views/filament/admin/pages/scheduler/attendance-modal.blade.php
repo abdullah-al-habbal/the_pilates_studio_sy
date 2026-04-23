@@ -1,15 +1,17 @@
+<!-- filePath: resources\views\filament\admin\pages\scheduler\attendance-modal.blade.php -->
 @php
+    use App\Models\User;
     $bookings = $session->bookingSessions()->with([
         'booking.user.bookings' => fn ($q) =>
             $q->where('status', 'active')->where('remaining_credits', '>', 0),
     ])->get();
 
-    $allUsers = \App\Models\User::orderBy('fullname')->get(['id', 'fullname', 'phone_number']);
+    $allUsers = User::orderBy('fullname')->get(['id', 'fullname', 'phone_number']);
 @endphp
 
 <div class="space-y-6 py-2" x-data="{
     tab: 'attendees',
-    walkInMode: 'existing',   {{-- 'existing' | 'new' --}}
+    walkInMode: 'existing',
     userId: null,
     newUser: { fullname: '', phone_number: '', email: '', password: '' },
     loading: false,
@@ -34,7 +36,6 @@
     }
 }">
 
-    {{-- ── Tab switcher ── --}}
     <div class="flex rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
         <button type="button"
             @click="tab = 'attendees'"
@@ -57,7 +58,6 @@
         </button>
     </div>
 
-    {{-- ── Confirmed attendees tab ── --}}
     <div x-show="tab === 'attendees'" x-cloak>
         @if($bookings->isEmpty())
             <div class="flex flex-col items-center justify-center py-10 gap-3 rounded-xl border border-dashed border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-800">
@@ -69,7 +69,7 @@
                 @foreach($bookings as $bookingSession)
                     @php
                         $user            = $bookingSession->booking?->user;
-                        $activeBooking   = $user?->bookings->first();   // eager-loaded active only
+                        $activeBooking   = $user?->bookings->first();
                         $credits         = $activeBooking?->remaining_credits ?? 0;
                         $hasCredits      = $credits > 0;
                         $currentStatus   = $bookingSession->attendance_status?->value ?? 'missed';
@@ -78,7 +78,6 @@
                     <div class="flex items-center justify-between px-4 py-3 bg-white dark:bg-gray-900 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
                         x-data="{ status: '{{ $currentStatus }}' }">
 
-                        {{-- Avatar + info --}}
                         <div class="flex items-center gap-3 min-w-0">
                             <div class="w-9 h-9 rounded-full bg-primary-100 dark:bg-primary-900 flex items-center justify-center text-primary-700 dark:text-primary-300 font-bold text-sm shrink-0">
                                 {{ substr($user?->fullname ?? '?', 0, 1) }}
@@ -104,7 +103,6 @@
                             </div>
                         </div>
 
-                        {{-- Attended / Missed toggles --}}
                         <div class="flex items-center gap-1.5 shrink-0">
                             <button type="button"
                                 @click="$wire.toggleAttendance({{ $bookingSession->id }}, 'attended'); status = 'attended'"
@@ -129,18 +127,15 @@
         @endif
     </div>
 
-    {{-- ── Walk-in tab ── --}}
     <div x-show="tab === 'walkin'" x-cloak class="space-y-4">
 
         @if($isFull)
-            {{-- Full capacity notice --}}
             <div class="flex items-center gap-3 p-4 rounded-xl bg-danger-50 dark:bg-danger-900/30 border border-danger-200 dark:border-danger-700 text-danger-700 dark:text-danger-300">
                 <x-heroicon-o-no-symbol style="width:1.25rem;height:1.25rem;" class="shrink-0" />
                 <p class="text-sm font-medium">{{ __('dashboard.pages.scheduler.session_full_notice') }}</p>
             </div>
         @else
 
-            {{-- Mode switcher: existing vs new user --}}
             <div class="flex rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden text-sm">
                 <button type="button"
                     @click="walkInMode = 'existing'"
@@ -156,7 +151,6 @@
                 </button>
             </div>
 
-            {{-- Existing user select --}}
             <div x-show="walkInMode === 'existing'" class="space-y-3">
                 <select x-model="userId"
                     class="block w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-sm text-gray-900 dark:text-gray-100 px-3 py-2 shadow-sm focus:border-primary-500 focus:ring-primary-500">
@@ -169,7 +163,6 @@
                 </select>
             </div>
 
-            {{-- New user form --}}
             <div x-show="walkInMode === 'new'" class="space-y-3">
                 <div class="grid grid-cols-2 gap-3">
                     <div>
@@ -204,7 +197,6 @@
                 </div>
             </div>
 
-            {{-- Attend Now button --}}
             <button type="button"
                 @click="attend()"
                 :disabled="loading ||

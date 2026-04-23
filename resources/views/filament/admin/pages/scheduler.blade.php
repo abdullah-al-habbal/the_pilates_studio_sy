@@ -1,6 +1,6 @@
+<!-- filePath: resources\views\filament\admin\pages\scheduler.blade.php -->
 <x-filament-panels::page>
 
-    {{-- Date picker --}}
     <div class="flex items-center gap-4 text-sm text-gray-500 dark:text-gray-400 -mt-2 mb-4" 
          wire:ignore 
          x-data="{
@@ -71,7 +71,6 @@
     </div>
 
     @if($sessions->isEmpty())
-        {{-- ── Empty state ── --}}
         <x-filament::section>
             <div class="flex flex-col items-center justify-center py-16 gap-4 text-gray-400 dark:text-gray-600">
                 <x-heroicon-o-calendar-days style="width:3rem;height:3rem;" />
