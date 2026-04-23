@@ -41,6 +41,11 @@ class CenterMerchandiseResource extends Resource
         return __('dashboard.resources.center_merchandises.singular');
     }
 
+    public static function getRecordTitle(?\Illuminate\Database\Eloquent\Model $record): string
+    {
+        return $record?->name ?? static::getModelLabel();
+    }
+
     public static function form(Schema $schema): Schema
     {
         return CenterMerchandiseForm::configure($schema);

@@ -28,6 +28,11 @@ class RecurrencePatternResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'label';
 
+    public static function getRecordTitle(?\Illuminate\Database\Eloquent\Model $record): string
+    {
+        return $record?->name ?? $record?->title ?? ('Pattern #'.$record->id);
+    }
+
     public static function form(Schema $schema): Schema
     {
         return RecurrencePatternForm::configure($schema);
@@ -59,10 +64,10 @@ class RecurrencePatternResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index'  => ListRecurrencePatterns::route('/'),
+            'index' => ListRecurrencePatterns::route('/'),
             'create' => CreateRecurrencePattern::route('/create'),
-            'view'   => ViewRecurrencePattern::route('/{record}'),
-            'edit'   => EditRecurrencePattern::route('/{record}/edit'),
+            'view' => ViewRecurrencePattern::route('/{record}'),
+            'edit' => EditRecurrencePattern::route('/{record}/edit'),
         ];
     }
 }

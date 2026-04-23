@@ -6,29 +6,36 @@ use App\Filament\Admin\Resources\ClassCategories\Pages\CreateClassCategory;
 use App\Filament\Admin\Resources\ClassCategories\Pages\EditClassCategory;
 use App\Filament\Admin\Resources\ClassCategories\Pages\ListClassCategories;
 use App\Filament\Admin\Resources\ClassCategories\Pages\ViewClassCategory;
+use App\Filament\Admin\Resources\ClassCategories\RelationManagers\ClassesRelationManager;
 use App\Filament\Admin\Resources\ClassCategories\Schemas\ClassCategoryForm;
 use App\Filament\Admin\Resources\ClassCategories\Schemas\ClassCategoryInfolist;
 use App\Filament\Admin\Resources\ClassCategories\Tables\ClassCategoriesTable;
 use App\Models\ClassCategory;
 use BackedEnum;
-use UnitEnum;
-use App\Filament\Admin\Resources\ClassCategories\RelationManagers\ClassesRelationManager;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
-use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use UnitEnum;
 
 class ClassCategoryResource extends Resource
 {
     protected static ?string $model = ClassCategory::class;
 
     protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-tag';
+
     protected static string|UnitEnum|null $navigationGroup = 'Configuration';
+
     protected static ?int $navigationSort = 2;
 
     protected static ?string $recordTitleAttribute = 'name';
+
+    public static function getRecordTitle(?Model $record): string
+    {
+        return $record?->name ?? static::getModelLabel();
+    }
 
     public static function form(Schema $schema): Schema
     {

@@ -43,6 +43,11 @@ class MerchandiseOrderResource extends Resource
         return __('dashboard.resources.merchandise_orders.singular');
     }
 
+    public static function getRecordTitle(?\Illuminate\Database\Eloquent\Model $record): string
+    {
+        return $record ? 'Order #'.$record->id : static::getModelLabel();
+    }
+
     public static function form(Schema $schema): Schema
     {
         return MerchandiseOrderForm::configure($schema);

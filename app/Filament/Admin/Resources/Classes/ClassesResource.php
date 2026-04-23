@@ -60,7 +60,7 @@ class ClassesResource extends Resource
         return cache()->remember(
             'filament.classes.count',
             now()->addMinutes(5),
-            fn() => static::getModel()::query()
+            fn () => static::getModel()::query()
                 ->where('status', 'active')
                 ->count()
         );
@@ -74,6 +74,11 @@ class ClassesResource extends Resource
     public static function getTranslatableLocales(): array
     {
         return ['en', 'ar'];
+    }
+
+    public static function getRecordTitle(?\Illuminate\Database\Eloquent\Model $record): string
+    {
+        return $record ? ($record->title[app()->getLocale()] ?? $record->title['en'] ?? 'Class #'.$record->id) : static::getModelLabel();
     }
 
     public static function form(Schema $schema): Schema

@@ -33,6 +33,11 @@ class UserResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'fullname';
 
+    public static function getRecordTitle(?\Illuminate\Database\Eloquent\Model $record): string
+    {
+        return $record?->fullname ?? static::getModelLabel();
+    }
+
     public static function form(Schema $schema): Schema
     {
         return UserForm::configure($schema);

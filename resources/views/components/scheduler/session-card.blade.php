@@ -1,5 +1,4 @@
-<!-- resources\views\components\scheduler\session-card.blade.php -->
-@props(['session'])
+@props(['session', 'attendanceAction' => null])
 
 @php
 $locale = app()->getLocale();
@@ -54,17 +53,10 @@ $isFull = $capacity > 0 && $total >= $capacity;
     </div>
 
     <div class="px-5 py-3 border-t border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/50">
-        <button
-            type="button"
-            @click="
-                $dispatch('open-modal', {
-                    id: 'attendance-{{ $session->id }}',
-                });
-            "
-            class="w-full flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-sm font-medium
-                   bg-primary-600 text-white hover:bg-primary-700 transition-colors">
-            <x-heroicon-o-clipboard-document-check style="width:1rem;height:1rem;" />
-            {{ __('dashboard.pages.scheduler.attendance') }}
-        </button>
+        @if($attendanceAction)
+            <div class="[&_.fi-ac-btn-label]:w-full">
+                <x-filament-actions::actions :actions="[$attendanceAction]" />
+            </div>
+        @endif
     </div>
 </div>

@@ -1,4 +1,5 @@
 <?php
+
 // app\Filament\Admin\Pages\Scheduler.php
 declare(strict_types=1);
 
@@ -77,7 +78,7 @@ class Scheduler extends Page
         $this->loadSessions();
     }
 
-    private function loadSessions(): void
+    public function loadSessions(): void
     {
         $this->sessions = App::make(ClassSessionEloquentRepository::class)
             ->getSessionsByDate($this->selectedDate);
@@ -126,6 +127,42 @@ class Scheduler extends Page
     public function allUsers(): Collection
     {
         return User::orderBy('fullname')->get(['id', 'fullname', 'phone_number']);
+    }
+
+    public function getSessionActions(int $sessionId): array
+    {
+        $session = $this->sessions->firstWhere('id', $sessionId);
+        if (! $session) {
+            return [];
+        }
+
+        $bookings = $session->bookingSessions()->with([
+            'booking.user.bookings' => fn ($q) => $q->where('status', 'active')->where('remaining_credits', '>', 0),
+        ])->get();
+
+        $allUsers = User::orderBy('fullname')->get(['id', 'fullname', 'phone_number']);
+        $isFull = $session->total_spots > 0 && $session->bookingSessions->count() >= $session->total_spots;
+
+        return [
+            Action::make('attendance_'.$sessionId)
+                ->label(__('dashboard.pages.scheduler.attendance'))
+                ->icon('heroicon-o-clipboard-document-check')
+                ->modalHeading(__('dashboard.pages.scheduler.modal.heading', [
+                    'class' => $session->class?->title[app()->getLocale()] ?? '—',
+                    'date' => $session->date->format('M j'),
+                ]))
+                ->modalContent(fn () => view('components.scheduler.attendance-content', [
+                    'session' => $session,
+                    'bookings' => $bookings,
+                    'allUsers' => $allUsers,
+                    'isFull' => $isFull,
+                ]))
+                ->modalSubmitAction(false)
+                ->modalCancelActionLabel(__('dashboard.pages.scheduler.modal.close'))
+                ->extraModalWindowAttributes(['class' => 'fi-modal-window'])
+                ->closeModalByClickingAway(false)
+                ->modalWidth('2xl'),
+        ];
     }
 
     protected function getHeaderActions(): array

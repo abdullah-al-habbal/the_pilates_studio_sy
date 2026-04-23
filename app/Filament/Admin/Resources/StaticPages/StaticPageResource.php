@@ -11,21 +11,27 @@ use App\Filament\Admin\Resources\StaticPages\Schemas\StaticPageInfolist;
 use App\Filament\Admin\Resources\StaticPages\Tables\StaticPagesTable;
 use App\Models\StaticPage;
 use BackedEnum;
-use UnitEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
-use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
+use UnitEnum;
 
 class StaticPageResource extends Resource
 {
     protected static ?string $model = StaticPage::class;
 
     protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-document-text';
+
     protected static string|UnitEnum|null $navigationGroup = 'Configuration';
+
     protected static ?int $navigationSort = 5;
 
     protected static ?string $recordTitleAttribute = 'slug';
+
+    public static function getRecordTitle(?\Illuminate\Database\Eloquent\Model $record): string
+    {
+        return $record?->title ?? static::getModelLabel();
+    }
 
     public static function form(Schema $schema): Schema
     {
