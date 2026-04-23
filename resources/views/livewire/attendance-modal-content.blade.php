@@ -2,7 +2,7 @@
 <div class="space-y-6" x-data="{ tab: 'attendees', walkInMode: @entangle('walkInMode') }">
     <!-- Tabs -->
     <div class="flex rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
-        <button @click="tab = 'attendees'" 
+        <button @click="tab = 'attendees'"
                 :class="tab === 'attendees' ? 'bg-primary-600 text-white' : 'bg-white dark:bg-gray-900 text-gray-600 dark:text-gray-400 hover:bg-gray-50'"
                 class="flex-1 px-4 py-2.5 text-sm font-medium flex items-center justify-center gap-2 transition-colors">
             <x-heroicon-o-users style="width:1rem;height:1rem;" />

@@ -4,6 +4,7 @@ namespace App\Livewire;
 
 use App\Enums\AttendanceStatusEnum;
 use App\Models\ClassSession;
+use App\Models\User;
 use App\Services\BookingSession\BookingSessionService;
 use Filament\Actions\Action;
 use Filament\Actions\Concerns\InteractsWithActions;
@@ -18,12 +19,10 @@ class AttendanceModalContent extends Component implements HasActions
 {
     use InteractsWithActions;
 
-    public ClassSession $session;
+    public int $sessionId;
 
-    /** @var Collection<int, \App\Models\BookingSession> */
     public Collection $bookings;
 
-    /** @var Collection<int, \App\Models\User> */
     public Collection $allUsers;
 
     public bool $isFull;
@@ -39,27 +38,50 @@ class AttendanceModalContent extends Component implements HasActions
         'password' => '',
     ];
 
-    public function mount(ClassSession $session, Collection $bookings, Collection $allUsers, bool $isFull): void
+    public function mount(int $sessionId): void
     {
-        $this->session = $session;
-        $this->bookings = $bookings;
-        $this->allUsers = $allUsers;
-        $this->isFull = $isFull;
+        $this->sessionId = $sessionId;
+        $this->loadData();
     }
 
-    private function refreshBookings(): void
+    private function getSession(): ClassSession
     {
-        $this->bookings = $this->session->bookingSessions()
+        return ClassSession::findOrFail($this->sessionId);
+    }
+
+    private function loadData(): void
+    {
+        $session = $this->getSession();
+
+        $this->bookings = $session->bookingSessions()
             ->with([
                 'booking.user.bookings' => fn ($q) => $q->where('status', 'active')->where('remaining_credits', '>', 0),
             ])
             ->get();
+
+        $this->allUsers = User::orderBy('fullname')
+            ->get(['id', 'fullname', 'phone_number']);
+
+        $total = $session->bookingSessions()->count();
+        $this->isFull = $session->total_spots > 0 && $total >= $session->total_spots;
+    }
+
+    private function refreshBookings(): void
+    {
+        $session = $this->getSession();
+        $this->bookings = $session->bookingSessions()
+            ->with([
+                'booking.user.bookings' => fn ($q) => $q->where('status', 'active')->where('remaining_credits', '>', 0),
+            ])
+            ->get();
+        $total = $this->bookings->count();
+        $this->isFull = $session->total_spots > 0 && $total >= $session->total_spots;
     }
 
     public function markAttendedAction(int $bookingSessionId): Action
     {
-        return Action::make('mark_attended_'.$bookingSessionId)
-            ->label('✓ '.__('dashboard.pages.scheduler.modal.attended'))
+        return Action::make('mark_attended_' . $bookingSessionId)
+            ->label('✓ ' . __('dashboard.pages.scheduler.modal.attended'))
             ->color('success')
             ->action(function () use ($bookingSessionId) {
                 app(BookingSessionService::class)
@@ -74,8 +96,8 @@ class AttendanceModalContent extends Component implements HasActions
 
     public function markMissedAction(int $bookingSessionId): Action
     {
-        return Action::make('mark_missed_'.$bookingSessionId)
-            ->label('✗ '.__('dashboard.pages.scheduler.modal.missed'))
+        return Action::make('mark_missed_' . $bookingSessionId)
+            ->label('✗ ' . __('dashboard.pages.scheduler.modal.missed'))
             ->color('danger')
             ->action(function () use ($bookingSessionId) {
                 app(BookingSessionService::class)
@@ -103,7 +125,7 @@ class AttendanceModalContent extends Component implements HasActions
             ->action(function (array $data) {
                 if (! empty($data['user_id'])) {
                     app(BookingSessionService::class)
-                        ->oneTimeAttend((int) $data['user_id'], $this->session->id);
+                        ->oneTimeAttend((int) $data['user_id'], $this->sessionId);
                 }
                 $this->refreshBookings();
                 Notification::make()
@@ -134,7 +156,7 @@ class AttendanceModalContent extends Component implements HasActions
             ->action(function (array $data) {
                 $service = app(BookingSessionService::class);
                 $user = $service->createWalkInUser($data);
-                $service->oneTimeAttend($user->id, $this->session->id);
+                $service->oneTimeAttend($user->id, $this->sessionId);
                 $this->refreshBookings();
                 Notification::make()
                     ->title(__('dashboard.pages.scheduler.notifications.walkin_added'))
