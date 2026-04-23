@@ -11,6 +11,7 @@ use App\Filament\Admin\Resources\AppNotifications\Schemas\AppNotificationInfolis
 use App\Filament\Admin\Resources\AppNotifications\Tables\AppNotificationsTable;
 use App\Models\AppNotification;
 use BackedEnum;
+use Illuminate\Database\Eloquent\Model;
 use UnitEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
@@ -26,6 +27,11 @@ class AppNotificationResource extends Resource
     protected static ?int $navigationSort = 2;
 
     protected static ?string $recordTitleAttribute = 'title';
+
+    public static function getRecordTitle(?Model $record): string
+    {
+        return $record ? ($record->title ?? '#' . $record->id) : static::getModelLabel();
+    }
 
     public static function form(Schema $schema): Schema
     {

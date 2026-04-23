@@ -1,5 +1,5 @@
 <?php
-
+// app\Filament\Admin\Pages\Scheduler.php
 declare(strict_types=1);
 
 namespace App\Filament\Admin\Pages;
@@ -12,6 +12,7 @@ use App\Services\BookingSession\BookingSessionService;
 use BackedEnum;
 use Carbon\Carbon;
 use Filament\Actions\Action;
+use Filament\Forms\Components\DatePicker;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
 use Illuminate\Support\Collection;
@@ -130,6 +131,19 @@ class Scheduler extends Page
     protected function getHeaderActions(): array
     {
         return [
+            Action::make('select_date')
+                ->label('Jump to Date')
+                ->icon('heroicon-o-calendar')
+                ->form([
+                    DatePicker::make('date')
+                        ->default(now())
+                        ->closeOnSelection()
+                        ->native(false),
+                ])
+                ->action(function (array $data) {
+                    $this->selectedDate = $data['date'];
+                    $this->loadSessions();
+                }),
             Action::make('refresh')
                 ->label(__('dashboard.pages.scheduler.actions.refresh'))
                 ->icon('heroicon-o-arrow-path')

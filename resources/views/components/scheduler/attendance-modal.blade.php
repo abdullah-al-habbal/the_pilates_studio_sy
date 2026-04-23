@@ -1,4 +1,5 @@
-<!-- filePath: resources\views\filament\admin\pages\scheduler\attendance-modal.blade.php -->
+<!-- filePath: resources\views\components\scheduler\attendance-modal.blade.php -->
+@props(['session', 'isFull' => false])
 @php
     use App\Models\User;
     $bookings = $session->bookingSessions()->with([
@@ -9,7 +10,7 @@
     $allUsers = User::orderBy('fullname')->get(['id', 'fullname', 'phone_number']);
 @endphp
 
-<div class="space-y-6 py-2" x-data="{
+<div class="space-y-6 p-6" x-data="{
     tab: 'attendees',
     walkInMode: 'existing',
     userId: null,
@@ -136,24 +137,29 @@
             </div>
         @else
 
-            <div class="flex rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden text-sm">
+            <div class="flex p-1 bg-gray-100 dark:bg-gray-800 rounded-lg">
                 <button type="button"
                     @click="walkInMode = 'existing'"
-                    :class="walkInMode === 'existing' ? 'bg-gray-100 dark:bg-gray-700 font-semibold' : 'bg-white dark:bg-gray-900 text-gray-500'"
-                    class="flex-1 px-3 py-2 transition-colors">
+                    :class="walkInMode === 'existing' 
+                            ? 'bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow' 
+                            : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'"
+                    class="flex-1 px-4 py-2 text-sm font-medium rounded-md transition-all duration-200">
                     {{ __('dashboard.pages.scheduler.modal.existing_member') }}
                 </button>
                 <button type="button"
                     @click="walkInMode = 'new'"
-                    :class="walkInMode === 'new' ? 'bg-gray-100 dark:bg-gray-700 font-semibold' : 'bg-white dark:bg-gray-900 text-gray-500'"
-                    class="flex-1 px-3 py-2 transition-colors">
+                    :class="walkInMode === 'new' 
+                            ? 'bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow' 
+                            : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'"
+                    class="flex-1 px-4 py-2 text-sm font-medium rounded-md transition-all duration-200">
                     {{ __('dashboard.pages.scheduler.modal.new_member') }}
                 </button>
             </div>
 
             <div x-show="walkInMode === 'existing'" class="space-y-3">
                 <select x-model="userId"
-                    class="block w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-sm text-gray-900 dark:text-gray-100 px-3 py-2 shadow-sm focus:border-primary-500 focus:ring-primary-500">
+                    class="appearance-none block w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-sm text-gray-900 dark:text-gray-100 px-3 py-2 shadow-sm focus:border-primary-500 focus:ring-primary-500"
+                    style="background-image: url('data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' fill=\'none\' viewBox=\'0 0 20 20\'%3E%3Cpath stroke=\'%236b7280\' stroke-linecap=\'round\' stroke-linejoin=\'round\' stroke-width=\'1.5\' d=\'m6 8 4 4 4-4\'/%3E%3C/svg%3E'); background-position: right 0.5rem center; background-repeat: no-repeat;">
                     <option value="">{{ __('dashboard.pages.scheduler.modal.select_member') }}</option>
                     @foreach($allUsers as $user)
                         <option value="{{ $user->id }}">

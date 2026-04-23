@@ -16,7 +16,7 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
-use UnitEnum;
+use Illuminate\Database\Eloquent\Model;
 
 class BookingSessionResource extends Resource
 {
@@ -27,6 +27,17 @@ class BookingSessionResource extends Resource
     protected static ?int $navigationSort = 2;
 
     protected static ?string $recordTitleAttribute = 'id';
+
+    public static function getRecordTitle(?Model $record): string
+    {
+        if (!$record) {
+            return static::getModelLabel();
+        }
+        $userName = $record->booking?->user?->fullname ?? '—';
+        $className = $record->classSession?->class?->title[app()->getLocale()] ?? $record->classSession?->class?->title['en'] ?? '—';
+        $date = $record->classSession?->date?->format('Y-m-d') ?? '';
+        return "{$userName} · {$className} · {$date}";
+    }
 
     public static function getModelLabel(): string
     {

@@ -1,5 +1,4 @@
 <?php
-
 // filePath: app/Filament/Admin/Resources/Bookings/BookingResource.php
 
 namespace App\Filament\Admin\Resources\Bookings;
@@ -20,6 +19,7 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class BookingResource extends Resource
@@ -31,6 +31,16 @@ class BookingResource extends Resource
     protected static ?int $navigationSort = 1;
 
     protected static ?string $recordTitleAttribute = 'id';
+
+    public static function getRecordTitle(?Model $record): string
+    {
+        if (!$record) {
+            return static::getModelLabel();
+        }
+        $userName = $record->user?->fullname ?? 'Unknown User';
+        $packageName = $record->package?->getTranslation('name', app()->getLocale()) ?? 'Unknown Package';
+        return "{$userName} — {$packageName}";
+    }
 
     public static function getModelLabel(): string
     {
@@ -57,7 +67,7 @@ class BookingResource extends Resource
         return cache()->remember(
             'filament.bookings.count',
             now()->addMinutes(5),
-            fn () => static::getModel()::query()->count()
+            fn() => static::getModel()::query()->count()
         );
     }
 
