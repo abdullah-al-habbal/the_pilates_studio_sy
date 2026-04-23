@@ -151,7 +151,7 @@ class Scheduler extends Page
                     'class' => $session->class?->title[app()->getLocale()] ?? '—',
                     'date' => $session->date->format('M j'),
                 ]))
-                ->modalContent(fn () => view('components.scheduler.attendance-content', [
+                ->modalContent(fn () => view('livewire.attendance-modal-content', [
                     'session' => $session,
                     'bookings' => $bookings,
                     'allUsers' => $allUsers,
