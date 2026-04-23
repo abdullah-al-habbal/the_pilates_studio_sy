@@ -44,6 +44,20 @@ class MerchandiseCategoryResource extends Resource
         return $record?->name ?? static::getModelLabel();
     }
 
+    public static function getNavigationBadge(): ?string
+    {
+        return cache()->remember(
+            'filament.merchandise_categories.count',
+            now()->addMinutes(5),
+            fn () => static::getModel()::query()->count()
+        );
+    }
+
+    public static function getNavigationBadgeColor(): string|array|null
+    {
+        return 'primary';
+    }
+
     public static function form(Schema $schema): Schema
     {
         return MerchandiseCategoryForm::configure($schema);

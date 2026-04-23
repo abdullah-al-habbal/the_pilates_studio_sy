@@ -34,6 +34,20 @@ class StaticPageResource extends Resource
         return $record?->title ?? static::getModelLabel();
     }
 
+    public static function getNavigationBadge(): ?string
+    {
+        return cache()->remember(
+            'filament.static_pages.count',
+            now()->addMinutes(5),
+            fn () => static::getModel()::query()->count()
+        );
+    }
+
+    public static function getNavigationBadgeColor(): string|array|null
+    {
+        return 'primary';
+    }
+
     public static function form(Schema $schema): Schema
     {
         return StaticPageForm::configure($schema);

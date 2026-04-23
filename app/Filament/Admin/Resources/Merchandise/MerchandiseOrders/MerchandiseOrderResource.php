@@ -46,7 +46,21 @@ class MerchandiseOrderResource extends Resource
 
     public static function getRecordTitle(?Model $record): string
     {
-        return $record ? 'Order #' . $record->id : static::getModelLabel();
+        return $record ? 'Order #'.$record->id : static::getModelLabel();
+    }
+
+    public static function getNavigationBadge(): ?string
+    {
+        return cache()->remember(
+            'filament.merchandise_orders.count',
+            now()->addMinutes(5),
+            fn () => static::getModel()::query()->count()
+        );
+    }
+
+    public static function getNavigationBadgeColor(): string|array|null
+    {
+        return 'primary';
     }
 
     public static function form(Schema $schema): Schema
@@ -75,7 +89,7 @@ class MerchandiseOrderResource extends Resource
 
                         TextEntry::make('total_price')
                             ->label(__('dashboard.resources.merchandise_orders.fields.total_price'))
-                            ->state(fn($record) => $record->quantity * ($record->merchandise?->price ?? 0))
+                            ->state(fn ($record) => $record->quantity * ($record->merchandise?->price ?? 0))
                             ->money('SYP')
                             ->weight(FontWeight::Bold)
                             ->color('success'),

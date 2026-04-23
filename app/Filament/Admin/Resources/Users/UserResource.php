@@ -39,6 +39,20 @@ class UserResource extends Resource
         return $record?->fullname ?? static::getModelLabel();
     }
 
+    public static function getNavigationBadge(): ?string
+    {
+        return cache()->remember(
+            'filament.users.count',
+            now()->addMinutes(5),
+            fn () => static::getModel()::query()->count()
+        );
+    }
+
+    public static function getNavigationBadgeColor(): string|array|null
+    {
+        return 'primary';
+    }
+
     public static function form(Schema $schema): Schema
     {
         return UserForm::configure($schema);

@@ -40,7 +40,7 @@ class TopInstructorsWidget extends BaseWidget
                     ->label(__('dashboard.widgets.top_instructors.instructor')),
                 TextColumn::make('attended_count')
                     ->label(__('dashboard.widgets.top_instructors.attended_sessions'))
-                    ->state(fn ($record) => $instructors->firstWhere('id', $record->id)?->attended_count ?? 0)
+                    ->state(fn($record) => $instructors->firstWhere('id', $record->id)?->attended_count ?? 0)
                     ->numeric()
                     ->sortable(),
             ]);
