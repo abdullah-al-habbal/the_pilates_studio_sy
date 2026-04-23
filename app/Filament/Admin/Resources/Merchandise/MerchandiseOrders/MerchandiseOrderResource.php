@@ -19,6 +19,7 @@ use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Filament\Support\Enums\FontWeight;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Model;
 
 class MerchandiseOrderResource extends Resource
 {
@@ -43,9 +44,9 @@ class MerchandiseOrderResource extends Resource
         return __('dashboard.resources.merchandise_orders.singular');
     }
 
-    public static function getRecordTitle(?\Illuminate\Database\Eloquent\Model $record): string
+    public static function getRecordTitle(?Model $record): string
     {
-        return $record ? 'Order #'.$record->id : static::getModelLabel();
+        return $record ? 'Order #' . $record->id : static::getModelLabel();
     }
 
     public static function form(Schema $schema): Schema
@@ -74,7 +75,7 @@ class MerchandiseOrderResource extends Resource
 
                         TextEntry::make('total_price')
                             ->label(__('dashboard.resources.merchandise_orders.fields.total_price'))
-                            ->state(fn ($record) => $record->quantity * ($record->merchandise?->price ?? 0))
+                            ->state(fn($record) => $record->quantity * ($record->merchandise?->price ?? 0))
                             ->money('SYP')
                             ->weight(FontWeight::Bold)
                             ->color('success'),

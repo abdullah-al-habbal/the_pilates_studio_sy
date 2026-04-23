@@ -33,6 +33,20 @@ class AppNotificationResource extends Resource
         return $record ? ($record->title ?? '#' . $record->id) : static::getModelLabel();
     }
 
+    public static function getNavigationBadge(): ?string
+    {
+        return cache()->remember(
+            'filament.app_notifications.count',
+            now()->addMinutes(5),
+            fn() => static::getModel()::query()->count()
+        );
+    }
+
+    public static function getNavigationBadgeColor(): string|array|null
+    {
+        return 'primary';
+    }
+
     public static function form(Schema $schema): Schema
     {
         return AppNotificationForm::configure($schema);

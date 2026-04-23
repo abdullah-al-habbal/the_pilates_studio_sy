@@ -14,6 +14,7 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Model;
 
 class MerchandiseCategoryResource extends Resource
 {
@@ -38,7 +39,7 @@ class MerchandiseCategoryResource extends Resource
         return __('dashboard.resources.merchandise_categories.singular');
     }
 
-    public static function getRecordTitle(?\Illuminate\Database\Eloquent\Model $record): string
+    public static function getRecordTitle(?Model $record): string
     {
         return $record?->name ?? static::getModelLabel();
     }

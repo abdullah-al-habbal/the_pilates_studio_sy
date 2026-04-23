@@ -174,4 +174,3 @@ class AttendanceModalContent extends Component implements HasActions
         ]);
     }
 }
-// done by abdullah

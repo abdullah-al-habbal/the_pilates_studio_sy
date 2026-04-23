@@ -50,6 +50,28 @@ class Scheduler extends Page
         return __('dashboard.navigation.groups.operations');
     }
 
+    public static function getNavigationBadge(): ?string
+    {
+        return cache()->remember(
+            'filament.scheduler.today_count',
+            now()->addMinutes(5),
+            fn() => ClassSession::where('status', 'scheduled')
+                ->whereDate('date', today())
+                ->count()
+        );
+    }
+
+    public static function getNavigationBadgeColor(): string|array|null
+    {
+        $count = static::getNavigationBadge();
+        return ($count && $count > 0) ? 'primary' : 'gray';
+    }
+
+    public function getSubheading(): ?string
+    {
+        return Carbon::parse($this->selectedDate)->isoFormat('dddd, MMMM D, YYYY');
+    }
+
     public function mount(): void
     {
         $this->selectedDate = today()->format('Y-m-d');
@@ -178,7 +200,6 @@ class Scheduler extends Page
                 ->form([
                     DatePicker::make('date')
                         ->default(now())
-                        ->closeOnSelection()
                         ->native(false),
                 ])
                 ->action(function (array $data) {
@@ -192,4 +213,3 @@ class Scheduler extends Page
         ];
     }
 }
-// done by abdullah

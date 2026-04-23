@@ -16,6 +16,7 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use UnitEnum;
 
@@ -31,9 +32,23 @@ class InstructorResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'name';
 
-    public static function getRecordTitle(?\Illuminate\Database\Eloquent\Model $record): string
+    public static function getRecordTitle(?Model $record): string
     {
         return $record?->fullname ?? static::getModelLabel();
+    }
+
+    public static function getNavigationBadge(): ?string
+    {
+        return cache()->remember(
+            'filament.instructors.count',
+            now()->addMinutes(5),
+            fn() => static::getModel()::query()->count()
+        );
+    }
+
+    public static function getNavigationBadgeColor(): string|array|null
+    {
+        return 'primary';
     }
 
     public static function form(Schema $schema): Schema

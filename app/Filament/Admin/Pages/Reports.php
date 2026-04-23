@@ -30,6 +30,25 @@ class Reports extends Page implements HasInfolists
 
     protected static ?int $navigationSort = 2;
 
+    public static function getNavigationBadge(): ?string
+    {
+        return cache()->remember(
+            'filament.reports.today_revenue',
+            now()->addMinutes(5),
+            function () {
+                $repo = App::make(MerchandiseOrderEloquentRepository::class);
+                $total = $repo->getTotalRevenue(now()->startOfDay(), now()->endOfDay());
+
+                return number_format($total, 0) . ' SYP';
+            }
+        );
+    }
+
+    public static function getNavigationBadgeColor(): string|array|null
+    {
+        return 'success';
+    }
+
     public string $period = 'daily';
 
     public string $dailyDate = '';
@@ -78,8 +97,8 @@ class Reports extends Page implements HasInfolists
                 Carbon::parse($this->dailyDate)->endOfDay(),
             ],
             'monthly' => [
-                Carbon::parse($this->month.'-01')->startOfMonth(),
-                Carbon::parse($this->month.'-01')->endOfMonth(),
+                Carbon::parse($this->month . '-01')->startOfMonth(),
+                Carbon::parse($this->month . '-01')->endOfMonth(),
             ],
             'yearly' => [
                 Carbon::create((int) $this->year)->startOfYear(),
@@ -107,7 +126,7 @@ class Reports extends Page implements HasInfolists
                         ->schema([
                             TextEntry::make('total_revenue')
                                 ->label(__('dashboard.pages.reports.stats.total_revenue'))
-                                ->state(number_format($stats['total_revenue']).' SYP')
+                                ->state(number_format($stats['total_revenue']) . ' SYP')
                                 ->icon('heroicon-o-currency-dollar')
                                 ->iconColor('primary')
                                 ->weight(FontWeight::Bold)
@@ -119,7 +138,7 @@ class Reports extends Page implements HasInfolists
                         ->schema([
                             TextEntry::make('booking_revenue')
                                 ->label(__('dashboard.pages.reports.stats.booking_revenue'))
-                                ->state(number_format($stats['booking_revenue']).' SYP')
+                                ->state(number_format($stats['booking_revenue']) . ' SYP')
                                 ->icon('heroicon-o-ticket')
                                 ->iconColor('success')
                                 ->weight(FontWeight::Bold),
@@ -129,7 +148,7 @@ class Reports extends Page implements HasInfolists
                         ->schema([
                             TextEntry::make('store_revenue')
                                 ->label(__('dashboard.pages.reports.stats.store_revenue'))
-                                ->state(number_format($stats['merchandise_revenue']).' SYP')
+                                ->state(number_format($stats['merchandise_revenue']) . ' SYP')
                                 ->icon('heroicon-o-shopping-bag')
                                 ->iconColor('warning')
                                 ->weight(FontWeight::Bold),
@@ -164,35 +183,35 @@ class Reports extends Page implements HasInfolists
                         ->iconColor('warning')
                         ->schema(
                             $classes->isEmpty()
-                                ? [
-                                    TextEntry::make('no_classes')
-                                        ->hiddenLabel()
-                                        ->state(__('dashboard.pages.reports.popular_classes.empty', [], 'en') ?? 'No data for this period.')
-                                        ->color('gray'),
-                                ]
-                                : $classes->values()->map(function ($class, int $i) use ($stats): TextEntry {
-                                    $locale = app()->getLocale();
-                                    $title = is_array($class->title)
-                                        ? ($class->title[$locale] ?? $class->title['en'] ?? 'Unknown')
-                                        : ($class->title ?? 'Unknown');
+                            ? [
+                                TextEntry::make('no_classes')
+                                    ->hiddenLabel()
+                                    ->state(__('dashboard.pages.reports.popular_classes.empty', [], 'en') ?? 'No data for this period.')
+                                    ->color('gray'),
+                            ]
+                            : $classes->values()->map(function ($class, int $i) use ($stats): TextEntry {
+                                $locale = app()->getLocale();
+                                $title = is_array($class->title)
+                                    ? ($class->title[$locale] ?? $class->title['en'] ?? 'Unknown')
+                                    : ($class->title ?? 'Unknown');
 
-                                    $pct = $stats['total_bookings'] > 0
-                                        ? min(100, round(($class->total_attendance / $stats['total_bookings']) * 100))
-                                        : 0;
+                                $pct = $stats['total_bookings'] > 0
+                                    ? min(100, round(($class->total_attendance / $stats['total_bookings']) * 100))
+                                    : 0;
 
-                                    return TextEntry::make('class_'.$i)
-                                        ->label($title)
-                                        ->state(
-                                            __('dashboard.pages.reports.popular_classes.attendees', ['count' => $class->total_attendance])
-                                                .'   ·   '
-                                                .__('dashboard.pages.reports.popular_classes.sessions', ['count' => $class->sessions_count])
-                                                .'   ·   '
-                                                .__('dashboard.pages.reports.popular_classes.avg', ['count' => $class->avg_attendance])
-                                        )
-                                        ->badge()
-                                        ->color('primary')
-                                        ->tooltip($pct.'% of total bookings');
-                                })->toArray()
+                                return TextEntry::make('class_' . $i)
+                                    ->label($title)
+                                    ->state(
+                                        __('dashboard.pages.reports.popular_classes.attendees', ['count' => $class->total_attendance])
+                                        . '   ·   '
+                                        . __('dashboard.pages.reports.popular_classes.sessions', ['count' => $class->sessions_count])
+                                        . '   ·   '
+                                        . __('dashboard.pages.reports.popular_classes.avg', ['count' => $class->avg_attendance])
+                                    )
+                                    ->badge()
+                                    ->color('primary')
+                                    ->tooltip($pct . '% of total bookings');
+                            })->toArray()
                         ),
 
                     Section::make(__('dashboard.pages.reports.top_merchandise.heading'))
@@ -200,27 +219,27 @@ class Reports extends Page implements HasInfolists
                         ->iconColor('success')
                         ->schema(
                             $merch->isEmpty()
-                                ? [
-                                    TextEntry::make('no_merch')
-                                        ->hiddenLabel()
-                                        ->state(__('dashboard.pages.reports.top_merchandise.empty', [], 'en') ?? 'No sales for this period.')
-                                        ->color('gray'),
-                                ]
-                                : $merch->values()->map(function ($item, int $i): TextEntry {
-                                    $locale = app()->getLocale();
-                                    $name = $item->name[$locale] ?? $item->name['en'] ?? '';
+                            ? [
+                                TextEntry::make('no_merch')
+                                    ->hiddenLabel()
+                                    ->state(__('dashboard.pages.reports.top_merchandise.empty', [], 'en') ?? 'No sales for this period.')
+                                    ->color('gray'),
+                            ]
+                            : $merch->values()->map(function ($item, int $i): TextEntry {
+                                $locale = app()->getLocale();
+                                $name = $item->name[$locale] ?? $item->name['en'] ?? '';
 
-                                    return TextEntry::make('merch_'.$i)
-                                        ->label($name)
-                                        ->state(
-                                            number_format($item->revenue).' SYP'
-                                                .' · '
-                                                .__('dashboard.pages.reports.top_merchandise.sold', ['count' => $item->quantity])
-                                        )
-                                        ->badge()
-                                        ->color('success')
-                                        ->icon('heroicon-o-cube');
-                                })->toArray()
+                                return TextEntry::make('merch_' . $i)
+                                    ->label($name)
+                                    ->state(
+                                        number_format($item->revenue) . ' SYP'
+                                        . ' · '
+                                        . __('dashboard.pages.reports.top_merchandise.sold', ['count' => $item->quantity])
+                                    )
+                                    ->badge()
+                                    ->color('success')
+                                    ->icon('heroicon-o-cube');
+                            })->toArray()
                         ),
                 ]),
         ]);

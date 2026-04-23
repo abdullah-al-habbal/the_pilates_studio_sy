@@ -14,6 +14,7 @@ use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Model;
 use UnitEnum;
 
 class StaticPageResource extends Resource
@@ -28,7 +29,7 @@ class StaticPageResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'slug';
 
-    public static function getRecordTitle(?\Illuminate\Database\Eloquent\Model $record): string
+    public static function getRecordTitle(?Model $record): string
     {
         return $record?->title ?? static::getModelLabel();
     }

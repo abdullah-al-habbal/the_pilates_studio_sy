@@ -139,19 +139,11 @@ class ClassSession extends Model
         );
     }
 
-    /**
-     * Check if this session is bookable for a specific user
-     * Call as: $classSession->isBookableForUser($user)
-     */
     public function isBookableForUser(User $user): bool
     {
         return $this->is_available && $user->total_remaining_credits > 0;
     }
 
-    /**
-     * Check if a specific booking session can be cancelled
-     * Call as: $classSession->isCancelableByUser($bookingSession)
-     */
     public function isCancelableByUser(BookingSession $bookingSession): bool
     {
         return $bookingSession->isReserved()
