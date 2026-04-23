@@ -55,7 +55,7 @@ class AttendanceModalContent extends Component implements HasActions
 
         $this->bookings = $session->bookingSessions()
             ->with([
-                'booking.user.bookings' => fn ($q) => $q->where('status', 'active')->where('remaining_credits', '>', 0),
+                'booking.user.bookings' => fn($q) => $q->where('status', 'active')->where('remaining_credits', '>', 0),
             ])
             ->get();
 
@@ -71,11 +71,13 @@ class AttendanceModalContent extends Component implements HasActions
         $session = $this->getSession();
         $this->bookings = $session->bookingSessions()
             ->with([
-                'booking.user.bookings' => fn ($q) => $q->where('status', 'active')->where('remaining_credits', '>', 0),
+                'booking.user.bookings' => fn($q) => $q->where('status', 'active')->where('remaining_credits', '>', 0),
             ])
             ->get();
         $total = $this->bookings->count();
         $this->isFull = $session->total_spots > 0 && $total >= $session->total_spots;
+
+        $this->dispatch('attendance-updated');
     }
 
     public function markAttendedAction(int $bookingSessionId): Action
@@ -120,10 +122,10 @@ class AttendanceModalContent extends Component implements HasActions
                     ->label(__('dashboard.pages.scheduler.modal.select_member'))
                     ->options($this->allUsers->pluck('fullname', 'id'))
                     ->searchable()
-                    ->visible(fn () => $this->walkInMode === 'existing'),
+                    ->visible(fn() => $this->walkInMode === 'existing'),
             ])
             ->action(function (array $data) {
-                if (! empty($data['user_id'])) {
+                if (!empty($data['user_id'])) {
                     app(BookingSessionService::class)
                         ->oneTimeAttend((int) $data['user_id'], $this->sessionId);
                 }
@@ -172,3 +174,4 @@ class AttendanceModalContent extends Component implements HasActions
         ]);
     }
 }
+// done by abdullah

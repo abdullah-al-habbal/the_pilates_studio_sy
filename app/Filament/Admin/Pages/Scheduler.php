@@ -18,6 +18,7 @@ use Filament\Notifications\Notification;
 use Filament\Pages\Page;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\App;
+use Livewire\Attributes\On;
 
 class Scheduler extends Page
 {
@@ -62,7 +63,7 @@ class Scheduler extends Page
             ->selectRaw('DATE(date) as session_date')
             ->distinct()
             ->pluck('session_date')
-            ->map(fn ($d) => Carbon::parse($d)->format('Y-m-d'))
+            ->map(fn($d) => Carbon::parse($d)->format('Y-m-d'))
             ->values()
             ->toArray();
     }
@@ -82,6 +83,12 @@ class Scheduler extends Page
     {
         $this->sessions = App::make(ClassSessionEloquentRepository::class)
             ->getSessionsByDate($this->selectedDate);
+    }
+
+    #[On('attendance-updated')]
+    public function handleAttendanceUpdate(): void
+    {
+        $this->loadSessions();
     }
 
     public function toggleAttendance(int $bookingSessionId, string $status): void
@@ -132,26 +139,26 @@ class Scheduler extends Page
     public function getSessionActions(int $sessionId): array
     {
         $session = $this->sessions->firstWhere('id', $sessionId);
-        if (! $session) {
+        if (!$session) {
             return [];
         }
 
         $bookings = $session->bookingSessions()->with([
-            'booking.user.bookings' => fn ($q) => $q->where('status', 'active')->where('remaining_credits', '>', 0),
+            'booking.user.bookings' => fn($q) => $q->where('status', 'active')->where('remaining_credits', '>', 0),
         ])->get();
 
         $allUsers = User::orderBy('fullname')->get(['id', 'fullname', 'phone_number']);
         $isFull = $session->total_spots > 0 && $session->bookingSessions->count() >= $session->total_spots;
 
         return [
-            Action::make('attendance_'.$sessionId)
+            Action::make('attendance_' . $sessionId)
                 ->label(__('dashboard.pages.scheduler.attendance'))
                 ->icon('heroicon-o-clipboard-document-check')
                 ->modalHeading(__('dashboard.pages.scheduler.modal.heading', [
                     'class' => $session->class?->title[app()->getLocale()] ?? '—',
                     'date' => $session->date->format('M j'),
                 ]))
-                ->modalContent(fn () => view('livewire.attendance-modal-wrapper', [
+                ->modalContent(fn() => view('livewire.attendance-modal-wrapper', [
                     'sessionId' => $sessionId,
                 ]))
                 ->modalSubmitAction(false)
@@ -181,7 +188,8 @@ class Scheduler extends Page
             Action::make('refresh')
                 ->label(__('dashboard.pages.scheduler.actions.refresh'))
                 ->icon('heroicon-o-arrow-path')
-                ->action(fn () => $this->loadSessions()),
+                ->action(fn() => $this->loadSessions()),
         ];
     }
 }
+// done by abdullah
