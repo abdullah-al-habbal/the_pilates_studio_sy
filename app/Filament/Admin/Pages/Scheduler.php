@@ -151,11 +151,8 @@ class Scheduler extends Page
                     'class' => $session->class?->title[app()->getLocale()] ?? '—',
                     'date' => $session->date->format('M j'),
                 ]))
-                ->modalContent(fn () => view('components.scheduler.attendance-content', [
-                    'session' => $session,
-                    'bookings' => $bookings,
-                    'allUsers' => $allUsers,
-                    'isFull' => $isFull,
+                ->modalContent(fn () => view('livewire.attendance-modal-wrapper', [
+                    'sessionId' => $sessionId,
                 ]))
                 ->modalSubmitAction(false)
                 ->modalCancelActionLabel(__('dashboard.pages.scheduler.modal.close'))

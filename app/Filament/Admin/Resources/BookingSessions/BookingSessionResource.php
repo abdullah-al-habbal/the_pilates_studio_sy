@@ -30,12 +30,13 @@ class BookingSessionResource extends Resource
 
     public static function getRecordTitle(?Model $record): string
     {
-        if (!$record) {
+        if (! $record) {
             return static::getModelLabel();
         }
         $userName = $record->booking?->user?->fullname ?? '—';
-        $className = $record->classSession?->class?->title[app()->getLocale()] ?? $record->classSession?->class?->title['en'] ?? '—';
+        $className = $record->classSession?->class?->title[app()->getLocale()] ?? '—';
         $date = $record->classSession?->date?->format('Y-m-d') ?? '';
+
         return "{$userName} · {$className} · {$date}";
     }
 
