@@ -25,6 +25,8 @@ use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 use LaraZeus\SpatieTranslatable\SpatieTranslatablePlugin;
+use Filament\Navigation\NavigationItem;
+use App\Models\ClassSession;
 
 class AdminPanelProvider extends PanelProvider
 {
@@ -58,7 +60,24 @@ class AdminPanelProvider extends PanelProvider
                 TopInstructorsWidget::class,
             ])
             ->middleware($this->getMiddleware())
-            ->authMiddleware($this->getAuthMiddleware());
+            ->authMiddleware($this->getAuthMiddleware())
+            ->navigationItems([
+                NavigationItem::make(__('dashboard.navigation.scheduler'))
+                    ->url('/admin/scheduler')
+                    ->icon('heroicon-o-calendar-days')
+                    ->sort(1)
+                    ->group(__('dashboard.navigation.groups.operations'))
+                    ->badge(fn(): string => (string) cache()->remember(
+                        'filament.scheduler.today_count',
+                        now()->addMinutes(5),
+                        fn() => ClassSession::where('status', 'scheduled')
+                            ->whereDate('date', today())
+                            ->count()
+                    ), color: fn(): string => ClassSession::where('status', 'scheduled')
+                            ->whereDate('date', today())
+                            ->count() > 0 ? 'primary' : 'gray')
+                    ->isActiveWhen(fn(): bool => request()->is('admin/scheduler*')),
+            ]);
     }
 
     private function getMiddleware(): array

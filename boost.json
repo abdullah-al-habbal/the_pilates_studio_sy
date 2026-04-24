@@ -1,9 +1,0 @@
-{
-    "agents": [
-        "copilot"
-    ],
-    "guidelines": true,
-    "packages": [
-        "filament/filament"
-    ]
-}
