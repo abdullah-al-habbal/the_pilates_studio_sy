@@ -49,7 +49,7 @@ class MerchandiseCategoryResource extends Resource
         return cache()->remember(
             'filament.merchandise_categories.count',
             now()->addMinutes(5),
-            fn () => (string) static::getModel()::query()->count()
+            fn() => (string) static::getModel()::query()->count()
         );
     }
 
@@ -75,7 +75,7 @@ class MerchandiseCategoryResource extends Resource
 
                     TextEntry::make('merchandises_count')
                         ->label(__('dashboard.resources.merchandise_categories.fields.merchandises_count'))
-                        ->state(fn ($record) => $record->merchandises()->count())
+                        ->state(fn($record) => $record->merchandises()->count())
                         ->badge()
                         ->color('primary'),
 

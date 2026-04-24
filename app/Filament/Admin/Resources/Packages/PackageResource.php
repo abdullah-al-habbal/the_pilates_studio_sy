@@ -34,11 +34,11 @@ class PackageResource extends Resource
 
     public static function getRecordTitle(?Model $record): string
     {
-        if (! $record) {
+        if (!$record) {
             return static::getModelLabel();
         }
 
-        return $record->getTranslation('name', app()->getLocale()) ?? 'Package #'.$record->id;
+        return $record->getTranslation('name', app()->getLocale()) ?? 'Package #' . $record->id;
     }
 
     public static function getNavigationBadge(): ?string
@@ -46,7 +46,7 @@ class PackageResource extends Resource
         return cache()->remember(
             'filament.packages.count',
             now()->addMinutes(5),
-            fn () => (string) static::getModel()::query()->count()
+            fn() => (string) static::getModel()::query()->count()
         );
     }
 

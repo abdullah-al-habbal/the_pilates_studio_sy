@@ -31,7 +31,7 @@ class AppNotificationResource extends Resource
 
     public static function getRecordTitle(?Model $record): string
     {
-        return $record ? ($record->title ?? '#'.$record->id) : static::getModelLabel();
+        return $record ? ($record->title ?? '#' . $record->id) : static::getModelLabel();
     }
 
     public static function getNavigationBadge(): ?string
@@ -39,7 +39,7 @@ class AppNotificationResource extends Resource
         return cache()->remember(
             'filament.app_notifications.count',
             now()->addMinutes(5),
-            fn () => (string) static::getModel()::query()->count()
+            fn() => (string) static::getModel()::query()->count()
         );
     }
 

@@ -31,7 +31,7 @@ class BookingSessionResource extends Resource
 
     public static function getRecordTitle(?Model $record): string
     {
-        if (! $record) {
+        if (!$record) {
             return static::getModelLabel();
         }
         $userName = $record->booking?->user?->fullname ?? '—';
@@ -66,7 +66,7 @@ class BookingSessionResource extends Resource
         return cache()->remember(
             'filament.booking_sessions.count',
             now()->addMinutes(5),
-            fn () => (string) static::getModel()::query()->count()
+            fn() => (string) static::getModel()::query()->count()
         );
     }
 

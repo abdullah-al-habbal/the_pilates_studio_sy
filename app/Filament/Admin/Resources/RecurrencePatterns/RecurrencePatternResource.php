@@ -31,7 +31,7 @@ class RecurrencePatternResource extends Resource
 
     public static function getRecordTitle(?Model $record): string
     {
-        return $record?->name ?? $record?->title ?? ('Pattern #'.$record->id);
+        return $record?->name ?? $record?->title ?? ('Pattern #' . $record->id);
     }
 
     public static function getNavigationBadge(): ?string
@@ -39,7 +39,7 @@ class RecurrencePatternResource extends Resource
         return cache()->remember(
             'filament.recurrence_patterns.count',
             now()->addMinutes(5),
-            fn () => (string) static::getModel()::query()->count()
+            fn() => (string) static::getModel()::query()->count()
         );
     }
 
