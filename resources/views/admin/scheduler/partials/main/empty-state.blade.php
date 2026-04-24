@@ -1,6 +1,6 @@
 {{-- resources/views/admin/scheduler/partials/main/empty-state.blade.php --}}
-<div x-show="!loading && !error && sessions.length === 0" x-cloak
-    class="flex flex-col items-center justify-center py-24 gap-4 text-gray-400 dark:text-gray-600">
+<div id="empty-state"
+    class="hidden flex flex-col items-center justify-center py-24 gap-4 text-gray-400 dark:text-gray-600">
     <div
         class="w-20 h-20 bg-gray-50 dark:bg-gray-800/50 rounded-full flex items-center justify-center border border-gray-100 dark:border-gray-700">
         <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
