@@ -11,26 +11,27 @@ use App\Filament\Admin\Resources\AppNotifications\Schemas\AppNotificationInfolis
 use App\Filament\Admin\Resources\AppNotifications\Tables\AppNotificationsTable;
 use App\Models\AppNotification;
 use BackedEnum;
-use Illuminate\Database\Eloquent\Model;
-use UnitEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
-use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Model;
+use UnitEnum;
 
 class AppNotificationResource extends Resource
 {
     protected static ?string $model = AppNotification::class;
 
     protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-bell';
+
     protected static string|UnitEnum|null $navigationGroup = 'Users';
+
     protected static ?int $navigationSort = 2;
 
     protected static ?string $recordTitleAttribute = 'title';
 
     public static function getRecordTitle(?Model $record): string
     {
-        return $record ? ($record->title ?? '#' . $record->id) : static::getModelLabel();
+        return $record ? ($record->title ?? '#'.$record->id) : static::getModelLabel();
     }
 
     public static function getNavigationBadge(): ?string
@@ -38,7 +39,7 @@ class AppNotificationResource extends Resource
         return cache()->remember(
             'filament.app_notifications.count',
             now()->addMinutes(5),
-            fn() => static::getModel()::query()->count()
+            fn () => (string) static::getModel()::query()->count()
         );
     }
 

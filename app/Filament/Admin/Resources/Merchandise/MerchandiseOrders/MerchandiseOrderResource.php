@@ -54,7 +54,7 @@ class MerchandiseOrderResource extends Resource
         return cache()->remember(
             'filament.merchandise_orders.count',
             now()->addMinutes(5),
-            fn () => static::getModel()::query()->count()
+            fn () => (string) static::getModel()::query()->count()
         );
     }
 

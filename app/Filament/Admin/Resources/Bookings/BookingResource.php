@@ -1,4 +1,5 @@
 <?php
+
 // filePath: app/Filament/Admin/Resources/Bookings/BookingResource.php
 
 namespace App\Filament\Admin\Resources\Bookings;
@@ -34,11 +35,12 @@ class BookingResource extends Resource
 
     public static function getRecordTitle(?Model $record): string
     {
-        if (!$record) {
+        if (! $record) {
             return static::getModelLabel();
         }
         $userName = $record->user?->fullname ?? 'Unknown User';
         $packageName = $record->package?->getTranslation('name', app()->getLocale()) ?? 'Unknown Package';
+
         return "{$userName} — {$packageName}";
     }
 
@@ -67,7 +69,7 @@ class BookingResource extends Resource
         return cache()->remember(
             'filament.bookings.count',
             now()->addMinutes(5),
-            fn() => static::getModel()::query()->count()
+            fn () => (string) static::getModel()::query()->count()
         );
     }
 

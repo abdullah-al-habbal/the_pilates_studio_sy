@@ -7,25 +7,25 @@ namespace App\Repositories\Eloquent\Booking;
 
 use App\Enums\BookingStatusEnum;
 use App\Models\Booking;
+use Carbon\CarbonInterface;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
-use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 
 class BookingEloquentRepository
 {
-    public function getTotalRevenue(?Carbon $startDate = null, ?Carbon $endDate = null): int
+    public function getTotalRevenue(?CarbonInterface $startDate = null, ?CarbonInterface $endDate = null): float
     {
-        return (int) Booking::join('packages', 'bookings.package_id', '=', 'packages.id')
-            ->when($startDate, fn($q) => $q->where('bookings.created_at', '>=', $startDate))
-            ->when($endDate, fn($q) => $q->where('bookings.created_at', '<=', $endDate))
+        return (float) Booking::join('packages', 'bookings.package_id', '=', 'packages.id')
+            ->when($startDate, fn ($q) => $q->where('bookings.created_at', '>=', $startDate))
+            ->when($endDate, fn ($q) => $q->where('bookings.created_at', '<=', $endDate))
             ->sum('packages.price');
     }
 
-    public function getTotalCount(?Carbon $startDate = null, ?Carbon $endDate = null): int
+    public function getTotalCount(?CarbonInterface $startDate = null, ?CarbonInterface $endDate = null): int
     {
         return (int) Booking::query()
-            ->when($startDate, fn($q) => $q->where('created_at', '>=', $startDate))
-            ->when($endDate, fn($q) => $q->where('created_at', '<=', $endDate))
+            ->when($startDate, fn ($q) => $q->where('created_at', '>=', $startDate))
+            ->when($endDate, fn ($q) => $q->where('created_at', '<=', $endDate))
             ->count();
     }
 
@@ -58,11 +58,11 @@ class BookingEloquentRepository
 
     public function getRevenueByPackage(): \Illuminate\Support\Collection
     {
-        return Booking::with(['package' => fn($q) => $q->withTrashed()])
+        return Booking::with(['package' => fn ($q) => $q->withTrashed()])
             ->selectRaw('package_id, COUNT(*) as bookings_count')
             ->groupBy('package_id')
             ->get()
-            ->map(fn($item) => (object) [
+            ->map(fn ($item) => (object) [
                 'package_name' => $item->package?->getTranslation('name', app()->getLocale()) ?? 'Deleted Package',
                 'revenue' => $item->bookings_count * ($item->package?->price ?? 0),
             ]);
@@ -76,7 +76,7 @@ class BookingEloquentRepository
             $query->lockForUpdate();
         }
 
-        if (!empty($relations)) {
+        if (! empty($relations)) {
             $query->with($relations);
         }
 
@@ -87,7 +87,7 @@ class BookingEloquentRepository
     {
         $query = Booking::query()->where('user_id', $userId);
 
-        if (!empty($relations)) {
+        if (! empty($relations)) {
             $query->with($relations);
         }
 
@@ -99,7 +99,7 @@ class BookingEloquentRepository
         return Booking::query()
             ->where('user_id', $userId)
             ->with(['package'])
-            ->when($filters['status'] ?? null, fn($q, $status) => $q->where('status', $status))
+            ->when($filters['status'] ?? null, fn ($q, $status) => $q->where('status', $status))
             ->latest()
             ->paginate($filters['per_page'] ?? 20);
     }

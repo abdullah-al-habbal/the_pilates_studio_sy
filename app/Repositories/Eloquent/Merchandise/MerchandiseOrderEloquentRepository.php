@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Repositories\Eloquent\Merchandise;
 
 use App\Models\MerchandiseOrder;
-use Illuminate\Support\Carbon;
+use Carbon\CarbonInterface;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
@@ -15,16 +15,16 @@ class MerchandiseOrderEloquentRepository
         private readonly MerchandiseOrder $model
     ) {}
 
-    public function getTotalRevenue(?Carbon $startDate = null, ?Carbon $endDate = null): int
+    public function getTotalRevenue(?CarbonInterface $startDate = null, ?CarbonInterface $endDate = null): float
     {
-        return (int) $this->model->newQuery()
+        return (float) $this->model->newQuery()
             ->join('center_merchandises', 'merchandise_orders.merchandise_id', '=', 'center_merchandises.id')
             ->when($startDate, fn ($q) => $q->where('merchandise_orders.created_at', '>=', $startDate))
             ->when($endDate, fn ($q) => $q->where('merchandise_orders.created_at', '<=', $endDate))
             ->sum(DB::raw('center_merchandises.price * merchandise_orders.quantity'));
     }
 
-    public function getTotalCount(?Carbon $startDate = null, ?Carbon $endDate = null): int
+    public function getTotalCount(?CarbonInterface $startDate = null, ?CarbonInterface $endDate = null): int
     {
         return $this->model->newQuery()
             ->when($startDate, fn ($q) => $q->where('created_at', '>=', $startDate))
@@ -32,7 +32,7 @@ class MerchandiseOrderEloquentRepository
             ->count();
     }
 
-    public function getTopSellingSummary(int $limit = 5, ?Carbon $startDate = null, ?Carbon $endDate = null): Collection
+    public function getTopSellingSummary(int $limit = 5, ?CarbonInterface $startDate = null, ?CarbonInterface $endDate = null): Collection
     {
         return $this->model->newQuery()
             ->with('merchandise')

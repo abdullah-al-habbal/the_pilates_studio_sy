@@ -61,7 +61,7 @@ class ClassesResource extends Resource
         return cache()->remember(
             'filament.classes.count',
             now()->addMinutes(5),
-            fn () => static::getModel()::query()
+            fn () => (string) static::getModel()::query()
                 ->where('status', 'active')
                 ->count()
         );

@@ -1,4 +1,5 @@
 <?php
+
 // filePath: app/Filament/Admin/Resources/BookingSessions/BookingSessionResource.php
 
 namespace App\Filament\Admin\Resources\BookingSessions;
@@ -65,7 +66,7 @@ class BookingSessionResource extends Resource
         return cache()->remember(
             'filament.booking_sessions.count',
             now()->addMinutes(5),
-            fn() => static::getModel()::query()->count()
+            fn () => (string) static::getModel()::query()->count()
         );
     }
 
@@ -112,7 +113,7 @@ class BookingSessionResource extends Resource
                     $query->select('id', 'user_id', 'package_id', 'status', 'remaining_credits', 'total_credits')
                         ->with([
                             'user:id,fullname',
-                            'package:id,name'
+                            'package:id,name',
                         ]);
                 },
                 'classSession' => function ($query) {
@@ -121,5 +122,4 @@ class BookingSessionResource extends Resource
                 },
             ]);
     }
-
 }
