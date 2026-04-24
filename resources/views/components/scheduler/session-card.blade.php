@@ -1,3 +1,4 @@
+<!-- filePath: resources\views\components\scheduler\session-card.blade.php -->
 @props(['session', 'attendanceAction' => null])
 
 @php

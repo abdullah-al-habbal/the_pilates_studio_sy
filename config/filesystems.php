@@ -1,8 +1,6 @@
 <?php
-
-// filePath:
+// filePath: config\filesystems.php
 declare(strict_types=1);
-
 return [
     'default' => env('FILESYSTEM_DISK', 'public'),
     'disks' => [

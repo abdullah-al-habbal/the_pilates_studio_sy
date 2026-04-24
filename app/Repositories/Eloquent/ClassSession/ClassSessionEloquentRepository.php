@@ -15,7 +15,8 @@ class ClassSessionEloquentRepository
 {
     public function __construct(
         private readonly ClassSession $model
-    ) {}
+    ) {
+    }
 
     public function queryUpcomingSessions(
         ?string $date,
@@ -27,11 +28,11 @@ class ClassSessionEloquentRepository
     ): LengthAwarePaginator {
         return $this->model->newQuery()
             ->with(['class.instructor', 'class.primaryImage', 'class.category'])
-            ->when($date, fn ($q) => $q->whereDate('date', $date))
-            ->when($dateAfter, fn ($q) => $q->whereDate('date', '>=', $dateAfter))
-            ->when($dateBefore, fn ($q) => $q->whereDate('date', '<=', $dateBefore))
-            ->when($startAfter, fn ($q, $time) => $q->where('start_time', '>=', $time))
-            ->when($classId, fn ($q, $id) => $q->where('class_id', $id))
+            ->when($date, fn($q) => $q->whereDate('date', $date))
+            ->when($dateAfter, fn($q) => $q->whereDate('date', '>=', $dateAfter))
+            ->when($dateBefore, fn($q) => $q->whereDate('date', '<=', $dateBefore))
+            ->when($startAfter, fn($q, $time) => $q->where('start_time', '>=', $time))
+            ->when($classId, fn($q, $id) => $q->where('class_id', $id))
             ->whereDate('date', '>=', now()->toDateString())
             ->orderBy('date')
             ->orderBy('start_time')
@@ -62,7 +63,7 @@ class ClassSessionEloquentRepository
             ->where('status', 'scheduled')
             ->with([
                 'class.instructor',
-                'bookingSessions.booking.user.bookings' => fn ($q) => $q->where('status', 'active')->where('remaining_credits', '>', 0),
+                'bookingSessions.booking.user.bookings' => fn($q) => $q->where('status', 'active')->where('remaining_credits', '>', 0),
             ])
             ->orderBy('start_time')
             ->get();
