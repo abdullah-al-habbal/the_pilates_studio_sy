@@ -164,12 +164,18 @@ class BookingSessionEloquentRepository
     }
     public function markAttended(int $id): bool
     {
-        return (bool) $this->model->where('id', $id)->update(['attendance_status' => AttendanceStatusEnum::ATTENDED]);
+        return (bool) $this->model->where('id', $id)->update([
+            'attendance_status' => AttendanceStatusEnum::ATTENDED,
+            'attended_at'       => now(),
+        ]);
     }
 
     public function markMissed(int $id): bool
     {
-        return (bool) $this->model->where('id', $id)->update(['attendance_status' => AttendanceStatusEnum::MISSED]);
+        return (bool) $this->model->where('id', $id)->update([
+            'attendance_status' => AttendanceStatusEnum::MISSED,
+            'attended_at'       => null,
+        ]);
     }
 
     public function countAttended(): int

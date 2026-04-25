@@ -58,20 +58,20 @@ class User extends Authenticatable
 
     protected function name(): Attribute
     {
-        return Attribute::make(get: fn () => $this->fullname);
+        return Attribute::make(get: fn() => $this->fullname);
     }
 
     protected function hasCredits(): Attribute
     {
         return Attribute::make(
-            get: fn () => $this->total_remaining_credits > 0
+            get: fn() => $this->total_remaining_credits > 0
         );
     }
 
     protected function canBookNewPackage(): Attribute
     {
         return Attribute::make(
-            get: fn () => ! $this->bookings()
+            get: fn() => !$this->bookings()
                 ->where('status', BookingStatusEnum::ACTIVE)
                 ->where('remaining_credits', '>', 0)
                 ->exists()
@@ -81,28 +81,28 @@ class User extends Authenticatable
     protected function canReserveClass(): Attribute
     {
         return Attribute::make(
-            get: fn () => $this->total_remaining_credits > 0 && $this->isActive()
+            get: fn() => $this->total_remaining_credits > 0 && $this->isActive()
         );
     }
 
     protected function isVerified(): Attribute
     {
         return Attribute::make(
-            get: fn () => ! is_null($this->email_verified_at)
+            get: fn() => !is_null($this->email_verified_at)
         );
     }
 
     protected function isDeactivated(): Attribute
     {
         return Attribute::make(
-            get: fn () => ! is_null($this->deactivated_at)
+            get: fn() => !is_null($this->deactivated_at)
         );
     }
 
     protected function hasActiveBooking(): Attribute
     {
         return Attribute::make(
-            get: fn () => ! is_null($this->activeCreditBooking)
+            get: fn() => !is_null($this->activeCreditBooking)
         );
     }
 
