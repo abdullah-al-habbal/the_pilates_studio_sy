@@ -1,8 +1,8 @@
 <?php
-// filePath: app\Http\Middleware\SetLocaleMiddleware.php
+
 namespace App\Http\Middleware;
 
-use App\Models\Language;
+use App\Repositories\Eloquent\Language\LanguageEloquentRepository;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\App;
@@ -12,11 +12,14 @@ use Symfony\Component\HttpFoundation\Response;
 
 class SetLocaleMiddleware
 {
+    public function __construct(
+        private readonly LanguageEloquentRepository $languageRepo
+    ) {}
+
     public function handle(Request $request, Closure $next): Response
     {
         Log::info('Determining locale for incoming request.');
         $locale = $this->determineLocale($request);
-
         $this->applyLocale($locale);
 
         return $next($request);
@@ -49,7 +52,10 @@ class SetLocaleMiddleware
         }
 
         $user->loadMissing('settings.preferredLanguage');
-        Log::info('Authenticated user found, checking preferred language.', ['user_id' => $user->id, 'preferred_language' => $user->settings?->preferredLanguage?->code]);
+        Log::info('Authenticated user found, checking preferred language.', [
+            'user_id' => $user->id,
+            'preferred_language' => $user->settings?->preferredLanguage?->code,
+        ]);
         $userLocale = $user->settings?->preferredLanguage?->code;
 
         return $this->isActiveLocale($userLocale) ? $userLocale : null;
@@ -58,7 +64,6 @@ class SetLocaleMiddleware
     private function getHeaderPreferredLocale(Request $request): ?string
     {
         $available = $this->getActiveLocales();
-
         $headerLocale = $request->getPreferredLanguage($available);
 
         return $this->isActiveLocale($headerLocale) ? $headerLocale : null;
@@ -66,9 +71,7 @@ class SetLocaleMiddleware
 
     private function getDefaultLocale(): ?string
     {
-        $default = Language::getDefault();
-
-        return $default?->code;
+        return $this->languageRepo->getDefault()?->code;
     }
 
     private function getFallbackLocale(): string
@@ -78,7 +81,7 @@ class SetLocaleMiddleware
 
     private function getActiveLocales(): array
     {
-        return Language::where('is_active', true)->pluck('code')->toArray();
+        return $this->languageRepo->getActiveLocaleCodes();
     }
 
     private function applyLocale(string $locale): void
@@ -92,8 +95,6 @@ class SetLocaleMiddleware
             return false;
         }
 
-        return Language::where('code', $code)
-            ->where('is_active', true)
-            ->exists();
+        return $this->languageRepo->existsActiveByCode($code);
     }
 }

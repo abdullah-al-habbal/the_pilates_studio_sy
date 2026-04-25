@@ -1,13 +1,11 @@
 <?php
 
-// filePath: app/Listeners/User/CreateDefaultUserSettingListener.php
-
 declare(strict_types=1);
 
 namespace App\Listeners\User;
 
 use App\Events\User\UserRegisteredEvent;
-use App\Models\Language;
+use App\Repositories\Eloquent\Language\LanguageEloquentRepository;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Support\Facades\Log;
@@ -20,9 +18,13 @@ class CreateDefaultUserSettingListener implements ShouldQueue
 
     public $tries = 3;
 
+    public function __construct(
+        private readonly LanguageEloquentRepository $languageRepo
+    ) {}
+
     public function handle(UserRegisteredEvent $event): void
     {
-        $defaultLanguage = Language::getDefault()
+        $defaultLanguage = $this->languageRepo->getDefault()
             ?? throw new RuntimeException('Default language missing');
 
         $event->user->settings()->create([

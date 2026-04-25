@@ -7,7 +7,6 @@ declare(strict_types=1);
 namespace App\Repositories\Eloquent\Instructor;
 
 use App\Enums\AttendanceStatusEnum;
-use App\Enums\BookingSessionStatusEnum;
 use App\Enums\ClassStatusEnum;
 use App\Models\Instructor;
 use Illuminate\Database\Eloquent\Collection;
@@ -85,11 +84,11 @@ class InstructorEloquentRepository
         }
 
         if (in_array('classes.category', $includes)) {
-            $relations['classes.category'] = fn ($q) => $q;
+            $relations['classes.category'] = fn($q) => $q;
         }
 
         if (in_array('classes.primaryImage', $includes)) {
-            $relations['classes.primaryImage'] = fn ($q) => $q;
+            $relations['classes.primaryImage'] = fn($q) => $q;
         }
 
         return $relations;

@@ -35,4 +35,15 @@ class LanguageEloquentRepository
             ->where('is_active', true)
             ->exists();
     }
+
+    public function getDefault(): ?Language
+    {
+        return Language::where('is_default', true)->first()
+            ?? Language::where('is_active', true)->first();
+    }
+
+    public function getActiveLocaleCodes(): array
+    {
+        return Language::where('is_active', true)->pluck('code')->toArray();
+    }
 }
