@@ -7,9 +7,11 @@ declare(strict_types=1);
 namespace App\Repositories\Eloquent\ClassSession;
 
 use App\Models\ClassSession;
+use DB;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Facades\DB;
 
 class ClassSessionEloquentRepository
 {
@@ -71,5 +73,55 @@ class ClassSessionEloquentRepository
     public function findOrFailForUpdate(int $id): ClassSession
     {
         return $this->model->newQuery()->lockForUpdate()->findOrFail($id);
+    }
+
+    public function paginateDailySessions(string $date, int $perPage, int $page): LengthAwarePaginator
+    {
+        return $this->model->newQuery()
+            ->with([
+                'class.instructor',
+                'bookingSessions',
+            ])
+            ->whereDate('date', $date)
+            ->where('status', 'scheduled')
+            ->orderBy('start_time')
+            ->paginate($perPage, ['*'], 'page', $page);
+    }
+
+    public function findWithDetails(int $id): ClassSession
+    {
+        return $this->model->newQuery()
+            ->with([
+                'class.instructor',
+                'bookingSessions.booking.user',
+            ])->findOrFail($id);
+    }
+
+    public function countReserved(int $id): int
+    {
+        return $this->model->newQuery()
+            ->findOrFail($id)
+            ->bookingSessions()
+            ->count();
+    }
+
+    public function findForUpdate(int $id): ?ClassSession
+    {
+        return $this->model->newQuery()->lockForUpdate()->find($id);
+    }
+
+    public function countUpcomingFullSessions(): int
+    {
+        $now = now();
+        return $this->model->newQuery()
+            ->where(function ($query) use ($now) {
+                $query->whereDate('date', '>', $now->toDateString())
+                    ->orWhere(function ($q) use ($now) {
+                        $q->whereDate('date', '=', $now->toDateString())
+                            ->whereTime('start_time', '>', $now->toTimeString());
+                    });
+            })
+            ->whereHas('bookingSessions', null, '>=', DB::raw('class_sessions.total_spots'))
+            ->count();
     }
 }

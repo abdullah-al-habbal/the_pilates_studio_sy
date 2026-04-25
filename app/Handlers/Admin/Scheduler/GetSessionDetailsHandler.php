@@ -1,18 +1,20 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Handlers\Admin\Scheduler;
 
 use App\Enums\AttendanceStatusEnum;
 use App\Models\BookingSession;
-use App\Models\ClassSession;
 use App\Queries\Admin\Scheduler\GetSessionDetailsQuery;
+use App\Repositories\Eloquent\ClassSession\ClassSessionEloquentRepository;
 use App\Services\Log\LoggingService;
 
 final readonly class GetSessionDetailsHandler
 {
     public function __construct(
-        private readonly LoggingService $logger
+        private ClassSessionEloquentRepository $repository,
+        private LoggingService $logger
     ) {
     }
 
@@ -22,10 +24,7 @@ final readonly class GetSessionDetailsHandler
             'session_id' => $query->sessionId,
         ]);
 
-        $session = ClassSession::with([
-            'class.instructor',
-            'bookingSessions.booking.user',
-        ])->findOrFail($query->sessionId);
+        $session = $this->repository->findWithDetails($query->sessionId);
 
         $locale = app()->getLocale();
 
