@@ -1,8 +1,11 @@
 // public/js/scheduler/render.js
-(function(S) {
+(function (S) {
+    'use strict';
+
     const { ui, templates, state } = S;
 
     S.render = {
+
         all: () => {
             S.render.header();
             S.render.states();
@@ -14,7 +17,6 @@
         header: () => {
             ui.text('resolved-date', state.resolvedDate);
             ui.text('sessions-count', state.sessions.length);
-            
             if (state.loading) {
                 ui.show('loading-badge');
                 ui.cls('refresh-icon', 'animate-spin', 'add');
@@ -34,7 +36,7 @@
                 ui.show('skeleton-loader');
             } else if (state.error) {
                 ui.show('error-state');
-                ui.text('error-title', state.error.title);
+                ui.text('error-title',   state.error.title);
                 ui.text('error-message', state.error.message);
             } else if (state.sessions.length === 0) {
                 ui.show('empty-state');
@@ -44,8 +46,7 @@
         },
 
         sessionList: () => {
-            const html = state.sessions.map(templates.sessionCard).join('');
-            ui.html('session-list', html);
+            ui.html('session-list', state.sessions.map(templates.sessionCard).join(''));
         },
 
         pagination: () => {
@@ -56,12 +57,11 @@
             }
             ui.show('pagination');
             ui.text('page-current', current_page);
-            ui.text('page-last', last_page);
-
-            const prevBtn = ui.$('btn-prev');
-            const nextBtn = ui.$('btn-next');
-            if (prevBtn) prevBtn.disabled = current_page <= 1;
-            if (nextBtn) nextBtn.disabled = current_page >= last_page;
+            ui.text('page-last',    last_page);
+            const prev = ui.$('btn-prev');
+            const next = ui.$('btn-next');
+            if (prev) prev.disabled = current_page <= 1;
+            if (next) next.disabled = current_page >= last_page;
         },
 
         modal: () => {
@@ -71,11 +71,9 @@
                 document.body.style.overflow = '';
                 return;
             }
-
             ui.show('modal-backdrop');
             ui.show('modal-panel');
             document.body.style.overflow = 'hidden';
-
             S.render.modalHeader();
             S.render.modalTabs();
             S.render.attendeesTab();
@@ -92,47 +90,63 @@
                 ui.show('modal-header-content');
                 const s = state.modal.session;
                 if (s) {
-                    ui.text('modal-title', s.title);
-                    ui.text('modal-date', s.date);
-                    ui.text('modal-time', `${s.start_time} - ${s.end_time}`);
-                    ui.text('modal-instructor', s.instructor);
+                    ui.text('modal-title',      s.title);
+                    ui.text('modal-date',        s.date);
+                    ui.text('modal-time',        `${s.start_time} – ${s.end_time}`);
+                    ui.text('modal-instructor',  s.instructor);
                 }
             }
         },
 
         modalTabs: () => {
-            const tab = state.modal.tab;
+            const tab          = state.modal.tab;
             const attendeesBtn = ui.$('tab-btn-attendees');
-            const walkinBtn = ui.$('tab-btn-walkin');
-
-            const activeClass = 'bg-primary-600 text-white shadow-lg shadow-primary-500/30';
-            const inactiveClass = 'text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800';
+            const walkinBtn    = ui.$('tab-btn-walkin');
+            const BASE         = 'flex-1 flex items-center justify-center gap-2.5 px-6 py-3.5 rounded-2xl text-sm font-black transition-all duration-300';
+            const ACTIVE       = `${BASE} bg-primary-600 text-white shadow-lg shadow-primary-500/30 ring-4 ring-primary-500/10`;
+            const INACTIVE     = `${BASE} text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800`;
 
             if (tab === 'attendees') {
-                attendeesBtn?.setAttribute('class', `flex-1 py-3 px-4 rounded-xl text-sm font-bold transition-all ${activeClass}`);
-                walkinBtn?.setAttribute('class', `flex-1 py-3 px-4 rounded-xl text-sm font-bold transition-all ${inactiveClass}`);
+                attendeesBtn?.setAttribute('class', ACTIVE);
+                walkinBtn?.setAttribute('class', INACTIVE);
                 ui.show('tab-attendees');
                 ui.hide('tab-walkin');
             } else {
-                attendeesBtn?.setAttribute('class', `flex-1 py-3 px-4 rounded-xl text-sm font-bold transition-all ${inactiveClass}`);
-                walkinBtn?.setAttribute('class', `flex-1 py-3 px-4 rounded-xl text-sm font-bold transition-all ${activeClass}`);
+                attendeesBtn?.setAttribute('class', INACTIVE);
+                walkinBtn?.setAttribute('class', ACTIVE);
                 ui.hide('tab-attendees');
                 ui.show('tab-walkin');
             }
-            
+
             ui.text('attendees-count', state.modal.bookings.length);
         },
 
         attendeesTab: () => {
             const s = state.modal.session;
+
+            ui.text('attendees-count', state.modal.bookings.length);
+
             if (!s) return;
 
             if (s.capacity > 0) {
                 ui.show('capacity-bar-wrap');
                 ui.text('capacity-reserved', s.reserved);
-                ui.text('capacity-total', s.capacity);
+                ui.text('capacity-total',    s.capacity);
+
                 const fillEl = ui.$('capacity-bar-fill');
-                if (fillEl) fillEl.style.width = `${s.fill_pct}%`;
+                if (fillEl) {
+                    fillEl.style.width = `${s.fill_pct ?? 0}%`;
+
+                    const colorClass = s.is_full || (s.fill_pct ?? 0) >= 100
+                        ? 'bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.35)]'
+                        : (s.fill_pct ?? 0) >= 75
+                            ? 'bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.3)]'
+                            : (s.fill_pct ?? 0) >= 50
+                                ? 'bg-amber-500'
+                                : 'bg-red-400';
+
+                    fillEl.className = `h-full rounded-full transition-all duration-1000 ease-out ${colorClass}`;
+                }
             } else {
                 ui.hide('capacity-bar-wrap');
             }
@@ -147,8 +161,7 @@
                 ui.show('attendees-empty');
             } else {
                 ui.show('attendees-list');
-                const html = state.modal.bookings.map(templates.bookingCard).join('');
-                ui.html('attendees-list', html);
+                ui.html('attendees-list', state.modal.bookings.map(templates.bookingCard).join(''));
             }
         },
 
@@ -168,57 +181,74 @@
         },
 
         walkinExisting: () => {
-            const w = state.walkin;
+            const w          = state.walkin;
             const existingBtn = ui.$('walkin-mode-existing');
-            const newBtn = ui.$('walkin-mode-new');
-            const activeClass = 'bg-primary-600 text-white shadow-md';
-            const inactiveClass = 'text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800';
+            const newBtn      = ui.$('walkin-mode-new');
+            const BASE_BTN    = 'flex-1 py-2 px-4 rounded-lg text-xs font-bold transition-all';
+            const ACTIVE_BTN  = `${BASE_BTN} bg-primary-600 text-white shadow-md`;
+            const INACT_BTN   = `${BASE_BTN} text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800`;
 
             if (w.mode === 'existing') {
-                existingBtn?.setAttribute('class', `flex-1 py-2 px-4 rounded-lg text-xs font-bold transition-all ${activeClass}`);
-                newBtn?.setAttribute('class', `flex-1 py-2 px-4 rounded-lg text-xs font-bold transition-all ${inactiveClass}`);
+                existingBtn?.setAttribute('class', ACTIVE_BTN);
+                newBtn?.setAttribute('class', INACT_BTN);
                 ui.show('walkin-existing-section');
                 ui.hide('walkin-new-section');
             } else {
-                existingBtn?.setAttribute('class', `flex-1 py-2 px-4 rounded-lg text-xs font-bold transition-all ${inactiveClass}`);
-                newBtn?.setAttribute('class', `flex-1 py-2 px-4 rounded-lg text-xs font-bold transition-all ${activeClass}`);
+                existingBtn?.setAttribute('class', INACT_BTN);
+                newBtn?.setAttribute('class', ACTIVE_BTN);
                 ui.hide('walkin-existing-section');
                 ui.show('walkin-new-section');
             }
 
-            if (w.dropdownOpen && w.search.length >= 2) {
+            w.usersLoading ? ui.show('walkin-users-loading') : ui.hide('walkin-users-loading');
+
+            if (w.dropdownOpen && w.search.length >= 1) {
                 ui.show('walkin-dropdown');
                 const users = S.walkin.filter();
                 if (users.length === 0) {
-                    ui.html('walkin-dropdown', '<div class="px-4 py-3 text-sm text-gray-500 italic">No members found...</div>');
+                    ui.html('walkin-dropdown',
+                        '<div class="px-4 py-3 text-sm text-gray-500 dark:text-gray-400 italic">No members found...</div>');
                 } else {
-                    const html = users.map(u => `
-                        <button onclick="Scheduler.walkin.select(${JSON.stringify(u).replace(/"/g, '&quot;')})" class="w-full text-left px-4 py-3 hover:bg-primary-50 dark:hover:bg-primary-900/20 transition-colors flex items-center justify-between group">
+                    ui.html('walkin-dropdown', users.map(u => `
+                        <button onclick="Scheduler.walkin.select(${JSON.stringify(u).replace(/"/g, '&quot;')})"
+                                class="w-full text-left px-4 py-3 rounded-xl
+                                       hover:bg-primary-50 dark:hover:bg-primary-900/20
+                                       transition-colors flex items-center justify-between group">
                             <div class="flex items-center gap-3">
-                                <div class="w-8 h-8 rounded-lg bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-[10px] font-black text-gray-500 group-hover:bg-primary-100 dark:group-hover:bg-primary-900/40 group-hover:text-primary-600">${u.initial}</div>
-                                <div>
-                                    <p class="text-sm font-bold text-gray-900 dark:text-white group-hover:text-primary-600">${u.label}</p>
-                                    <p class="text-[10px] text-gray-400 font-medium">${u.phone}</p>
-                                </div>
+                                <div class="w-8 h-8 rounded-lg bg-gray-100 dark:bg-gray-800
+                                            flex items-center justify-center text-[10px] font-black text-gray-500
+                                            group-hover:bg-primary-100 dark:group-hover:bg-primary-900/40
+                                            group-hover:text-primary-600">${u.initial ?? u.label.charAt(0).toUpperCase()}</div>
+                                <p class="text-sm font-bold text-gray-900 dark:text-white
+                                          group-hover:text-primary-600">${u.label}</p>
                             </div>
-                            <svg class="w-4 h-4 text-gray-300 group-hover:text-primary-500 transform group-hover:translate-x-1 transition-all" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
+                            <svg class="w-4 h-4 text-gray-300 group-hover:text-primary-500
+                                        group-hover:translate-x-0.5 transition-all"
+                                 fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                                      d="M13 7l5 5m0 0l-5 5m5-5H6"/>
+                            </svg>
                         </button>
-                    `).join('');
-                    ui.html('walkin-dropdown', html);
+                    `).join(''));
                 }
             } else {
                 ui.hide('walkin-dropdown');
             }
 
-            const tagsHtml = w.selected.map(u => `
-                <div class="inline-flex items-center gap-2 bg-primary-50 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300 px-3 py-1.5 rounded-xl border border-primary-100 dark:border-primary-800/50 animate-in fade-in zoom-in duration-300">
+            ui.html('walkin-selected-tags', w.selected.map(u => `
+                <div class="inline-flex items-center gap-2 bg-primary-50 dark:bg-primary-900/30
+                            text-primary-700 dark:text-primary-300 px-3 py-1.5 rounded-xl
+                            border border-primary-100 dark:border-primary-800/50">
                     <span class="text-xs font-bold">${u.label}</span>
-                    <button onclick="Scheduler.walkin.remove(${u.id})" class="hover:text-primary-900 dark:hover:text-primary-100 transition-colors">
-                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/></svg>
+                    <button onclick="Scheduler.walkin.remove(${u.id})"
+                            class="hover:text-primary-900 dark:hover:text-primary-100 transition-colors">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                                  d="M6 18L18 6M6 6l12 12"/>
+                        </svg>
                     </button>
                 </div>
-            `).join('');
-            ui.html('walkin-selected-tags', tagsHtml);
+            `).join(''));
 
             if (w.error) {
                 ui.show('walkin-existing-error');
@@ -230,23 +260,36 @@
             const submitBtn = ui.$('btn-submit-existing');
             if (submitBtn) {
                 submitBtn.disabled = w.selected.length === 0 || w.submitting;
-                ui.text('btn-submit-existing-text', w.submitting ? 'Adding...' : `Add ${w.selected.length} Member(s)`);
+                ui.text('btn-submit-existing-text',
+                    w.submitting
+                        ? 'Adding...'
+                        : w.selected.length > 0
+                            ? `Confirm ${w.selected.length} Walk-in${w.selected.length !== 1 ? 's' : ''}`
+                            : 'Select Members'
+                );
             }
         },
 
         walkinNew: () => {
-            const w = state.walkin;
+            const w         = state.walkin;
             const submitBtn = ui.$('btn-submit-new');
             if (submitBtn) submitBtn.disabled = w.submitting;
-            ui.text('btn-submit-new-text', w.submitting ? 'Creating...' : 'Create & Add to Session');
+            ui.text('btn-submit-new-text', w.submitting ? 'Creating...' : 'Register & Add Walk-in');
 
-            ['fullname', 'phone_number', 'email', 'general'].forEach(field => {
-                const errEl = ui.$(`err-${field}`);
-                if (w.newErrors[field]) {
-                    ui.show(`err-${field}`);
-                    ui.text(`err-${field}`, Array.isArray(w.newErrors[field]) ? w.newErrors[field][0] : w.newErrors[field]);
+            const FIELD_MAP = {
+                fullname:     'fullname',
+                phone_number: 'phone',
+                email:        'email',
+                general:      'general',
+            };
+
+            Object.entries(FIELD_MAP).forEach(([backendKey, domSuffix]) => {
+                const val = w.newErrors[backendKey];
+                if (val) {
+                    ui.show(`err-${domSuffix}`);
+                    ui.text(`err-${domSuffix}`, Array.isArray(val) ? val[0] : val);
                 } else {
-                    ui.hide(`err-${field}`);
+                    ui.hide(`err-${domSuffix}`);
                 }
             });
         },
@@ -258,6 +301,7 @@
             } else {
                 ui.hide('modal-toast');
             }
-        }
+        },
     };
+
 })(window.Scheduler);

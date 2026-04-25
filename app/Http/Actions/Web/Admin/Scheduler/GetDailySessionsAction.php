@@ -1,5 +1,4 @@
 <?php
-
 declare(strict_types=1);
 
 namespace App\Http\Actions\Web\Admin\Scheduler;
@@ -27,7 +26,9 @@ final class GetDailySessionsAction
     public function __invoke(GetDailySessionsRequest $request): JsonResponse
     {
         try {
-            $this->logger->info('Fetching daily sessions', ['date' => $request->getDate()]);
+            $this->logger->info('[Scheduler:GetDailySessions] Fetching sessions', [
+                'date' => $request->getDate(),
+            ]);
 
             $query = new GetDailySessionsQuery(
                 date: $request->getDate(),
@@ -39,9 +40,18 @@ final class GetDailySessionsAction
             $locale = app()->getLocale();
 
             $items = collect($paginator->items())->map(function (object $session) use ($locale): array {
-                $title = is_array($session->class?->title)
-                    ? ($session->class->title[$locale] ?? $session->class->title['en'] ?? '—')
-                    : ($session->class?->title ?? '—');
+                $title = match (true) {
+                    is_array($session->class?->title) => $session->class->title[$locale]
+                    ?? $session->class->title['en']
+                    ?? '[MISSING:class.title.translation]',
+                    !is_null($session->class?->title) => $session->class->title,
+                    is_null($session->class) => '[MISSING:class_session.class_relation]',
+                    default => '[MISSING:class.title]',
+                };
+
+                $instructor = $session->class?->instructor?->fullname
+                    ?? ($session->class ? '[MISSING:instructor.fullname]' : '[MISSING:class_relation→instructor]');
+
                 $reserved = $session->bookingSessions->count();
                 $capacity = (int) ($session->total_spots ?? 0);
                 $attended = $session->bookingSessions
@@ -51,9 +61,9 @@ final class GetDailySessionsAction
                 return [
                     'id' => $session->id,
                     'title' => $title,
-                    'instructor' => $session->class?->instructor?->fullname ?? '—',
-                    'start_time' => substr($session->start_time, 0, 5),
-                    'end_time' => substr($session->end_time, 0, 5),
+                    'instructor' => $instructor,
+                    'start_time' => substr($session->start_time ?? '00:00', 0, 5),
+                    'end_time' => substr($session->end_time ?? '00:00', 0, 5),
                     'duration_minutes' => $session->duration_minutes,
                     'capacity' => $capacity,
                     'reserved' => $reserved,
@@ -73,17 +83,17 @@ final class GetDailySessionsAction
                 'total' => $paginator->total(),
             ];
 
-            $this->logger->info('Daily sessions fetched successfully', ['count' => count($items), 'meta' => $meta]);
+            $this->logger->info('[Scheduler:GetDailySessions] Sessions fetched', [
+                'count' => count($items),
+                'date' => $request->getDate(),
+            ]);
 
-            return $this->success(
-                data: $items,
-                code: SuccessCodeEnum::SUCCESS,
-                meta: $meta
-            );
+            return $this->success(data: $items, code: SuccessCodeEnum::SUCCESS, meta: $meta);
+
         } catch (Throwable $e) {
-            $this->logger->error('Failed to fetch daily sessions', [
+            $this->logger->error('[Scheduler:GetDailySessions] Failed', [
                 'error' => $e->getMessage(),
-                'date' => $request->getDate()
+                'date' => $request->getDate(),
             ]);
             report($e);
             return $this->error(

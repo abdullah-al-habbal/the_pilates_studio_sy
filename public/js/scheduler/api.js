@@ -1,5 +1,19 @@
 // public/js/scheduler/api.js
-(function(S) {
+(function (S) {
+    'use strict';
+
+    const BASE = '/admin/scheduler';
+
+    const ROUTES = Object.freeze({
+        sessions:       `${BASE}/sessions`,
+        session:        (id)                   => `${BASE}/sessions/${id}`,
+        users:          `${BASE}/users`,
+        attendance:     (sessionId, bookingId) => `${BASE}/sessions/${sessionId}/attendance/${bookingId}`,
+        walkInExisting: (sessionId)            => `${BASE}/sessions/${sessionId}/walkin/existing`,
+        walkInNew:      (sessionId)            => `${BASE}/sessions/${sessionId}/walkin/new`,
+        validateField:  `${BASE}/walkin/validate`,
+    });
+
     const csrf = () => {
         const c = document.cookie.split('; ').find(r => r.startsWith('XSRF-TOKEN='));
         if (c) return decodeURIComponent(c.split('=')[1]);
@@ -8,9 +22,9 @@
 
     const request = async (url, options = {}) => {
         const headers = {
-            'Accept': 'application/json',
+            'Accept':           'application/json',
             'X-Requested-With': 'XMLHttpRequest',
-            ...options.headers
+            ...options.headers,
         };
 
         if (options.method && options.method !== 'GET') {
@@ -20,53 +34,56 @@
             }
         }
 
-        const response = await fetch(url, {
-            ...options,
-            headers,
-            credentials: 'same-origin'
-        });
+        const response = await fetch(url, { ...options, headers, credentials: 'same-origin' });
 
         if (response.status === 422) {
-            const error = await response.json();
-            throw { status: 422, errors: error.errors, message: error.message };
+            const err = await response.json();
+            throw { status: 422, errors: err.errors, message: err.message };
         }
 
         if (!response.ok) {
-            const error = await response.json().catch(() => ({}));
-            throw { status: response.status, message: error.message || 'Network response was not ok' };
+            const err = await response.json().catch(() => ({}));
+            throw { status: response.status, message: err.message || 'Network response was not ok' };
         }
 
         return response.json();
     };
 
     S.api = {
+
         getSessions: (date, page, perPage) => {
             const params = new URLSearchParams({ date, page, per_page: perPage });
-            return request(`/admin/scheduler/sessions?${params}`);
+            return request(`${ROUTES.sessions}?${params}`);
         },
-        getSession: (sessionId) => {
-            return request(`/admin/scheduler/sessions/${sessionId}`);
-        },
-        getUsers: () => {
-            return request('/admin/scheduler/users');
-        },
-        postAttendance: (sessionId, bookingId, status) => {
-            return request(`/admin/scheduler/sessions/${sessionId}/attendance/${bookingId}`, {
+
+        getSession: (sessionId) =>
+            request(ROUTES.session(sessionId)),
+
+        getUsers: () =>
+            request(ROUTES.users),
+
+        postAttendance: (sessionId, bookingId, status) =>
+            request(ROUTES.attendance(sessionId, bookingId), {
                 method: 'POST',
-                body: JSON.stringify({ status })
-            });
-        },
-        postExistingWalkIn: (sessionId, userIds) => {
-            return request(`/admin/scheduler/sessions/${sessionId}/walkin/existing`, {
+                body:   JSON.stringify({ status }),
+            }),
+
+        postExistingWalkIn: (sessionId, userIds) =>
+            request(ROUTES.walkInExisting(sessionId), {
                 method: 'POST',
-                body: JSON.stringify({ user_ids: userIds })
-            });
-        },
-        postNewWalkIn: (sessionId, userData) => {
-            return request(`/admin/scheduler/sessions/${sessionId}/walkin/new`, {
+                body:   JSON.stringify({ user_ids: userIds }),
+            }),
+
+        postNewWalkIn: (sessionId, userData) =>
+            request(ROUTES.walkInNew(sessionId), {
                 method: 'POST',
-                body: JSON.stringify(userData)
-            });
-        }
+                body:   JSON.stringify(userData),
+            }),
+
+        validateField: (field, value) => {
+            const params = new URLSearchParams({ field, value });
+            return request(`${ROUTES.validateField}?${params}`);
+        },
     };
+
 })(window.Scheduler);

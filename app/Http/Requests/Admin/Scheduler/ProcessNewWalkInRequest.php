@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace App\Http\Requests\Admin\Scheduler;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 final class ProcessNewWalkInRequest extends FormRequest
 {
@@ -16,9 +17,28 @@ final class ProcessNewWalkInRequest extends FormRequest
     {
         return [
             'fullname' => ['required', 'string', 'max:255'],
-            'phone_number' => ['required', 'string', 'max:20'],
-            'email' => ['nullable', 'email', 'max:255'],
+            'phone_number' => [
+                'required',
+                'string',
+                'max:20',
+                Rule::unique('users', 'phone_number')->whereNull('deleted_at'),
+            ],
+            'email' => [
+                'nullable',
+                'email',
+                'max:255',
+                Rule::unique('users', 'email')->whereNull('deleted_at'),
+            ],
+
             'password' => ['nullable', 'string', 'min:6'],
+        ];
+    }
+
+    public function messages(): array
+    {
+        return [
+            'phone_number.unique' => 'This phone number is already registered to an active account.',
+            'email.unique' => 'This email address is already registered to an active account.',
         ];
     }
 }

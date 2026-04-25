@@ -1,3 +1,4 @@
+<!-- filePath: resources\views\admin\scheduler\index.blade.php -->
 @extends('layouts.scheduler')
 @section('content')
     <style>

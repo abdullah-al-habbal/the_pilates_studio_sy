@@ -6,8 +6,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
-{
+return new class extends Migration {
     public function up(): void
     {
         Schema::create('users', function (Blueprint $table) {
@@ -28,9 +27,14 @@ return new class extends Migration
                 ->nullOnDelete();
             $table->timestamps();
             $table->softDeletes();
-            $table->unique(['email', 'deleted_at']);
-            $table->unique(['phone_number', 'deleted_at']);
+
+            $table->unsignedTinyInteger('is_active')
+                ->storedAs('IF(deleted_at IS NULL, 1, 0)');
+
+            $table->unique(['email', 'is_active'], 'users_email_active_unique');
+            $table->unique(['phone_number', 'is_active'], 'users_phone_active_unique');
         });
+
 
         Schema::create('password_reset_tokens', function (Blueprint $table) {
             $table->string('email')->primary();

@@ -52,6 +52,7 @@ class User extends Authenticatable
             'otp_expires_at' => 'datetime',
             'deactivated_at' => 'datetime',
             'password' => 'hashed',
+            'is_active' => 'boolean',
         ];
     }
 
