@@ -6,6 +6,7 @@ declare(strict_types=1);
 
 namespace App\Repositories\Eloquent\BookingSession;
 
+use App\Enums\AttendanceStatusEnum;
 use App\Enums\BookingSessionStatusEnum;
 use App\Models\BookingSession;
 use App\Services\Log\LoggingService;
@@ -13,7 +14,7 @@ use Carbon\Carbon;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
-
+use Illuminate\Support\Collection;
 class BookingSessionEloquentRepository
 {
     public function __construct(
@@ -160,5 +161,54 @@ class BookingSessionEloquentRepository
             ->with(['classSession.class.instructor', 'classSession.class.primaryImage'])
             ->latest()
             ->paginate($perPage);
+    }
+    public function markAttended(int $id): bool
+    {
+        return (bool) $this->model->where('id', $id)->update(['attendance_status' => AttendanceStatusEnum::ATTENDED]);
+    }
+
+    public function markMissed(int $id): bool
+    {
+        return (bool) $this->model->where('id', $id)->update(['attendance_status' => AttendanceStatusEnum::MISSED]);
+    }
+
+    public function countAttended(): int
+    {
+        return $this->model->where('attendance_status', AttendanceStatusEnum::ATTENDED)->count();
+    }
+
+    public function countMissed(): int
+    {
+        return $this->model->where('attendance_status', AttendanceStatusEnum::MISSED)->count();
+    }
+
+    public function countMissedForMonth(int $month, int $year): int
+    {
+        return $this->model->where('attendance_status', AttendanceStatusEnum::MISSED)
+            ->whereMonth('created_at', $month)
+            ->whereYear('created_at', $year)
+            ->count();
+    }
+
+    public function countCancelled(): int
+    {
+        return $this->model->where('status', BookingSessionStatusEnum::CANCELLED)->count();
+    }
+
+    public function getAttendanceTrend(int $days = 30): Collection
+    {
+        $startDate = now()->subDays($days)->startOfDay();
+        return $this->model->where('attendance_status', AttendanceStatusEnum::ATTENDED)
+            ->where('created_at', '>=', $startDate)
+            ->selectRaw('DATE(created_at) as date, COUNT(*) as count')
+            ->groupBy('date')
+            ->orderBy('date')
+            ->get()
+            ->pluck('count', 'date');
+    }
+
+    public function totalSessionsCount(): int
+    {
+        return $this->model->count();
     }
 }

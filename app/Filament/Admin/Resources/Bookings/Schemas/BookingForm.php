@@ -30,7 +30,7 @@ class BookingForm
                         ->options(function () {
                             return User::whereDoesntHave(
                                 'bookings',
-                                fn ($q) => $q->where('status', BookingStatusEnum::ACTIVE)
+                                fn($q) => $q->where('status', BookingStatusEnum::ACTIVE)
                                     ->where('remaining_credits', '>', 0)
                             )->pluck('fullname', 'id');
                         })
@@ -63,7 +63,7 @@ class BookingForm
                                 ->helperText(__('dashboard.resources.users.helpers.password_default')),
                         ])
                         ->createOptionAction(
-                            fn ($action) => $action
+                            fn($action) => $action
                                 ->modalHeading(__('dashboard.resources.bookings.actions.create_customer'))
                                 ->modalWidth('md')
                         )
@@ -92,8 +92,8 @@ class BookingForm
                             $locale = app()->getLocale();
 
                             return Package::where('is_active', true)->get()
-                                ->mapWithKeys(fn (Package $p) => [
-                                    $p->id => $p->getTranslation('name', $locale).' ('.$p->total_credits.' credits)',
+                                ->mapWithKeys(fn(Package $p) => [
+                                    $p->id => $p->getTranslation('name', $locale) . ' (' . $p->total_credits . ' credits)',
                                 ]);
                         })
                         ->searchable()
@@ -123,7 +123,7 @@ class BookingForm
                                 ->prefix('SYP'),
                         ])
                         ->createOptionAction(
-                            fn ($action) => $action
+                            fn($action) => $action
                                 ->modalHeading(__('dashboard.resources.bookings.actions.create_package'))
                                 ->modalWidth('md')
                         )

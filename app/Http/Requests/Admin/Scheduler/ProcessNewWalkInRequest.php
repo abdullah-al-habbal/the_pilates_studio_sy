@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace App\Http\Requests\Admin\Scheduler;
 
+use App\Commands\Admin\Scheduler\ProcessNewWalkInCommand;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -32,6 +33,17 @@ final class ProcessNewWalkInRequest extends FormRequest
 
             'password' => ['nullable', 'string', 'min:6'],
         ];
+    }
+
+    public function toCommand(int $sessionId): ProcessNewWalkInCommand
+    {
+        return new ProcessNewWalkInCommand(
+            sessionId: $sessionId,
+            fullname: $this->validated('fullname'),
+            phoneNumber: $this->validated('phone_number'),
+            email: $this->validated('email'),
+            password: $this->validated('password') ?? 'pilates',
+        );
     }
 
     public function messages(): array

@@ -68,4 +68,8 @@ class ClassSessionEloquentRepository
             ->orderBy('start_time')
             ->get();
     }
+    public function findOrFailForUpdate(int $id): ClassSession
+    {
+        return $this->model->newQuery()->lockForUpdate()->findOrFail($id);
+    }
 }

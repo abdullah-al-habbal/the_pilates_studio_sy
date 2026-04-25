@@ -117,4 +117,53 @@ class BookingEloquentRepository
             ->where('id', $id)
             ->increment('remaining_credits');
     }
+
+    public function findActiveWithCreditsForUser(int $userId): ?Booking
+    {
+        return Booking::where('user_id', $userId)
+            ->where('status', BookingStatusEnum::ACTIVE)
+            ->where('remaining_credits', '>', 0)
+            ->lockForUpdate()
+            ->first();
+    }
+
+    public function create(array $data): Booking
+    {
+        return Booking::create($data);
+    }
+
+    public function existsActiveWithCredits(int $userId): bool
+    {
+        return Booking::where('user_id', $userId)
+            ->where('status', BookingStatusEnum::ACTIVE->value)
+            ->where('remaining_credits', '>', 0)
+            ->exists();
+    }
+
+    public function updateStatus(int $id, BookingStatusEnum $status): void
+    {
+        Booking::where('id', $id)->update(['status' => $status]);
+    }
+
+    public function expire(int $id): void
+    {
+        Booking::where('id', $id)->update([
+            'status'     => BookingStatusEnum::EXPIRED->value,
+            'expires_at' => now(),
+        ]);
+    }
+
+    public function cancel(int $id): void
+    {
+        $booking = Booking::findOrFail($id);
+        $booking->update([
+            'status'            => BookingStatusEnum::CANCELLED->value,
+            'remaining_credits' => $booking->total_credits,
+        ]);
+    }
+
+    public function updateRemainingCredits(int $id, int $remaining): void
+    {
+        Booking::where('id', $id)->update(['remaining_credits' => $remaining]);
+    }
 }

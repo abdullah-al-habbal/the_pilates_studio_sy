@@ -9,10 +9,10 @@ use App\Http\Controllers\Api\BaseApiController;
 use App\Http\Resources\Api\V1\BookingCollection;
 use App\Http\Resources\Api\V1\BookingResource;
 use App\Services\Booking\BookingService;
+use App\Services\Package\PackageService;
 use Dedoc\Scramble\Attributes\Endpoint;
 use Dedoc\Scramble\Attributes\Group;
 use App\Http\Requests\Api\V1\Booking\CreateBookingRequest;
-use App\Models\Package;
 use App\Enums\Api\SuccessCodeEnum;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -22,7 +22,8 @@ use Illuminate\Support\Facades\Log;
 class BookingController extends BaseApiController
 {
     public function __construct(
-        private readonly BookingService $bookingService
+        private readonly BookingService $bookingService,
+        private readonly PackageService $packageService
     ) {}
 
     #[Endpoint('List bookings', description: 'Returns a paginated list of user bookings.')]
@@ -57,7 +58,7 @@ class BookingController extends BaseApiController
     public function store(CreateBookingRequest $request): JsonResponse
     {
         $user = $request->user();
-        $package = Package::findOrFail($request->package_id);
+        $package = $this->packageService->findById($request->package_id);
 
         $booking = $this->bookingService->createFromPackage($user, $package);
 

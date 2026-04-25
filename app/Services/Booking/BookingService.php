@@ -1,6 +1,7 @@
 <?php
 
 // filePath: app/Services/Booking/BookingService.php
+
 declare(strict_types=1);
 
 namespace App\Services\Booking;
@@ -10,6 +11,7 @@ use App\Models\Booking;
 use App\Models\Package;
 use App\Models\User;
 use App\Repositories\Eloquent\Booking\BookingEloquentRepository;
+use App\Services\Package\PackageService;
 use Carbon\Carbon;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -21,7 +23,9 @@ class BookingService
 {
     public function __construct(
         private readonly BookingEloquentRepository $repository,
-    ) {}
+        private readonly PackageService $packageService
+    ) {
+    }
 
     public function userHasActiveCreditBooking(User $user): bool
     {
@@ -54,12 +58,7 @@ class BookingService
 
     public function assertNoActiveBooking(User $user): void
     {
-        $hasActive = Booking::where('user_id', $user->id)
-            ->where('status', BookingStatusEnum::ACTIVE)
-            ->where('remaining_credits', '>', 0)
-            ->exists();
-
-        if ($hasActive) {
+        if ($this->repository->existsActiveWithCredits($user->id)) {
             throw ValidationException::withMessages([
                 'user_id' => 'User already has an active booking with remaining credits.',
             ]);
@@ -71,12 +70,12 @@ class BookingService
         $this->assertNoActiveBooking($user);
 
         return DB::transaction(function () use ($user, $package, $expiresAt): Booking {
-            return Booking::create([
+            return $this->repository->create([
                 'user_id' => $user->id,
                 'package_id' => $package->id,
                 'total_credits' => $package->total_credits,
                 'remaining_credits' => $package->total_credits,
-                'status' => BookingStatusEnum::ACTIVE,
+                'status' => BookingStatusEnum::ACTIVE->value,
                 'expires_at' => $expiresAt,
             ]);
         });
@@ -101,7 +100,7 @@ class BookingService
                 ]);
             }
 
-            $locked->update(['remaining_credits' => $newRemaining]);
+            $this->repository->updateRemainingCredits($locked->id, $newRemaining);
         });
     }
 
@@ -121,28 +120,22 @@ class BookingService
 
     public function expireBooking(Booking $booking): void
     {
-        $booking->update([
-            'status' => BookingStatusEnum::EXPIRED,
-            'expires_at' => now(),
-        ]);
+        $this->repository->expire($booking->id);
     }
 
     public function cancelBooking(Booking $booking): void
     {
-        $booking->update([
-            'status' => BookingStatusEnum::CANCELLED,
-            'remaining_credits' => $booking->total_credits,
-        ]);
+        $this->repository->cancel($booking->id);
     }
 
     public function updateStatus(Booking $booking, BookingStatusEnum $status): void
     {
-        $booking->update(['status' => $status]);
+        $this->repository->updateStatus($booking->id, $status);
     }
 
     public function hasCreditsRemaining(Booking $booking): bool
     {
-        return $booking->hasCreditsRemaining();
+        return $booking->remaining_credits > 0;
     }
 
     public function countActive(): int
@@ -163,22 +156,15 @@ class BookingService
     public function createWalkInBooking(int $userId): Booking
     {
         return DB::transaction(function () use ($userId): Booking {
-            $package = Package::firstOrCreate(
-                ['name->en' => 'Walk-in Pass'],
-                [
-                    'name->ar' => 'خدمة لمرة واحدة',
-                    'total_credits' => 1,
-                    'price' => 0,
-                    'status' => 'active',
-                ]
-            );
+            $package = $this->packageService->findActiveWalkInPackage()
+                ?? $this->packageService->createWalkInPackage();
 
-            return Booking::create([
+            return $this->repository->create([
                 'user_id' => $userId,
                 'package_id' => $package->id,
                 'total_credits' => 1,
                 'remaining_credits' => 1,
-                'status' => BookingStatusEnum::ACTIVE,
+                'status' => BookingStatusEnum::ACTIVE->value,
                 'expires_at' => now()->endOfDay(),
             ]);
         });

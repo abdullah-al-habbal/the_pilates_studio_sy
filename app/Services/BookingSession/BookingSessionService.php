@@ -11,10 +11,12 @@ use App\Enums\BookingSessionStatusEnum;
 use App\Enums\BookingStatusEnum;
 use App\Models\Booking;
 use App\Models\BookingSession;
-use App\Models\ClassSession;
-use App\Models\Package;
 use App\Models\User;
+use App\Repositories\Eloquent\Booking\BookingEloquentRepository;
 use App\Repositories\Eloquent\BookingSession\BookingSessionEloquentRepository;
+use App\Repositories\Eloquent\ClassSession\ClassSessionEloquentRepository;
+use App\Repositories\Eloquent\Package\PackageEloquentRepository;
+use App\Repositories\Eloquent\User\UserEloquentRepository;
 use App\Services\Booking\BookingService;
 use App\Services\ClassSession\ClassSessionService;
 use App\Services\Log\LoggingService;
@@ -23,11 +25,15 @@ use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
-
+use Illuminate\Support\Collection;
 class BookingSessionService
 {
     public function __construct(
         private readonly BookingSessionEloquentRepository $repository,
+        private readonly BookingEloquentRepository $bookingRepo,
+        private readonly ClassSessionEloquentRepository $classSessionRepo,
+        private readonly PackageEloquentRepository $packageRepo,
+        private readonly UserEloquentRepository $userRepo,
         private readonly BookingService $bookingService,
         private readonly ClassSessionService $classSessionService,
         private readonly LoggingService $logger
@@ -86,15 +92,13 @@ class BookingSessionService
     public function markAttended(int $bookingSessionId): void
     {
         $this->logger->info('Marking session attended', ['session_id' => $bookingSessionId]);
-        $bookingSession = $this->findById($bookingSessionId);
-        $bookingSession->markAttended();
+        $this->repository->markAttended($bookingSessionId);
     }
 
     public function markMissed(int $bookingSessionId): void
     {
         $this->logger->info('Marking session missed', ['session_id' => $bookingSessionId]);
-        $bookingSession = $this->findById($bookingSessionId);
-        $bookingSession->markMissed();
+        $this->repository->markMissed($bookingSessionId);
     }
 
     public function toggleAttendance(int $bookingSessionId, AttendanceStatusEnum $status): void
@@ -104,11 +108,10 @@ class BookingSessionService
             'status' => $status->value,
         ]);
 
-        $bookingSession = $this->findById($bookingSessionId);
         if ($status === AttendanceStatusEnum::ATTENDED) {
-            $bookingSession->markAttended();
+            $this->repository->markAttended($bookingSessionId);
         } else {
-            $bookingSession->markMissed();
+            $this->repository->markMissed($bookingSessionId);
         }
     }
 
@@ -116,39 +119,24 @@ class BookingSessionService
     {
         DB::transaction(function () use ($userId, $classSessionId): void {
 
-            $session = ClassSession::lockForUpdate()->findOrFail($classSessionId);
+            $this->classSessionRepo->findOrFailForUpdate($classSessionId);
 
-            $alreadyAttending = BookingSession::whereHas('booking', fn($q) => $q->where('user_id', $userId))
-                ->where('class_session_id', $classSessionId)
-                ->exists();
+            $alreadyAttending = $this->repository->existsForUserAndClassSession($userId, $classSessionId);
 
             if ($alreadyAttending) {
                 return;
             }
 
-            // Resolve active booking with credits
-            $booking = Booking::where('user_id', $userId)
-                ->where('status', BookingStatusEnum::ACTIVE)
-                ->where('remaining_credits', '>', 0)
-                ->lockForUpdate()
-                ->first();
+            $booking = $this->bookingRepo->findActiveWithCreditsForUser($userId);
 
             if (!$booking) {
-                // Find or create a 1-credit walk-in package
-                $package = Package::where('total_credits', 1)
-                    ->where('is_active', true)
-                    ->first();
+                $package = $this->packageRepo->findActiveWalkInPackage();
 
                 if (!$package) {
-                    $package = Package::create([
-                        'name' => ['en' => 'Walk-in Session', 'ar' => 'جلسة مباشرة'],
-                        'total_credits' => 1,
-                        'price' => 0,
-                        'is_active' => true,
-                    ]);
+                    $package = $this->packageRepo->createWalkInPackage();
                 }
 
-                $booking = Booking::create([
+                $booking = $this->bookingRepo->create([
                     'user_id' => $userId,
                     'package_id' => $package->id,
                     'total_credits' => 1,
@@ -157,9 +145,9 @@ class BookingSessionService
                 ]);
             }
 
-            $booking->deductCredit();
+            $this->bookingService->decrementCredits($booking);
 
-            BookingSession::create([
+            $this->repository->create([
                 'booking_id' => $booking->id,
                 'class_session_id' => $classSessionId,
                 'status' => 'reserved',
@@ -170,7 +158,7 @@ class BookingSessionService
 
     public function createWalkInUser(array $data): User
     {
-        return User::create([
+        return $this->userRepo->create([
             'fullname' => $data['fullname'],
             'phone_number' => $data['phone_number'],
             'email' => $data['email'] ?? null,
@@ -215,39 +203,29 @@ class BookingSessionService
 
     public function countAttended(): int
     {
-        return BookingSession::where('attendance_status', AttendanceStatusEnum::ATTENDED)->count();
+        return $this->repository->countAttended();
     }
 
     public function countMissed(): int
     {
-        return BookingSession::where('attendance_status', AttendanceStatusEnum::MISSED)->count();
+        return $this->repository->countMissed();
     }
 
     public function countMissedForMonth(int $month, ?int $year = null): int
     {
         $year = $year ?? now()->year;
 
-        return BookingSession::where('attendance_status', AttendanceStatusEnum::MISSED)
-            ->whereMonth('created_at', $month)
-            ->whereYear('created_at', $year)
-            ->count();
+        return $this->repository->countMissedForMonth($month, $year);
     }
 
     public function countCancelled(): int
     {
-        return BookingSession::where('status', BookingSessionStatusEnum::CANCELLED)->count();
+        return $this->repository->countCancelled();
     }
 
-    public function getAttendanceTrend(int $days = 30): \Illuminate\Support\Collection
+    public function getAttendanceTrend(int $days = 30): Collection
     {
-        $startDate = now()->subDays($days)->startOfDay();
-        $sessions = BookingSession::where('attendance_status', AttendanceStatusEnum::ATTENDED)
-            ->where('created_at', '>=', $startDate)
-            ->selectRaw('DATE(created_at) as date, COUNT(*) as count')
-            ->groupBy('date')
-            ->orderBy('date')
-            ->get()
-            ->pluck('count', 'date');
+        $sessions = $this->repository->getAttendanceTrend($days);
 
         $dates = collect();
         for ($i = 0; $i <= $days; $i++) {
@@ -260,7 +238,7 @@ class BookingSessionService
 
     public function totalSessionsCount(): int
     {
-        return BookingSession::count();
+        return $this->repository->totalSessionsCount();
     }
 
     private function assertNoDuplicateSessionForUser(int $userId, int $classSessionId): void

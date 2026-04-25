@@ -12,14 +12,28 @@ use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class PackageService
 {
+    public function __construct(
+        private readonly PackageEloquentRepository $repository
+    ) {}
+
+    public function findById(int $id): Package
+    {
+        $package = $this->repository->findById($id);
+        if (! $package) {
+            throw new ModelNotFoundException("Package with ID {$id} not found.");
+        }
+        return $package;
+    }
+
+    public function hasActivePackage(): bool
+    {
+        return $this->repository->hasActivePackage();
+    }
+
     public function getCheapestActivePackage(): ?Package
     {
         return $this->repository->getCheapestActivePackage();
     }
-
-    public function __construct(
-        private readonly PackageEloquentRepository $repository
-    ) {}
 
     public function getUserBookedPackage(int $userId, int $packageId): Package
     {
@@ -30,5 +44,15 @@ class PackageService
         }
 
         return $package;
+    }
+
+    public function findActiveWalkInPackage(): ?Package
+    {
+        return $this->repository->findActiveWalkInPackage();
+    }
+
+    public function createWalkInPackage(): Package
+    {
+        return $this->repository->createWalkInPackage();
     }
 }

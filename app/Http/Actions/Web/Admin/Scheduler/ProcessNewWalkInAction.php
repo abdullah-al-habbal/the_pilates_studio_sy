@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Http\Actions\Web\Admin\Scheduler;
 
-use App\Commands\Admin\Scheduler\ProcessNewWalkInCommand;
 use App\Enums\Api\ErrorCodeEnum;
 use App\Enums\Api\SuccessCodeEnum;
 use App\Handlers\Admin\Scheduler\ProcessNewWalkInHandler;
@@ -25,15 +24,7 @@ final class ProcessNewWalkInAction
     public function __invoke(ProcessNewWalkInRequest $request, int $sessionId): JsonResponse
     {
         try {
-            $this->handler->handle(
-                new ProcessNewWalkInCommand(
-                    sessionId: $sessionId,
-                    fullname: $request->validated('fullname'),
-                    phoneNumber: $request->validated('phone_number'),
-                    email: $request->validated('email'),
-                    password: $request->validated('password') ?? 'pilates',
-                )
-            );
+            $this->handler->handle($request->toCommand($sessionId));
 
             return $this->created(
                 code: SuccessCodeEnum::CREATED,
