@@ -7,7 +7,6 @@ declare(strict_types=1);
 namespace App\Repositories\Eloquent\ClassSession;
 
 use App\Models\ClassSession;
-use DB;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
@@ -123,5 +122,21 @@ class ClassSessionEloquentRepository
             })
             ->whereHas('bookingSessions', null, '>=', DB::raw('class_sessions.total_spots'))
             ->count();
+    }
+
+    public function getAvailableSpots(int $id): int
+    {
+        $session = $this->model->newQuery()->find($id);
+        if (!$session) {
+            return 0;
+        }
+
+        $capacity = (int) ($session->total_spots ?? 0);
+        if ($capacity <= 0) {
+            return PHP_INT_MAX;
+        }
+
+        $reserved = $session->bookingSessions()->count();
+        return max(0, $capacity - $reserved);
     }
 }

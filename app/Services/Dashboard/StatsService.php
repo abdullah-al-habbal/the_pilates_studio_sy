@@ -35,7 +35,6 @@ class StatsService
             $missedPrevious = $this->bookingSessionService->countMissedForMonth(now()->subMonth()->month);
             $missedTrend = $missedPrevious > 0 ? (int) round((($missedCurrent - $missedPrevious) / $missedPrevious) * 100) : 0;
             $cancellationRate = $this->calculateCancellationRate();
-            $fillRate = $this->classSessionService->getFillRate();
             $upcomingFullSessions = $this->classSessionService->countUpcomingFullSessions();
             $revenueByPackage = $this->bookingService->getRevenueByPackage();
 
@@ -49,7 +48,6 @@ class StatsService
                 'missed' => $missedCurrent,
                 'missed_trend' => $missedTrend,
                 'cancellation_rate' => $cancellationRate,
-                'fill_rate' => $fillRate,
                 'upcoming_full_sessions' => $upcomingFullSessions,
                 'revenue_by_package' => $revenueByPackage,
             ];

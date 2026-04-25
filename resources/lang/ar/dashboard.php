@@ -317,8 +317,6 @@ return [
             'attendance_rate_description' => 'آخر ٣٠ يوماً',
             'missed' => 'حالات الغياب',
             'missed_description' => ':trend% مقارنة بالشهر الماضي',
-            'fill_rate' => 'معدل الإشغال',
-            'fill_rate_description' => 'متوسط إشغال الدروس',
             'upcoming_full_sessions' => 'الجلسات القادمة المكتملة',
             'upcoming_full_sessions_description' => 'دروس محجوزة بالكامل',
         ],

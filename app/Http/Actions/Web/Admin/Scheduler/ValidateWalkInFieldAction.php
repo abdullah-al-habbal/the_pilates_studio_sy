@@ -6,7 +6,7 @@ namespace App\Http\Actions\Web\Admin\Scheduler;
 
 use App\Enums\Api\ErrorCodeEnum;
 use App\Enums\Api\SuccessCodeEnum;
-use App\Models\User;
+use App\Repositories\Eloquent\User\UserEloquentRepository;
 use App\Traits\ApiResponseTrait;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -16,6 +16,11 @@ final class ValidateWalkInFieldAction
     use ApiResponseTrait;
 
     private const ALLOWED_FIELDS = ['phone_number', 'email'];
+
+    public function __construct(
+        private readonly UserEloquentRepository $repository
+    ) {
+    }
 
     public function __invoke(Request $request): JsonResponse
     {
@@ -30,9 +35,7 @@ final class ValidateWalkInFieldAction
             );
         }
 
-        $exists = User::whereNull('deleted_at')
-            ->where($field, $value)
-            ->exists();
+        $exists = $this->repository->existsByFieldWithoutDeleted($field, $value);
 
         return $this->success(
             data: [

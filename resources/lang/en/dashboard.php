@@ -516,8 +516,6 @@ return [
             'attendance_rate_description' => 'Last 30 days',
             'missed' => 'Missed Sessions',
             'missed_description' => ':trend% vs last month',
-            'fill_rate' => 'Fill Rate',
-            'fill_rate_description' => 'Average class occupancy',
             'upcoming_full_sessions' => 'Upcoming Full Sessions',
             'upcoming_full_sessions_description' => 'Fully booked classes',
         ],

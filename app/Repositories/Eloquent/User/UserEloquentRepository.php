@@ -10,7 +10,8 @@ use App\Enums\BookingStatusEnum;
 use App\Events\User\UserRegisteredEvent;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
-
+use Illuminate\Database\Eloquent\Collection as EloquentCollection;
+use Illuminate\Support\Collection;
 class UserEloquentRepository
 {
     public function countActiveUsers(): int
@@ -107,5 +108,28 @@ class UserEloquentRepository
             $user->tokens()->delete();
             $user->forceDelete();
         });
+    }
+
+    public function list(array $filters = []): EloquentCollection
+    {
+        return User::query()
+            ->orderBy('fullname')
+            ->get();
+    }
+
+    public function existsByFieldWithoutDeleted(string $field, mixed $value): bool
+    {
+        return User::whereNull('deleted_at')
+            ->where($field, $value)
+            ->exists();
+    }
+
+    public function listExcludingSession(int $sessionId): Collection
+    {
+        return User::orderBy('fullname')
+            ->whereDoesntHave('bookingSessions', function ($q) use ($sessionId) {
+                $q->where('class_session_id', $sessionId);
+            })
+            ->get(['id', 'fullname', 'phone_number']);
     }
 }

@@ -19,7 +19,8 @@ class ClassSessionController extends BaseApiController
 {
     public function __construct(
         private readonly ClassSessionService $classSessionService
-    ) {}
+    ) {
+    }
 
     #[Endpoint('List class sessions', description: 'Returns filtered upcoming class sessions.')]
     public function index(QueryClassSessionsRequest $request): JsonResponse
@@ -42,7 +43,7 @@ class ClassSessionController extends BaseApiController
     #[Endpoint('Get class session by ID', description: 'Returns a class session by its ID.')]
     public function show(int $id): JsonResponse
     {
-        $session = $this->classSessionService->getSessionById($id);
+        $session = $this->classSessionService->find($id);
 
         return $this->success(new ClassSessionResource($session));
     }

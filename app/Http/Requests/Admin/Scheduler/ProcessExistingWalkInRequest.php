@@ -1,26 +1,24 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Http\Requests\Admin\Scheduler;
 
-use App\Models\ClassSession;
+use App\Services\ClassSession\ClassSessionService;
 use Illuminate\Foundation\Http\FormRequest;
 
 final class ProcessExistingWalkInRequest extends FormRequest
 {
-    public function authorize(): bool { return true; }
+    public function authorize(): bool
+    {
+        return true;
+    }
 
     public function rules(): array
     {
         $sessionId = (int) $this->route('sessionId');
-        $session   = ClassSession::find($sessionId);
-        $available = PHP_INT_MAX;
-
-        if ($session) {
-            $capacity  = (int) ($session->total_spots ?? 0);
-            $reserved  = $session->bookingSessions()->count();
-            $available = $capacity > 0 ? max(0, $capacity - $reserved) : PHP_INT_MAX;
-        }
+        $service = app(ClassSessionService::class);
+        $available = $service->getAvailableSpots($sessionId);
 
         return [
             'user_ids' => [

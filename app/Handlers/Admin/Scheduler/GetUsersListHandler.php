@@ -1,27 +1,28 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Handlers\Admin\Scheduler;
 
-use App\Models\User;
+use App\Repositories\Eloquent\User\UserEloquentRepository;
 use Illuminate\Support\Collection;
 
 final readonly class GetUsersListHandler
 {
+    public function __construct(
+        private UserEloquentRepository $repository
+    ) {
+    }
+
     public function handle(?int $sessionId = null): Collection
     {
-        $query = User::orderBy('fullname');
+        $users = $sessionId
+            ? $this->repository->listExcludingSession($sessionId)
+            : $this->repository->list();
 
-        if ($sessionId) {
-            $query->whereDoesntHave('bookingSessions', function ($q) use ($sessionId) {
-                $q->where('class_session_id', $sessionId);
-            });
-        }
-
-        return $query->get(['id', 'fullname', 'phone_number'])
-            ->map(fn(User $u) => [
-                'id' => $u->id,
-                'label' => $u->fullname . ($u->phone_number ? ' · ' . $u->phone_number : ''),
-            ]);
+        return $users->map(fn($u) => [
+            'id' => $u->id,
+            'label' => $u->fullname . ($u->phone_number ? ' · ' . $u->phone_number : ''),
+        ]);
     }
 }

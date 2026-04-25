@@ -1,10 +1,11 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Handlers\Admin\Scheduler;
 
 use App\Commands\Admin\Scheduler\ProcessExistingWalkInCommand;
-use App\Models\ClassSession;
+use App\Repositories\Eloquent\ClassSession\ClassSessionEloquentRepository;
 use App\Services\BookingSession\BookingSessionService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
@@ -13,21 +14,20 @@ final readonly class ProcessExistingWalkInHandler
 {
     public function __construct(
         private BookingSessionService $bookingSessionService,
-    ) {}
+        private ClassSessionEloquentRepository $classSessionRepo,
+    ) {
+    }
 
-    /**
-     * @return array{added: int, messages: string[], errors: string[]}
-     */
     public function handle(ProcessExistingWalkInCommand $command): array
     {
-        $added    = 0;
+        $added = 0;
         $messages = [];
-        $errors   = [];
+        $errors = [];
 
         DB::transaction(function () use ($command, &$added, &$messages, &$errors): void {
-            $session   = ClassSession::lockForUpdate()->findOrFail($command->sessionId);
-            $capacity  = (int) ($session->total_spots ?? 0);
-            $reserved  = $session->bookingSessions()->count();
+            $session = $this->classSessionRepo->findOrFailForUpdate($command->sessionId);
+            $capacity = (int) ($session->total_spots ?? 0);
+            $reserved = $this->classSessionRepo->countReserved($command->sessionId);
             $available = $capacity > 0 ? max(0, $capacity - $reserved) : PHP_INT_MAX;
 
             if ($capacity > 0 && count($command->userIds) > $available) {

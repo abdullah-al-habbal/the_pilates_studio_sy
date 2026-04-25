@@ -50,11 +50,6 @@ class StatsOverview extends BaseWidget
                 ->descriptionIcon('heroicon-m-arrow-trending-down')
                 ->color($statsData['missed_trend'] > 0 ? 'danger' : 'success'),
 
-            Stat::make(__('dashboard.widgets.stats_overview.fill_rate'), $statsData['fill_rate'] . '%')
-                ->description(__('dashboard.widgets.stats_overview.fill_rate_description'))
-                ->descriptionIcon('heroicon-m-chart-pie')
-                ->color($statsData['fill_rate'] >= 60 ? 'success' : 'warning'),
-
             Stat::make(__('dashboard.widgets.stats_overview.upcoming_full_sessions'), $statsData['upcoming_full_sessions'])
                 ->description(__('dashboard.widgets.stats_overview.upcoming_full_sessions_description'))
                 ->descriptionIcon('heroicon-m-exclamation-circle')

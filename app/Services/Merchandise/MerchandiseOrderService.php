@@ -1,16 +1,22 @@
 <?php
+
 declare(strict_types=1);
+
 namespace App\Services\Merchandise;
 
-use App\Models\CenterMerchandise;
 use App\Models\MerchandiseOrder;
+use App\Repositories\Eloquent\CenterMerchandise\CenterMerchandiseEloquentRepository;
+use App\Repositories\Eloquent\MerchandiseOrder\MerchandiseOrderEloquentRepository;
 use App\Services\Log\LoggingService;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
 class MerchandiseOrderService
 {
     public function __construct(
+        private readonly CenterMerchandiseEloquentRepository $merchandiseRepo,
+        private readonly MerchandiseOrderEloquentRepository $orderRepo,
         private readonly LoggingService $logger
     ) {
     }
@@ -26,8 +32,11 @@ class MerchandiseOrderService
         ]);
 
         return DB::transaction(function () use ($merchandiseId, $quantity, $customerId) {
-            /** @var CenterMerchandise $merchandise */
-            $merchandise = CenterMerchandise::lockForUpdate()->findOrFail($merchandiseId);
+            $merchandise = $this->merchandiseRepo->findForUpdate($merchandiseId);
+
+            if (!$merchandise) {
+                throw new ModelNotFoundException("Merchandise with ID {$merchandiseId} not found.");
+            }
 
             if ($merchandise->stock_quantity < $quantity) {
                 throw ValidationException::withMessages([
@@ -35,9 +44,9 @@ class MerchandiseOrderService
                 ]);
             }
 
-            $merchandise->decrement('stock_quantity', $quantity);
+            $this->merchandiseRepo->decrementStock($merchandiseId, $quantity);
 
-            return MerchandiseOrder::create([
+            return $this->orderRepo->create([
                 'merchandise_id' => $merchandiseId,
                 'quantity' => $quantity,
                 'customer_id' => $customerId,
@@ -49,10 +58,11 @@ class MerchandiseOrderService
     public function deleteOrder(int $orderId): void
     {
         DB::transaction(function () use ($orderId) {
-            $order = MerchandiseOrder::findOrFail($orderId);
-            CenterMerchandise::lockForUpdate()->findOrFail($order->merchandise_id)
-                ->increment('stock_quantity', $order->quantity);
-            $order->delete();
+            $order = $this->orderRepo->findOrFail($orderId);
+
+            $this->merchandiseRepo->incrementStock($order->merchandise_id, $order->quantity);
+
+            $this->orderRepo->delete($orderId);
         });
     }
 }

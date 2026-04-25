@@ -6,7 +6,6 @@ declare(strict_types=1);
 
 namespace App\Services\ClassSession;
 
-use App\Enums\BookingSessionStatusEnum;
 use App\Models\BookingSession;
 use App\Models\ClassSession;
 use App\Repositories\Eloquent\ClassSession\ClassSessionEloquentRepository;
@@ -18,7 +17,8 @@ class ClassSessionService
 {
     public function __construct(
         private readonly ClassSessionEloquentRepository $repository
-    ) {}
+    ) {
+    }
 
     public function querySessions(
         ?string $date = null,
@@ -58,10 +58,10 @@ class ClassSessionService
     public function find(int $id, bool $lockForUpdate = false): ClassSession
     {
         $session = $lockForUpdate
-            ? ClassSession::lockForUpdate()->find($id)
+            ? $this->repository->findForUpdate($id)
             : $this->repository->findById($id);
 
-        if (! $session) {
+        if (!$session) {
             throw new ModelNotFoundException("Class session with ID {$id} not found.");
         }
 
@@ -70,45 +70,16 @@ class ClassSessionService
 
     public function hasAvailableSpots(int $id): bool
     {
-        $session = $this->repository->findById($id);
-
-        return $session && $session->available_spots > 0;
+        return $this->repository->getAvailableSpots($id) > 0;
     }
 
-    public function getSessionById(int $id): ClassSession
+    public function getAvailableSpots(int $id): int
     {
-        $session = $this->repository->findById($id);
-
-        if (! $session) {
-            throw new ModelNotFoundException("Class session with ID {$id} not found.");
-        }
-
-        return $session;
-    }
-
-    public function getFillRate(): float
-    {
-        $sessions = ClassSession::withCount([
-            'bookingSessions' => function ($q) {
-                $q->where('status', BookingSessionStatusEnum::RESERVED->value);
-            },
-        ])->get();
-
-        if ($sessions->isEmpty()) {
-            return 0;
-        }
-
-        $totalFill = $sessions->sum(function ($session) {
-            return $session->total_spots > 0 ? ($session->booking_sessions_count / $session->total_spots) * 100 : 0;
-        });
-
-        return (float) round($totalFill / $sessions->count(), 1);
+        return $this->repository->getAvailableSpots($id);
     }
 
     public function countUpcomingFullSessions(): int
     {
-        $sessions = ClassSession::query()->where('date', '>', now())->get();
-
-        return $sessions->filter(fn(ClassSession $session) => $session->isFull())->count();
+        return $this->repository->countUpcomingFullSessions();
     }
 }
