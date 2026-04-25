@@ -39,7 +39,7 @@
             state.modal.tab = tab;
             render.modalTabs();
             if (tab === 'walkin') {
-                S.walkin.loadUsers();
+                S.walkin.loadUsers(state.modal.sessionId);
             }
         },
 

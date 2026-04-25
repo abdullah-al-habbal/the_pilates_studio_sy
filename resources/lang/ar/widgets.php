@@ -42,7 +42,6 @@ return [
         'active'         => 'الحصص النشطة',
         'active_desc'    => 'تعمل حالياً',
         'inactive'       => 'غير نشط',
-        'archived'       => 'مؤرشف',
         'today'          => 'جلسات اليوم',
         'today_desc'     => 'مجدولة لليوم',
         'scheduled'      => 'الجلسات المجدولة',

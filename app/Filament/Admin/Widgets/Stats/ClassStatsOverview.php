@@ -29,7 +29,6 @@ class ClassStatsOverview extends BaseWidget
             $this->totalClassesStat(),
             $this->activeClassesStat(),
             $this->inactiveClassesStat(),
-            $this->archivedClassesStat(),
             $this->todaySessionsStat(),
             $this->scheduledSessionsStat(),
             $this->completedSessionsStat(),
@@ -46,7 +45,6 @@ class ClassStatsOverview extends BaseWidget
                 'total'                          => Classes::withTrashed()->count(),
                 ClassStatusEnum::ACTIVE->value   => Classes::where('status', ClassStatusEnum::ACTIVE->value)->count(),
                 ClassStatusEnum::INACTIVE->value => Classes::where('status', ClassStatusEnum::INACTIVE->value)->count(),
-                ClassStatusEnum::ARCHIVED->value => Classes::where('status', ClassStatusEnum::ARCHIVED->value)->count(),
             ];
         });
     }
@@ -93,13 +91,6 @@ class ClassStatsOverview extends BaseWidget
         return Stat::make(__('widgets.classes.inactive'), $this->classData()[ClassStatusEnum::INACTIVE->value])
             ->descriptionIcon('heroicon-m-pause-circle')
             ->color('warning');
-    }
-
-    private function archivedClassesStat(): Stat
-    {
-        return Stat::make(__('widgets.classes.archived'), $this->classData()[ClassStatusEnum::ARCHIVED->value])
-            ->descriptionIcon('heroicon-m-archive-box')
-            ->color('gray');
     }
 
     private function todaySessionsStat(): Stat

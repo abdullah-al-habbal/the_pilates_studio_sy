@@ -7,6 +7,14 @@ namespace App\Providers\Filament;
 
 use App\Filament\Admin\Widgets\AttendanceTrendChart;
 use App\Filament\Admin\Widgets\CategoryPerformanceWidget;
+use App\Filament\Admin\Widgets\Stats\{
+    BookingStatsOverview,
+    ClassStatsOverview,
+    InsightsStatsOverview,
+    NotificationStatsOverview,
+    TopPerformersStatsOverview,
+    UserStatsOverview,
+};
 use App\Filament\Admin\Widgets\StatsOverview;
 use App\Filament\Admin\Widgets\TopInstructorsWidget;
 use Filament\Auth\Pages\EditProfile;
@@ -58,6 +66,12 @@ class AdminPanelProvider extends PanelProvider
                 AttendanceTrendChart::class,
                 CategoryPerformanceWidget::class,
                 TopInstructorsWidget::class,
+                BookingStatsOverview::class,
+                ClassStatsOverview::class,
+                InsightsStatsOverview::class,
+                NotificationStatsOverview::class,
+                TopPerformersStatsOverview::class,
+                UserStatsOverview::class,
             ])
             ->middleware($this->getMiddleware())
             ->authMiddleware($this->getAuthMiddleware())

@@ -23,6 +23,7 @@ window.Scheduler = {
             allUsers:    [],
             usersLoaded: false,
             usersLoading:false,
+            loadedSessionId: null,
             search:      '',
             selected:    [],
             dropdownOpen:false,

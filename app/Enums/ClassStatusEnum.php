@@ -10,14 +10,12 @@ enum ClassStatusEnum: string implements HasColor, HasIcon, HasLabel
 {
     case ACTIVE   = 'active';
     case INACTIVE = 'inactive';
-    case ARCHIVED = 'archived';
 
     public function getLabel(): ?string
     {
         return match ($this) {
             self::ACTIVE   => __('dashboard.resources.classes.statuses.active'),
             self::INACTIVE => __('dashboard.resources.classes.statuses.inactive'),
-            self::ARCHIVED => __('dashboard.resources.classes.statuses.archived'),
         };
     }
 
@@ -26,7 +24,6 @@ enum ClassStatusEnum: string implements HasColor, HasIcon, HasLabel
         return match ($this) {
             self::ACTIVE   => 'success',
             self::INACTIVE => 'warning',
-            self::ARCHIVED => 'gray',
         };
     }
 
@@ -35,7 +32,6 @@ enum ClassStatusEnum: string implements HasColor, HasIcon, HasLabel
         return match ($this) {
             self::ACTIVE   => 'heroicon-o-check-circle',
             self::INACTIVE => 'heroicon-o-pause-circle',
-            self::ARCHIVED => 'heroicon-o-archive-box',
         };
     }
 

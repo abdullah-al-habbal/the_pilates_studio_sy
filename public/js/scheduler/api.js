@@ -7,7 +7,7 @@
     const ROUTES = Object.freeze({
         sessions:       `${BASE}/sessions`,
         session:        (id)                   => `${BASE}/sessions/${id}`,
-        users:          `${BASE}/users`,
+        users:          (sessionId) => `${BASE}/users?session_id=${sessionId}`,
         attendance:     (sessionId, bookingId) => `${BASE}/sessions/${sessionId}/attendance/${bookingId}`,
         walkInExisting: (sessionId)            => `${BASE}/sessions/${sessionId}/walkin/existing`,
         walkInNew:      (sessionId)            => `${BASE}/sessions/${sessionId}/walkin/new`,
@@ -59,8 +59,8 @@
         getSession: (sessionId) =>
             request(ROUTES.session(sessionId)),
 
-        getUsers: () =>
-            request(ROUTES.users),
+        getUsers: (sessionId) =>
+            request(ROUTES.users(sessionId)),
 
         postAttendance: (sessionId, bookingId, status) =>
             request(ROUTES.attendance(sessionId, bookingId), {

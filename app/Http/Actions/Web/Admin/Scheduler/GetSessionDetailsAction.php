@@ -24,6 +24,7 @@ final class GetSessionDetailsAction
     public function __invoke(int $sessionId): JsonResponse
     {
         try {
+            
             $result = $this->handler->handle(
                 new GetSessionDetailsQuery(sessionId: $sessionId)
             );

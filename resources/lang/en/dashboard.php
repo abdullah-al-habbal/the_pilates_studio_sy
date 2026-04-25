@@ -391,7 +391,6 @@ return [
             'statuses' => [
                 'active' => 'Active',
                 'inactive' => 'Inactive',
-                'archived' => 'Archived',
             ],
             'notifications' => [
                 'completed' => 'Class marked as completed.',

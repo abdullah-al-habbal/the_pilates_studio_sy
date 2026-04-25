@@ -10,13 +10,13 @@
     }
 
     S.walkin = {
-
-        loadUsers: async () => {
-            if (state.walkin.usersLoaded || state.walkin.usersLoading) return;
+        loadUsers: async (sessionId) => {
+            if (state.walkin.usersLoaded && state.walkin.loadedSessionId === sessionId) return;
             state.walkin.usersLoading = true;
+            state.walkin.loadedSessionId = sessionId;
             render.walkinExisting();
             try {
-                const json = await api.getUsers();
+                const json = await api.getUsers(sessionId);
                 if (json.success) {
                     state.walkin.allUsers  = json.data;
                     state.walkin.usersLoaded = true;

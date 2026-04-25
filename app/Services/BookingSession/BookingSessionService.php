@@ -31,7 +31,8 @@ class BookingSessionService
         private readonly BookingService $bookingService,
         private readonly ClassSessionService $classSessionService,
         private readonly LoggingService $logger
-    ) {}
+    ) {
+    }
 
     public function listUserSessions(int $userId, array $filters = []): LengthAwarePaginator
     {
@@ -66,7 +67,7 @@ class BookingSessionService
                 : Carbon::parse($classSession->date);
 
             $cutoff = Carbon::parse(
-                $date->format('Y-m-d').' '.$classSession->start_time
+                $date->format('Y-m-d') . ' ' . $classSession->start_time
             )->subHours(24);
 
             if (now()->greaterThanOrEqualTo($cutoff)) {
@@ -111,20 +112,13 @@ class BookingSessionService
         }
     }
 
-    /**
-     * Walk-in transaction:
-     * 1. Resolve or create user
-     * 2. Find active booking with credits, or provision one-credit package + booking
-     * 3. Create BookingSession marked as ATTENDED, deduct credit
-     */
     public function oneTimeAttend(int $userId, int $classSessionId): void
     {
         DB::transaction(function () use ($userId, $classSessionId): void {
 
             $session = ClassSession::lockForUpdate()->findOrFail($classSessionId);
 
-            // Duplicate guard
-            $alreadyAttending = BookingSession::whereHas('booking', fn ($q) => $q->where('user_id', $userId))
+            $alreadyAttending = BookingSession::whereHas('booking', fn($q) => $q->where('user_id', $userId))
                 ->where('class_session_id', $classSessionId)
                 ->exists();
 
@@ -139,13 +133,13 @@ class BookingSessionService
                 ->lockForUpdate()
                 ->first();
 
-            if (! $booking) {
+            if (!$booking) {
                 // Find or create a 1-credit walk-in package
                 $package = Package::where('total_credits', 1)
                     ->where('is_active', true)
                     ->first();
 
-                if (! $package) {
+                if (!$package) {
                     $package = Package::create([
                         'name' => ['en' => 'Walk-in Session', 'ar' => 'جلسة مباشرة'],
                         'total_credits' => 1,
@@ -207,7 +201,7 @@ class BookingSessionService
             $this->bookingService->decrementCredits($booking);
             $booking->refresh();
 
-            if (! $this->bookingService->hasCreditsRemaining($booking)) {
+            if (!$this->bookingService->hasCreditsRemaining($booking)) {
                 $this->bookingService->updateStatus($booking, BookingStatusEnum::EXHAUSTED);
             }
 
@@ -280,16 +274,16 @@ class BookingSessionService
 
     private function assertSessionHasAvailableSpots(int $classSessionId): void
     {
-        if (! $this->classSessionService->hasAvailableSpots($classSessionId)) {
+        if (!$this->classSessionService->hasAvailableSpots($classSessionId)) {
             throw ValidationException::withMessages([
                 'class_session_id' => 'This session is fully booked.',
             ]);
         }
     }
 
-    private function assertBookingHasCredits(\App\Models\Booking $booking): void
+    private function assertBookingHasCredits(Booking $booking): void
     {
-        if (! $this->bookingService->hasCreditsRemaining($booking)) {
+        if (!$this->bookingService->hasCreditsRemaining($booking)) {
             throw ValidationException::withMessages([
                 'booking_id' => 'This booking has no remaining credits.',
             ]);

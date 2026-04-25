@@ -277,7 +277,6 @@ return [
             'statuses' => [
                 'active' => 'نشط',
                 'inactive' => 'غير نشط',
-                'archived' => 'مؤرشف',
             ],
             'actions' => [
                 'mark_completed' => 'تعليم كمكتمل',

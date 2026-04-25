@@ -42,7 +42,6 @@ return [
         'active'               => 'Active Classes',
         'active_desc'          => 'Currently running',
         'inactive'             => 'Inactive',
-        'archived'             => 'Archived',
         'today'                => "Today's Sessions",
         'today_desc'           => 'Scheduled for today',
         'scheduled'            => 'Scheduled Sessions',

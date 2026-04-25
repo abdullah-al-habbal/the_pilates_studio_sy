@@ -36,23 +36,6 @@ class ViewClasses extends ViewRecord
     {
         return [
             LocaleSwitcher::make(),
-            Action::make('mark_completed')
-                ->label('Mark Completed')
-                ->icon('heroicon-s-check-circle')
-                ->color('success')
-                ->requiresConfirmation()
-                ->modalHeading('Mark Class as Completed')
-                ->modalDescription('This will mark the class as completed. All active bookings will be updated.')
-                ->modalSubmitActionLabel('Yes, complete it')
-                ->visible(fn() => $this->getRecord()->status === ClassStatusEnum::ACTIVE)
-                ->action(function (): void {
-                    $this->getRecord()->update(['status' => ClassStatusEnum::ARCHIVED->value]);
-                    $this->refreshFormData(['status']);
-                    Notification::make()
-                        ->title('Class marked as completed.')
-                        ->success()
-                        ->send();
-                }),
 
             Action::make('mark_cancelled')
                 ->label('Cancel Class')
