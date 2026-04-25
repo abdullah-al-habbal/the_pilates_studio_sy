@@ -10,7 +10,7 @@ use App\Handlers\Admin\Scheduler\GetUsersListHandler;
 use App\Services\Log\LoggingService;
 use App\Traits\ApiResponseTrait;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Facades\Request;
+use Illuminate\Http\Request;
 use Throwable;
 
 final class GetUsersListAction
