@@ -7,6 +7,7 @@ declare(strict_types=1);
 use App\Http\Middleware\EnsureActiveBookingMiddleware;
 use App\Http\Middleware\EnsureActivePackageMiddleware;
 use App\Http\Middleware\MobileAppVersion\CheckAppVersionMiddleware;
+use App\Http\Middleware\SetLocaleMiddleware;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Auth\Middleware\Authenticate;
 use Illuminate\Auth\Middleware\AuthenticateWithBasicAuth;
@@ -62,6 +63,10 @@ return Application::configure(basePath: dirname(__DIR__))
             'signed' => ValidateSignature::class,
             'throttle' => ThrottleRequests::class,
             'verified' => EnsureEmailIsVerified::class,
+        ]);
+
+        $middleware->web(append: [
+            SetLocaleMiddleware::class,
         ]);
 
         $middleware->api(prepend: [

@@ -14,7 +14,8 @@ class StaticPageForm
         return $schema
             ->components([
                 TextInput::make('slug')
-                    ->required(),
+                    ->required()
+                    ->disabled(fn($context) => $context === 'edit'),
                 TextInput::make('title')
                     ->required(),
                 FileUpload::make('image')

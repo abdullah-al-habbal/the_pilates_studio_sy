@@ -15,9 +15,11 @@ class StaticPageEloquentRepository
         return StaticPage::where('slug', $slug)->first();
     }
 
-    /**
-     * Get all static pages.
-     */
+    public function findBySlugOrFail(string $slug): StaticPage
+    {
+        return StaticPage::where('slug', $slug)->firstOrFail();
+    }
+
     public function getAll(): Collection
     {
         return StaticPage::all();
