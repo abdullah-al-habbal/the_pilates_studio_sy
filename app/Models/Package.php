@@ -1,8 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
 use App\Enums\BookingStatusEnum;
+use App\Enums\PackageTypeEnum;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -16,20 +19,39 @@ class Package extends Model
 
     public array $translatable = ['name'];
 
-    protected $fillable = ['name', 'total_credits', 'price', 'is_active'];
+    protected $fillable = ['name', 'total_credits', 'price', 'is_active', 'type', 'generated_reason', 'validity_days'];
 
     protected function casts(): array
     {
         return [
             'total_credits' => 'integer',
             'price' => 'integer',
+            'validity_days' => 'integer',
             'is_active' => 'boolean',
+            'type' => PackageTypeEnum::class,
         ];
     }
 
     public function bookings(): HasMany
     {
         return $this->hasMany(Booking::class);
+    }
+
+    public function prices(): HasMany
+    {
+        return $this->hasMany(PackagePrice::class);
+    }
+
+    public function priceForCurrency(string $currencyCode): ?int
+    {
+        return $this->prices
+            ->firstWhere('currency.code', $currencyCode)
+            ?->amount;
+    }
+
+    public function isSystemGenerated(): bool
+    {
+        return $this->type !== PackageTypeEnum::STANDARD;
     }
 
     protected function isAvailableForPurchase(): Attribute

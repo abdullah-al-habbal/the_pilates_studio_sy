@@ -1,0 +1,33 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Http\Actions\Web\Admin\Operations;
+
+use App\Handlers\Admin\Operations\GetPackagesHandler;
+use App\Http\Requests\Admin\Operations\GetPackagesRequest;
+use App\Http\Resources\Admin\Operations\PackageResource;
+use App\Traits\ApiResponseTrait;
+use Illuminate\Http\JsonResponse;
+
+final readonly class GetPackagesAction
+{
+    use ApiResponseTrait;
+
+    public function __construct(
+        private GetPackagesHandler $handler
+    ) {}
+
+    /**
+     * Fetch list of active packages with validated request.
+     */
+    public function __invoke(GetPackagesRequest $request): JsonResponse
+    {
+        $packages = $this->handler->handle();
+
+        return $this->success(
+            data: PackageResource::collection($packages),
+            message: 'Packages retrieved successfully.'
+        );
+    }
+}

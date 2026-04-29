@@ -23,9 +23,18 @@ class EnsureActiveBookingMiddleware
 
         if (! $activeBooking || $activeBooking->remaining_credits <= 0) {
             return $this->error(
-                ErrorCodeEnum::FORBIDDEN,
-                'No active booking with credits available.',
-                403
+                ErrorCodeEnum::NO_ACTIVE_BOOKING,
+                ErrorCodeEnum::NO_ACTIVE_BOOKING->getMessage(),
+                ErrorCodeEnum::NO_ACTIVE_BOOKING->getStatusCode()
+            );
+        }
+
+        // Check expiry
+        if ($activeBooking->isExpired()) {
+            return $this->error(
+                ErrorCodeEnum::BOOKING_EXPIRED,
+                ErrorCodeEnum::BOOKING_EXPIRED->getMessage(),
+                ErrorCodeEnum::BOOKING_EXPIRED->getStatusCode()
             );
         }
 

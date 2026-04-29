@@ -123,6 +123,7 @@ class BookingEloquentRepository
         return Booking::where('user_id', $userId)
             ->where('status', BookingStatusEnum::ACTIVE)
             ->where('remaining_credits', '>', 0)
+            ->where(fn($q) => $q->whereNull('expires_at')->orWhere('expires_at', '>', now()))
             ->lockForUpdate()
             ->first();
     }
@@ -135,8 +136,9 @@ class BookingEloquentRepository
     public function existsActiveWithCredits(int $userId): bool
     {
         return Booking::where('user_id', $userId)
-            ->where('status', BookingStatusEnum::ACTIVE->value)
+            ->where('status', BookingStatusEnum::ACTIVE)
             ->where('remaining_credits', '>', 0)
+            ->where(fn($q) => $q->whereNull('expires_at')->orWhere('expires_at', '>', now()))
             ->exists();
     }
 

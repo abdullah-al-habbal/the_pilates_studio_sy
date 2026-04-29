@@ -4,23 +4,21 @@ declare(strict_types=1);
 
 namespace App\Actions\V1\StaticPage\GetStaticPageBySlug;
 
-use App\Http\Requests\Web\StaticPage\GetStaticPageBySlugRequest;
-use App\Http\Presenters\Web\StaticPage\StaticPagePresenter;
-use Illuminate\View\View;
+use App\Models\StaticPage;
+use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Cache;
 
 final readonly class GetStaticPageBySlugAction
 {
-    public function __construct(
-        private GetStaticPageBySlugHandler $handler,
-    ) {
-    }
 
-    public function __invoke(GetStaticPageBySlugRequest $request): View
+    public function __invoke(string $slug): Response
     {
-        $page = $this->handler->handle($request->validated('slug'));
+        $page = Cache::remember("static_page_{$slug}", now()->addHours(6), fn() =>
+            StaticPage::where('slug', $slug)->firstOrFail()
+        );
 
-        return view('static-pages.show', [
-            'page' => new StaticPagePresenter($page),
-        ]);
+        return response()
+            ->view('static-pages.show', compact('page'))
+            ->header('Cache-Control', 'no-store, no-cache, must-revalidate');
     }
 }

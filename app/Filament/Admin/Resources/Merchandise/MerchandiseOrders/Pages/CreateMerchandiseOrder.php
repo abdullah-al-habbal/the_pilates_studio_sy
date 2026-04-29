@@ -11,15 +11,17 @@ class CreateMerchandiseOrder extends CreateRecord
 {
     protected static string $resource = MerchandiseOrderResource::class;
 
-    protected function mutateFormDataBeforeCreate(array $data): array
+    protected function handleRecordCreation(array $data): \Illuminate\Database\Eloquent\Model
     {
-        $data['ordered_at'] = now();
-
-        return $data;
+        return app(\App\Services\Merchandise\MerchandiseOrderService::class)->placeOrder(
+            customerId: (int) $data['customer_id'],
+            merchandiseId: (int) $data['merchandise_id'],
+            quantity: (int) $data['quantity']
+        );
     }
 
     protected function getRedirectUrl(): string
     {
-        return $this->getResource()::getUrl('view', ['record' => $this->getRecord()]);
+        return $this->getResource()::getUrl('view', ['record' => $this->record]);
     }
 }

@@ -1,6 +1,8 @@
 <?php
 // filePath: app/Enums/BookingStatusEnum.php
 
+declare(strict_types=1);
+
 namespace App\Enums;
 
 use Filament\Support\Contracts\HasColor;
@@ -13,6 +15,7 @@ enum BookingStatusEnum: string implements HasColor, HasIcon, HasLabel
     case EXHAUSTED = 'exhausted';
     case EXPIRED = 'expired';
     case CANCELLED = 'cancelled';
+    case FROZEN = 'frozen';
 
     public function getLabel(): ?string
     {
@@ -21,6 +24,7 @@ enum BookingStatusEnum: string implements HasColor, HasIcon, HasLabel
             self::EXHAUSTED => __('dashboard.resources.bookings.statuses.exhausted'),
             self::EXPIRED => __('dashboard.resources.bookings.statuses.expired'),
             self::CANCELLED => __('dashboard.resources.bookings.statuses.cancelled'),
+            self::FROZEN => __('dashboard.resources.bookings.statuses.frozen'),
         };
     }
 
@@ -31,6 +35,7 @@ enum BookingStatusEnum: string implements HasColor, HasIcon, HasLabel
             self::EXHAUSTED => 'warning',
             self::EXPIRED => 'danger',
             self::CANCELLED => 'gray',
+            self::FROZEN => 'info',
         };
     }
 
@@ -40,8 +45,19 @@ enum BookingStatusEnum: string implements HasColor, HasIcon, HasLabel
             self::ACTIVE => 'heroicon-o-check-circle',
             self::EXHAUSTED => 'heroicon-o-exclamation-triangle',
             self::EXPIRED => 'heroicon-o-x-circle',
+            self::FROZEN => 'heroicon-o-lock-closed',
             self::CANCELLED => 'heroicon-o-no-symbol',
         };
+    }
+
+    public function label(): string
+    {
+        return $this->getLabel() ?? $this->value;
+    }
+
+    public function color(): string
+    {
+        return $this->getColor() ?? 'gray';
     }
 
     public static function toArray(): array

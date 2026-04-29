@@ -1,6 +1,6 @@
 <?php
 
-// filePath: app/Models/Booking.php
+declare(strict_types=1);
 
 namespace App\Models;
 
@@ -24,18 +24,29 @@ class Booking extends Model
         'remaining_credits',
         'status',
         'expires_at',
+        'paid_amount',
+        'currency_id',
+        'source_type',
+        'parent_booking_id',
+        'frozen_at',
+        'unfrozen_at',
     ];
 
     protected function casts(): array
     {
         return [
-            'total_credits' => 'integer',
+            'total_credits'     => 'integer',
             'remaining_credits' => 'integer',
-            'expires_at' => 'datetime',
-            'status' => BookingStatusEnum::class,
+            'paid_amount'       => 'integer',
+            'expires_at'        => 'datetime',
+            'frozen_at'         => 'datetime',
+            'unfrozen_at'       => 'datetime',
+            'status'            => BookingStatusEnum::class,
+            'source_type'       => \App\Enums\BookingSourceTypeEnum::class,
         ];
     }
 
+    // ─── Business logic ──────────────────────────────────────────────────────
 
     public function deductCredit(): void
     {
@@ -67,23 +78,15 @@ class Booking extends Model
 
     public function isActive(): bool
     {
-        return $this->status === BookingStatusEnum::ACTIVE && !$this->isExpired();
+        return $this->status === BookingStatusEnum::ACTIVE && ! $this->isExpired();
     }
 
-    public function user(): BelongsTo
+    public function isFrozen(): bool
     {
-        return $this->belongsTo(User::class);
+        return $this->status === BookingStatusEnum::FROZEN;
     }
 
-    public function package(): BelongsTo
-    {
-        return $this->belongsTo(Package::class);
-    }
-
-    public function bookingSessions(): HasMany
-    {
-        return $this->hasMany(BookingSession::class);
-    }
+    // ─── Accessors ───────────────────────────────────────────────────────────
 
     public function getUsedCreditsAttribute(): int
     {
@@ -106,51 +109,95 @@ class Booking extends Model
         return match (true) {
             $ratio > 0.5 => 'success',
             $ratio > 0.2 => 'warning',
-            default => 'danger',
+            default      => 'danger',
         };
     }
+
+    public function getRemainingDaysAttribute(): ?int
+    {
+        return $this->expires_at ? max(0, (int) now()->diffInDays($this->expires_at, false)) : null;
+    }
+
+    // ─── Computed attributes ─────────────────────────────────────────────────
 
     protected function hasCreditsRemaining(): Attribute
     {
         return Attribute::make(
-            get: fn() => $this->remaining_credits > 0
+            get: fn () => $this->remaining_credits > 0
         );
     }
 
     protected function canDeductCredit(): Attribute
     {
         return Attribute::make(
-            get: fn() => $this->isActive() && $this->remaining_credits > 0
+            get: fn () => $this->isActive() && $this->remaining_credits > 0
         );
     }
 
     protected function canBeCancelled(): Attribute
     {
         return Attribute::make(
-            get: fn() => $this->status === BookingStatusEnum::ACTIVE
-            && $this->remaining_credits === $this->total_credits
+            get: fn () => $this->status === BookingStatusEnum::ACTIVE
+                && $this->remaining_credits === $this->total_credits
         );
     }
 
     protected function isExhausted(): Attribute
     {
         return Attribute::make(
-            get: fn() => $this->status === BookingStatusEnum::EXHAUSTED
-            || $this->remaining_credits <= 0
+            get: fn () => $this->status === BookingStatusEnum::EXHAUSTED
+                || $this->remaining_credits <= 0
         );
     }
 
     protected function isWithinValidity(): Attribute
     {
         return Attribute::make(
-            get: fn() => !$this->isExpired() && $this->isActive()
+            get: fn () => ! $this->isExpired() && $this->isActive()
         );
     }
 
     protected function creditsNearEmpty(): Attribute
     {
         return Attribute::make(
-            get: fn() => $this->remaining_credits > 0 && $this->remaining_credits <= 2
+            get: fn () => $this->remaining_credits > 0 && $this->remaining_credits <= 2
         );
+    }
+
+    // ─── Relations ───────────────────────────────────────────────────────────
+
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
+    }
+
+    public function package(): BelongsTo
+    {
+        return $this->belongsTo(Package::class);
+    }
+
+    public function currency(): BelongsTo
+    {
+        return $this->belongsTo(Currency::class);
+    }
+
+    public function bookingSessions(): HasMany
+    {
+        return $this->hasMany(BookingSession::class);
+    }
+
+    public function refunds(): HasMany
+    {
+        return $this->hasMany(Refund::class);
+    }
+
+    public function parentBooking(): BelongsTo
+    {
+        return $this->belongsTo(Booking::class, 'parent_booking_id');
+    }
+
+    public function resumeBookings(): HasMany
+    {
+        return $this->hasMany(Booking::class, 'parent_booking_id');
     }
 }

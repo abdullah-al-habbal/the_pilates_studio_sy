@@ -47,6 +47,16 @@ enum ErrorCodeEnum: string
     case CLASS_CANCELLED = 'CLASS_CANCELLED';
     case INVALID_BOOKING_STATUS = 'INVALID_BOOKING_STATUS';
 
+    // Freeze and booking lifecycle errors
+    case FROZEN_USER = 'FROZEN_USER';
+    case DEACTIVATED_USER = 'DEACTIVATED_USER';
+    case NO_ACTIVE_BOOKING = 'NO_ACTIVE_BOOKING';
+    case BOOKING_EXPIRED = 'BOOKING_EXPIRED';
+    case ALREADY_RESERVED = 'ALREADY_RESERVED';
+    case CANCELLATION_WINDOW_PASSED = 'CANCELLATION_WINDOW_PASSED';
+    case OUT_OF_STOCK = 'OUT_OF_STOCK';
+    case ENDPOINT_NOT_FOUND = 'ENDPOINT_NOT_FOUND';
+
     // Mobile app errors
     case APP_VERSION_REQUIRED = 'APP_VERSION_REQUIRED';
     case APP_VERSION_OUTDATED = 'APP_VERSION_OUTDATED';
@@ -97,10 +107,20 @@ enum ErrorCodeEnum: string
             self::OPERATION_NOT_ALLOWED => 'Operation not allowed',
             self::INSUFFICIENT_CREDITS => 'Insufficient credits',
             self::BOOKING_ALREADY_EXISTS => 'Booking already exists',
-            self::SESSION_FULL => 'Class session is full',
             self::SESSION_EXPIRED => 'Session has expired',
             self::CLASS_CANCELLED => 'Class has been cancelled',
             self::INVALID_BOOKING_STATUS => 'Invalid booking status',
+
+            // Freeze and booking lifecycle errors
+            self::FROZEN_USER => 'Your account is currently frozen. Please contact support.',
+            self::DEACTIVATED_USER => 'Your account has been deactivated.',
+            self::NO_ACTIVE_BOOKING => 'No active booking with credits available',
+            self::BOOKING_EXPIRED => 'Your package has expired',
+            self::ALREADY_RESERVED => 'You have already reserved this session',
+            self::CANCELLATION_WINDOW_PASSED => 'Cancellation window has passed (24h before session)',
+            self::OUT_OF_STOCK => 'This item is out of stock',
+            self::SESSION_FULL => 'This session has reached full capacity',
+            self::ENDPOINT_NOT_FOUND => 'Endpoint not found',
 
             // Mobile app errors
             self::APP_VERSION_REQUIRED => 'App version header is required',
@@ -122,6 +142,7 @@ enum ErrorCodeEnum: string
             self::UNAUTHORIZED => 401,
             self::FORBIDDEN => 403,
             self::NOT_FOUND => 404,
+            self::ENDPOINT_NOT_FOUND => 404,
             self::METHOD_NOT_ALLOWED => 405,
             self::UNPROCESSABLE_ENTITY => 422,
             self::TOO_MANY_REQUESTS => 429,
@@ -136,6 +157,14 @@ enum ErrorCodeEnum: string
             self::EMAIL_ALREADY_VERIFIED => 400,
             self::ACCOUNT_LOCKED => 403,
             self::INVALID_VERIFICATION_CODE => 422,
+            self::FROZEN_USER => 403,
+            self::DEACTIVATED_USER => 403,
+            self::NO_ACTIVE_BOOKING => 422,
+            self::BOOKING_EXPIRED => 422,
+            self::ALREADY_RESERVED => 422,
+            self::CANCELLATION_WINDOW_PASSED => 422,
+            self::OUT_OF_STOCK => 422,
+            self::SESSION_FULL => 422,
             default => 400,
         };
     }

@@ -8,10 +8,33 @@ namespace App\Traits;
 use App\Enums\Api\ErrorCodeEnum;
 use App\Enums\Api\SuccessCodeEnum;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Carbon;
 
 trait ApiResponseTrait
 {
+    public function paginated(
+        LengthAwarePaginator $paginator,
+        string $resourceClass,
+        SuccessCodeEnum|string $code = SuccessCodeEnum::SUCCESS,
+        ?string $message = null
+    ): JsonResponse {
+        return $this->success(
+            data: $resourceClass::collection($paginator->items()),
+            code: $code,
+            message: $message,
+            meta: [
+                'pagination' => [
+                    'total'        => $paginator->total(),
+                    'count'        => $paginator->count(),
+                    'per_page'     => $paginator->perPage(),
+                    'current_page' => $paginator->currentPage(),
+                    'total_pages'  => $paginator->lastPage(),
+                ],
+            ]
+        );
+    }
+
     protected function success(
         mixed $data = null,
         SuccessCodeEnum|string $code = SuccessCodeEnum::SUCCESS,

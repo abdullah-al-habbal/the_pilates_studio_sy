@@ -182,6 +182,7 @@ class BookingSessionService
             $booking = $this->bookingService->find($bookingId, true);
 
             $this->assertBookingHasCredits($booking);
+            $this->assertBookingIsValid($booking);
             $this->assertNoDuplicateSessionForUser($booking->user_id, $classSessionId);
             $this->assertSessionHasAvailableSpots($classSessionId);
 
@@ -264,6 +265,21 @@ class BookingSessionService
         if (!$this->bookingService->hasCreditsRemaining($booking)) {
             throw ValidationException::withMessages([
                 'booking_id' => 'This booking has no remaining credits.',
+            ]);
+        }
+    }
+
+    private function assertBookingIsValid(Booking $booking): void
+    {
+        if ($booking->isExpired()) {
+            throw ValidationException::withMessages([
+                'booking_id' => 'This package has expired. New reservations are not permitted.',
+            ]);
+        }
+
+        if ($booking->status !== BookingStatusEnum::ACTIVE) {
+            throw ValidationException::withMessages([
+                'booking_id' => 'This package is not in an active state.',
             ]);
         }
     }

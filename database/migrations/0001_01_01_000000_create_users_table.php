@@ -20,6 +20,12 @@ return new class extends Migration {
             $table->timestamp('email_verified_at')->nullable();
             $table->string('otp_code')->nullable();
             $table->timestamp('otp_expires_at')->nullable();
+            $table->string('status')->default(UserStatusEnum::ACTIVE->value)
+                ->comment('active | frozen | deactivated');
+            $table->timestamp('frozen_at')->nullable()
+                ->comment('When the user was frozen');
+            $table->string('freeze_reason')->nullable()
+                ->comment('Admin note for freeze action');
             $table->timestamp('deactivated_at')->nullable();
             $table->foreignId('deleted_by')
                 ->nullable()

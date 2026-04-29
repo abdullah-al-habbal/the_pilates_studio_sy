@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace App\Services\Merchandise;
 
+use App\Models\CenterMerchandise;
 use App\Models\MerchandiseOrder;
 use App\Repositories\Eloquent\CenterMerchandise\CenterMerchandiseEloquentRepository;
 use App\Repositories\Eloquent\MerchandiseOrder\MerchandiseOrderEloquentRepository;
 use App\Services\Log\LoggingService;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
@@ -21,36 +21,25 @@ class MerchandiseOrderService
     ) {
     }
 
-    public function createOrder(
-        int $merchandiseId,
-        int $quantity,
-        ?int $customerId = null,
-    ): MerchandiseOrder {
-        $this->logger->info('Creating merchandise order', [
-            'merchandise_id' => $merchandiseId,
-            'quantity' => $quantity,
-        ]);
+    public function placeOrder(int $customerId, int $merchandiseId, int $quantity): MerchandiseOrder
+    {
+        return DB::transaction(function () use ($customerId, $merchandiseId, $quantity): MerchandiseOrder {
+            /** @var CenterMerchandise $item */
+            $item = CenterMerchandise::lockForUpdate()->findOrFail($merchandiseId);
 
-        return DB::transaction(function () use ($merchandiseId, $quantity, $customerId) {
-            $merchandise = $this->merchandiseRepo->findForUpdate($merchandiseId);
-
-            if (!$merchandise) {
-                throw new ModelNotFoundException("Merchandise with ID {$merchandiseId} not found.");
-            }
-
-            if ($merchandise->stock_quantity < $quantity) {
+            if ($item->stock_quantity < $quantity) {
                 throw ValidationException::withMessages([
-                    'quantity' => "Insufficient stock. Available: {$merchandise->stock_quantity}, requested: {$quantity}.",
+                    'quantity' => "Insufficient stock. Available: {$item->stock_quantity}.",
                 ]);
             }
 
-            $this->merchandiseRepo->decrementStock($merchandiseId, $quantity);
+            $item->decrement('stock_quantity', $quantity);
 
-            return $this->orderRepo->create([
+            return MerchandiseOrder::create([
                 'merchandise_id' => $merchandiseId,
-                'quantity' => $quantity,
-                'customer_id' => $customerId,
-                'ordered_at' => now(),
+                'customer_id'    => $customerId,
+                'quantity'       => $quantity,
+                'ordered_at'     => now(),
             ]);
         });
     }

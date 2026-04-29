@@ -217,4 +217,23 @@ class BookingSessionEloquentRepository
     {
         return $this->model->count();
     }
+
+    public function getCancellationRateByUser(int $limit = 20): Collection
+    {
+        return DB::table('booking_sessions')
+            ->join('bookings', 'booking_sessions.booking_id', '=', 'bookings.id')
+            ->join('users', 'bookings.user_id', '=', 'users.id')
+            ->where('booking_sessions.status', BookingSessionStatusEnum::CANCELLED->value)
+            ->selectRaw('
+                users.id,
+                users.fullname,
+                users.phone_number,
+                COUNT(*) as cancellation_count,
+                MAX(booking_sessions.cancelled_at) as last_cancelled_at
+            ')
+            ->groupBy('users.id', 'users.fullname', 'users.phone_number')
+            ->orderByDesc('cancellation_count')
+            ->limit($limit)
+            ->get();
+    }
 }
