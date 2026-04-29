@@ -54,6 +54,18 @@ class StatsOverview extends BaseWidget
                 ->description(__('dashboard.widgets.stats_overview.upcoming_full_sessions_description'))
                 ->descriptionIcon('heroicon-m-exclamation-circle')
                 ->color('danger'),
+
+            Stat::make(__('dashboard.navigation.scheduler'), '')
+                ->description('Quick access to today\'s schedule and attendance')
+                ->descriptionIcon('heroicon-m-calendar-days')
+                ->color('primary')
+                ->url('/admin/scheduler'),
+
+            Stat::make(__('dashboard.navigation.groups.operations'), '')
+                ->description('Manage client packages, store orders, and finances')
+                ->descriptionIcon('heroicon-m-cog-6-tooth')
+                ->color('primary')
+                ->url('/admin/operations'),
         ];
     }
 }

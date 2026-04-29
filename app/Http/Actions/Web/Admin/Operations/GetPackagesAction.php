@@ -9,6 +9,7 @@ use App\Http\Requests\Admin\Operations\GetPackagesRequest;
 use App\Http\Resources\Admin\Operations\PackageResource;
 use App\Traits\ApiResponseTrait;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Log;
 
 final readonly class GetPackagesAction
 {
@@ -18,16 +19,21 @@ final readonly class GetPackagesAction
         private GetPackagesHandler $handler
     ) {}
 
-    /**
-     * Fetch list of active packages with validated request.
-     */
     public function __invoke(GetPackagesRequest $request): JsonResponse
     {
-        $packages = $this->handler->handle();
+        try {
+            $packages = $this->handler->handle();
 
-        return $this->success(
-            data: PackageResource::collection($packages),
-            message: 'Packages retrieved successfully.'
-        );
+            return $this->success(
+                data: PackageResource::collection($packages),
+                message: 'Packages retrieved successfully.'
+            );
+        } catch (\Throwable $e) {
+            Log::error('Operations - GetPackages failed: ' . $e->getMessage(), [
+                'exception' => $e,
+            ]);
+
+            return $this->error(message: 'Failed to retrieve packages.');
+        }
     }
 }

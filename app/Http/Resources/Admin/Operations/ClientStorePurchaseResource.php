@@ -8,9 +8,6 @@ use App\Models\MerchandiseOrder;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
-/**
- * @property-read MerchandiseOrder $resource
- */
 class ClientStorePurchaseResource extends JsonResource
 {
     public function toArray(Request $request): array

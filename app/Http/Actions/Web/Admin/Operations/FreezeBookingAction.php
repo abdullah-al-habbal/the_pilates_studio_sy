@@ -8,6 +8,7 @@ use App\Handlers\Admin\Operations\FreezeBookingHandler;
 use App\Http\Requests\Admin\Operations\FreezeBookingRequest;
 use App\Traits\ApiResponseTrait;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Log;
 
 final readonly class FreezeBookingAction
 {
@@ -17,9 +18,6 @@ final readonly class FreezeBookingAction
         private FreezeBookingHandler $handler
     ) {}
 
-    /**
-     * Freeze a booking with validated request.
-     */
     public function __invoke(FreezeBookingRequest $request, int $bookingId): JsonResponse
     {
         try {
@@ -28,7 +26,11 @@ final readonly class FreezeBookingAction
             return $this->success(
                 message: 'Booking frozen successfully.'
             );
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
+            Log::error('Operations - FreezeBooking failed: ' . $e->getMessage(), [
+                'exception' => $e,
+                'booking_id' => $bookingId,
+            ]);
             return $this->unprocessable($e->getMessage());
         }
     }

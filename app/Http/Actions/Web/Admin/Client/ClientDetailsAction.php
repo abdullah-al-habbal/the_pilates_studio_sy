@@ -9,6 +9,7 @@ use App\Http\Requests\Admin\Operations\GetClientDetailsRequest;
 use App\Http\Resources\Admin\Operations\ClientDetailsResource;
 use App\Traits\ApiResponseTrait;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Log;
 
 final readonly class ClientDetailsAction
 {
@@ -18,16 +19,22 @@ final readonly class ClientDetailsAction
         private GetClientDetailsHandler $handler
     ) {}
 
-    /**
-     * Get comprehensive details for a specific client.
-     */
     public function __invoke(GetClientDetailsRequest $request, int $userId): JsonResponse
     {
-        $user = $this->handler->handle($userId);
+        try {
+            $user = $this->handler->handle($userId);
 
-        return $this->success(
-            data: new ClientDetailsResource($user),
-            message: 'Client details retrieved successfully.'
-        );
+            return $this->success(
+                data: new ClientDetailsResource($user),
+                message: 'Client details retrieved successfully.'
+            );
+        } catch (\Throwable $e) {
+            Log::error('Operations - ClientDetails failed: ' . $e->getMessage(), [
+                'exception' => $e,
+                'user_id' => $userId,
+            ]);
+
+            return $this->error(message: 'Failed to retrieve client details.');
+        }
     }
 }

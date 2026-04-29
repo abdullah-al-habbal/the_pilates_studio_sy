@@ -33,6 +33,7 @@ use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 use LaraZeus\SpatieTranslatable\SpatieTranslatablePlugin;
+use Illuminate\Support\Facades\Blade;
 use Filament\Navigation\NavigationItem;
 use App\Models\ClassSession;
 
@@ -75,6 +76,31 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->middleware($this->getMiddleware())
             ->authMiddleware($this->getAuthMiddleware())
+            ->renderHook(
+                'panels::user-menu.before',
+                fn (): string => Blade::render('
+                    <div class="flex items-center gap-x-3 mr-4">
+                        <x-filament::button
+                            href="/admin/scheduler"
+                            tag="a"
+                            size="sm"
+                            icon="heroicon-m-calendar-days"
+                            color="gray"
+                        >
+                            ' . __('dashboard.navigation.scheduler') . '
+                        </x-filament::button>
+                        <x-filament::button
+                            href="/admin/operations"
+                            tag="a"
+                            size="sm"
+                            icon="heroicon-m-cog-6-tooth"
+                            color="primary"
+                        >
+                            ' . __('dashboard.navigation.groups.operations') . '
+                        </x-filament::button>
+                    </div>
+                '),
+            )
             ->navigationItems([
                 NavigationItem::make(__('dashboard.navigation.scheduler'))
                     ->url('/admin/scheduler')
@@ -91,6 +117,13 @@ class AdminPanelProvider extends PanelProvider
                             ->whereDate('date', today())
                             ->count() > 0 ? 'primary' : 'gray')
                     ->isActiveWhen(fn(): bool => request()->is('admin/scheduler*')),
+
+                NavigationItem::make(__('dashboard.navigation.groups.operations'))
+                    ->url('/admin/operations')
+                    ->icon('heroicon-o-cog-6-tooth')
+                    ->sort(2)
+                    ->group(__('dashboard.navigation.groups.operations'))
+                    ->isActiveWhen(fn(): bool => request()->is('admin/operations*')),
             ]);
     }
 

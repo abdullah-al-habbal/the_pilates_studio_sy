@@ -9,6 +9,7 @@ use App\Http\Requests\Admin\Operations\GetClientsRequest;
 use App\Http\Resources\Admin\Operations\ClientListItemResource;
 use App\Traits\ApiResponseTrait;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Log;
 
 final readonly class GetClientsAction
 {
@@ -18,20 +19,26 @@ final readonly class GetClientsAction
         private GetClientsHandler $handler
     ) {}
 
-    /**
-     * Search and list clients with unified pagination.
-     */
     public function __invoke(GetClientsRequest $request): JsonResponse
     {
-        $paginator = $this->handler->handle(
-            $request->query('search'),
-            (int) $request->query('page', 1)
-        );
+        try {
+            $paginator = $this->handler->handle(
+                $request->query('search'),
+                (int) $request->query('page', 1)
+            );
 
-        return $this->paginated(
-            $paginator,
-            ClientListItemResource::class,
-            message: 'Clients retrieved successfully.'
-        );
+            return $this->paginated(
+                $paginator,
+                ClientListItemResource::class,
+                message: 'Clients retrieved successfully.'
+            );
+        } catch (\Throwable $e) {
+            Log::error('Operations - GetClients failed: ' . $e->getMessage(), [
+                'exception' => $e,
+                'search' => $request->query('search'),
+            ]);
+
+            return $this->error(message: 'Failed to retrieve clients.');
+        }
     }
 }

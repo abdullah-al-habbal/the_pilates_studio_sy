@@ -8,6 +8,7 @@ use App\Handlers\Admin\Operations\AssignPackageHandler;
 use App\Http\Requests\Admin\Operations\AssignPackageRequest;
 use App\Traits\ApiResponseTrait;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Log;
 
 final readonly class AssignPackageAction
 {
@@ -17,9 +18,6 @@ final readonly class AssignPackageAction
         private AssignPackageHandler $handler
     ) {}
 
-    /**
-     * Assign a package to a user using validated request.
-     */
     public function __invoke(AssignPackageRequest $request, int $packageId): JsonResponse
     {
         try {
@@ -32,7 +30,12 @@ final readonly class AssignPackageAction
                 data: $booking,
                 message: 'Package assigned successfully.'
             );
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
+            Log::error('Operations - AssignPackage failed: ' . $e->getMessage(), [
+                'exception' => $e,
+                'package_id' => $packageId,
+                'user_id' => $request->user_id,
+            ]);
             return $this->unprocessable($e->getMessage());
         }
     }

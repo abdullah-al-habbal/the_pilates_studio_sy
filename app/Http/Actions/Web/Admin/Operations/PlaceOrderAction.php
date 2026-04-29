@@ -8,6 +8,7 @@ use App\Handlers\Admin\Operations\PlaceOrderHandler;
 use App\Http\Requests\Admin\Operations\PlaceOrderRequest;
 use App\Traits\ApiResponseTrait;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Log;
 
 final readonly class PlaceOrderAction
 {
@@ -17,9 +18,6 @@ final readonly class PlaceOrderAction
         private PlaceOrderHandler $handler
     ) {}
 
-    /**
-     * Place a merchandise order using validated request.
-     */
     public function __invoke(PlaceOrderRequest $request): JsonResponse
     {
         try {
@@ -33,7 +31,12 @@ final readonly class PlaceOrderAction
                 data: $order,
                 message: 'Order placed successfully.'
             );
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
+            Log::error('Operations - PlaceOrder failed: ' . $e->getMessage(), [
+                'exception' => $e,
+                'customer_id' => $request->customer_id,
+                'merchandise_id' => $request->merchandise_id,
+            ]);
             return $this->unprocessable($e->getMessage());
         }
     }

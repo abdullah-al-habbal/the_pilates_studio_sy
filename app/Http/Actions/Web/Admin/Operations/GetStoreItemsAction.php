@@ -9,6 +9,7 @@ use App\Http\Requests\Admin\Operations\GetStoreItemsRequest;
 use App\Http\Resources\Admin\Operations\MerchandiseResource;
 use App\Traits\ApiResponseTrait;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Log;
 
 final readonly class GetStoreItemsAction
 {
@@ -18,16 +19,21 @@ final readonly class GetStoreItemsAction
         private GetStoreItemsHandler $handler
     ) {}
 
-    /**
-     * Fetch store items with validated request.
-     */
     public function __invoke(GetStoreItemsRequest $request): JsonResponse
     {
-        $items = $this->handler->handle();
+        try {
+            $items = $this->handler->handle();
 
-        return $this->success(
-            data: MerchandiseResource::collection($items),
-            message: 'Store items retrieved successfully.'
-        );
+            return $this->success(
+                data: MerchandiseResource::collection($items),
+                message: 'Store items retrieved successfully.'
+            );
+        } catch (\Throwable $e) {
+            Log::error('Operations - GetStoreItems failed: ' . $e->getMessage(), [
+                'exception' => $e,
+            ]);
+
+            return $this->error(message: 'Failed to retrieve store items.');
+        }
     }
 }

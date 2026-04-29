@@ -1,10 +1,7 @@
-/**
- * Operations Hub Main Logic
- */
 document.addEventListener('DOMContentLoaded', () => {
     initTabs();
     initTheme();
-    loadTab('clients'); // Default tab
+    loadTab('clients');
     updateGlobalStats();
 });
 
@@ -28,7 +25,6 @@ function initTabs() {
             const tab = btn.dataset.tab;
             loadTab(tab);
 
-            // Update UI
             buttons.forEach(b => {
                 b.classList.remove('bg-primary-600', 'text-white', 'shadow-lg', 'shadow-primary-500/20', 'active-tab');
                 b.classList.add('hover:bg-slate-100', 'dark:hover:bg-slate-800');
@@ -47,7 +43,6 @@ async function loadTab(tab) {
 
     container.innerHTML = template.innerHTML;
 
-    // Tab-specific initialization
     if (tab === 'clients') initClientsTab();
     if (tab === 'store') initStoreTab();
     if (tab === 'finance') initFinanceTab();
@@ -62,7 +57,6 @@ async function updateGlobalStats() {
     }
 }
 
-// --- Tab: Clients ---
 let clientSearchTimeout = null;
 
 async function initClientsTab() {
@@ -106,6 +100,8 @@ async function renderClients(search = '', page = 1) {
 
         renderPagination(result.meta);
     } catch (e) {
+        console.error('Failed to load clients:', e);
+        tbody.innerHTML = '<tr><td colspan="4" class="text-center py-12"><div class="flex flex-col items-center gap-2"><span class="text-rose-500 font-bold">Error loading clients</span><button onclick="renderClients()" class="text-xs text-primary-600 underline">Try again</button></div></td></tr>';
         OperationsUI.toast('Failed to load clients', 'error');
     }
 }
@@ -145,7 +141,6 @@ async function showClientDetails(userId) {
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <!-- Active Package Card -->
                     <div class="glass-card rounded-2xl p-6 border-l-4 border-gold-500">
                         <h5 class="text-xs font-bold text-slate-400 uppercase mb-4">Current Package</h5>
                         ${user.active_package ? `
@@ -182,7 +177,6 @@ async function showClientDetails(userId) {
                         `}
                     </div>
 
-                    <!-- Usage Stats -->
                     <div class="glass-card rounded-2xl p-6">
                         <h5 class="text-xs font-bold text-slate-400 uppercase mb-4">Activity Snapshot</h5>
                         <div class="grid grid-cols-2 gap-4">
@@ -198,7 +192,6 @@ async function showClientDetails(userId) {
                     </div>
                 </div>
 
-                <!-- Purchase History -->
                 <div class="space-y-4">
                     <h5 class="text-xs font-bold text-slate-400 uppercase">Recent Store Purchases</h5>
                     <div class="border border-slate-100 dark:border-slate-800 rounded-xl overflow-hidden">
@@ -225,6 +218,7 @@ async function showClientDetails(userId) {
 
         OperationsUI.openModal('Client Workspace', content);
     } catch (e) {
+        console.error('Failed to load client details:', e);
         OperationsUI.toast('Failed to load client details', 'error');
     }
 }
@@ -248,6 +242,7 @@ async function showPackageAssignment(userId) {
 
         OperationsUI.openModal('Assign New Package', content);
     } catch (e) {
+        console.error('Failed to load packages:', e);
         OperationsUI.toast('Failed to load packages', 'error');
     }
 }
@@ -259,6 +254,7 @@ async function handlePackageAssign(userId, packageId) {
         OperationsUI.closeModal();
         renderClients(); // Refresh list
     } catch (e) {
+        console.error('Failed to assign package:', e);
         OperationsUI.toast(e.message, 'error');
     }
 }
@@ -321,6 +317,8 @@ async function renderStore() {
             </div>
         `).join('');
     } catch (e) {
+        console.error('Failed to load store:', e);
+        grid.innerHTML = '<div class="col-span-full py-12 text-center text-rose-500 font-bold">Failed to load merchandise.</div>';
         OperationsUI.toast('Failed to load store', 'error');
     }
 }
@@ -354,6 +352,7 @@ async function showQuickSale(itemId, itemName) {
         select.innerHTML = '<option value="">-- Choose Client --</option>' + 
             result.data.map(u => `<option value="${u.id}">${u.fullname} (${u.phone_number})</option>`).join('');
     } catch (e) {
+        console.error('Failed to load customers for sale:', e);
         OperationsUI.toast('Failed to load customers', 'error');
     }
 
@@ -404,6 +403,7 @@ async function renderBalance(date = '') {
         const result = await OperationsAPI.getDailyBalance(date);
         OperationsUI.renderBalance(result.data);
     } catch (e) {
+        console.error('Failed to load balance:', e);
         OperationsUI.toast('Failed to load balance', 'error');
     }
 }

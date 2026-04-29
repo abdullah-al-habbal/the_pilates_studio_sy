@@ -9,6 +9,7 @@ use App\Http\Requests\Admin\Operations\RecordExpenseRequest;
 use App\Traits\ApiResponseTrait;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Log;
 
 final readonly class RecordExpenseAction
 {
@@ -18,22 +19,29 @@ final readonly class RecordExpenseAction
         private RecordExpenseHandler $handler
     ) {}
 
-    /**
-     * Record a new expense with validated data.
-     */
     public function __invoke(RecordExpenseRequest $request): JsonResponse
     {
-        $expense = $this->handler->handle(
-            $request->category_name,
-            (int) $request->amount,
-            (int) auth()->id(),
-            $request->notes,
-            $request->date ? Carbon::parse($request->date) : null
-        );
+        try {
+            $expense = $this->handler->handle(
+                $request->category_name,
+                (int) $request->amount,
+                (int) auth()->id(),
+                $request->notes,
+                $request->date ? Carbon::parse($request->date) : null
+            );
 
-        return $this->created(
-            data: $expense,
-            message: 'Expense recorded successfully.'
-        );
+            return $this->created(
+                data: $expense,
+                message: 'Expense recorded successfully.'
+            );
+        } catch (\Throwable $e) {
+            Log::error('Operations - RecordExpense failed: ' . $e->getMessage(), [
+                'exception' => $e,
+                'category' => $request->category_name,
+                'amount' => $request->amount,
+            ]);
+
+            return $this->error(message: 'Failed to record expense.');
+        }
     }
 }

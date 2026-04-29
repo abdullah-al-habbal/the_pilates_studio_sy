@@ -8,6 +8,7 @@ use App\Handlers\Admin\Operations\UnfreezeBookingHandler;
 use App\Http\Requests\Admin\Operations\UnfreezeBookingRequest;
 use App\Traits\ApiResponseTrait;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Log;
 
 final readonly class UnfreezeBookingAction
 {
@@ -17,9 +18,6 @@ final readonly class UnfreezeBookingAction
         private UnfreezeBookingHandler $handler
     ) {}
 
-    /**
-     * Unfreeze a booking with validated request.
-     */
     public function __invoke(UnfreezeBookingRequest $request, int $bookingId): JsonResponse
     {
         try {
@@ -29,7 +27,11 @@ final readonly class UnfreezeBookingAction
                 data: $newBooking,
                 message: 'Booking unfrozen and new package generated.'
             );
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
+            Log::error('Operations - UnfreezeBooking failed: ' . $e->getMessage(), [
+                'exception' => $e,
+                'booking_id' => $bookingId,
+            ]);
             return $this->unprocessable($e->getMessage());
         }
     }
