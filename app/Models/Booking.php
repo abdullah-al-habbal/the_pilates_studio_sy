@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Enums\BookingSourceTypeEnum;
 use App\Enums\BookingStatusEnum;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -42,7 +43,7 @@ class Booking extends Model
             'frozen_at'         => 'datetime',
             'unfrozen_at'       => 'datetime',
             'status'            => BookingStatusEnum::class,
-            'source_type'       => \App\Enums\BookingSourceTypeEnum::class,
+            'source_type'       => BookingSourceTypeEnum::class,
         ];
     }
 

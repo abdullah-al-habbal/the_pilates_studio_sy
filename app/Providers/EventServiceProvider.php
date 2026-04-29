@@ -7,6 +7,8 @@ declare(strict_types=1);
 namespace App\Providers;
 
 use App\Events\User\UserRegisteredEvent;
+use App\Events\UserSuccessfullyRegisteredEvent;
+use App\Listeners\CreateInitialBookingForUserSuccessfullyRegisteredListener;
 use App\Listeners\User\CreateDefaultUserSettingListener;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
 
@@ -16,8 +18,8 @@ class EventServiceProvider extends ServiceProvider
         UserRegisteredEvent::class => [
             CreateDefaultUserSettingListener::class,
         ],
-        \App\Events\UserSuccessfullyRegisteredEvent::class => [
-            \App\Listeners\CreateInitialBookingForUserSuccessfullyRegisteredListener::class,
+        UserSuccessfullyRegisteredEvent::class => [
+            CreateInitialBookingForUserSuccessfullyRegisteredListener::class,
         ],
     ];
 

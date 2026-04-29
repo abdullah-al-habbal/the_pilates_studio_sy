@@ -4,11 +4,12 @@ declare(strict_types=1);
 
 namespace App\Http\Resources\Admin\Operations;
 
+use App\Models\Package;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 /**
- * @property-read \App\Models\Package $resource
+ * @property-read Package $resource
  */
 class PackageResource extends JsonResource
 {
