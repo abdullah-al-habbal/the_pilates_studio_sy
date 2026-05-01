@@ -39,6 +39,7 @@ class Reports extends Page implements HasInfolists
                 $repo = App::make(MerchandiseOrderEloquentRepository::class);
                 $total = $repo->getTotalRevenue(now()->startOfDay(), now()->endOfDay());
 
+                // fix: use the correct currecny code
                 return number_format($total, 0) . ' SYP';
             }
         );
@@ -124,6 +125,7 @@ class Reports extends Page implements HasInfolists
                 ->schema([
                     Section::make()
                         ->schema([
+                            // fix: check the calculation and we must make the revenues in the prices
                             TextEntry::make('total_revenue')
                                 ->label(__('dashboard.pages.reports.stats.total_revenue'))
                                 ->state(number_format($stats['total_revenue']) . ' SYP')
@@ -138,6 +140,8 @@ class Reports extends Page implements HasInfolists
                         ->schema([
                             TextEntry::make('booking_revenue')
                                 ->label(__('dashboard.pages.reports.stats.booking_revenue'))
+                                // fix: use the correct price approach
+
                                 ->state(number_format($stats['booking_revenue']) . ' SYP')
                                 ->icon('heroicon-o-ticket')
                                 ->iconColor('success')
@@ -232,6 +236,8 @@ class Reports extends Page implements HasInfolists
                                 return TextEntry::make('merch_' . $i)
                                     ->label($name)
                                     ->state(
+// fix: use the correct price approach
+                    
                                         number_format($item->revenue) . ' SYP'
                                         . ' · '
                                         . __('dashboard.pages.reports.top_merchandise.sold', ['count' => $item->quantity])

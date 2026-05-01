@@ -10,6 +10,7 @@ use App\Models\Package;
 use App\Models\User;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Hidden;
+use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Components\Section;
@@ -30,7 +31,7 @@ class BookingForm
                         ->options(function () {
                             return User::whereDoesntHave(
                                 'bookings',
-                                fn($q) => $q->where('status', BookingStatusEnum::ACTIVE)
+                                fn($query) => $query->where('status', BookingStatusEnum::ACTIVE)
                                     ->where('remaining_credits', '>', 0)
                             )->pluck('fullname', 'id');
                         })
@@ -68,7 +69,8 @@ class BookingForm
                                 ->modalWidth('md')
                         )
                         ->createOptionUsing(function (array $data): int {
-                            $data['password'] = bcrypt(filled($data['password'] ?? null) ? $data['password'] : '12345678');
+                            $password = filled($data['password'] ?? null) ? $data['password'] : '12345678';
+                            $data['password'] = bcrypt($password);
 
                             return User::create($data)->id;
                         })
@@ -76,12 +78,13 @@ class BookingForm
                             'required',
                             'exists:users,id',
                             function ($attribute, $value, $fail) {
-                                $exists = Booking::where('user_id', $value)
+                                $hasActiveBooking = Booking::query()->where('user_id', $value)
                                     ->where('status', BookingStatusEnum::ACTIVE)
                                     ->where('remaining_credits', '>', 0)
                                     ->exists();
-                                if ($exists) {
-                                    $fail('This user already has an active booking with credits.');
+
+                                if ($hasActiveBooking) {
+                                    $fail(__('dashboard.resources.bookings.validation.user_has_active_booking'));
                                 }
                             },
                         ]),
@@ -91,9 +94,9 @@ class BookingForm
                         ->options(function () {
                             $locale = app()->getLocale();
 
-                            return Package::where('is_active', true)->get()
-                                ->mapWithKeys(fn(Package $p) => [
-                                    $p->id => $p->getTranslation('name', $locale) . ' (' . $p->total_credits . ' credits)',
+                            return Package::query()->where('is_active', true)->get()
+                                ->mapWithKeys(fn(Package $package) => [
+                                    $package->id => $package->getTranslation('name', $locale) . ' (' . $package->total_credits . ' credits)',
                                 ]);
                         })
                         ->searchable()
@@ -116,11 +119,20 @@ class BookingForm
                                 ->numeric()
                                 ->minValue(1),
 
-                            TextInput::make('price')
-                                ->label('Price (SYP)')
-                                ->required()
-                                ->numeric()
-                                ->prefix('SYP'),
+                            Repeater::make('prices')
+                                ->schema([
+                                    Select::make('currency_id')
+                                        ->relationship('currency', 'name')
+                                        ->required(),
+                                    TextInput::make('amount')
+                                        ->label('Price')
+                                        ->required()
+                                        ->numeric()
+                                        ->minValue(0),
+                                ])
+                                ->columns(2)
+                                ->label('Prices by Currency')
+                                ->minItems(1),
                         ])
                         ->createOptionAction(
                             fn($action) => $action
@@ -128,14 +140,25 @@ class BookingForm
                                 ->modalWidth('md')
                         )
                         ->createOptionUsing(function (array $data): int {
-                            $data['is_active'] = true;
+                            $prices = $data['prices'] ?? [];
+                            unset($data['prices']);
 
-                            return Package::create($data)->id;
+                            $data['is_active'] = true;
+                            $package = Package::create($data);
+
+                            foreach ($prices as $price) {
+                                if (isset($price['currency_id']) && isset($price['amount'])) {
+                                    $package->prices()->create($price);
+                                }
+                            }
+
+                            return $package->id;
                         })
                         ->afterStateUpdated(function ($state, callable $set) {
                             if (blank($state)) {
                                 return;
                             }
+
                             $package = Package::select(['id', 'total_credits'])->find($state);
                             if ($package) {
                                 $set('total_credits', $package->total_credits);
@@ -147,7 +170,7 @@ class BookingForm
                         ->label(__('dashboard.resources.bookings.fields.expires_at'))
                         ->withoutSeconds()
                         ->nullable()
-                        ->hint('Leave empty for no expiration')
+                        ->hint(__('dashboard.resources.bookings.helpers.expiration_hint'))
                         ->hintIcon('heroicon-m-information-circle'),
 
                     Hidden::make('total_credits')->default(0),

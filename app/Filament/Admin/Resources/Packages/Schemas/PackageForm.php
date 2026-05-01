@@ -3,6 +3,8 @@
 namespace App\Filament\Admin\Resources\Packages\Schemas;
 
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Repeater;
+use Filament\Forms\Components\Select;
 use Filament\Schemas\Schema;
 
 class PackageForm
@@ -16,10 +18,19 @@ class PackageForm
                 TextInput::make('total_credits')
                     ->required()
                     ->numeric(),
-                TextInput::make('price')
-                    ->required()
-                    ->numeric()
-                    ->prefix('$'),
+                Repeater::make('prices')
+                    ->relationship()
+                    ->schema([
+                        Select::make('currency_id')
+                            ->relationship('currency', 'name')
+                            ->required(),
+                        TextInput::make('amount')
+                            ->required()
+                            ->numeric()
+                            ->label('Price'),
+                    ])
+                    ->columns(2)
+                    ->label('Prices by Currency'),
             ]);
     }
 }

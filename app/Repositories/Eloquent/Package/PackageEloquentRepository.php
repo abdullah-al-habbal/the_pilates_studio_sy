@@ -6,14 +6,21 @@ declare(strict_types=1);
 
 namespace App\Repositories\Eloquent\Package;
 
+use App\Models\Currency;
 use App\Models\Package;
 
 class PackageEloquentRepository
 {
     public function getCheapestActivePackage(): ?Package
     {
+        // fix: search for the currency with code usd
+        $currencyId = 1;
+
         return Package::where('is_active', true)
-            ->orderBy('total_credits', 'asc')
+            ->whereHas('prices', fn($q) => $q->where('currency_id', $currencyId))
+            ->with(['prices' => fn($q) => $q->where('currency_id', $currencyId)])
+            ->get()
+            ->sortBy(fn($p) => $p->prices->first()?->amount ?? PHP_INT_MAX)
             ->first();
     }
 
@@ -42,11 +49,20 @@ class PackageEloquentRepository
 
     public function createWalkInPackage(): Package
     {
-        return Package::create([
+        $package = Package::create([
             'name' => ['en' => 'Walk-in Session', 'ar' => 'جلسة مباشرة'],
             'total_credits' => 1,
-            'price' => 0,
             'is_active' => true,
         ]);
+
+        $currencies = Currency::where('is_active', true)->get();
+        foreach ($currencies as $currency) {
+            $package->prices()->create([
+                'currency_id' => $currency->id,
+                'amount' => 0,
+            ]);
+        }
+
+        return $package;
     }
 }

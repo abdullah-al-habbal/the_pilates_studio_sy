@@ -17,7 +17,8 @@ final readonly class GetClientsAction
 
     public function __construct(
         private GetClientsHandler $handler
-    ) {}
+    ) {
+    }
 
     public function __invoke(GetClientsRequest $request): JsonResponse
     {

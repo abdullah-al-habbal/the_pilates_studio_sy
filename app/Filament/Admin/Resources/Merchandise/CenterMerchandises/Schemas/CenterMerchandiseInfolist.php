@@ -27,7 +27,7 @@ class CenterMerchandiseInfolist
                             ->label(__('dashboard.resources.center_merchandises.fields.name'))
                             ->weight(FontWeight::Bold)
                             ->formatStateUsing(
-                                fn ($state) => is_array($state)
+                                fn($state) => is_array($state)
                                 ? ($state[app()->getLocale()] ?? $state['en'] ?? '')
                                 : $state
                             )
@@ -37,7 +37,7 @@ class CenterMerchandiseInfolist
                             ->label(__('dashboard.resources.center_merchandises.fields.description'))
                             ->placeholder(__('dashboard.resources.center_merchandises.placeholders.no_description'))
                             ->formatStateUsing(
-                                fn ($state) => is_array($state)
+                                fn($state) => is_array($state)
                                 ? ($state[app()->getLocale()] ?? $state['en'] ?? '')
                                 : $state
                             )
@@ -48,7 +48,7 @@ class CenterMerchandiseInfolist
                             ->badge()
                             ->color('gray')
                             ->formatStateUsing(
-                                fn ($state) => is_array($state)
+                                fn($state) => is_array($state)
                                 ? ($state[app()->getLocale()] ?? $state['en'] ?? '')
                                 : $state
                             ),
@@ -58,6 +58,7 @@ class CenterMerchandiseInfolist
                     ->icon('heroicon-o-currency-dollar')
                     ->columns(2)
                     ->schema([
+                        // fix: use the correct price approach
                         TextEntry::make('price')
                             ->label(__('dashboard.resources.center_merchandises.fields.price'))
                             ->money('SYP')
@@ -67,7 +68,7 @@ class CenterMerchandiseInfolist
                         TextEntry::make('stock_quantity')
                             ->label(__('dashboard.resources.center_merchandises.fields.stock_quantity'))
                             ->badge()
-                            ->color(fn (int $state): string => match (true) {
+                            ->color(fn(int $state): string => match (true) {
                                 $state === 0 => 'danger',
                                 $state < 5 => 'warning',
                                 default => 'success',
@@ -91,12 +92,12 @@ class CenterMerchandiseInfolist
                                 ->hiddenLabel()
                                 ->badge()
                                 ->state(
-                                    fn ($record): ?string => $record->is_primary
+                                    fn($record): ?string => $record->is_primary
                                     ? __('dashboard.resources.center_merchandises.labels.primary')
                                     : null
                                 )
                                 ->color('success')
-                                ->visible(fn ($record): bool => (bool) $record->is_primary),
+                                ->visible(fn($record): bool => (bool) $record->is_primary),
                         ])
                         ->columns(4)
                         ->contained(false),

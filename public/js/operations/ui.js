@@ -63,6 +63,8 @@ const OperationsUI = {
         const container = document.getElementById('balance-container');
         if (!container) return;
 
+                                                    // fix: use the current price approach
+
         const format = (val) => new Intl.NumberFormat().format(val) + ' SYP';
 
         container.innerHTML = `

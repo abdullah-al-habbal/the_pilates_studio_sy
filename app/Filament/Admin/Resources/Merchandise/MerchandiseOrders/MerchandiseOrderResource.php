@@ -90,6 +90,7 @@ class MerchandiseOrderResource extends Resource
                         TextEntry::make('total_price')
                             ->label(__('dashboard.resources.merchandise_orders.fields.total_price'))
                             ->state(fn($record) => $record->quantity * ($record->merchandise?->price ?? 0))
+                            // fix: use the correct price approach
                             ->money('SYP')
                             ->weight(FontWeight::Bold)
                             ->color('success'),

@@ -16,7 +16,8 @@ final readonly class PlaceOrderAction
 
     public function __construct(
         private PlaceOrderHandler $handler
-    ) {}
+    ) {
+    }
 
     public function __invoke(PlaceOrderRequest $request): JsonResponse
     {

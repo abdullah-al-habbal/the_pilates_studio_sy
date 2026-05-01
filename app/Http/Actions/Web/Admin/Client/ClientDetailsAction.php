@@ -17,7 +17,8 @@ final readonly class ClientDetailsAction
 
     public function __construct(
         private GetClientDetailsHandler $handler
-    ) {}
+    ) {
+    }
 
     public function __invoke(GetClientDetailsRequest $request, int $userId): JsonResponse
     {

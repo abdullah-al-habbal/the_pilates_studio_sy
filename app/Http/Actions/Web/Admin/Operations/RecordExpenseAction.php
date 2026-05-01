@@ -17,7 +17,8 @@ final readonly class RecordExpenseAction
 
     public function __construct(
         private RecordExpenseHandler $handler
-    ) {}
+    ) {
+    }
 
     public function __invoke(RecordExpenseRequest $request): JsonResponse
     {

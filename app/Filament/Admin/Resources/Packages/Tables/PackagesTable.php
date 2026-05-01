@@ -24,8 +24,9 @@ class PackagesTable
                     ->numeric()
                     ->sortable(),
                 TextColumn::make('price')
-                    ->money()
-                    ->sortable(),
+                    ->label('Price (Default Currency)')
+                    ->getStateUsing(fn($record) => $record->getPriceForCurrentCurrency())
+                    ->money(),
                 TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()

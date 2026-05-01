@@ -17,7 +17,8 @@ final readonly class GetStoreItemsAction
 
     public function __construct(
         private GetStoreItemsHandler $handler
-    ) {}
+    ) {
+    }
 
     public function __invoke(GetStoreItemsRequest $request): JsonResponse
     {

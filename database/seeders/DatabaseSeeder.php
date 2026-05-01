@@ -9,6 +9,7 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         $this->call([
+            CurrencySeeder::class,
             LanguageSeeder::class,
             RecurrencePatternSeeder::class,
             ClassCategorySeeder::class,
@@ -16,6 +17,7 @@ class DatabaseSeeder extends Seeder
             PackageSeeder::class,
             StaticPageSeeder::class,
             CenterMerchandiseCategorySeeder::class,
+            CenterMerchandiseSeeder::class,
             UserSeeder::class,
             UserSettingSeeder::class,
             ClassesSeeder::class,

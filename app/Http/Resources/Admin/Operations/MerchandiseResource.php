@@ -4,11 +4,12 @@ declare(strict_types=1);
 
 namespace App\Http\Resources\Admin\Operations;
 
+use App\Models\CenterMerchandise;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 /**
- * @property-read \App\Models\CenterMerchandise $resource
+ * @property-read CenterMerchandise $resource
  */
 class MerchandiseResource extends JsonResource
 {
@@ -17,7 +18,7 @@ class MerchandiseResource extends JsonResource
         return [
             'id'             => $this->resource->id,
             'name'           => $this->resource->getTranslation('name', app()->getLocale()),
-            'price'          => $this->resource->price,
+            'price'          => $this->resource->getPriceForCurrentCurrency(),
             'stock_quantity' => $this->resource->stock_quantity,
             'category'       => $this->resource->category?->name,
         ];

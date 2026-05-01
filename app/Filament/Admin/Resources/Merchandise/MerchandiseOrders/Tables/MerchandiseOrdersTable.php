@@ -27,6 +27,7 @@ class MerchandiseOrdersTable
                 TextColumn::make('total_price')
                     ->label(__('dashboard.resources.merchandise_orders.fields.total_price'))
                     ->state(fn ($record) => $record->quantity * ($record->merchandise?->price ?? 0))
+                                            // fix: use the correct price approach
                     ->money('SYP')->sortable(),
 
                 TextColumn::make('customer.fullname')

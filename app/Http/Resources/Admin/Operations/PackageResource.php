@@ -20,7 +20,7 @@ class PackageResource extends JsonResource
             'name'          => $this->resource->getTranslation('name', app()->getLocale()),
             'total_credits' => $this->resource->total_credits,
             'validity_days' => $this->resource->validity_days,
-            'price'         => $this->resource->price,
+            'price'         => $this->resource->getPriceForCurrentCurrency(),
         ];
     }
 }

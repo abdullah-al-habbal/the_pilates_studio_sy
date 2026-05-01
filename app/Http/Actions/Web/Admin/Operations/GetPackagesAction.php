@@ -17,7 +17,8 @@ final readonly class GetPackagesAction
 
     public function __construct(
         private GetPackagesHandler $handler
-    ) {}
+    ) {
+    }
 
     public function __invoke(GetPackagesRequest $request): JsonResponse
     {

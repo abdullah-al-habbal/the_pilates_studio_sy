@@ -15,10 +15,10 @@ class BookingEloquentRepository
 {
     public function getTotalRevenue(?CarbonInterface $startDate = null, ?CarbonInterface $endDate = null): float
     {
-        return (float) Booking::join('packages', 'bookings.package_id', '=', 'packages.id')
-            ->when($startDate, fn($q) => $q->where('bookings.created_at', '>=', $startDate))
-            ->when($endDate, fn($q) => $q->where('bookings.created_at', '<=', $endDate))
-            ->sum('packages.price');
+        return (float) Booking::query()
+            ->when($startDate, fn($q) => $q->where('created_at', '>=', $startDate))
+            ->when($endDate, fn($q) => $q->where('created_at', '<=', $endDate))
+            ->sum('paid_amount');
     }
 
     public function getTotalCount(?CarbonInterface $startDate = null, ?CarbonInterface $endDate = null): int
@@ -59,12 +59,12 @@ class BookingEloquentRepository
     public function getRevenueByPackage(): \Illuminate\Support\Collection
     {
         return Booking::with(['package' => fn($q) => $q->withTrashed()])
-            ->selectRaw('package_id, COUNT(*) as bookings_count')
+            ->selectRaw('package_id, COUNT(*) as bookings_count, SUM(paid_amount) as total_revenue')
             ->groupBy('package_id')
             ->get()
             ->map(fn($item) => (object) [
                 'package_name' => $item->package?->getTranslation('name', app()->getLocale()) ?? 'Deleted Package',
-                'revenue' => $item->bookings_count * ($item->package?->price ?? 0),
+                'revenue' => (int) ($item->total_revenue ?? 0),
             ]);
     }
 

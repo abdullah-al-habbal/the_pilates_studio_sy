@@ -25,22 +25,22 @@ class CenterMerchandiseForm
                 ->columns(2)
                 ->schema([
                     TextInput::make('name.en')
-                        ->label(__('dashboard.resources.center_merchandises.fields.name').' (EN)')
+                        ->label(__('dashboard.resources.center_merchandises.fields.name') . ' (EN)')
                         ->required()
                         ->maxLength(255),
 
                     TextInput::make('name.ar')
-                        ->label(__('dashboard.resources.center_merchandises.fields.name').' (AR)')
+                        ->label(__('dashboard.resources.center_merchandises.fields.name') . ' (AR)')
                         ->maxLength(255),
 
                     Textarea::make('description.en')
-                        ->label(__('dashboard.resources.center_merchandises.fields.description').' (EN)')
+                        ->label(__('dashboard.resources.center_merchandises.fields.description') . ' (EN)')
                         ->rows(3)
                         ->maxLength(65535)
                         ->columnSpanFull(),
 
                     Textarea::make('description.ar')
-                        ->label(__('dashboard.resources.center_merchandises.fields.description').' (AR)')
+                        ->label(__('dashboard.resources.center_merchandises.fields.description') . ' (AR)')
                         ->rows(3)
                         ->maxLength(65535)
                         ->columnSpanFull(),
@@ -50,21 +50,31 @@ class CenterMerchandiseForm
                 ->icon('heroicon-o-currency-dollar')
                 ->schema([
                     Grid::make(3)->schema([
-                        TextInput::make('price')
-                            ->label(__('dashboard.resources.center_merchandises.fields.price'))
-                            ->required()
-                            ->numeric()
-                            ->minValue(0)
-                            ->prefix('SYP'),
+                    Repeater::make('prices')
+                        ->relationship()
+                        ->schema([
+                            Select::make('currency_id')
+                                ->label(__('dashboard.resources.center_merchandises.fields.currency') ?? 'Currency')
+                                ->relationship('currency', 'name')
+                                ->required(),
+                            TextInput::make('amount')
+                                ->label(__('dashboard.resources.center_merchandises.fields.price') ?? 'Price')
+                                ->required()
+                                ->numeric()
+                                ->minValue(0),
+                        ])
+                        ->columns(2)
+                        ->label(__('dashboard.resources.center_merchandises.sections.pricing'))
+                        ->columnSpanFull(),
 
                         TextInput::make('stock_quantity')
                             ->label(__('dashboard.resources.center_merchandises.fields.stock_quantity'))
                             ->required()
                             ->numeric()
                             ->default(0)
-                            ->minValue(fn ($record): int => $record?->stock_quantity ?? 0)
+                            ->minValue(fn($record): int => $record?->stock_quantity ?? 0)
                             ->helperText(
-                                fn ($record): ?string => $record
+                                fn($record): ?string => $record
                                 ? __('dashboard.resources.center_merchandises.helpers.stock_min', ['min' => $record->stock_quantity])
                                 : null
                             ),
@@ -76,7 +86,7 @@ class CenterMerchandiseForm
                             ->searchable()
                             ->preload()
                             ->getOptionLabelFromRecordUsing(
-                                fn ($record) => $record->getTranslation('name', app()->getLocale())
+                                fn($record) => $record->getTranslation('name', app()->getLocale())
                             ),
                     ]),
                 ]),
@@ -107,10 +117,7 @@ class CenterMerchandiseForm
                         ->collapsible()
                         ->defaultItems(0)
                         ->reorderable()
-                        ->columnSpanFull()
-                        ->mutateRelationshipDataBeforeCreateUsing(function (array $data): array {
-                            return $data;
-                        }),
+                        ->columnSpanFull(),
                 ]),
         ]);
     }

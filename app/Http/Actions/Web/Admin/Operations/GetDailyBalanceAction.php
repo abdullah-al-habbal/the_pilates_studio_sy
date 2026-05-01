@@ -18,7 +18,8 @@ final readonly class GetDailyBalanceAction
 
     public function __construct(
         private GetDailyBalanceHandler $handler
-    ) {}
+    ) {
+    }
 
     public function __invoke(GetDailyBalanceRequest $request): JsonResponse
     {

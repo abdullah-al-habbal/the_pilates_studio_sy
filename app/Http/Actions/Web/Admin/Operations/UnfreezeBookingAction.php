@@ -16,7 +16,8 @@ final readonly class UnfreezeBookingAction
 
     public function __construct(
         private UnfreezeBookingHandler $handler
-    ) {}
+    ) {
+    }
 
     public function __invoke(UnfreezeBookingRequest $request, int $bookingId): JsonResponse
     {

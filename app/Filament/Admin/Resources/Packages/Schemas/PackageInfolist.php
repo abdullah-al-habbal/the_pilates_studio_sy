@@ -16,6 +16,8 @@ class PackageInfolist
                 TextEntry::make('total_credits')
                     ->numeric(),
                 TextEntry::make('price')
+                    ->label('Price (Default Currency)')
+                    ->getStateUsing(fn($record) => $record->getPriceForCurrentCurrency())
                     ->money(),
                 TextEntry::make('created_at')
                     ->dateTime()

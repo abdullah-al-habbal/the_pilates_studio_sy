@@ -36,7 +36,8 @@ class CenterMerchandisesTable
 
                 TextColumn::make('price')
                     ->label(__('dashboard.resources.center_merchandises.fields.price'))
-                    ->money('SYP')
+                    ->getStateUsing(fn($record) => $record->getPriceForCurrentCurrency())
+                    ->money()
                     ->sortable(),
 
                 TextColumn::make('stock_quantity')

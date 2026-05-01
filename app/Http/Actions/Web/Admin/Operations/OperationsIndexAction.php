@@ -8,9 +8,6 @@ use Illuminate\View\View;
 
 final class OperationsIndexAction
 {
-    /**
-     * Display the Operations Hub SPA.
-     */
     public function __invoke(): View
     {
         return view('admin.operations.index');

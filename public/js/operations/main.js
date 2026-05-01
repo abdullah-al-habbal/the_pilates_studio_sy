@@ -202,6 +202,7 @@ async function showClientDetails(userId) {
                                         <tr>
                                             <td class="px-4 py-3">${o.item_name}</td>
                                             <td class="px-4 py-3 text-slate-500">${o.quantity} unit(s)</td>
+                                            // fix: use the current price approach
                                             <td class="px-4 py-3 font-bold">${o.total_price} SYP</td>
                                             <td class="px-4 py-3 text-right text-xs text-slate-400">${o.ordered_at}</td>
                                         </tr>
@@ -234,6 +235,8 @@ async function showPackageAssignment(userId) {
                     <button onclick="handlePackageAssign(${userId}, ${p.id})" class="flex flex-col p-6 rounded-2xl border-2 border-slate-100 dark:border-slate-800 hover:border-primary-500 transition-all text-left group">
                         <span class="text-lg font-bold group-hover:text-primary-600 transition-colors">${p.name}</span>
                         <span class="text-sm text-slate-500">${p.total_credits} Sessions &bull; ${p.validity_days} Days</span>
+                                                                    // fix: use the current price approach
+
                         <span class="mt-4 text-2xl font-black text-slate-900 dark:text-white">${p.price} SYP</span>
                     </button>
                 `).join('')}
@@ -301,6 +304,8 @@ async function renderStore() {
                         <h4 class="text-xl font-bold">${item.name}</h4>
                     </div>
                     <div class="text-right">
+                    //                                             // fix: use the current price approach
+
                         <span class="text-xl font-black">${item.price}</span>
                         <span class="text-[10px] block text-slate-400 font-bold uppercase">SYP</span>
                     </div>

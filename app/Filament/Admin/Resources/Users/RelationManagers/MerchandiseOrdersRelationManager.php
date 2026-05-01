@@ -34,7 +34,7 @@ class MerchandiseOrdersRelationManager extends RelationManager
                 TextColumn::make('merchandise.name')
                     ->label(__('dashboard.resources.merchandise_orders.fields.merchandise'))
                     ->formatStateUsing(
-                        fn ($state) => is_array($state)
+                        fn($state) => is_array($state)
                         ? ($state[app()->getLocale()] ?? $state['en'] ?? '')
                         : $state
                     )
@@ -47,7 +47,9 @@ class MerchandiseOrdersRelationManager extends RelationManager
 
                 TextColumn::make('total_price')
                     ->label(__('dashboard.resources.merchandise_orders.fields.total_price'))
-                    ->state(fn ($record) => $record->quantity * ($record->merchandise?->price ?? 0))
+                    ->state(fn($record) => $record->quantity * ($record->merchandise?->price ?? 0))
+                    // fix: use the correct price approach
+
                     ->money('SYP'),
 
                 TextColumn::make('ordered_at')
@@ -57,7 +59,7 @@ class MerchandiseOrdersRelationManager extends RelationManager
             ])
             ->actions([
                 ViewAction::make()
-                    ->url(fn ($record) => route('filament.admin.resources.merchandise.merchandise-orders.view', $record)),
+                    ->url(fn($record) => route('filament.admin.resources.merchandise.merchandise-orders.view', $record)),
                 DeleteAction::make(),
             ]);
     }

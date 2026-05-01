@@ -14,7 +14,6 @@ return new class extends Migration {
             $table->id();
             $table->json('name')->comment('Translatable: {en, ar}');
             $table->json('description')->nullable()->comment('Translatable: {en, ar}');
-            $table->unsignedInteger('price')->default(0)->comment('Price in SYP, stored as integer');
             $table->unsignedInteger('stock_quantity')->default(0);
             $table->foreignId('category_id')
                 ->nullable()
@@ -23,7 +22,7 @@ return new class extends Migration {
             $table->timestamps();
             $table->softDeletes();
             $table->index('category_id', 'idx_merchandise_category');
-            $table->index(['stock_quantity', 'price'], 'idx_merchandise_stock_price');
+            $table->index('stock_quantity', 'idx_merchandise_stock');
         });
     }
 

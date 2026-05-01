@@ -17,7 +17,7 @@ class PackageResource extends JsonResource
             'id' => $this->id,
             'name' => $this->name,
             'total_credits' => $this->total_credits,
-            'price' => $this->price,
+            'price' => $this->getPriceForCurrentCurrency(),
             'is_active' => $this->is_active,
             'is_available_for_purchase' => $this->is_available_for_purchase,
             'is_cheapest_option' => $this->is_cheapest_option,
