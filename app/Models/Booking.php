@@ -47,8 +47,6 @@ class Booking extends Model
         ];
     }
 
-    // ─── Business logic ──────────────────────────────────────────────────────
-
     public function deductCredit(): void
     {
         if ($this->remaining_credits <= 0) {
@@ -79,7 +77,7 @@ class Booking extends Model
 
     public function isActive(): bool
     {
-        return $this->status === BookingStatusEnum::ACTIVE && ! $this->isExpired();
+        return $this->status === BookingStatusEnum::ACTIVE && !$this->isExpired();
     }
 
     public function isFrozen(): bool
@@ -87,7 +85,21 @@ class Booking extends Model
         return $this->status === BookingStatusEnum::FROZEN;
     }
 
-    // ─── Accessors ───────────────────────────────────────────────────────────
+    public function freeze(): void
+    {
+        $this->update([
+            'status' => BookingStatusEnum::FROZEN,
+            'frozen_at' => now(),
+        ]);
+    }
+
+    public function resume(): void
+    {
+        $this->update([
+            'status' => BookingStatusEnum::ACTIVE,
+            'unfrozen_at' => now(),
+        ]);
+    }
 
     public function getUsedCreditsAttribute(): int
     {
@@ -119,8 +131,6 @@ class Booking extends Model
         return $this->expires_at ? max(0, (int) now()->diffInDays($this->expires_at, false)) : null;
     }
 
-    // ─── Computed attributes ─────────────────────────────────────────────────
-
     protected function hasCreditsRemaining(): Attribute
     {
         return Attribute::make(
@@ -142,30 +152,6 @@ class Booking extends Model
                 && $this->remaining_credits === $this->total_credits
         );
     }
-
-    protected function isExhausted(): Attribute
-    {
-        return Attribute::make(
-            get: fn () => $this->status === BookingStatusEnum::EXHAUSTED
-                || $this->remaining_credits <= 0
-        );
-    }
-
-    protected function isWithinValidity(): Attribute
-    {
-        return Attribute::make(
-            get: fn () => ! $this->isExpired() && $this->isActive()
-        );
-    }
-
-    protected function creditsNearEmpty(): Attribute
-    {
-        return Attribute::make(
-            get: fn () => $this->remaining_credits > 0 && $this->remaining_credits <= 2
-        );
-    }
-
-    // ─── Relations ───────────────────────────────────────────────────────────
 
     public function user(): BelongsTo
     {
