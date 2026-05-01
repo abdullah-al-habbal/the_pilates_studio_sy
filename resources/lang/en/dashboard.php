@@ -179,9 +179,7 @@ return [
             'fields' => [
                 'merchandise' => 'Product',
                 'quantity' => 'Quantity',
-                // fix: use the current price approach
-
-                'total_price' => 'Total (SYP)',
+                'total_price' => 'Total',
                 'customer' => 'Customer',
                 'phone' => 'Phone',
                 'ordered_at' => 'Ordered At',

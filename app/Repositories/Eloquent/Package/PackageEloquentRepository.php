@@ -1,21 +1,21 @@
 <?php
 
-// filePath: app/Repositories/Eloquent/Package/PackageEloquentRepository.php
-
 declare(strict_types=1);
 
 namespace App\Repositories\Eloquent\Package;
 
-use App\Models\Currency;
 use App\Models\Package;
+use App\Services\Currency\CurrencyService;
 
 class PackageEloquentRepository
 {
+    public function __construct(
+        private readonly CurrencyService $currencyService
+    ) {}
+
     public function getCheapestActivePackage(): ?Package
     {
-        // fix: search for the currency with code usd
-        $currencyId = 1;
-
+        $currencyId = $this->currencyService->getDefaultCurrency()->id;
         return Package::where('is_active', true)
             ->whereHas('prices', fn($q) => $q->where('currency_id', $currencyId))
             ->with(['prices' => fn($q) => $q->where('currency_id', $currencyId)])
@@ -30,6 +30,7 @@ class PackageEloquentRepository
             $query->where('user_id', $userId);
         })->find($packageId);
     }
+
     public function findById(int $id): ?Package
     {
         return Package::find($id);
@@ -50,19 +51,16 @@ class PackageEloquentRepository
     public function createWalkInPackage(): Package
     {
         $package = Package::create([
-            'name' => ['en' => 'Walk-in Session', 'ar' => 'جلسة مباشرة'],
+            'name' => ['en' => 'Walk-in Session', 'ar' => 'جلسة دخول مباشر'],
             'total_credits' => 1,
             'is_active' => true,
         ]);
-
-        $currencies = Currency::where('is_active', true)->get();
-        foreach ($currencies as $currency) {
+        $this->currencyService->getAllActiveCurrencies()->each(function ($currency) use ($package) {
             $package->prices()->create([
                 'currency_id' => $currency->id,
                 'amount' => 0,
             ]);
-        }
-
+        });
         return $package;
     }
 }

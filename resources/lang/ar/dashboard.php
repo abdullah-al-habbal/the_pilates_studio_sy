@@ -154,7 +154,7 @@ return [
             'fields' => [
                 'merchandise' => 'المنتج',
                 'quantity' => 'الكمية',
-                'total_price' => 'الإجمالي (ل.س)',
+                'total_price' => 'الإجمالي',
                 'customer' => 'العميل',
                 'phone' => 'الهاتف',
                 'ordered_at' => 'تاريخ الطلب',

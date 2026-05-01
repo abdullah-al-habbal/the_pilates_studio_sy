@@ -59,34 +59,17 @@ class CenterMerchandise extends Model
         return $this->hasMany(MerchandiseOrder::class, 'merchandise_id');
     }
 
-    /**
-     * Get the prices for this merchandise.
-     *
-     * @return MorphMany<Price, $this>
-     */
     public function prices(): MorphMany
     {
         return $this->morphMany(Price::class, 'priceable');
     }
 
-    /**
-     * Get the price for a specific currency ID.
-     *
-     * @param int $currencyId
-     * @return int|null
-     */
     public function getPriceForCurrency(int $currencyId): ?int
     {
         return $this->prices
             ->firstWhere('currency_id', $currencyId)
-            ?->amount;
+                ?->amount;
     }
-
-    /**
-     * Get the current currency ID from authenticated user or default (USD).
-     *
-     * @return int
-     */
     private function getCurrentCurrencyId(): int
     {
         $user = Auth::user();
@@ -99,12 +82,6 @@ class CenterMerchandise extends Model
 
         return $usdCurrency?->id ?? 1;
     }
-
-    /**
-     * Get the price for the current user's currency.
-     *
-     * @return int|null
-     */
     public function getPriceForCurrentCurrency(): ?int
     {
         $currencyId = $this->getCurrentCurrencyId();
@@ -113,13 +90,6 @@ class CenterMerchandise extends Model
             ->where('currency_id', $currencyId)
             ->value('amount');
     }
-
-    /**
-     * Accessor for price attribute (backward compatibility).
-     * Returns the price for the current user's currency.
-     *
-     * @return Attribute<int|null, never>
-     */
     protected function price(): Attribute
     {
         return Attribute::make(

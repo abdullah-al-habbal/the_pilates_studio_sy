@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Filament\Admin\Resources\Users\RelationManagers;
 
+use App\Services\Currency\CurrencyService;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\ViewAction;
 use Filament\Resources\RelationManagers\RelationManager;
@@ -15,17 +16,14 @@ use Illuminate\Database\Eloquent\Model;
 class MerchandiseOrdersRelationManager extends RelationManager
 {
     protected static string $relationship = 'merchandiseOrders';
-
     public static function getTitle(Model $ownerRecord, string $pageClass): string
     {
         return __('dashboard.resources.merchandise_orders.plural');
     }
-
     public function form(Schema $schema): Schema
     {
         return $schema->components([]);
     }
-
     public function table(Table $table): Table
     {
         return $table
@@ -35,23 +33,18 @@ class MerchandiseOrdersRelationManager extends RelationManager
                     ->label(__('dashboard.resources.merchandise_orders.fields.merchandise'))
                     ->formatStateUsing(
                         fn($state) => is_array($state)
-                        ? ($state[app()->getLocale()] ?? $state['en'] ?? '')
-                        : $state
+                            ? ($state[app()->getLocale()] ?? $state['en'] ?? '')
+                            : $state
                     )
                     ->searchable(),
-
                 TextColumn::make('quantity')
                     ->label(__('dashboard.resources.merchandise_orders.fields.quantity'))
                     ->badge()
                     ->color('info'),
-
                 TextColumn::make('total_price')
                     ->label(__('dashboard.resources.merchandise_orders.fields.total_price'))
                     ->state(fn($record) => $record->quantity * ($record->merchandise?->price ?? 0))
-                    // fix: use the correct price approach
-
-                    ->money('SYP'),
-
+                    ->money(app(CurrencyService::class)->getCode()),
                 TextColumn::make('ordered_at')
                     ->label(__('dashboard.resources.merchandise_orders.fields.ordered_at'))
                     ->dateTime()

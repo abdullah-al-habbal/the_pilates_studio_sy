@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Filament\Admin\Resources\Merchandise\CenterMerchandises\Schemas;
 
+use App\Services\Currency\CurrencyService;
 use Filament\Infolists\Components\ImageEntry;
 use Filament\Infolists\Components\RepeatableEntry;
 use Filament\Infolists\Components\TextEntry;
@@ -17,9 +18,7 @@ class CenterMerchandiseInfolist
     public static function configure(Schema $schema): Schema
     {
         return $schema->components([
-
             Grid::make(['default' => 1, 'lg' => 2])->schema([
-
                 Section::make(__('dashboard.resources.center_merchandises.sections.information'))
                     ->icon('heroicon-o-shopping-bag')
                     ->schema([
@@ -28,43 +27,38 @@ class CenterMerchandiseInfolist
                             ->weight(FontWeight::Bold)
                             ->formatStateUsing(
                                 fn($state) => is_array($state)
-                                ? ($state[app()->getLocale()] ?? $state['en'] ?? '')
-                                : $state
+                                    ? ($state[app()->getLocale()] ?? $state['en'] ?? '')
+                                    : $state
                             )
                             ->columnSpanFull(),
-
                         TextEntry::make('description')
                             ->label(__('dashboard.resources.center_merchandises.fields.description'))
                             ->placeholder(__('dashboard.resources.center_merchandises.placeholders.no_description'))
                             ->formatStateUsing(
                                 fn($state) => is_array($state)
-                                ? ($state[app()->getLocale()] ?? $state['en'] ?? '')
-                                : $state
+                                    ? ($state[app()->getLocale()] ?? $state['en'] ?? '')
+                                    : $state
                             )
                             ->columnSpanFull(),
-
                         TextEntry::make('category.name')
                             ->label(__('dashboard.resources.center_merchandises.fields.category'))
                             ->badge()
                             ->color('gray')
                             ->formatStateUsing(
                                 fn($state) => is_array($state)
-                                ? ($state[app()->getLocale()] ?? $state['en'] ?? '')
-                                : $state
+                                    ? ($state[app()->getLocale()] ?? $state['en'] ?? '')
+                                    : $state
                             ),
                     ]),
-
                 Section::make(__('dashboard.resources.center_merchandises.sections.pricing'))
                     ->icon('heroicon-o-currency-dollar')
                     ->columns(2)
                     ->schema([
-                        // fix: use the correct price approach
                         TextEntry::make('price')
                             ->label(__('dashboard.resources.center_merchandises.fields.price'))
-                            ->money('SYP')
+                            ->money(app(CurrencyService::class)->getCode())
                             ->weight(FontWeight::Bold)
                             ->color('success'),
-
                         TextEntry::make('stock_quantity')
                             ->label(__('dashboard.resources.center_merchandises.fields.stock_quantity'))
                             ->badge()
@@ -75,7 +69,6 @@ class CenterMerchandiseInfolist
                             }),
                     ]),
             ]),
-
             Section::make(__('dashboard.resources.center_merchandises.sections.gallery'))
                 ->icon('heroicon-o-photo')
                 ->columnSpanFull()
@@ -87,14 +80,13 @@ class CenterMerchandiseInfolist
                                 ->hiddenLabel()
                                 ->height(180)
                                 ->extraImgAttributes(['class' => 'w-full object-cover rounded-lg']),
-
                             TextEntry::make('is_primary')
                                 ->hiddenLabel()
                                 ->badge()
                                 ->state(
                                     fn($record): ?string => $record->is_primary
-                                    ? __('dashboard.resources.center_merchandises.labels.primary')
-                                    : null
+                                        ? __('dashboard.resources.center_merchandises.labels.primary')
+                                        : null
                                 )
                                 ->color('success')
                                 ->visible(fn($record): bool => (bool) $record->is_primary),

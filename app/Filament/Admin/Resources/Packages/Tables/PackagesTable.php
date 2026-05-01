@@ -2,6 +2,7 @@
 
 namespace App\Filament\Admin\Resources\Packages\Tables;
 
+use App\Services\Currency\CurrencyService;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
@@ -26,7 +27,7 @@ class PackagesTable
                 TextColumn::make('price')
                     ->label('Price (Default Currency)')
                     ->getStateUsing(fn($record) => $record->getPriceForCurrentCurrency())
-                    ->money(),
+                    ->money(app(CurrencyService::class)->getCode()),
                 TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()

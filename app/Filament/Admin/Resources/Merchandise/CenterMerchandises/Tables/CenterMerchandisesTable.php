@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Filament\Admin\Resources\Merchandise\CenterMerchandises\Tables;
 
+use App\Services\Currency\CurrencyService;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
@@ -21,25 +22,21 @@ class CenterMerchandisesTable
                     ->label('')
                     ->circular()
                     ->defaultImageUrl('https://ui-avatars.com/api/?name=P&color=7C3AED&background=EDE9FE'),
-
                 TextColumn::make('name')
                     ->label(__('dashboard.resources.center_merchandises.fields.name'))
                     ->searchable()
                     ->sortable(),
-
                 TextColumn::make('category.name')
                     ->label(__('dashboard.resources.center_merchandises.fields.category'))
                     ->badge()
                     ->color('gray')
                     ->sortable()
                     ->searchable(),
-
                 TextColumn::make('price')
                     ->label(__('dashboard.resources.center_merchandises.fields.price'))
                     ->getStateUsing(fn($record) => $record->getPriceForCurrentCurrency())
-                    ->money()
+                    ->money(app(CurrencyService::class)->getCode())
                     ->sortable(),
-
                 TextColumn::make('stock_quantity')
                     ->label(__('dashboard.resources.center_merchandises.fields.stock_quantity'))
                     ->badge()
@@ -49,7 +46,6 @@ class CenterMerchandisesTable
                         $state < 5 => 'warning',
                         default => 'success',
                     }),
-
                 TextColumn::make('created_at')
                     ->label(__('dashboard.resources.center_merchandises.fields.created_at'))
                     ->dateTime()

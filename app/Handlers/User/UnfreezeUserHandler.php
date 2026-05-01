@@ -1,19 +1,24 @@
 <?php
+
 declare(strict_types=1);
+
 namespace App\Handlers\User;
+
 use App\Enums\BookingStatusEnum;
 use App\Enums\PackageTypeEnum;
 use App\Enums\UserStatusEnum;
 use App\Models\Package;
 use App\Models\User;
+use App\Services\Currency\CurrencyService;
 use Illuminate\Support\Facades\DB;
 use InvalidArgumentException;
+
 class UnfreezeUserHandler
 {
     public function __construct(
-        private readonly CreateBookingFromPackageHandler $createBookingHandler
-    ) {
-    }
+        private readonly CreateBookingFromPackageHandler $createBookingHandler,
+        private readonly CurrencyService $currencyService
+    ) {}
 
     public function handle(User $user): void
     {
@@ -30,26 +35,23 @@ class UnfreezeUserHandler
         DB::transaction(function () use ($user, $frozenBooking) {
             $originalExpires = $frozenBooking->expires_at;
             $frozenAt = $user->frozen_at;
-
             if (!$originalExpires || !$frozenAt) {
                 throw new InvalidArgumentException('Missing snapshot data for unfreeze.');
             }
             $residualDays = max(1, (int) floor($originalExpires->diffInHours($frozenAt) / 24));
             $remainingCredits = $frozenBooking->remaining_credits;
             $package = Package::create([
-                'name' => ['en' => "Unfreeze Residual - {$user->fullname}", 'ar' => "رصيد متبقي - {$user->fullname}"],
+                'name' => ['en' => "Unfreeze Residual - {$user->fullname}", 'ar' => "رصيد التجميد - {$user->fullname}"],
                 'total_credits' => $remainingCredits,
                 'type' => PackageTypeEnum::FOR_FREEZE_CLIENT,
                 'generated_reason' => "unfreeze residual from booking #{$frozenBooking->id}",
                 'validity_days' => $residualDays,
                 'is_active' => false,
             ]);
-
             $package->prices()->create([
-                'currency_id' => 1,
+                'currency_id' => $this->currencyService->getDefaultCurrency()->id,
                 'amount' => 0,
             ]);
-
             ($this->createBookingHandler)(
                 user: $user,
                 package: $package,

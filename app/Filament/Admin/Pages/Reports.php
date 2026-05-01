@@ -7,6 +7,7 @@ namespace App\Filament\Admin\Pages;
 use App\Repositories\Eloquent\Booking\BookingEloquentRepository;
 use App\Repositories\Eloquent\Classes\ClassesEloquentRepository;
 use App\Repositories\Eloquent\Merchandise\MerchandiseOrderEloquentRepository;
+use App\Services\Currency\CurrencyService;
 use BackedEnum;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Infolists\Concerns\InteractsWithInfolists;
@@ -25,9 +26,7 @@ class Reports extends Page implements HasInfolists
     use InteractsWithInfolists;
 
     protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-presentation-chart-bar';
-
     protected string $view = 'filament.admin.pages.reports';
-
     protected static ?int $navigationSort = 2;
 
     public static function getNavigationBadge(): ?string
@@ -37,10 +36,10 @@ class Reports extends Page implements HasInfolists
             now()->addMinutes(5),
             function () {
                 $repo = App::make(MerchandiseOrderEloquentRepository::class);
+                $currency = App::make(CurrencyService::class)->getDefaultCurrency();
                 $total = $repo->getTotalRevenue(now()->startOfDay(), now()->endOfDay());
-
-                // fix: use the correct currecny code
-                return number_format($total, 0) . ' SYP';
+                $divisor = 10 ** $currency->decimal_places;
+                return number_format($total / $divisor, $currency->decimal_places) . ' ' . $currency->symbol;
             }
         );
     }
@@ -51,21 +50,13 @@ class Reports extends Page implements HasInfolists
     }
 
     public string $period = 'daily';
-
     public string $dailyDate = '';
-
     public string $month = '';
-
     public string $year = '';
-
     public string $customStart = '';
-
     public string $customEnd = '';
-
     private ?array $_stats = null;
-
     private ?Collection $_classes = null;
-
     private ?Collection $_merch = null;
 
     public function mount(): void
@@ -118,46 +109,41 @@ class Reports extends Page implements HasInfolists
         $stats = $this->stats();
         $classes = $this->popularClasses();
         $merch = $this->merchandiseSales();
+        $currency = app(CurrencyService::class)->getDefaultCurrency();
+        $divisor = 10 ** $currency->decimal_places;
 
         return $schema->components([
-
             Grid::make(['default' => 1, 'sm' => 2, 'lg' => 3, 'xl' => 5])
                 ->schema([
                     Section::make()
                         ->schema([
-                            // fix: check the calculation and we must make the revenues in the prices
                             TextEntry::make('total_revenue')
                                 ->label(__('dashboard.pages.reports.stats.total_revenue'))
-                                ->state(number_format($stats['total_revenue']) . ' SYP')
+                                ->state(number_format($stats['total_revenue'] / $divisor, $currency->decimal_places) . ' ' . $currency->symbol)
                                 ->icon('heroicon-o-currency-dollar')
                                 ->iconColor('primary')
                                 ->weight(FontWeight::Bold)
                                 ->copyable()
                                 ->copyMessage(__('Copied')),
                         ]),
-
                     Section::make()
                         ->schema([
                             TextEntry::make('booking_revenue')
                                 ->label(__('dashboard.pages.reports.stats.booking_revenue'))
-                                // fix: use the correct price approach
-
-                                ->state(number_format($stats['booking_revenue']) . ' SYP')
+                                ->state(number_format($stats['booking_revenue'] / $divisor, $currency->decimal_places) . ' ' . $currency->symbol)
                                 ->icon('heroicon-o-ticket')
                                 ->iconColor('success')
                                 ->weight(FontWeight::Bold),
                         ]),
-
                     Section::make()
                         ->schema([
                             TextEntry::make('store_revenue')
                                 ->label(__('dashboard.pages.reports.stats.store_revenue'))
-                                ->state(number_format($stats['merchandise_revenue']) . ' SYP')
+                                ->state(number_format($stats['merchandise_revenue'] / $divisor, $currency->decimal_places) . ' ' . $currency->symbol)
                                 ->icon('heroicon-o-shopping-bag')
                                 ->iconColor('warning')
                                 ->weight(FontWeight::Bold),
                         ]),
-
                     Section::make()
                         ->schema([
                             TextEntry::make('total_bookings')
@@ -167,7 +153,6 @@ class Reports extends Page implements HasInfolists
                                 ->iconColor('info')
                                 ->weight(FontWeight::Bold),
                         ]),
-
                     Section::make()
                         ->schema([
                             TextEntry::make('total_orders')
@@ -178,74 +163,66 @@ class Reports extends Page implements HasInfolists
                                 ->weight(FontWeight::Bold),
                         ]),
                 ]),
-
             Grid::make(['default' => 1, 'lg' => 2])
                 ->schema([
-
                     Section::make(__('dashboard.pages.reports.popular_classes.heading'))
                         ->icon('heroicon-o-fire')
                         ->iconColor('warning')
                         ->schema(
                             $classes->isEmpty()
-                            ? [
-                                TextEntry::make('no_classes')
-                                    ->hiddenLabel()
-                                    ->state(__('dashboard.pages.reports.popular_classes.empty', [], 'en') ?? 'No data for this period.')
-                                    ->color('gray'),
-                            ]
-                            : $classes->values()->map(function ($class, int $i) use ($stats): TextEntry {
-                                $locale = app()->getLocale();
-                                $title = is_array($class->title)
-                                    ? ($class->title[$locale] ?? $class->title['en'] ?? 'Unknown')
-                                    : ($class->title ?? 'Unknown');
-
-                                $pct = $stats['total_bookings'] > 0
-                                    ? min(100, round(($class->total_attendance / $stats['total_bookings']) * 100))
-                                    : 0;
-
-                                return TextEntry::make('class_' . $i)
-                                    ->label($title)
-                                    ->state(
-                                        __('dashboard.pages.reports.popular_classes.attendees', ['count' => $class->total_attendance])
-                                        . '   ·   '
-                                        . __('dashboard.pages.reports.popular_classes.sessions', ['count' => $class->sessions_count])
-                                        . '   ·   '
-                                        . __('dashboard.pages.reports.popular_classes.avg', ['count' => $class->avg_attendance])
-                                    )
-                                    ->badge()
-                                    ->color('primary')
-                                    ->tooltip($pct . '% of total bookings');
-                            })->toArray()
+                                ? [
+                                    TextEntry::make('no_classes')
+                                        ->hiddenLabel()
+                                        ->state(__('dashboard.pages.reports.popular_classes.empty', [], 'en') ?? 'No data for this period.')
+                                        ->color('gray'),
+                                ]
+                                : $classes->values()->map(function ($class, int $i) use ($stats): TextEntry {
+                                    $locale = app()->getLocale();
+                                    $title = is_array($class->title)
+                                        ? ($class->title[$locale] ?? $class->title['en'] ?? 'Unknown')
+                                        : ($class->title ?? 'Unknown');
+                                    $pct = $stats['total_bookings'] > 0
+                                        ? min(100, round(($class->total_attendance / $stats['total_bookings']) * 100))
+                                        : 0;
+                                    return TextEntry::make('class_' . $i)
+                                        ->label($title)
+                                        ->state(
+                                            __('dashboard.pages.reports.popular_classes.attendees', ['count' => $class->total_attendance])
+                                            . '   ·   '
+                                            . __('dashboard.pages.reports.popular_classes.sessions', ['count' => $class->sessions_count])
+                                            . '   ·   '
+                                            . __('dashboard.pages.reports.popular_classes.avg', ['count' => $class->avg_attendance])
+                                        )
+                                        ->badge()
+                                        ->color('primary')
+                                        ->tooltip($pct . '% of total bookings');
+                                })->toArray()
                         ),
-
                     Section::make(__('dashboard.pages.reports.top_merchandise.heading'))
                         ->icon('heroicon-o-chart-bar-square')
                         ->iconColor('success')
                         ->schema(
                             $merch->isEmpty()
-                            ? [
-                                TextEntry::make('no_merch')
-                                    ->hiddenLabel()
-                                    ->state(__('dashboard.pages.reports.top_merchandise.empty', [], 'en') ?? 'No sales for this period.')
-                                    ->color('gray'),
-                            ]
-                            : $merch->values()->map(function ($item, int $i): TextEntry {
-                                $locale = app()->getLocale();
-                                $name = $item->name[$locale] ?? $item->name['en'] ?? '';
-
-                                return TextEntry::make('merch_' . $i)
-                                    ->label($name)
-                                    ->state(
-// fix: use the correct price approach
-                    
-                                        number_format($item->revenue) . ' SYP'
-                                        . ' · '
-                                        . __('dashboard.pages.reports.top_merchandise.sold', ['count' => $item->quantity])
-                                    )
-                                    ->badge()
-                                    ->color('success')
-                                    ->icon('heroicon-o-cube');
-                            })->toArray()
+                                ? [
+                                    TextEntry::make('no_merch')
+                                        ->hiddenLabel()
+                                        ->state(__('dashboard.pages.reports.top_merchandise.empty', [], 'en') ?? 'No sales for this period.')
+                                        ->color('gray'),
+                                ]
+                                : $merch->values()->map(function ($item, int $i) use ($currency, $divisor): TextEntry {
+                                    $locale = app()->getLocale();
+                                    $name = $item->name[$locale] ?? $item->name['en'] ?? '';
+                                    return TextEntry::make('merch_' . $i)
+                                        ->label($name)
+                                        ->state(
+                                            number_format($item->revenue / $divisor, $currency->decimal_places) . ' ' . $currency->symbol
+                                            . ' · '
+                                            . __('dashboard.pages.reports.top_merchandise.sold', ['count' => $item->quantity])
+                                        )
+                                        ->badge()
+                                        ->color('success')
+                                        ->icon('heroicon-o-cube');
+                                })->toArray()
                         ),
                 ]),
         ]);
@@ -256,15 +233,11 @@ class Reports extends Page implements HasInfolists
         if ($this->_stats !== null) {
             return $this->_stats;
         }
-
         $bookingRepo = App::make(BookingEloquentRepository::class);
         $merchandiseRepo = App::make(MerchandiseOrderEloquentRepository::class);
-
         [$startDate, $endDate] = $this->getPeriodDates();
-
         $bookingRevenue = $bookingRepo->getTotalRevenue($startDate, $endDate);
         $merchandiseRevenue = $merchandiseRepo->getTotalRevenue($startDate, $endDate);
-
         return $this->_stats = [
             'booking_revenue' => $bookingRevenue,
             'merchandise_revenue' => $merchandiseRevenue,
@@ -279,9 +252,7 @@ class Reports extends Page implements HasInfolists
         if ($this->_classes !== null) {
             return $this->_classes;
         }
-
         [$startDate, $endDate] = $this->getPeriodDates();
-
         return $this->_classes = App::make(ClassesEloquentRepository::class)
             ->getPopularClassesSummary(5, $startDate, $endDate);
     }
@@ -291,9 +262,7 @@ class Reports extends Page implements HasInfolists
         if ($this->_merch !== null) {
             return $this->_merch;
         }
-
         [$startDate, $endDate] = $this->getPeriodDates();
-
         return $this->_merch = App::make(MerchandiseOrderEloquentRepository::class)
             ->getTopSellingSummary(5, $startDate, $endDate);
     }

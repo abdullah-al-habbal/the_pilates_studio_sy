@@ -56,18 +56,8 @@ class Package extends Model
     use HasTranslations;
     use SoftDeletes;
 
-    /**
-     * The attributes that are translatable.
-     *
-     * @var array<int, string>
-     */
     public array $translatable = ['name'];
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array<int, string>
-     */
     protected $fillable = [
         'name',
         'total_credits',
@@ -77,11 +67,6 @@ class Package extends Model
         'validity_days',
     ];
 
-    /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
-     */
     protected function casts(): array
     {
         return [
@@ -92,32 +77,15 @@ class Package extends Model
         ];
     }
 
-    /**
-     * Get the bookings for this package.
-     *
-     * @return HasMany<Booking, $this>
-     */
     public function bookings(): HasMany
     {
         return $this->hasMany(Booking::class);
     }
-
-    /**
-     * Get the prices for this package.
-     *
-     * @return MorphMany<Price, $this>
-     */
     public function prices(): MorphMany
     {
         return $this->morphMany(Price::class, 'priceable');
     }
 
-    /**
-     * Get the price for a specific currency ID.
-     *
-     * @param int $currencyId
-     * @return int|null
-     */
     public function getPriceForCurrency(int $currencyId): ?int
     {
         return $this->prices
@@ -125,21 +93,10 @@ class Package extends Model
             ?->amount;
     }
 
-    /**
-     * Check if the package is system generated.
-     *
-     * @return bool
-     */
     public function isSystemGenerated(): bool
     {
         return $this->type !== PackageTypeEnum::STANDARD;
     }
-
-    /**
-     * Get the current currency ID from authenticated user or default (USD).
-     *
-     * @return int
-     */
     private function getCurrentCurrencyId(): int
     {
         $user = Auth::user();
@@ -153,11 +110,6 @@ class Package extends Model
         return $usdCurrency?->id ?? 1;
     }
 
-    /**
-     * Get the price for the current user's currency.
-     *
-     * @return int|null
-     */
     public function getPriceForCurrentCurrency(): ?int
     {
         $currencyId = $this->getCurrentCurrencyId();
@@ -167,11 +119,6 @@ class Package extends Model
             ->value('amount');
     }
 
-    /**
-     * Get the cheapest package price for the current currency.
-     *
-     * @return int|null
-     */
     private function getCheapestPriceForCurrentCurrency(): ?int
     {
         $currencyId = $this->getCurrentCurrencyId();
@@ -192,12 +139,6 @@ class Package extends Model
         return $cheapestAmount !== PHP_INT_MAX ? $cheapestAmount : null;
     }
 
-    /**
-     * Accessor for is_available_for_purchase attribute.
-     * Determines if the package can be purchased by the current user.
-     *
-     * @return Attribute<bool, never>
-     */
     protected function isAvailableForPurchase(): Attribute
     {
         return Attribute::make(
@@ -216,12 +157,6 @@ class Package extends Model
         );
     }
 
-    /**
-     * Accessor for is_cheapest_option attribute.
-     * Determines if this package is the cheapest available option.
-     *
-     * @return Attribute<bool, never>
-     */
     protected function isCheapestOption(): Attribute
     {
         return Attribute::make(
@@ -241,13 +176,6 @@ class Package extends Model
             }
         );
     }
-
-    /**
-     * Accessor for price attribute (backward compatibility).
-     * Returns the price for the current user's currency.
-     *
-     * @return Attribute<int|null, never>
-     */
     protected function price(): Attribute
     {
         return Attribute::make(
