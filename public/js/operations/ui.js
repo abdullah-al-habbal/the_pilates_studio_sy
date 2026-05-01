@@ -1,6 +1,4 @@
-/**
- * UI Rendering and Modal Logic
- */
+
 const OperationsUI = {
     toast(message, type = 'info') {
         const container = document.getElementById('toast-container');
@@ -59,13 +57,22 @@ const OperationsUI = {
         }, 300);
     },
 
+    formatCurrency(amount) {
+        const symbol = document.body.dataset.currencySymbol || '$';
+        const decimals = parseInt(document.body.dataset.currencyDecimals || '2');
+        const code = document.body.dataset.currencyCode || 'USD';
+
+        return new Intl.NumberFormat('en-US', {
+            style: 'currency',
+            currency: code,
+        }).format(amount / (10 ** decimals));
+    },
+
     renderBalance(data) {
         const container = document.getElementById('balance-container');
         if (!container) return;
 
-                                                    // fix: use the current price approach
-
-        const format = (val) => new Intl.NumberFormat().format(val) + ' SYP';
+        const format = (val) => this.formatCurrency(val);
 
         container.innerHTML = `
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -88,9 +95,9 @@ const OperationsUI = {
             </div>
         `;
 
-        // Update Quick Stats
         document.getElementById('stat-balance').textContent = format(data.true_balance);
-        const percentage = Math.min(100, Math.round((data.true_balance / 5000) * 100));
+        const target = 5000 * (10 ** parseInt(document.body.dataset.currencyDecimals || '2'));
+        const percentage = Math.min(100, Math.round((data.true_balance / target) * 100));
         document.getElementById('balance-progress').style.width = `${percentage}%`;
         document.getElementById('stat-percentage').textContent = `${percentage}%`;
     }

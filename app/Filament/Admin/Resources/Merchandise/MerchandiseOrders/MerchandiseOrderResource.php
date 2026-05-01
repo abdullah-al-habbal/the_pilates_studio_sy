@@ -11,6 +11,7 @@ use App\Filament\Admin\Resources\Merchandise\MerchandiseOrders\Pages\ViewMerchan
 use App\Filament\Admin\Resources\Merchandise\MerchandiseOrders\Schemas\MerchandiseOrderForm;
 use App\Filament\Admin\Resources\Merchandise\MerchandiseOrders\Tables\MerchandiseOrdersTable;
 use App\Models\MerchandiseOrder;
+use App\Services\Currency\CurrencyService;
 use BackedEnum;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Resources\Resource;
@@ -90,8 +91,7 @@ class MerchandiseOrderResource extends Resource
                         TextEntry::make('total_price')
                             ->label(__('dashboard.resources.merchandise_orders.fields.total_price'))
                             ->state(fn($record) => $record->quantity * ($record->merchandise?->price ?? 0))
-                            // fix: use the correct price approach
-                            ->money('SYP')
+                            ->money(app(CurrencyService::class)->getCode())
                             ->weight(FontWeight::Bold)
                             ->color('success'),
 

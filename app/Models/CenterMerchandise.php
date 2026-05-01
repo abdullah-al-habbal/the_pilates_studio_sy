@@ -10,7 +10,6 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Casts\Attribute;
-use Illuminate\Support\Facades\Auth;
 use Spatie\Translatable\HasTranslations;
 
 class CenterMerchandise extends Model
@@ -72,15 +71,7 @@ class CenterMerchandise extends Model
     }
     private function getCurrentCurrencyId(): int
     {
-        $user = Auth::user();
-
-        if ($user && isset($user->currency_id)) {
-            return (int) $user->currency_id;
-        }
-
-        $usdCurrency = Currency::query()->where('code', 'USD')->first();
-
-        return $usdCurrency?->id ?? 1;
+        return app(\App\Services\Currency\CurrencyService::class)->getDefaultCurrency()->id;
     }
     public function getPriceForCurrentCurrency(): ?int
     {

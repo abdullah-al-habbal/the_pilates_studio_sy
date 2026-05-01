@@ -202,8 +202,7 @@ async function showClientDetails(userId) {
                                         <tr>
                                             <td class="px-4 py-3">${o.item_name}</td>
                                             <td class="px-4 py-3 text-slate-500">${o.quantity} unit(s)</td>
-                                            // fix: use the current price approach
-                                            <td class="px-4 py-3 font-bold">${o.total_price} SYP</td>
+                                            <td class="px-4 py-3 font-bold">${OperationsUI.formatCurrency(o.total_price)}</td>
                                             <td class="px-4 py-3 text-right text-xs text-slate-400">${o.ordered_at}</td>
                                         </tr>
                                     `).join('')}
@@ -237,7 +236,7 @@ async function showPackageAssignment(userId) {
                         <span class="text-sm text-slate-500">${p.total_credits} Sessions &bull; ${p.validity_days} Days</span>
                                                                     // fix: use the current price approach
 
-                        <span class="mt-4 text-2xl font-black text-slate-900 dark:text-white">${p.price} SYP</span>
+                        <span class="mt-4 text-2xl font-black text-slate-900 dark:text-white">${OperationsUI.formatCurrency(p.price)}</span>
                     </button>
                 `).join('')}
             </div>
@@ -306,8 +305,8 @@ async function renderStore() {
                     <div class="text-right">
                     //                                             // fix: use the current price approach
 
-                        <span class="text-xl font-black">${item.price}</span>
-                        <span class="text-[10px] block text-slate-400 font-bold uppercase">SYP</span>
+                        <span class="text-xl font-black">${OperationsUI.formatCurrency(item.price)}</span>
+
                     </div>
                 </div>
                 

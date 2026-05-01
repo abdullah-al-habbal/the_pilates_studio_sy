@@ -6,6 +6,7 @@ namespace App\Models;
 
 use App\Enums\BookingStatusEnum;
 use App\Enums\PackageTypeEnum;
+use App\Services\Currency\CurrencyService;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Collection;
@@ -90,7 +91,7 @@ class Package extends Model
     {
         return $this->prices
             ->firstWhere('currency_id', $currencyId)
-            ?->amount;
+                ?->amount;
     }
 
     public function isSystemGenerated(): bool
@@ -99,15 +100,7 @@ class Package extends Model
     }
     private function getCurrentCurrencyId(): int
     {
-        $user = Auth::user();
-
-        if ($user && isset($user->currency_id)) {
-            return (int) $user->currency_id;
-        }
-
-        $usdCurrency = Currency::query()->where('code', 'USD')->first();
-
-        return $usdCurrency?->id ?? 1;
+        return app(CurrencyService::class)->getDefaultCurrency()->id;
     }
 
     public function getPriceForCurrentCurrency(): ?int
@@ -127,9 +120,11 @@ class Package extends Model
             ->whereHas('prices', function ($query) use ($currencyId) {
                 $query->where('currency_id', $currencyId);
             })
-            ->with(['prices' => function ($query) use ($currencyId) {
-                $query->where('currency_id', $currencyId);
-            }])
+            ->with([
+                'prices' => function ($query) use ($currencyId) {
+                    $query->where('currency_id', $currencyId);
+                }
+            ])
             ->get()
             ->min(function (Package $package) {
                 $price = $package->prices->first();
@@ -145,11 +140,11 @@ class Package extends Model
             get: function (): bool {
                 $user = Auth::user();
 
-                if (! $user || ! $this->is_active) {
+                if (!$user || !$this->is_active) {
                     return false;
                 }
 
-                return ! $user->bookings()
+                return !$user->bookings()
                     ->where('status', BookingStatusEnum::ACTIVE)
                     ->where('remaining_credits', '>', 0)
                     ->exists();
@@ -161,7 +156,7 @@ class Package extends Model
     {
         return Attribute::make(
             get: function (): bool {
-                if (! $this->is_active) {
+                if (!$this->is_active) {
                     return false;
                 }
 
