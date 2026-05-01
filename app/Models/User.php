@@ -58,6 +58,7 @@ class User extends Authenticatable
             'deactivated_at'     => 'datetime',
             'password'           => 'hashed',
             'status'             => UserStatusEnum::class,
+            'is_active'          => 'boolean',
         ];
     }
 

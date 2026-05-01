@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Enums\UserStatusEnum;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -12,8 +13,8 @@ return new class extends Migration {
         Schema::create('users', function (Blueprint $table) {
             $table->id();
             $table->string('fullname');
-            $table->string('phone_number');
-            $table->string('email');
+            $table->string('phone_number')->unique();
+            $table->string('email')->unique()->nullable();
             $table->string('password');
             $table->rememberToken();
             $table->date('date_of_birth')->nullable();
@@ -39,6 +40,9 @@ return new class extends Migration {
 
             $table->unique(['email', 'is_active'], 'users_email_active_unique');
             $table->unique(['phone_number', 'is_active'], 'users_phone_active_unique');
+
+            $table->index('status');
+            $table->index('frozen_at');
         });
 
 
