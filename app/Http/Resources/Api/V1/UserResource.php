@@ -18,6 +18,7 @@ class UserResource extends JsonResource
             'fullname' => $this->fullname,
             'email' => $this->email,
             'phone_number' => $this->phone_number,
+            'is_active' => $this->is_active,
             'date_of_birth' => $this->date_of_birth?->toDateString(),
             'email_verified' => $this->is_verified,
             'is_deactivated' => $this->is_deactivated,

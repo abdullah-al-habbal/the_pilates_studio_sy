@@ -29,6 +29,9 @@ class UsersTable
                 TextColumn::make('date_of_birth')
                     ->date()
                     ->sortable(),
+                IconColumn::make('is_active')
+                    ->boolean()
+                    ->sortable(),
                 IconColumn::make('allow_notifications')
                     ->boolean(),
                 TextColumn::make('email_verified_at')

@@ -7,6 +7,7 @@ use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Schema;
+use Illuminate\Validation\Rules\Unique;
 
 class UserForm
 {
@@ -18,11 +19,13 @@ class UserForm
                     ->required(),
                 TextInput::make('phone_number')
                     ->tel()
-                    ->required(),
+                    ->required()
+                    ->unique(ignoreRecord: true, modifyRuleUsing: fn (Unique $rule) => $rule->where('is_active', 1)),
                 TextInput::make('email')
                     ->label('Email address')
                     ->email()
-                    ->required(),
+                    ->required()
+                    ->unique(ignoreRecord: true, modifyRuleUsing: fn (Unique $rule) => $rule->where('is_active', 1)),
                 TextInput::make('password')
                     ->password()
                     ->required(),
