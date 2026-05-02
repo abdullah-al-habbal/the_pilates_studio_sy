@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Filament\Admin\Resources\Merchandise\CenterMerchandises\Tables;
 
-use App\Services\Currency\CurrencyService;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
@@ -14,7 +13,7 @@ use Filament\Tables\Table;
 
 class CenterMerchandisesTable
 {
-    public static function configure(Table $table): Table
+    public static function configure(Table $table, string $currencyCode): Table
     {
         return $table
             ->columns([
@@ -35,7 +34,7 @@ class CenterMerchandisesTable
                 TextColumn::make('price')
                     ->label(__('dashboard.resources.center_merchandises.fields.price'))
                     ->getStateUsing(fn($record) => $record->getPriceForCurrentCurrency())
-                    ->money(app(CurrencyService::class)->getCode())
+                    ->money($currencyCode)
                     ->sortable(),
                 TextColumn::make('stock_quantity')
                     ->label(__('dashboard.resources.center_merchandises.fields.stock_quantity'))

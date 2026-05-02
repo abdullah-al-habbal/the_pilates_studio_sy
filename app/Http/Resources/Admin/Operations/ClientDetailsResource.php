@@ -35,11 +35,15 @@ class ClientDetailsResource extends JsonResource
             'store_purchases' => ClientStorePurchaseResource::collection($this->resource->merchandiseOrders),
             
             'total_sessions_attended' => new ClientSessionCountResource(
-                $this->resource->bookingSessions()->where('attendance_status', 'attended')->count()
+                $this->resource->bookingSessions()
+                    ->where('booking_sessions.attendance_status', 'attended')
+                    ->count()
             ),
             
             'total_sessions_cancelled' => new ClientSessionCountResource(
-                $this->resource->bookingSessions()->where('status', 'cancelled')->count()
+                $this->resource->bookingSessions()
+                    ->where('booking_sessions.status', 'cancelled')
+                    ->count()
             ),
         ];
     }

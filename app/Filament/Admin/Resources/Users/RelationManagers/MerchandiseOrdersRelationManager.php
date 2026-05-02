@@ -16,6 +16,11 @@ use Illuminate\Database\Eloquent\Model;
 class MerchandiseOrdersRelationManager extends RelationManager
 {
     protected static string $relationship = 'merchandiseOrders';
+
+    public function __construct(private readonly CurrencyService $currencyService)
+    {
+        parent::__construct();
+    }
     public static function getTitle(Model $ownerRecord, string $pageClass): string
     {
         return __('dashboard.resources.merchandise_orders.plural');
@@ -44,7 +49,7 @@ class MerchandiseOrdersRelationManager extends RelationManager
                 TextColumn::make('total_price')
                     ->label(__('dashboard.resources.merchandise_orders.fields.total_price'))
                     ->state(fn($record) => $record->quantity * ($record->merchandise?->price ?? 0))
-                    ->money(app(CurrencyService::class)->getCode()),
+                    ->money($this->currencyService->getCode()),
                 TextColumn::make('ordered_at')
                     ->label(__('dashboard.resources.merchandise_orders.fields.ordered_at'))
                     ->dateTime()

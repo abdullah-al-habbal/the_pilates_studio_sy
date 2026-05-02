@@ -12,6 +12,11 @@ class TopInstructorsWidget extends BaseWidget
 {
     protected ?string $pollingInterval = '30s';
 
+    public function __construct(private readonly StatsService $statsService)
+    {
+        parent::__construct();
+    }
+
     protected function getHeading(): ?string
     {
         return __('dashboard.widgets.top_instructors.heading');
@@ -24,8 +29,7 @@ class TopInstructorsWidget extends BaseWidget
 
     public function table(Table $table): Table
     {
-        $statsService = app(StatsService::class);
-        $instructors = $statsService->getTopInstructors(5);
+        $instructors = $this->statsService->getTopInstructors(5);
 
         return $table
             ->query(function () use ($instructors) {

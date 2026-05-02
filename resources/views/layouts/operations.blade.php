@@ -1,3 +1,4 @@
+<!-- resources\views\layouts\operations.blade.php -->
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 
@@ -46,13 +47,62 @@
         [x-cloak] {
             display: none !important;
         }
+
+        /* ── Shimmer skeleton ───────────────────────────────── */
+        @keyframes shimmer {
+            0% {
+                background-position: -800px 0;
+            }
+
+            100% {
+                background-position: 800px 0;
+            }
+        }
+
+        .shimmer-row td {
+            padding: 0.75rem 1rem;
+        }
+
+        .shimmer-cell {
+            height: 14px;
+            border-radius: 4px;
+            background: linear-gradient(90deg,
+                    #e8e8e8 25%,
+                    #f5f5f5 50%,
+                    #e8e8e8 75%);
+            background-size: 800px 100%;
+            animation: shimmer 1.4s infinite linear;
+        }
+
+        .dark .shimmer-cell {
+            background: linear-gradient(90deg,
+                    #1e293b 25%,
+                    #334155 50%,
+                    #1e293b 75%);
+            background-size: 800px 100%;
+        }
+
+        .shimmer-cell.w-15 {
+            width: 15%;
+        }
+
+        .shimmer-cell.w-20 {
+            width: 20%;
+        }
+
+        .shimmer-cell.w-30 {
+            width: 30%;
+        }
+
+        .shimmer-cell.w-50 {
+            width: 50%;
+        }
+
+        #tab-content-container {
+            min-width: 0;
+        }
     </style>
 </head>
-<!-- use the view for share it -->
-@php
-    $currencyService = app(\App\Services\Currency\CurrencyService::class);
-    $defaultCurrency = $currencyService->getDefaultCurrency();
-@endphp
 
 <body class="bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 antialiased min-h-screen"
     data-currency-symbol="{{ $defaultCurrency->symbol }}" data-currency-code="{{ $defaultCurrency->code }}"
@@ -82,20 +132,17 @@
         </div>
     </nav>
 
-    <main class="max-w-[1600px] mx-auto p-6">
+    <main class="w-full mx-auto p-6">
         @yield('content')
     </main>
 
-    <!-- Global Modal Overlay -->
     <div id="modal-overlay"
         class="fixed inset-0 bg-slate-950/50 backdrop-blur-sm z-[100] hidden flex items-center justify-center p-4">
         <div id="modal-container"
             class="glass-card rounded-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto shadow-2xl scale-95 opacity-0 transition-all duration-300">
-            <!-- Modal content injected here -->
         </div>
     </div>
 
-    <!-- Toaster Stack -->
     <div id="toast-container" class="fixed bottom-6 right-6 z-[200] flex flex-col gap-3"></div>
 
     <script src="{{ asset('js/operations/api.js') }}"></script>

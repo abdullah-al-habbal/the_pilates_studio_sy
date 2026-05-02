@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Filament\Admin\Resources\Merchandise\MerchandiseOrders\Tables;
 
-use App\Services\Currency\CurrencyService;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
@@ -13,7 +12,7 @@ use Filament\Tables\Table;
 
 class MerchandiseOrdersTable
 {
-    public static function configure(Table $table): Table
+    public static function configure(Table $table, string $currencyCode): Table
     {
         return $table
             ->columns([
@@ -26,7 +25,7 @@ class MerchandiseOrdersTable
                 TextColumn::make('total_price')
                     ->label(__('dashboard.resources.merchandise_orders.fields.total_price'))
                     ->state(fn ($record) => $record->quantity * ($record->merchandise?->price ?? 0))
-                    ->money(app(CurrencyService::class)->getCode())
+                    ->money($currencyCode)
                     ->sortable(),
                 TextColumn::make('customer.fullname')
                     ->label(__('dashboard.resources.merchandise_orders.fields.customer'))

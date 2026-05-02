@@ -1,3 +1,4 @@
+<!-- resources\views\admin\operations\partials\tab-finance.blade.php -->
 <div class="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
     <div class="flex justify-between items-end">
         <div class="space-y-2">

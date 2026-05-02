@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Filament\Admin\Resources\Merchandise\CenterMerchandises\Schemas;
 
-use App\Services\Currency\CurrencyService;
 use Filament\Infolists\Components\ImageEntry;
 use Filament\Infolists\Components\RepeatableEntry;
 use Filament\Infolists\Components\TextEntry;
@@ -15,7 +14,7 @@ use Filament\Support\Enums\FontWeight;
 
 class CenterMerchandiseInfolist
 {
-    public static function configure(Schema $schema): Schema
+    public static function configure(Schema $schema, string $currencyCode): Schema
     {
         return $schema->components([
             Grid::make(['default' => 1, 'lg' => 2])->schema([
@@ -56,7 +55,7 @@ class CenterMerchandiseInfolist
                     ->schema([
                         TextEntry::make('price')
                             ->label(__('dashboard.resources.center_merchandises.fields.price'))
-                            ->money(app(CurrencyService::class)->getCode())
+                            ->money($currencyCode)
                             ->weight(FontWeight::Bold)
                             ->color('success'),
                         TextEntry::make('stock_quantity')

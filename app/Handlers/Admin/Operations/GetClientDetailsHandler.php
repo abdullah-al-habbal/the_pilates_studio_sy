@@ -8,9 +8,6 @@ use App\Models\User;
 
 final readonly class GetClientDetailsHandler
 {
-    /**
-     * Fetch comprehensive client details with relations.
-     */
     public function handle(int $userId): User
     {
         return User::with([

@@ -11,6 +11,7 @@ use Filament\Actions\EditAction;
 use Filament\Actions\ForceDeleteBulkAction;
 use Filament\Actions\RestoreBulkAction;
 use Filament\Actions\ViewAction;
+use Filament\Support\Enums\FontWeight;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
@@ -37,7 +38,7 @@ class ClassesTable
                     ->label(__('dashboard.resources.classes.fields.title'))
                     ->searchable()
                     ->sortable()
-                    ->weight(\Filament\Support\Enums\FontWeight::Bold)
+                    ->weight(FontWeight::Bold)
                     ->limit(30)
                     ->tooltip(fn($record) => $record->title)
                     ->formatStateUsing(
@@ -114,10 +115,12 @@ class ClassesTable
 
                 TextColumn::make('upcoming_sessions_count')
                     ->label(__('dashboard.resources.classes.fields.upcoming_sessions'))
-                    ->counts('sessions', function ($query) {
-                        $query->where('date', '>=', now())
-                            ->where('status', 'scheduled');
-                    })
+                    ->getStateUsing(
+                        fn($record) => $record->sessions()
+                            ->where('date', '>=', now())
+                            ->where('status', 'scheduled')
+                            ->count()
+                    )
                     ->badge()
                     ->color('success')
                     ->toggleable(isToggledHiddenByDefault: true),

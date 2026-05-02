@@ -7,47 +7,9 @@ namespace App\Repositories\Eloquent;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 
-/**
- * Generic, reusable Eloquent repository.
- *
- * Subclasses declare:
- *   - model()          → the Eloquent model class string
- *   - allowedIncludes() → flat whitelist of valid dot-notation relation paths
- *   - constrainedRelations() → optional closures per relation (e.g. filters, ordering)
- *
- * The find() method handles normalization, whitelisting, and eager loading
- * automatically. No per-model duplication required.
- *
- * @template TModel of Model
- */
-/**
- * Generic, reusable Eloquent repository.
- *
- * Subclasses declare:
- *   - model()          → the Eloquent model class string
- *   - allowedIncludes() → flat whitelist of valid dot-notation relation paths
- *   - constrainedRelations() → optional closures per relation (e.g. filters, ordering)
- *
- * The find() method handles normalization, whitelisting, and eager loading
- * automatically. No per-model duplication required.
- *
- * @template TModel of Model
- */
 abstract class BaseEloquentRepository
 {
-    /**
-     * The fully-qualified Eloquent model class.
-     *
-     * @return class-string<TModel>
-     */
     abstract protected function model(): string;
-
-    /**
-     * All valid dot-notation include paths for this model.
-     * Must match exactly what callers are allowed to request.
-     *
-     * @return string[]
-     */
     abstract protected function allowedIncludes(): array;
 
     /**

@@ -10,6 +10,11 @@ class AttendanceTrendChart extends ChartWidget
 {
     protected ?string $pollingInterval = '30s';
 
+    public function __construct(private readonly StatsService $statsService)
+    {
+        parent::__construct();
+    }
+
     public function getHeading(): ?string
     {
         return __('dashboard.widgets.attendance_trend.heading');
@@ -22,7 +27,7 @@ class AttendanceTrendChart extends ChartWidget
 
     protected function getData(): array
     {
-        $trend = app(StatsService::class)->getAttendanceTrend(30);
+        $trend = $this->statsService->getAttendanceTrend(30);
 
         return [
             'datasets' => [

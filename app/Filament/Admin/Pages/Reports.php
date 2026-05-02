@@ -59,6 +59,15 @@ class Reports extends Page implements HasInfolists
     private ?Collection $_classes = null;
     private ?Collection $_merch = null;
 
+    public function __construct(
+        private readonly CurrencyService $currencyService,
+        private readonly BookingEloquentRepository $bookingRepo,
+        private readonly ClassesEloquentRepository $classesRepo,
+        private readonly MerchandiseOrderEloquentRepository $merchandiseRepo,
+    ) {
+        parent::__construct();
+    }
+
     public function mount(): void
     {
         $this->dailyDate = now()->toDateString();
@@ -109,7 +118,7 @@ class Reports extends Page implements HasInfolists
         $stats = $this->stats();
         $classes = $this->popularClasses();
         $merch = $this->merchandiseSales();
-        $currency = app(CurrencyService::class)->getDefaultCurrency();
+        $currency = $this->currencyService->getDefaultCurrency();
         $divisor = 10 ** $currency->decimal_places;
 
         return $schema->components([
@@ -233,17 +242,15 @@ class Reports extends Page implements HasInfolists
         if ($this->_stats !== null) {
             return $this->_stats;
         }
-        $bookingRepo = App::make(BookingEloquentRepository::class);
-        $merchandiseRepo = App::make(MerchandiseOrderEloquentRepository::class);
         [$startDate, $endDate] = $this->getPeriodDates();
-        $bookingRevenue = $bookingRepo->getTotalRevenue($startDate, $endDate);
-        $merchandiseRevenue = $merchandiseRepo->getTotalRevenue($startDate, $endDate);
+        $bookingRevenue = $this->bookingRepo->getTotalRevenue($startDate, $endDate);
+        $merchandiseRevenue = $this->merchandiseRepo->getTotalRevenue($startDate, $endDate);
         return $this->_stats = [
             'booking_revenue' => $bookingRevenue,
             'merchandise_revenue' => $merchandiseRevenue,
             'total_revenue' => $bookingRevenue + $merchandiseRevenue,
-            'total_bookings' => $bookingRepo->getTotalCount($startDate, $endDate),
-            'total_merchandise_orders' => $merchandiseRepo->getTotalCount($startDate, $endDate),
+            'total_bookings' => $this->bookingRepo->getTotalCount($startDate, $endDate),
+            'total_merchandise_orders' => $this->merchandiseRepo->getTotalCount($startDate, $endDate),
         ];
     }
 
@@ -253,7 +260,7 @@ class Reports extends Page implements HasInfolists
             return $this->_classes;
         }
         [$startDate, $endDate] = $this->getPeriodDates();
-        return $this->_classes = App::make(ClassesEloquentRepository::class)
+        return $this->_classes = $this->classesRepo
             ->getPopularClassesSummary(5, $startDate, $endDate);
     }
 
@@ -263,7 +270,7 @@ class Reports extends Page implements HasInfolists
             return $this->_merch;
         }
         [$startDate, $endDate] = $this->getPeriodDates();
-        return $this->_merch = App::make(MerchandiseOrderEloquentRepository::class)
+        return $this->_merch = $this->merchandiseRepo
             ->getTopSellingSummary(5, $startDate, $endDate);
     }
 }

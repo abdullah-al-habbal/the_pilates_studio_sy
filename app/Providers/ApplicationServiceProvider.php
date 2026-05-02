@@ -25,6 +25,7 @@ use App\Services\ClassSession\ClassSessionService;
 use App\Services\Dashboard\StatsService;
 use App\Services\Instructor\InstructorService;
 use App\Services\User\UserService;
+use App\Services\Currency\CurrencyService;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
@@ -33,6 +34,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\URL;
+use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
 
@@ -78,6 +80,18 @@ class ApplicationServiceProvider extends ServiceProvider
         $this->configureDatabase();
         $this->configurePasswordDefaults();
         $this->configureDashboardCache();
+        $this->shareViewData();
+    }
+
+    protected function shareViewData(): void
+    {
+        View::composer('layouts.operations', function ($view) {
+            $currencyService = app(CurrencyService::class);
+            $view->with([
+                'currencyService' => $currencyService,
+                'defaultCurrency' => $currencyService->getDefaultCurrency(),
+            ]);
+        });
     }
 
     protected function registerPolicies(): void

@@ -11,6 +11,7 @@ use App\Filament\Admin\Resources\Packages\Schemas\PackageForm;
 use App\Filament\Admin\Resources\Packages\Schemas\PackageInfolist;
 use App\Filament\Admin\Resources\Packages\Tables\PackagesTable;
 use App\Models\Package;
+use App\Services\Currency\CurrencyService;
 use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
@@ -67,7 +68,7 @@ class PackageResource extends Resource
 
     public static function table(Table $table): Table
     {
-        return PackagesTable::configure($table);
+        return PackagesTable::configure($table, app(CurrencyService::class)->getCode());
     }
 
     public static function getRelations(): array

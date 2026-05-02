@@ -27,6 +27,7 @@ final readonly class GetClientsAction
                 $request->query('search'),
                 (int) $request->query('page', 1)
             );
+            Log::info('paginator data: ' . $paginator);
 
             return $this->paginated(
                 $paginator,

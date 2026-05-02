@@ -13,6 +13,7 @@ use App\Filament\Admin\Resources\Merchandise\CenterMerchandises\Schemas\CenterMe
 use App\Filament\Admin\Resources\Merchandise\CenterMerchandises\Schemas\CenterMerchandiseInfolist;
 use App\Filament\Admin\Resources\Merchandise\CenterMerchandises\Tables\CenterMerchandisesTable;
 use App\Models\CenterMerchandise;
+use App\Services\Currency\CurrencyService;
 use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
@@ -68,12 +69,12 @@ class CenterMerchandiseResource extends Resource
 
     public static function infolist(Schema $schema): Schema
     {
-        return CenterMerchandiseInfolist::configure($schema);
+        return CenterMerchandiseInfolist::configure($schema, app(CurrencyService::class)->getCode());
     }
 
     public static function table(Table $table): Table
     {
-        return CenterMerchandisesTable::configure($table);
+        return CenterMerchandisesTable::configure($table, app(CurrencyService::class)->getCode());
     }
 
     public static function getRelations(): array

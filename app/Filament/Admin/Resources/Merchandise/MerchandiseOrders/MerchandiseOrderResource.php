@@ -71,6 +71,8 @@ class MerchandiseOrderResource extends Resource
 
     public static function infolist(Schema $schema): Schema
     {
+        $currencyCode = app(CurrencyService::class)->getCode();
+
         return $schema->components([
             Grid::make(['default' => 1, 'lg' => 3])->schema([
 
@@ -91,7 +93,7 @@ class MerchandiseOrderResource extends Resource
                         TextEntry::make('total_price')
                             ->label(__('dashboard.resources.merchandise_orders.fields.total_price'))
                             ->state(fn($record) => $record->quantity * ($record->merchandise?->price ?? 0))
-                            ->money(app(CurrencyService::class)->getCode())
+                            ->money($currencyCode)
                             ->weight(FontWeight::Bold)
                             ->color('success'),
 
@@ -120,7 +122,7 @@ class MerchandiseOrderResource extends Resource
 
     public static function table(Table $table): Table
     {
-        return MerchandiseOrdersTable::configure($table);
+        return MerchandiseOrdersTable::configure($table, app(CurrencyService::class)->getCode());
     }
 
     public static function getPages(): array

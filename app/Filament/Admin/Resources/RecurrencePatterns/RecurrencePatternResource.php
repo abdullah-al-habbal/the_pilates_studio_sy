@@ -3,6 +3,7 @@
 namespace App\Filament\Admin\Resources\RecurrencePatterns;
 
 use App\Filament\Admin\Resources\RecurrencePatterns\Pages\CreateRecurrencePattern;
+use Filament\Resources\Pages\Page;
 use App\Filament\Admin\Resources\RecurrencePatterns\Pages\EditRecurrencePattern;
 use App\Filament\Admin\Resources\RecurrencePatterns\Pages\ListRecurrencePatterns;
 use App\Filament\Admin\Resources\RecurrencePatterns\Pages\ViewRecurrencePattern;
@@ -68,7 +69,7 @@ class RecurrencePatternResource extends Resource
         return [];
     }
 
-    public static function getRecordSubNavigation(\Filament\Resources\Pages\Page $page): array
+    public static function getRecordSubNavigation(Page $page): array
     {
         return $page->generateNavigationItems([
             ViewRecurrencePattern::class,

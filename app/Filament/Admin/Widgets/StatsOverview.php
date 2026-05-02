@@ -12,9 +12,14 @@ class StatsOverview extends BaseWidget
 
     protected static bool $isLazy = false;
 
+    public function __construct(private readonly StatsService $statsService)
+    {
+        parent::__construct();
+    }
+
     protected function getStats(): array
     {
-        $statsData = app(StatsService::class)->getOverviewStats();
+        $statsData = $this->statsService->getOverviewStats();
 
         return [
             Stat::make(__('dashboard.widgets.stats_overview.active_users'), number_format($statsData['total_active_users']))

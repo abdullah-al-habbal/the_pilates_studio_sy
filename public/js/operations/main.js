@@ -1,3 +1,4 @@
+// public\js\operations\main.js
 document.addEventListener('DOMContentLoaded', () => {
     initTabs();
     initTheme();
@@ -59,6 +60,18 @@ async function updateGlobalStats() {
 
 let clientSearchTimeout = null;
 
+function renderShimmerRows(tbodyId, rowCount = 6) {
+    const widths = ['w-50', 'w-30', 'w-20', 'w-15'];
+    const rows = Array.from({ length: rowCount }, () => `
+        <tr class="shimmer-row border-b border-slate-100 dark:border-slate-800/50">
+            ${widths.map(w => `
+                <td><div class="shimmer-cell ${w}"></div></td>
+            `).join('')}
+        </tr>
+    `).join('');
+    document.getElementById(tbodyId).innerHTML = rows;
+}
+
 async function initClientsTab() {
     const searchInput = document.getElementById('client-search');
     searchInput.addEventListener('input', (e) => {
@@ -72,8 +85,7 @@ async function initClientsTab() {
 }
 
 async function renderClients(search = '', page = 1) {
-    const tbody = document.getElementById('client-table-body');
-    tbody.innerHTML = '<tr><td colspan="4" class="text-center py-12 text-slate-400">Searching...</td></tr>';
+    renderShimmerRows('client-table-body');
 
     try {
         const result = await OperationsAPI.getClients(search, page);
@@ -234,8 +246,6 @@ async function showPackageAssignment(userId) {
                     <button onclick="handlePackageAssign(${userId}, ${p.id})" class="flex flex-col p-6 rounded-2xl border-2 border-slate-100 dark:border-slate-800 hover:border-primary-500 transition-all text-left group">
                         <span class="text-lg font-bold group-hover:text-primary-600 transition-colors">${p.name}</span>
                         <span class="text-sm text-slate-500">${p.total_credits} Sessions &bull; ${p.validity_days} Days</span>
-                                                                    // fix: use the current price approach
-
                         <span class="mt-4 text-2xl font-black text-slate-900 dark:text-white">${OperationsUI.formatCurrency(p.price)}</span>
                     </button>
                 `).join('')}
@@ -283,7 +293,6 @@ async function handleUnfreeze(bookingId, userId) {
     }
 }
 
-// --- Tab: Store ---
 async function initStoreTab() {
     renderStore();
 }
@@ -303,8 +312,6 @@ async function renderStore() {
                         <h4 class="text-xl font-bold">${item.name}</h4>
                     </div>
                     <div class="text-right">
-                    //                                             // fix: use the current price approach
-
                         <span class="text-xl font-black">${OperationsUI.formatCurrency(item.price)}</span>
 
                     </div>
@@ -349,7 +356,6 @@ async function showQuickSale(itemId, itemName) {
 
     OperationsUI.openModal(`Sale: ${itemName}`, content);
 
-    // Load customers for select
     try {
         const result = await OperationsAPI.getClients();
         const select = document.getElementById('sale-customer-select');
