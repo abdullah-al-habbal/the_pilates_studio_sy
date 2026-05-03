@@ -61,9 +61,6 @@ const OperationsAPI = {
         });
     },
 
-    /**
-     * Walk-in store sale — creates a new user then places the order atomically.
-     */
     storeWalkInOrder(merchandiseId, quantity, fullname, phoneNumber, email = null) {
         return this.request('/admin/operations/store/walk-in-order', 'POST', {
             merchandise_id: merchandiseId,

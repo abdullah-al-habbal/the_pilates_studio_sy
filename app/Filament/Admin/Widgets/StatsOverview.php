@@ -12,14 +12,13 @@ class StatsOverview extends BaseWidget
 
     protected static bool $isLazy = false;
 
-    public function __construct(private readonly StatsService $statsService)
-    {
-        parent::__construct();
-    }
+    // No constructor needed – Livewire creates the widget directly
 
     protected function getStats(): array
     {
-        $statsData = $this->statsService->getOverviewStats();
+        // Resolve the service from the container
+        $statsService = app(StatsService::class);
+        $statsData = $statsService->getOverviewStats();
 
         return [
             Stat::make(__('dashboard.widgets.stats_overview.active_users'), number_format($statsData['total_active_users']))

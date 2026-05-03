@@ -12,6 +12,11 @@ return new class extends Migration {
             $table->id();
             $table->morphs('refundable');
             $table->foreignId('user_id')->constrained('users')->restrictOnDelete();
+            
+            $table->foreignId('currency_id')
+                ->constrained('currencies')
+                ->restrictOnDelete();
+                
             $table->unsignedInteger('amount');
             $table->text('reason')->nullable();
             $table->foreignId('refunded_by')->constrained('users')->restrictOnDelete();
@@ -21,6 +26,7 @@ return new class extends Migration {
             $table->index('user_id');
             $table->index('refunded_at');
             $table->index('refunded_by');
+            $table->index('currency_id');
         });
         DB::statement("ALTER TABLE refunds MODIFY refundable_type VARCHAR(255) COMMENT 'bookings or merchandise_orders'");
     }

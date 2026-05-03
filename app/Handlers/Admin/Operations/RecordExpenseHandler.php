@@ -1,29 +1,42 @@
 <?php
-
 declare(strict_types=1);
 
 namespace App\Handlers\Admin\Operations;
 
 use App\Models\ClubExpense;
-use App\Services\Finance\ClubExpenseService;
-use DateTimeInterface;
+use App\Models\ClubExpenseCategory;
+use App\Repositories\Eloquent\ClubExpense\ClubExpenseEloquentRepository;
+use Carbon\Carbon;
+use Carbon\CarbonInterface;
 
 final readonly class RecordExpenseHandler
 {
     public function __construct(
-        private ClubExpenseService $expenseService
-    ) {}
+        private ClubExpenseEloquentRepository $repository,
+    ) {
+    }
 
-    /**
-     * Record a club expense.
-     */
     public function handle(
         string $categoryName,
+        int $currencyId,
         int $amount,
         int $recordedBy,
-        ?string $notes = null,
-        ?DateTimeInterface $date = null
+        ?string $notes,
+        ?CarbonInterface $expenseDate,
     ): ClubExpense {
-        return $this->expenseService->record($categoryName, $amount, $recordedBy, $notes, $date);
+        $category = ClubExpenseCategory::firstOrCreate(
+            ['name' => $categoryName],
+            ['name' => $categoryName],
+        );
+
+        return $this->repository->create([
+            'category_id' => $category->id,
+            'category_label' => $categoryName,
+            'currency_id' => $currencyId,
+            'amount' => $amount,
+            'notes' => $notes,
+            'recorded_by' => $recordedBy,
+            'expense_date' => ($expenseDate ?? Carbon::today())->toDateString(),
+        ]);
     }
 }

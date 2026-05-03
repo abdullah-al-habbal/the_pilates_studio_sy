@@ -1,5 +1,4 @@
 <?php
-
 declare(strict_types=1);
 
 namespace App\Http\Actions\Web\Admin\Operations;
@@ -24,11 +23,12 @@ final readonly class RecordExpenseAction
     {
         try {
             $expense = $this->handler->handle(
-                $request->category_name,
-                (int) $request->amount,
-                (int) auth()->id(),
-                $request->notes,
-                $request->date ? Carbon::parse($request->date) : null
+                categoryName: $request->category_name,
+                currencyId: (int) $request->currency_id,
+                amount: (int) $request->amount,
+                recordedBy: (int) auth()->id(),
+                notes: $request->notes,
+                expenseDate: $request->date ? Carbon::parse($request->date) : null,
             );
 
             return $this->created(
@@ -38,7 +38,8 @@ final readonly class RecordExpenseAction
         } catch (\Throwable $e) {
             Log::error('Operations - RecordExpense failed: ' . $e->getMessage(), [
                 'exception' => $e,
-                'category' => $request->category_name,
+                'category_name' => $request->category_name,
+                'currency_id' => $request->currency_id,
                 'amount' => $request->amount,
             ]);
 

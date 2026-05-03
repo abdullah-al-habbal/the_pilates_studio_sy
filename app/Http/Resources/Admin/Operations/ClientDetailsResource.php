@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Http\Resources\Admin\Operations;
 
 use App\Enums\BookingStatusEnum;
-use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -30,21 +29,11 @@ class ClientDetailsResource extends JsonResource
                 ? new ClientActivePackageResource($activeBooking) 
                 : null,
             
+            'activity_snapshot' => new ClientActivitySnapshotResource($this->resource),
+            
             'booking_history' => ClientBookingHistoryResource::collection($this->resource->bookings),
             
             'store_purchases' => ClientStorePurchaseResource::collection($this->resource->merchandiseOrders),
-            
-            'total_sessions_attended' => new ClientSessionCountResource(
-                $this->resource->bookingSessions()
-                    ->where('booking_sessions.attendance_status', 'attended')
-                    ->count()
-            ),
-            
-            'total_sessions_cancelled' => new ClientSessionCountResource(
-                $this->resource->bookingSessions()
-                    ->where('booking_sessions.status', 'cancelled')
-                    ->count()
-            ),
         ];
     }
 }

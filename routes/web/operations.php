@@ -12,6 +12,7 @@ use App\Http\Actions\Web\Admin\Operations\RecordExpenseAction;
 use App\Http\Actions\Web\Admin\Operations\GetClientsAction;
 use App\Http\Actions\Web\Admin\Operations\FreezeBookingAction;
 use App\Http\Actions\Web\Admin\Operations\UnfreezeBookingAction;
+use App\Http\Actions\Web\Admin\Operations\StoreWalkInOrderAction;
 use App\Http\Actions\Web\Admin\Client\ClientDetailsAction;
 use Illuminate\Support\Facades\Route;
 
@@ -26,6 +27,7 @@ Route::prefix('admin/operations')
 
         Route::get('/store/items', GetStoreItemsAction::class)->name('store.index');
         Route::post('/store/orders', PlaceOrderAction::class)->name('store.order');
+        Route::post('/store/walk-in-order', StoreWalkInOrderAction::class)->name('store.walk-in-order');
 
         Route::get('/finance/daily', GetDailyBalanceAction::class)->name('finance.daily');
         Route::post('/finance/expenses', RecordExpenseAction::class)->name('finance.expenses');

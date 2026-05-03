@@ -10,6 +10,11 @@ return new class extends Migration
         Schema::create('club_expenses', function (Blueprint $table) {
             $table->id();
             $table->foreignId('category_id')->constrained('club_expense_categories')->restrictOnDelete();
+            
+            $table->foreignId('currency_id')
+                ->constrained('currencies')
+                ->restrictOnDelete();
+                
             $table->unsignedInteger('amount');
             $table->text('notes')->nullable();
             $table->foreignId('recorded_by')->constrained('users')->restrictOnDelete();
@@ -18,6 +23,7 @@ return new class extends Migration
             $table->index('expense_date');
             $table->index('category_id');
             $table->index('recorded_by');
+            $table->index('currency_id');
         });
     }
     public function down(): void { Schema::dropIfExists('club_expenses'); }

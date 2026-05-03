@@ -1,18 +1,20 @@
-<!-- resources\views\admin\operations\partials\tab-finance.blade.php -->
+{{-- resources/views/admin/operations/partials/tab-finance.blade.php --}}
+@php
+    /** @var \App\Services\Currency\CurrencyService $currencyService */
+    $currencyService = app(\App\Services\Currency\CurrencyService::class);
+    $defaultCurrency = $currencyService->getDefaultCurrency();
+    $activeCurrencies = $currencyService->getAllActiveCurrencies();
+@endphp
 <div class="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
     <div class="flex justify-between items-end">
         <div class="space-y-2">
             <h2 class="text-2xl font-bold tracking-tight">Financial Balance</h2>
-            <p class="text-slate-500">Real-time revenue and expense tracking.</p>
+            <p class="text-slate-500">Real-time revenue and expense tracking, per currency.</p>
         </div>
         <input type="date" id="balance-date" value="{{ date('Y-m-d') }}"
             class="px-4 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl focus:ring-2 focus:ring-primary-500 outline-none">
     </div>
-
-    <div id="balance-container">
-        <!-- Balance cards injected here -->
-    </div>
-
+    <div id="balance-container"></div>
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div class="glass-card rounded-2xl p-6 space-y-4">
             <h3 class="text-lg font-bold">Record Expense</h3>
@@ -24,10 +26,27 @@
                             class="w-full px-4 py-2 bg-slate-50 dark:bg-slate-800 rounded-lg border-transparent focus:ring-2 focus:ring-primary-500 outline-none">
                     </div>
                     <div class="space-y-1">
-                        <label class="text-xs font-semibold text-slate-500 uppercase">Amount</label>
-                        <input type="number" name="amount" required placeholder="0"
+                        <label class="text-xs font-semibold text-slate-500 uppercase">Amount <span
+                                class="text-slate-400">(smallest unit)</span></label>
+                        <input type="number" name="amount" required placeholder="0" min="1"
                             class="w-full px-4 py-2 bg-slate-50 dark:bg-slate-800 rounded-lg border-transparent focus:ring-2 focus:ring-primary-500 outline-none">
                     </div>
+                </div>
+                <div class="space-y-1">
+                    <label class="text-xs font-semibold text-slate-500 uppercase">Currency</label>
+                    <select name="currency_id" required
+                        class="w-full px-4 py-2 bg-slate-50 dark:bg-slate-800 rounded-lg border-transparent focus:ring-2 focus:ring-primary-500 outline-none">
+                        @foreach($activeCurrencies as $currency)
+                            <option value="{{ $currency->id }}" {{ $currency->id === $defaultCurrency->id ? 'selected' : '' }}>
+                                {{ $currency->code }} — {{ $currency->symbol }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+                <div class="space-y-1">
+                    <label class="text-xs font-semibold text-slate-500 uppercase">Expense Date</label>
+                    <input type="date" name="date" value="{{ date('Y-m-d') }}"
+                        class="w-full px-4 py-2 bg-slate-50 dark:bg-slate-800 rounded-lg border-transparent focus:ring-2 focus:ring-primary-500 outline-none">
                 </div>
                 <div class="space-y-1">
                     <label class="text-xs font-semibold text-slate-500 uppercase">Notes</label>
@@ -35,15 +54,14 @@
                         class="w-full px-4 py-2 bg-slate-50 dark:bg-slate-800 rounded-lg border-transparent focus:ring-2 focus:ring-primary-500 outline-none"></textarea>
                 </div>
                 <button type="submit"
-                    class="w-full bg-slate-900 dark:bg-white dark:text-slate-900 text-white font-bold py-3 rounded-xl hover:scale-[1.02] active:scale-[0.98] transition-all">Save
-                    Expense</button>
+                    class="w-full bg-slate-900 dark:bg-white dark:text-slate-900 text-white font-bold py-3 rounded-xl hover:scale-[1.02] active:scale-[0.98] transition-all">
+                    Save Expense
+                </button>
             </form>
         </div>
-
         <div class="glass-card rounded-2xl p-6 space-y-4">
             <h3 class="text-lg font-bold">Revenue Breakdown</h3>
             <div id="revenue-chart-placeholder" class="h-48 flex items-end gap-2 px-4">
-                <!-- Fake chart bars -->
             </div>
         </div>
     </div>

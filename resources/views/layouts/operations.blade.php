@@ -114,6 +114,11 @@
                 class="w-10 h-10 bg-primary-600 rounded-xl flex items-center justify-center text-white font-bold text-xl shadow-lg shadow-primary-500/30">
                 P</div>
             <h1 class="text-xl font-bold tracking-tight">Operations <span class="text-primary-500">Hub</span></h1>
+            <a href="{{ url('/admin') }}"
+                class="ml-4 px-3 py-1.5 text-sm bg-slate-100 dark:bg-slate-800 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors flex items-center gap-1.5">
+                <span class="text-lg leading-none">←</span>
+                Dashboard
+            </a>
         </div>
         <div class="flex items-center gap-4">
             <div id="connection-status"
@@ -137,7 +142,7 @@
     </main>
 
     <div id="modal-overlay"
-        class="fixed inset-0 bg-slate-950/50 backdrop-blur-sm z-[100] hidden flex items-center justify-center p-4">
+        class="fixed inset-0 bg-slate-950/50 backdrop-blur-sm z-100 hidden flex items-center justify-center p-4">
         <div id="modal-container"
             class="glass-card rounded-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto shadow-2xl scale-95 opacity-0 transition-all duration-300">
         </div>

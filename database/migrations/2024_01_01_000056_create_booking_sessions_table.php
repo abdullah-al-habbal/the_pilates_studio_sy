@@ -54,6 +54,10 @@ return new class extends Migration
                 ->nullable()
                 ->comment('Timestamp when receptionist confirmed attendance');
 
+            $table->timestamp('reminder_sent_at')
+                ->nullable()
+                ->comment('When the 24h reminder was sent (null = not sent yet)');
+
             $table->timestamps();
 
             $table->unique(['booking_id', 'class_session_id'], 'unique_booking_session')

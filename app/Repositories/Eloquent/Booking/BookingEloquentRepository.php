@@ -150,7 +150,7 @@ class BookingEloquentRepository
     public function expire(int $id): void
     {
         Booking::where('id', $id)->update([
-            'status'     => BookingStatusEnum::EXPIRED->value,
+            'status' => BookingStatusEnum::EXPIRED->value,
             'expires_at' => now(),
         ]);
     }
@@ -159,7 +159,7 @@ class BookingEloquentRepository
     {
         $booking = Booking::findOrFail($id);
         $booking->update([
-            'status'            => BookingStatusEnum::CANCELLED->value,
+            'status' => BookingStatusEnum::CANCELLED->value,
             'remaining_credits' => $booking->total_credits,
         ]);
     }
@@ -167,5 +167,17 @@ class BookingEloquentRepository
     public function updateRemainingCredits(int $id, int $remaining): void
     {
         Booking::where('id', $id)->update(['remaining_credits' => $remaining]);
+    }
+
+    public function getTotalRevenueByCurrency(
+        int $currencyId,
+        ?CarbonInterface $startDate = null,
+        ?CarbonInterface $endDate = null,
+    ): int {
+        return (int) Booking::query()
+            ->where('currency_id', $currencyId)
+            ->when($startDate, fn($q) => $q->where('created_at', '>=', $startDate))
+            ->when($endDate, fn($q) => $q->where('created_at', '<=', $endDate))
+            ->sum('paid_amount');
     }
 }

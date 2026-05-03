@@ -10,10 +10,6 @@ class AttendanceTrendChart extends ChartWidget
 {
     protected ?string $pollingInterval = '30s';
 
-    public function __construct(private readonly StatsService $statsService)
-    {
-        parent::__construct();
-    }
 
     public function getHeading(): ?string
     {
@@ -27,7 +23,8 @@ class AttendanceTrendChart extends ChartWidget
 
     protected function getData(): array
     {
-        $trend = $this->statsService->getAttendanceTrend(30);
+        $statsService = app(StatsService::class);
+        $trend = $statsService->getAttendanceTrend(30);
 
         return [
             'datasets' => [
@@ -40,7 +37,7 @@ class AttendanceTrendChart extends ChartWidget
                     'tension' => 0.4,
                 ],
             ],
-            'labels' => $trend->keys()->map(fn ($date) => Carbon::parse($date)->format('M d'))->toArray(),
+            'labels' => $trend->keys()->map(fn($date) => Carbon::parse($date)->format('M d'))->toArray(),
         ];
     }
 }

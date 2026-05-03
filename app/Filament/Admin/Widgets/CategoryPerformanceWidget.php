@@ -9,11 +9,6 @@ class CategoryPerformanceWidget extends ChartWidget
 {
     protected ?string $pollingInterval = '30s';
 
-    public function __construct(private readonly StatsService $statsService)
-    {
-        parent::__construct();
-    }
-
     public function getHeading(): ?string
     {
         return __('dashboard.widgets.category_performance.heading');
@@ -26,7 +21,8 @@ class CategoryPerformanceWidget extends ChartWidget
 
     protected function getData(): array
     {
-        $categories = $this->statsService->getTopCategories(5);
+        $statsService = app(StatsService::class);
+        $categories = $statsService->getTopCategories(5);
 
         return [
             'datasets' => [

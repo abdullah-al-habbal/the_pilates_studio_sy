@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Http\Actions\Web\Admin\Client;
 
 use App\Handlers\Admin\Operations\GetClientDetailsHandler;
-use App\Http\Requests\Admin\Operations\GetClientDetailsRequest;
 use App\Http\Resources\Admin\Operations\ClientDetailsResource;
 use App\Traits\ApiResponseTrait;
 use Illuminate\Http\JsonResponse;
@@ -20,7 +19,7 @@ final readonly class ClientDetailsAction
     ) {
     }
 
-    public function __invoke(GetClientDetailsRequest $request, int $userId): JsonResponse
+    public function __invoke(int $userId): JsonResponse
     {
         try {
             $user = $this->handler->handle($userId);
