@@ -14,12 +14,12 @@ final readonly class GetClientsHandler
      */
     public function handle(?string $search = null, int $page = 1): LengthAwarePaginator
     {
-        return User::query()
-            ->when($search, function($q) use ($search) {
+        return User::with(['bookings.package', 'bookingSessions'])
+            ->when($search, function ($q) use ($search) {
                 $q->where('fullname', 'like', "%{$search}%")
-                  ->orWhere('phone_number', 'like', "%{$search}%");
+                    ->orWhere('phone_number', 'like', "%{$search}%");
             })
             ->latest()
-            ->paginate(20, ['*'], 'page', $page);
+            ->paginate(15, ['*'], 'page', $page);
     }
 }

@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Http\Actions\Web\Admin\Operations;
 
 use App\Handlers\Admin\Operations\FreezeBookingHandler;
-use App\Http\Requests\Admin\Operations\FreezeBookingRequest;
 use App\Traits\ApiResponseTrait;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Log;
@@ -16,9 +15,10 @@ final readonly class FreezeBookingAction
 
     public function __construct(
         private FreezeBookingHandler $handler
-    ) {}
+    ) {
+    }
 
-    public function __invoke(FreezeBookingRequest $request, int $bookingId): JsonResponse
+    public function __invoke(int $bookingId): JsonResponse
     {
         try {
             $this->handler->handle($bookingId);

@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Http\Actions\Web\Admin\Operations;
 
 use App\Handlers\Admin\Operations\GetPackagesHandler;
-use App\Http\Requests\Admin\Operations\GetPackagesRequest;
 use App\Http\Resources\Admin\Operations\PackageResource;
 use App\Traits\ApiResponseTrait;
 use Illuminate\Http\JsonResponse;
@@ -20,7 +19,7 @@ final readonly class GetPackagesAction
     ) {
     }
 
-    public function __invoke(GetPackagesRequest $request): JsonResponse
+    public function __invoke(): JsonResponse
     {
         try {
             $packages = $this->handler->handle();

@@ -54,7 +54,6 @@ class BookingFreezeService
             $originalExpiry  = $booking->expires_at;
             $frozenAt        = $booking->frozen_at ?? now();
             
-            // If the original expiry was null, it never expires, so remaining days is infinite
             if ($originalExpiry === null) {
                 $newExpiry = null;
             } else {

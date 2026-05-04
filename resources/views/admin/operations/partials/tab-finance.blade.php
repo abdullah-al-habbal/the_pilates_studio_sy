@@ -1,7 +1,8 @@
 {{-- resources/views/admin/operations/partials/tab-finance.blade.php --}}
 @php
-    /** @var \App\Services\Currency\CurrencyService $currencyService */
-    $currencyService = app(\App\Services\Currency\CurrencyService::class);
+    use App\Services\Currency\CurrencyService;
+    /** @var CurrencyService $currencyService */
+    $currencyService = app(CurrencyService::class);
     $defaultCurrency = $currencyService->getDefaultCurrency();
     $activeCurrencies = $currencyService->getAllActiveCurrencies();
 @endphp
@@ -54,7 +55,7 @@
                         class="w-full px-4 py-2 bg-slate-50 dark:bg-slate-800 rounded-lg border-transparent focus:ring-2 focus:ring-primary-500 outline-none"></textarea>
                 </div>
                 <button type="submit"
-                    class="w-full bg-slate-900 dark:bg-white dark:text-slate-900 text-white font-bold py-3 rounded-xl hover:scale-[1.02] active:scale-[0.98] transition-all">
+                    class="w-full bg-slate-900 dark:bg-white dark:text-slate-900 text-white font-bold py-3 rounded-xl hover:scale-[1.02] active:scale-[0.98] transition-all btn-single-action">
                     Save Expense
                 </button>
             </form>

@@ -56,7 +56,7 @@ class Classes extends Model
     protected function durationMinutes(): Attribute
     {
         return Attribute::make(
-            get: fn () => (int) Carbon::parse($this->start_time)
+            get: fn() => (int) Carbon::parse($this->start_time)
                 ->diffInMinutes(Carbon::parse($this->end_time))
         );
     }

@@ -13,13 +13,13 @@ class ClientActivePackageResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
-            'id'                => $this->resource->id,
-            'package_name'      => $this->resource->package?->getTranslation('name', app()->getLocale()),
-            'total_credits'     => $this->resource->total_credits,
+            'id' => $this->resource->id,
+            'name' => $this->resource->package?->getTranslation('name', app()->getLocale()),
+            'source_type' => $this->resource->source_type,
+            'total_credits' => $this->resource->total_credits,
             'remaining_credits' => $this->resource->remaining_credits,
-            'expires_at'        => $this->resource->expires_at?->toDateString(),
-            'activated_at'      => $this->resource->activated_at?->toDateString(),
-            'status'            => $this->resource->status,
+            'expires_at' => $this->resource->expires_at?->toDateString(),
+            'status' => $this->resource->status,
         ];
     }
 }

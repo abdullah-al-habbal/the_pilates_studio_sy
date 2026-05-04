@@ -14,16 +14,14 @@ final readonly class AssignPackageHandler
 {
     public function __construct(
         private BookingService $bookingService
-    ) {}
+    ) {
+    }
 
-    /**
-     * Assign a package to a user and calculate expiry.
-     */
     public function handle(int $userId, int $packageId): Booking
     {
-        $user    = User::findOrFail($userId);
+        $user = User::findOrFail($userId);
         $package = Package::findOrFail($packageId);
-        
+
         $expiresAt = $package->validity_days ? now()->addDays($package->validity_days) : null;
 
         return $this->bookingService->createFromPackage($user, $package, $expiresAt);

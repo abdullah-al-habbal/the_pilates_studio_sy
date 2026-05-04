@@ -1,5 +1,4 @@
-// public/js/operations/main.js
-
+// public\js\operations\main.js
 document.addEventListener('DOMContentLoaded', () => {
     initTheme();
     initTabs();
@@ -7,7 +6,20 @@ document.addEventListener('DOMContentLoaded', () => {
     updateGlobalStats();
 });
 
-// ── Theme ─────────────────────────────────────────────────────────────────
+document.addEventListener('click', function(e) {
+    const btn = e.target.closest('.btn-single-action');
+    if (!btn || btn.disabled) return;
+    btn.disabled = true;
+    const originalText = btn.textContent;
+    btn.innerHTML = '<span class="btn-spinner"></span>' + originalText;
+    setTimeout(() => {
+        if (btn.disabled && btn.innerHTML.includes('btn-spinner')) {
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+        }
+    }, 5000);
+});
+
 function initTheme() {
     const toggle = document.getElementById('theme-toggle');
     if (!toggle) return;
@@ -26,7 +38,6 @@ function initTheme() {
     });
 }
 
-// ── Tabs ──────────────────────────────────────────────────────────────────
 function initTabs() {
     const buttons = document.querySelectorAll('[data-tab]');
     buttons.forEach(btn => {
@@ -55,7 +66,6 @@ function loadTab(tab) {
     if (tab === 'finance') initFinanceTab();
 }
 
-// ── Global stats ──────────────────────────────────────────────────────────
 async function updateGlobalStats() {
     try {
         const result = await OperationsAPI.getDailyBalance();
@@ -65,7 +75,6 @@ async function updateGlobalStats() {
     }
 }
 
-// ── Shimmer helpers ───────────────────────────────────────────────────────
 function renderShimmerRows(tbodyId, colCount = 4, rowCount = 6) {
     const tbody = document.getElementById(tbodyId);
     if (!tbody) return;
@@ -81,9 +90,6 @@ function renderShimmerRows(tbodyId, colCount = 4, rowCount = 6) {
     tbody.innerHTML = rows;
 }
 
-// ─────────────────────────────────────────────────────────────────────────
-// TAB: CLIENTS
-// ─────────────────────────────────────────────────────────────────────────
 let clientSearchTimeout = null;
 
 function initClientsTab() {
@@ -99,9 +105,8 @@ function initClientsTab() {
 }
 
 async function renderClients(search = '', page = 1) {
-    renderShimmerRows('client-table-body', 4, 6);
+    renderShimmerRows('client-table-body', 6, 6);
 
-    // FIX #1: Declare tbody before the try block so error handler can also use it
     const tbody = document.getElementById('client-table-body');
 
     try {
@@ -110,7 +115,7 @@ async function renderClients(search = '', page = 1) {
         if (!result.data || result.data.length === 0) {
             tbody.innerHTML = `
                 <tr>
-                    <td colspan="4" class="text-center py-12 text-slate-400">
+                    <td colspan="6" class="text-center py-12 text-slate-400">
                         No clients found.
                     </td>
                 </tr>`;
@@ -126,9 +131,19 @@ async function renderClients(search = '', page = 1) {
                         ${user.is_active ? 'ACTIVE' : 'INACTIVE'}
                     </span>
                 </td>
+                <td class="px-6 py-4">
+                    ${user.active_package ? `
+                        <span class="text-sm font-medium">${user.active_package.name}</span>
+                        <span class="text-xs text-slate-400 ml-1">(${user.active_package.remaining_credits}/${user.active_package.total_credits})</span>
+                    ` : '<span class="text-xs text-slate-400">No package</span>'}
+                </td>
+                <td class="px-6 py-4">
+                    <span class="text-sm font-medium">${user.sessions_attended}</span>
+                    <span class="text-xs text-slate-400 ml-1">attended</span>
+                </td>
                 <td class="px-6 py-4 text-right">
                     <button onclick="showClientDetails(${user.id})"
-                        class="text-primary-600 hover:text-primary-700 font-bold text-sm">
+                        class="text-primary-600 hover:text-primary-700 font-bold text-sm btn-single-action">
                         Details
                     </button>
                 </td>
@@ -140,7 +155,7 @@ async function renderClients(search = '', page = 1) {
         console.error('Failed to load clients:', e);
         tbody.innerHTML = `
             <tr>
-                <td colspan="4" class="text-center py-12">
+                <td colspan="6" class="text-center py-12">
                     <div class="flex flex-col items-center gap-2">
                         <span class="text-rose-500 font-bold">Error loading clients</span>
                         <p class="text-xs text-slate-400">${e.message}</p>
@@ -172,7 +187,6 @@ function renderPagination(meta) {
 }
 
 async function showClientDetails(userId) {
-    // Show loading modal immediately
     OperationsUI.openModal('Client Workspace', `
         <div class="space-y-6">
             ${Array(3).fill('').map(() => `
@@ -201,7 +215,7 @@ async function showClientDetails(userId) {
                         </div>
                     </div>
                     <button onclick="showPackageAssignment(${user.id})"
-                        class="bg-primary-600 text-white px-5 py-2.5 rounded-xl font-bold text-sm hover:scale-105 transition-all">
+                        class="bg-primary-600 text-white px-5 py-2.5 rounded-xl font-bold text-sm hover:scale-105 transition-all btn-single-action">
                         + Assign Package
                     </button>
                 </div>
@@ -237,11 +251,11 @@ async function showClientDetails(userId) {
                                 <div class="flex gap-2 pt-2">
                                     ${user.active_package.status === 'frozen' ? `
                                         <button onclick="handleUnfreeze(${user.active_package.id}, ${user.id})"
-                                            class="flex-1 bg-emerald-100 text-emerald-700 py-2 rounded-lg font-bold text-xs uppercase tracking-wider hover:bg-emerald-200 transition-colors">
+                                            class="flex-1 bg-emerald-100 text-emerald-700 py-2 rounded-lg font-bold text-xs uppercase tracking-wider hover:bg-emerald-200 transition-colors btn-single-action">
                                             Unfreeze Now
                                         </button>` : `
                                         <button onclick="handleFreeze(${user.active_package.id}, ${user.id})"
-                                            class="flex-1 bg-amber-100 text-amber-700 py-2 rounded-lg font-bold text-xs uppercase tracking-wider hover:bg-amber-200 transition-colors">
+                                            class="flex-1 bg-amber-100 text-amber-700 py-2 rounded-lg font-bold text-xs uppercase tracking-wider hover:bg-amber-200 transition-colors btn-single-action">
                                             Freeze Package
                                         </button>`}
                                 </div>
@@ -325,7 +339,7 @@ async function showPackageAssignment(userId) {
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 ${packages.map(p => `
                     <button onclick="handlePackageAssign(${userId}, ${p.id})"
-                        class="flex flex-col p-6 rounded-2xl border-2 border-slate-100 dark:border-slate-800 hover:border-primary-500 transition-all text-left group">
+                        class="flex flex-col p-6 rounded-2xl border-2 border-slate-100 dark:border-slate-800 hover:border-primary-500 transition-all text-left group btn-single-action">
                         <span class="text-lg font-bold group-hover:text-primary-600 transition-colors">${p.name}</span>
                         <span class="text-sm text-slate-500">${p.total_credits} Sessions &bull; ${p.validity_days} Days</span>
                         <span class="mt-4 text-2xl font-black text-slate-900 dark:text-white">
@@ -376,15 +390,11 @@ async function handleUnfreeze(bookingId, userId) {
     }
 }
 
-// ─────────────────────────────────────────────────────────────────────────
-// TAB: STORE
-// ─────────────────────────────────────────────────────────────────────────
 function initStoreTab() {
     renderStore();
 }
 
 async function renderStore() {
-    // FIX: shimmer instead of plain text
     OperationsUI.renderStoreShimmer();
 
     try {
@@ -419,7 +429,7 @@ async function renderStore() {
                 </div>
                 <button
                     onclick="showQuickSale(${item.id}, '${item.name.replace(/'/g, "\\'")}')"
-                    class="w-full bg-slate-900 dark:bg-white dark:text-slate-900 text-white py-3 rounded-xl font-bold text-sm hover:scale-[1.02] transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+                    class="w-full bg-slate-900 dark:bg-white dark:text-slate-900 text-white py-3 rounded-xl font-bold text-sm hover:scale-[1.02] transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 btn-single-action"
                     ${item.stock_quantity <= 0 ? 'disabled' : ''}>
                     ${item.stock_quantity <= 0 ? 'Out of Stock' : 'Quick Sale'}
                 </button>
@@ -437,9 +447,6 @@ async function renderStore() {
     }
 }
 
-/**
- * Quick Sale modal — supports both existing customers and walk-in (new) customers.
- */
 async function showQuickSale(itemId, itemName) {
     const existingTab = () => `
         <div id="existing-customer-form" class="space-y-4">
@@ -500,14 +507,13 @@ async function showQuickSale(itemId, itemName) {
             </div>
 
             <button id="sale-submit-btn" onclick="submitQuickSale()"
-                class="w-full bg-primary-600 text-white py-4 rounded-xl font-bold text-lg hover:shadow-lg hover:scale-[1.01] transition-all">
+                class="w-full bg-primary-600 text-white py-4 rounded-xl font-bold text-lg hover:shadow-lg hover:scale-[1.01] transition-all btn-single-action">
                 Confirm Purchase
             </button>
         </div>`;
 
     OperationsUI.openModal(`Sale: ${itemName}`, content);
 
-    // Populate existing clients dropdown
     try {
         const result = await OperationsAPI.getClients('', 1);
         const select = document.getElementById('sale-customer-select');
@@ -534,13 +540,10 @@ function toggleSaleMode(mode) {
 }
 
 async function submitQuickSale() {
-    const btn          = document.getElementById('sale-submit-btn');
+    const btn           = document.getElementById('sale-submit-btn');
     const merchandiseId = document.getElementById('sale-merchandise-id').value;
     const quantity      = document.getElementById('sale-quantity').value;
     const isWalkIn      = !document.getElementById('walkin-customer-form').classList.contains('hidden');
-
-    btn.disabled    = true;
-    btn.textContent = 'Processing...';
 
     try {
         if (isWalkIn) {
@@ -550,8 +553,6 @@ async function submitQuickSale() {
 
             if (!fullname || !phone) {
                 OperationsUI.toast('Full name and phone are required for walk-in.', 'warning');
-                btn.disabled    = false;
-                btn.textContent = 'Confirm Purchase';
                 return;
             }
 
@@ -560,8 +561,6 @@ async function submitQuickSale() {
             const customerId = document.getElementById('sale-customer-select').value;
             if (!customerId) {
                 OperationsUI.toast('Please select a customer.', 'warning');
-                btn.disabled    = false;
-                btn.textContent = 'Confirm Purchase';
                 return;
             }
             await OperationsAPI.placeOrder(customerId, merchandiseId, quantity);
@@ -575,14 +574,14 @@ async function submitQuickSale() {
     } catch (err) {
         console.error('Quick sale failed:', err);
         OperationsUI.toast(err.message, 'error');
-        btn.disabled    = false;
-        btn.textContent = 'Confirm Purchase';
+    } finally {
+        if (btn) {
+            btn.disabled = false;
+            btn.textContent = 'Confirm Purchase';
+        }
     }
 }
 
-// ─────────────────────────────────────────────────────────────────────────
-// TAB: FINANCE
-// ─────────────────────────────────────────────────────────────────────────
 function initFinanceTab() {
     const dateInput = document.getElementById('balance-date');
     if (!dateInput) return;
@@ -594,8 +593,6 @@ function initFinanceTab() {
         e.preventDefault();
         const formData = new FormData(e.target);
         const btn = e.target.querySelector('button[type="submit"]');
-        btn.disabled    = true;
-        btn.textContent = 'Saving...';
 
         try {
             await OperationsAPI.recordExpense(Object.fromEntries(formData));
@@ -605,8 +602,10 @@ function initFinanceTab() {
         } catch (err) {
             OperationsUI.toast(err.message, 'error');
         } finally {
-            btn.disabled    = false;
-            btn.textContent = 'Save Expense';
+            if (btn) {
+                btn.disabled    = false;
+                btn.textContent = 'Save Expense';
+            }
         }
     });
 }

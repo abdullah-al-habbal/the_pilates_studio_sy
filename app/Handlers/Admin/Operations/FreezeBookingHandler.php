@@ -11,11 +11,9 @@ final readonly class FreezeBookingHandler
 {
     public function __construct(
         private BookingFreezeService $freezeService
-    ) {}
+    ) {
+    }
 
-    /**
-     * Freeze an active booking.
-     */
     public function handle(int $bookingId): void
     {
         $booking = Booking::findOrFail($bookingId);

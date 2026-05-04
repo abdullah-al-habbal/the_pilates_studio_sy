@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Http\Actions\Web\Admin\Operations;
 
 use App\Handlers\Admin\Operations\GetStoreItemsHandler;
-use App\Http\Requests\Admin\Operations\GetStoreItemsRequest;
 use App\Http\Resources\Admin\Operations\MerchandiseResource;
 use App\Traits\ApiResponseTrait;
 use Illuminate\Http\JsonResponse;
@@ -20,7 +19,7 @@ final readonly class GetStoreItemsAction
     ) {
     }
 
-    public function __invoke(GetStoreItemsRequest $request): JsonResponse
+    public function __invoke(): JsonResponse
     {
         try {
             $items = $this->handler->handle();

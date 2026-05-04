@@ -37,9 +37,9 @@ class MerchandiseOrderService
 
             return MerchandiseOrder::create([
                 'merchandise_id' => $merchandiseId,
-                'customer_id'    => $customerId,
-                'quantity'       => $quantity,
-                'ordered_at'     => now(),
+                'customer_id' => $customerId,
+                'quantity' => $quantity,
+                'ordered_at' => now(),
             ]);
         });
     }

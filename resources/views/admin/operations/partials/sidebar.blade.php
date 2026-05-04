@@ -1,3 +1,4 @@
+<!-- resources\views\admin\operations\partials\sidebar.blade.php -->
 <aside class="lg:col-span-3 space-y-4">
     <div class="glass-card rounded-2xl p-4">
         <h2 class="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-4 px-2">Navigation</h2>
