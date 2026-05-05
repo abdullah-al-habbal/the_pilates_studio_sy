@@ -29,8 +29,11 @@ export function initFinanceTab() {
 export async function renderBalance(date = '') {
     OperationsUI.renderBalanceShimmer();
 
+    const checkboxes = document.querySelectorAll('.currency-filter-cb:checked');
+    const selectedCurrencies = Array.from(checkboxes).map(cb => cb.value);
+
     try {
-        const result = await OperationsAPI.getDailyBalance(date);
+        const result = await OperationsAPI.getDailyBalance(date, selectedCurrencies);
         OperationsUI.renderBalance(result.data);
     } catch (e) {
         console.error('Failed to load balance:', e);
@@ -48,4 +51,14 @@ export async function renderBalance(date = '') {
     }
 }
 
+export function applyCurrencyFilter() {
+    const dateInput = document.getElementById('balance-date');
+    if (dateInput) {
+        renderBalance(dateInput.value);
+    }
+}
+
 window.renderBalance = renderBalance;
+window.OperationsFinance = window.OperationsFinance || {};
+window.OperationsFinance.applyCurrencyFilter = applyCurrencyFilter;
+window.OperationsFinance.renderBalance = renderBalance;

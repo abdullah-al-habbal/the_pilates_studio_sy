@@ -19,6 +19,7 @@ class PlaceOrderRequest extends FormRequest
             'customer_id'    => ['required', 'exists:users,id'],
             'merchandise_id' => ['required', 'exists:center_merchandises,id'],
             'quantity'       => ['required', 'integer', 'min:1'],
+            'currency_id'    => ['required', 'exists:currencies,id'],
         ];
     }
 }

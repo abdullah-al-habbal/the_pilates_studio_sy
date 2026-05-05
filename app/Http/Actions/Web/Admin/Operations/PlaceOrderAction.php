@@ -25,7 +25,8 @@ final readonly class PlaceOrderAction
             $order = $this->handler->handle(
                 (int) $request->customer_id,
                 (int) $request->merchandise_id,
-                (int) $request->quantity
+                (int) $request->quantity,
+                (int) $request->currency_id
             );
 
             return $this->created(

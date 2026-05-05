@@ -20,16 +20,19 @@ final class DailyBalanceService
         private readonly RefundEloquentRepository $refundRepo,
     ) {
     }
-    public function getSummary(?string $date = null): Collection
+    public function getSummary(?string $date = null, ?array $currencies = null): Collection
     {
         [$start, $end] = $this->resolveDateRange($date);
 
         $expenseTotals = $this->expenseRepo->getTotalsByCurrency($start, $end);
         $refundTotals = $this->refundRepo->getTotalsByCurrency($start, $end);
 
-        return Currency::where('is_active', true)
-            ->orderBy('id')
-            ->get()
+        $query = Currency::where('is_active', true)->orderBy('id');
+        if (!empty($currencies)) {
+            $query->whereIn('code', $currencies);
+        }
+
+        return $query->get()
             ->map(function (Currency $currency) use ($start, $end, $expenseTotals, $refundTotals): array {
                 $pkgRevenue = $this->bookingRepo->getTotalRevenueByCurrency($currency->id, $start, $end);
                 $merchRevenue = $this->orderRepo->getTotalRevenueByCurrency($currency->id, $start, $end);

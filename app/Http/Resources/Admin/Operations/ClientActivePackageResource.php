@@ -20,6 +20,8 @@ class ClientActivePackageResource extends JsonResource
             'remaining_credits' => $this->resource->remaining_credits,
             'expires_at' => $this->resource->expires_at?->toDateString(),
             'status' => $this->resource->status,
+            'paid_amount' => $this->resource->paid_amount,
+            'currency_id' => $this->resource->currency_id,
         ];
     }
 }

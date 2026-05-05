@@ -17,7 +17,7 @@ class PackageFactory extends Factory
             'name' => ['en' => $name, 'ar' => "باقة {$credits} جلسات"],
             'total_credits' => $credits,
             'is_active' => true,
-            'validity_days' => $this->faker->optional(0.7, null)->numberBetween(30, 365),
+            'validity_days' => $this->faker->numberBetween(15, 365),
             'type' => 'standard',
             'generated_reason' => null,
         ];

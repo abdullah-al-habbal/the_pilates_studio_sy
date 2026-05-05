@@ -8,6 +8,7 @@ use App\Http\Actions\Web\Admin\Operations\AssignPackageAction;
 use App\Http\Actions\Web\Admin\Operations\GetStoreItemsAction;
 use App\Http\Actions\Web\Admin\Operations\PlaceOrderAction;
 use App\Http\Actions\Web\Admin\Operations\GetDailyBalanceAction;
+use App\Http\Actions\Web\Admin\Operations\ProcessBookingRefundAction;
 use App\Http\Actions\Web\Admin\Operations\RecordExpenseAction;
 use App\Http\Actions\Web\Admin\Operations\GetClientsAction;
 use App\Http\Actions\Web\Admin\Operations\FreezeBookingAction;
@@ -17,7 +18,7 @@ use App\Http\Actions\Web\Admin\Client\ClientDetailsAction;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('admin/operations')
-    ->middleware(['web', 'auth', 'freeze.user'])
+    ->middleware(['web', 'auth', 'freeze.user', 'cache.api.get'])
     ->name('admin.operations.')
     ->group(function (): void {
         Route::get('/', OperationsIndexAction::class)->name('index');
@@ -37,4 +38,5 @@ Route::prefix('admin/operations')
 
         Route::post('/bookings/{bookingId}/freeze', FreezeBookingAction::class)->name('bookings.freeze');
         Route::post('/bookings/{bookingId}/unfreeze', UnfreezeBookingAction::class)->name('bookings.unfreeze');
+        Route::post('/bookings/{bookingId}/refund', ProcessBookingRefundAction::class)->name('bookings.refund');
     });

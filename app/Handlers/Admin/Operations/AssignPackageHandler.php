@@ -19,7 +19,7 @@ final readonly class AssignPackageHandler
     ) {
     }
 
-    public function handle(int $userId, int $packageId): Booking
+    public function handle(int $userId, int $packageId, ?int $currencyId = null, ?int $paidAmount = null): Booking
     {
         $user = User::findOrFail($userId);
 
@@ -39,6 +39,6 @@ final readonly class AssignPackageHandler
 
         $expiresAt = $package->validity_days ? now()->addDays($package->validity_days) : null;
 
-        return $this->bookingService->createFromPackage($user, $package, $expiresAt);
+        return $this->bookingService->createFromPackage($user, $package, $expiresAt, $currencyId, $paidAmount);
     }
 }

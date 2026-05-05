@@ -6,7 +6,7 @@ namespace App\Http\Requests\Admin\Operations;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class AssignPackageRequest extends FormRequest
+class ProcessBookingRefundRequest extends FormRequest
 {
     public function authorize(): bool
     {
@@ -16,9 +16,7 @@ class AssignPackageRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'user_id' => ['required', 'exists:users,id'],
-            'currency_id' => ['required', 'integer', 'exists:currencies,id'],
-            'paid_amount' => ['required', 'integer', 'min:1'],
+            'amount' => ['nullable', 'numeric', 'min:1'],
         ];
     }
 }

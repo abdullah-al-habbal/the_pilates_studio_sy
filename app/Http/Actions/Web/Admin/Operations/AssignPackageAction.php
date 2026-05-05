@@ -23,7 +23,9 @@ final readonly class AssignPackageAction
         try {
             $booking = $this->handler->handle(
                 (int) $request->user_id,
-                $packageId
+                $packageId,
+                $request->has('currency_id') ? (int) $request->currency_id : null,
+                $request->has('paid_amount') ? (int) $request->paid_amount : null
             );
 
             return $this->created(

@@ -32,9 +32,9 @@ class BookingService
         return $this->repository->userHasActiveCreditBooking($user->id);
     }
 
-    public function createBookingFromPackage(User $user, Package $package, ?Carbon $expiresAt = null): Booking
+    public function createBookingFromPackage(User $user, Package $package, ?Carbon $expiresAt = null, ?int $currencyId = null, ?int $paidAmount = null): Booking
     {
-        return $this->createFromPackage($user, $package, $expiresAt);
+        return $this->createFromPackage($user, $package, $expiresAt, $currencyId, $paidAmount);
     }
 
     public function find(int $id, bool $lockForUpdate = false, array $relations = []): Booking
@@ -65,11 +65,11 @@ class BookingService
         }
     }
 
-    public function createFromPackage(User $user, Package $package, ?Carbon $expiresAt = null): Booking
+    public function createFromPackage(User $user, Package $package, ?Carbon $expiresAt = null, ?int $currencyId = null, ?int $paidAmount = null): Booking
     {
         $this->assertNoActiveBooking($user);
 
-        return DB::transaction(function () use ($user, $package, $expiresAt): Booking {
+        return DB::transaction(function () use ($user, $package, $expiresAt, $currencyId, $paidAmount): Booking {
             return $this->repository->create([
                 'user_id' => $user->id,
                 'package_id' => $package->id,
@@ -77,6 +77,8 @@ class BookingService
                 'remaining_credits' => $package->total_credits,
                 'status' => BookingStatusEnum::ACTIVE->value,
                 'expires_at' => $expiresAt,
+                'currency_id' => $currencyId,
+                'paid_amount' => $paidAmount,
             ]);
         });
     }

@@ -1,8 +1,29 @@
+// public\js\operations\modules\clients.js
 import { renderShimmerRows } from './tabs.js';
 import { showPackageAssignment, handleFreeze, handleUnfreeze } from './packages.js';
 
 let clientSearchTimeout = null;
 let activeClientFilter  = '';
+
+function humanizeRemainingDays(daysTotal) {
+    if (daysTotal == null || isNaN(daysTotal)) return '';
+    const total = Math.round(Number(daysTotal));
+    if (total <= 0) return 'No days left';
+
+    const months = Math.floor(total / 30);
+    const remainingAfterMonths = total % 30;
+    const weeks = Math.floor(remainingAfterMonths / 7);
+    const days = remainingAfterMonths % 7;
+
+    const parts = [];
+    if (months > 0) parts.push(`${months} month${months !== 1 ? 's' : ''}`);
+    if (weeks > 0) parts.push(`${weeks} week${weeks !== 1 ? 's' : ''}`);
+    if (days > 0) parts.push(`${days} day${days !== 1 ? 's' : ''}`);
+
+    if (parts.length === 0) parts.push(`${days} day${days !== 1 ? 's' : ''}`);
+
+    return parts.join(', ') + ' left';
+}
 
 export function applyClientFilter(pillEl) {
     activeClientFilter = pillEl.dataset.filter || '';
@@ -134,22 +155,23 @@ export async function showClientDetails(userId) {
 
         if (!user) throw new Error('Empty response from server.');
 
-        const actionButton = `<button onclick="${user.active_package?.status === 'frozen' 
-            ? `window.handleUnfreeze(${user.active_package.id}, ${user.id})` 
-            : user.active_package 
-                ? `window.showPackageAssignment(${user.id})` 
-                : `window.showPackageAssignment(${user.id})`
-        }" class="bg-primary-600 text-white px-5 py-2.5 rounded-xl font-bold text-sm hover:scale-105 transition-all btn-single-action">
-        ${user.active_package?.status === 'frozen' 
-            ? '🔓 Unfreeze Package' 
-            : user.active_package 
-                ? '🔄 Change Package' 
-                : '+ Assign Package'}
-        </button>`;
+        const actionButton = user.active_package?.status === 'frozen'
+            ? `<button onclick="window.handleUnfreeze(${user.active_package.id}, ${user.id})"
+                   class="bg-primary-600 text-white px-5 py-2.5 rounded-xl font-bold text-sm hover:scale-105 transition-all btn-single-action">
+                   🔓 Unfreeze Package
+               </button>`
+            : !user.active_package
+                ? `<button onclick="window.showPackageAssignment(${user.id})"
+                        class="bg-primary-600 text-white px-5 py-2.5 rounded-xl font-bold text-sm hover:scale-105 transition-all btn-single-action">
+                        + Assign Package
+                    </button>`
+                : '';
 
-        const daysBadge = user.active_package?.remaining_days != null
+        const remainingDaysRaw = user.active_package?.remaining_days;
+        const daysLeftText = humanizeRemainingDays(remainingDaysRaw);
+        const daysBadge = remainingDaysRaw != null
             ? `<span class="px-2 py-0.5 rounded-lg bg-gold-100 text-gold-700 text-xs font-bold">
-                   ${user.active_package.remaining_days} days left
+                   ${daysLeftText}
                </span>`
             : user.active_package?.expires_at
                 ? '<span class="px-2 py-0.5 rounded-lg bg-rose-100 text-rose-700 text-xs font-bold">No days left</span>'
@@ -204,10 +226,14 @@ export async function showClientDetails(userId) {
                                                 class="flex-1 bg-emerald-100 text-emerald-700 py-2 rounded-lg font-bold text-xs uppercase tracking-wider hover:bg-emerald-200 transition-colors btn-single-action">
                                                 Unfreeze Now
                                            </button>`
-                                        : `<button onclick="window.handleFreeze(${user.active_package.id}, ${user.id})"
+                                        : `<div class="flex flex-1 gap-2"><button onclick="window.handleFreeze(${user.active_package.id}, ${user.id})"
                                                 class="flex-1 bg-amber-100 text-amber-700 py-2 rounded-lg font-bold text-xs uppercase tracking-wider hover:bg-amber-200 transition-colors btn-single-action">
-                                                Freeze Package
-                                           </button>`
+                                                Freeze
+                                           </button>
+                                           <button onclick="window.showRefundModal(${user.active_package.id}, ${user.active_package.paid_amount || 0}, ${user.active_package.currency_id || null}, ${user.id})"
+                                                class="flex-1 bg-rose-100 text-rose-700 py-2 rounded-lg font-bold text-xs uppercase tracking-wider hover:bg-rose-200 transition-colors btn-single-action">
+                                                Refund
+                                           </button></div>`
                                     }
                                 </div>
                             </div>` : `
@@ -270,6 +296,41 @@ export async function showClientDetails(userId) {
     }
 }
 
+export function showRefundModal(bookingId, maxAmount, currencyId, userId) {
+    const currency = window.OperationsCurrencies?.find(c => c.id == currencyId);
+    const code = currency?.code || 'USD';
+    const decimals = currency?.decimal_places || 2;
+    const amountStr = maxAmount ? OperationsUI.formatCurrencyBlock(maxAmount, decimals, code) : 'Unknown';
+
+    const content = `
+        <div class="space-y-4">
+            <p class="text-sm text-slate-600">The original payment was <strong>${amountStr}</strong>.</p>
+            <div class="space-y-1">
+                <label class="text-xs font-bold text-slate-500 uppercase">Refund Amount (optional)</label>
+                <input type="number" id="refund-amount" placeholder="Leave empty for full refund" max="${maxAmount || ''}"
+                    class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 rounded-xl border-transparent focus:ring-2 focus:ring-primary-500 outline-none">
+            </div>
+            <button onclick="window.submitRefund(${bookingId}, ${userId})" class="w-full bg-rose-600 text-white py-3 rounded-xl font-bold text-sm hover:bg-rose-700 transition-colors btn-single-action">
+                Confirm Refund
+            </button>
+        </div>`;
+    OperationsUI.openModal('Refund Package', content);
+}
+
+export async function submitRefund(bookingId, userId) {
+    const amount = document.getElementById('refund-amount').value;
+    try {
+        await OperationsAPI.refundBooking(bookingId, amount);
+        OperationsUI.toast('Refund processed successfully', 'success');
+        OperationsUI.closeModal();
+        showClientDetails(userId);
+    } catch (e) {
+        OperationsUI.toast(e.message, 'error');
+    }
+}
+
 window.applyClientFilter = applyClientFilter;
 window.renderClients = renderClients;
 window.showClientDetails = showClientDetails;
+window.showRefundModal = showRefundModal;
+window.submitRefund = submitRefund;

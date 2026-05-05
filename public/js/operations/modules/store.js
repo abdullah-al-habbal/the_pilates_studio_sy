@@ -109,11 +109,21 @@ export async function showQuickSale(itemId, itemName) {
             ${existingTab()}
             ${walkInTab()}
 
-            <!-- Quantity -->
-            <div class="space-y-2">
-                <label class="text-sm font-bold text-slate-600 dark:text-slate-400">Quantity</label>
-                <input type="number" id="sale-quantity" value="1" min="1"
-                    class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 rounded-xl border-transparent focus:ring-2 focus:ring-primary-500 outline-none">
+            <!-- Quantity & Currency -->
+            <div class="grid grid-cols-2 gap-4">
+                <div class="space-y-2">
+                    <label class="text-sm font-bold text-slate-600 dark:text-slate-400">Currency</label>
+                    <select id="sale-currency-id" class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 rounded-xl border-transparent focus:ring-2 focus:ring-primary-500 outline-none">
+                        ${(window.OperationsCurrencies || []).map(c => 
+                            `<option value="${c.id}">${c.code} (${c.symbol})</option>`
+                        ).join('')}
+                    </select>
+                </div>
+                <div class="space-y-2">
+                    <label class="text-sm font-bold text-slate-600 dark:text-slate-400">Quantity</label>
+                    <input type="number" id="sale-quantity" value="1" min="1"
+                        class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 rounded-xl border-transparent focus:ring-2 focus:ring-primary-500 outline-none">
+                </div>
             </div>
 
             <button id="sale-submit-btn" onclick="window.submitQuickSale()"
@@ -153,9 +163,15 @@ export async function submitQuickSale() {
     const btn           = document.getElementById('sale-submit-btn');
     const merchandiseId = document.getElementById('sale-merchandise-id').value;
     const quantity      = document.getElementById('sale-quantity').value;
+    const currencyId    = document.getElementById('sale-currency-id').value;
     const isWalkIn      = !document.getElementById('walkin-customer-form').classList.contains('hidden');
 
     try {
+        if (!currencyId) {
+            OperationsUI.toast('Please select a currency.', 'warning');
+            return;
+        }
+
         if (isWalkIn) {
             const fullname = document.getElementById('walkin-fullname').value.trim();
             const phone    = document.getElementById('walkin-phone').value.trim();
@@ -166,14 +182,14 @@ export async function submitQuickSale() {
                 return;
             }
 
-            await OperationsAPI.storeWalkInOrder(merchandiseId, quantity, fullname, phone, email);
+            await OperationsAPI.storeWalkInOrder(merchandiseId, quantity, currencyId, fullname, phone, email);
         } else {
             const customerId = document.getElementById('sale-customer-select').value;
             if (!customerId) {
                 OperationsUI.toast('Please select a customer.', 'warning');
                 return;
             }
-            await OperationsAPI.placeOrder(customerId, merchandiseId, quantity);
+            await OperationsAPI.placeOrder(customerId, merchandiseId, quantity, currencyId);
         }
 
         OperationsUI.toast('Sale recorded successfully!', 'success');

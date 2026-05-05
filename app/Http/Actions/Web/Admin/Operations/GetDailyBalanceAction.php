@@ -21,7 +21,8 @@ final readonly class GetDailyBalanceAction
     public function __invoke(Request $request): JsonResponse
     {
         try {
-            $summary = $this->balanceService->getSummary($request->query('date'));
+            $currencies = $request->query('currencies');
+            $summary = $this->balanceService->getSummary($request->query('date'), is_array($currencies) ? $currencies : null);
 
             return $this->success(
                 data: $summary->values()->all(),

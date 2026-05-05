@@ -18,6 +18,7 @@ final class StoreWalkInOrderRequest extends FormRequest
         return [
             'merchandise_id' => ['required', 'exists:center_merchandises,id'],
             'quantity' => ['required', 'integer', 'min:1'],
+            'currency_id' => ['required', 'exists:currencies,id'],
             'fullname' => ['required', 'string', 'max:255'],
             'phone_number' => [
                 'required',

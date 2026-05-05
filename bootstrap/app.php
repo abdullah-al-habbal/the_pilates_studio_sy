@@ -4,6 +4,7 @@
 
 declare(strict_types=1);
 
+use App\Http\Middleware\CacheApiGetResponses;
 use App\Http\Middleware\EnsureActiveBookingMiddleware;
 use App\Http\Middleware\EnsureActivePackageMiddleware;
 use App\Http\Middleware\FreezeUserMiddleware;
@@ -55,6 +56,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'auth.sanctum' => EnsureFrontendRequestsAreStateful::class,
             'auth.session' => AuthenticateSession::class,
             'cache.headers' => SetCacheHeaders::class,
+            'cache.api.get' => CacheApiGetResponses::class,
             'can' => Authorize::class,
             'ensure.active.booking' => EnsureActiveBookingMiddleware::class,
             'ensure.active.package' => EnsureActivePackageMiddleware::class,

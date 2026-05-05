@@ -45,34 +45,46 @@ const OperationsAPI = {
         return this.request('/admin/operations/packages');
     },
 
-    assignPackage(userId, packageId) {
-        return this.request(`/admin/operations/packages/${packageId}/assign`, 'POST', { user_id: userId });
+    assignPackage(userId, packageId, currencyId, paidAmount) {
+        return this.request(`/admin/operations/packages/${packageId}/assign`, 'POST', { 
+            user_id: userId,
+            currency_id: parseInt(currencyId, 10),
+            paid_amount: parseInt(paidAmount, 10)
+        });
     },
 
     getStoreItems() {
         return this.request('/admin/operations/store/items');
     },
 
-    placeOrder(customerId, merchandiseId, quantity) {
+    placeOrder(customerId, merchandiseId, quantity, currencyId) {
         return this.request('/admin/operations/store/orders', 'POST', {
             customer_id: customerId,
             merchandise_id: merchandiseId,
             quantity: parseInt(quantity, 10),
+            currency_id: parseInt(currencyId, 10),
         });
     },
 
-    storeWalkInOrder(merchandiseId, quantity, fullname, phoneNumber, email = null) {
+    storeWalkInOrder(merchandiseId, quantity, currencyId, fullname, phoneNumber, email = null) {
         return this.request('/admin/operations/store/walk-in-order', 'POST', {
             merchandise_id: merchandiseId,
             quantity: parseInt(quantity, 10),
+            currency_id: parseInt(currencyId, 10),
             fullname,
             phone_number: phoneNumber,
             email,
         });
     },
 
-    getDailyBalance(date = '') {
-        return this.request(`/admin/operations/finance/daily?date=${date}`);
+    getDailyBalance(date = '', currencies = []) {
+        let url = `/admin/operations/finance/daily?date=${date}`;
+        if (currencies && currencies.length > 0) {
+            currencies.forEach(c => {
+                url += `&currencies[]=${encodeURIComponent(c)}`;
+            });
+        }
+        return this.request(url);
     },
 
     recordExpense(data) {
@@ -85,5 +97,9 @@ const OperationsAPI = {
 
     unfreezeBooking(bookingId) {
         return this.request(`/admin/operations/bookings/${bookingId}/unfreeze`, 'POST');
+    },
+
+    refundBooking(bookingId, amount) {
+        return this.request(`/admin/operations/bookings/${bookingId}/refund`, 'POST', { amount: amount ? parseFloat(amount) : null });
     },
 };

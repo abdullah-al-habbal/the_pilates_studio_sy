@@ -14,8 +14,8 @@ final readonly class PlaceOrderHandler
     ) {
     }
 
-    public function handle(int $customerId, int $merchandiseId, int $quantity): MerchandiseOrder
+    public function handle(int $customerId, int $merchandiseId, int $quantity, int $currencyId): MerchandiseOrder
     {
-        return $this->orderService->placeOrder($customerId, $merchandiseId, $quantity);
+        return $this->orderService->placeOrder($customerId, $merchandiseId, $quantity, $currencyId);
     }
 }

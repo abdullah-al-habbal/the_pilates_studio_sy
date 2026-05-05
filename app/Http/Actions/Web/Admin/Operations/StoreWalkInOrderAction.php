@@ -24,6 +24,7 @@ final readonly class StoreWalkInOrderAction
             $order = $this->handler->handle(
                 merchandiseId: (int) $request->merchandise_id,
                 quantity: (int) $request->quantity,
+                currencyId: (int) $request->currency_id,
                 fullname: $request->fullname,
                 phoneNumber: $request->phone_number,
                 email: $request->email,

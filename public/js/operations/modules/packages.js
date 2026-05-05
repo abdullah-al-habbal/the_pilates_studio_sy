@@ -17,18 +17,32 @@ export async function showPackageAssignment(userId) {
 
         const content = `
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                ${packages.map(p => `
-                    <button onclick="window.handlePackageAssign(${userId}, ${p.id})"
-                        class="flex flex-col p-6 rounded-2xl border-2 border-slate-100 dark:border-slate-800 hover:border-primary-50 transition-all text-left group btn-single-action">
-                        <span class="text-lg font-bold group-hover:text-primary-600 transition-colors">${p.name}</span>
-                        <span class="text-sm text-slate-500">
+                ${packages.map(p => {
+                    const price = p.prices && p.prices.length > 0 ? p.prices[0].amount : (p.price || 0);
+                    const currId = p.prices && p.prices.length > 0 ? p.prices[0].currency_id : (window.OperationsCurrencies?.[0]?.id || 1);
+                    return `
+                    <div class="flex flex-col p-6 rounded-2xl border-2 border-slate-100 dark:border-slate-800 transition-all text-left group">
+                        <span class="text-lg font-bold text-slate-900 dark:text-white">${p.name}</span>
+                        <span class="text-sm text-slate-500 mb-4">
                             ${p.total_credits} Sessions &bull; 
                             ${p.validity_days ? `${p.validity_days} Days` : 'No expiry'}
                         </span>
-                        <span class="mt-4 text-2xl font-black text-slate-900 dark:text-white">
-                            ${p.price != null ? OperationsUI.formatCurrency(p.price) : '—'}
-                        </span>
-                    </button>`).join('')}
+                        
+                        <div class="space-y-3 mt-auto">
+                            <div class="flex gap-2">
+                                <select id="currency-${p.id}" class="flex-1 px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-sm outline-none focus:ring-2 focus:ring-primary-500">
+                                    ${(window.OperationsCurrencies || []).map(c => 
+                                        `<option value="${c.id}" ${c.id == currId ? 'selected' : ''}>${c.code} (${c.symbol})</option>`
+                                    ).join('')}
+                                </select>
+                                <input type="number" id="amount-${p.id}" value="${price}" min="0" class="flex-1 px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-sm outline-none focus:ring-2 focus:ring-primary-500" placeholder="Amount">
+                            </div>
+                            <button onclick="window.handlePackageAssign(${userId}, ${p.id})" class="w-full bg-primary-600 hover:bg-primary-700 text-white font-bold py-2 rounded-xl transition-colors btn-single-action">
+                                Assign Package
+                            </button>
+                        </div>
+                    </div>`;
+                }).join('')}
             </div>`;
 
         OperationsUI.openModal('Assign New Package', content);
@@ -39,8 +53,16 @@ export async function showPackageAssignment(userId) {
 }
 
 export async function handlePackageAssign(userId, packageId) {
+    const currencyId = document.getElementById(`currency-${packageId}`)?.value;
+    const paidAmount = document.getElementById(`amount-${packageId}`)?.value;
+
+    if (!currencyId || !paidAmount) {
+        OperationsUI.toast('Please select a currency and enter a valid amount.', 'error');
+        return;
+    }
+
     try {
-        await OperationsAPI.assignPackage(userId, packageId);
+        await OperationsAPI.assignPackage(userId, packageId, currencyId, paidAmount);
         OperationsUI.toast('Package assigned successfully!', 'success');
         OperationsUI.closeModal();
         renderClients();

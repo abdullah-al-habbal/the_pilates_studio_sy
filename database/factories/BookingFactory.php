@@ -3,6 +3,7 @@
 namespace Database\Factories;
 
 use App\Enums\BookingStatusEnum;
+use App\Models\Currency;
 use App\Models\Package;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -23,6 +24,8 @@ class BookingFactory extends Factory
             'status'            => BookingStatusEnum::ACTIVE->value,
             'expires_at'        => $this->faker->optional(0.4)
                 ->dateTimeBetween('+1 month', '+1 year'),
+            'paid_amount'       => $this->faker->numberBetween(10000, 100000),
+            'currency_id'       => Currency::where('code', 'SYP')->first()?->id,
         ];
     }
 

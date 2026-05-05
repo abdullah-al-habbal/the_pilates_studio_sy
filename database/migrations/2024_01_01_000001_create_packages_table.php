@@ -19,8 +19,8 @@ return new class extends Migration {
                 ->comment('standard | by_system | for_freeze_client');
             $table->string('generated_reason')->nullable()
                 ->comment('Populated when type != standard');
-            $table->unsignedSmallInteger('validity_days')->nullable()
-                ->comment('If set, booking expires_at = created_at + validity_days');
+            $table->unsignedSmallInteger('validity_days')->default(0)
+                ->comment('If > 0, booking expires_at = created_at + validity_days. 0 means no expiry');
             $table->timestamps();
             $table->softDeletes();
 

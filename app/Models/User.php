@@ -182,7 +182,13 @@ class User extends Authenticatable
 
     public function activeBooking(): HasOne
     {
-        return $this->hasOne(Booking::class)->where('status', BookingStatusEnum::ACTIVE->value)->latest();
+        return $this->hasOne(Booking::class)
+            ->where('status', BookingStatusEnum::ACTIVE->value)
+            ->where(function ($query) {
+                $query->whereNull('expires_at')
+                      ->orWhere('expires_at', '>', now());
+            })
+            ->latest();
     }
 
     public function activeCreditBooking(): HasOne
@@ -190,6 +196,10 @@ class User extends Authenticatable
         return $this->hasOne(Booking::class)
             ->where('status', BookingStatusEnum::ACTIVE)
             ->where('remaining_credits', '>', 0)
+            ->where(function ($query) {
+                $query->whereNull('expires_at')
+                      ->orWhere('expires_at', '>', now());
+            })
             ->latest();
     }
 

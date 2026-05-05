@@ -15,6 +15,8 @@ class MerchandiseOrder extends Model
         'quantity',
         'customer_id',
         'ordered_at',
+        'currency_id',
+        'paid_amount',
     ];
 
     protected function casts(): array
@@ -22,11 +24,15 @@ class MerchandiseOrder extends Model
         return [
             'quantity' => 'integer',
             'ordered_at' => 'datetime',
+            'paid_amount' => 'integer',
         ];
     }
 
     public function getTotalPriceAttribute(): int
     {
+        if ($this->paid_amount !== null) {
+            return $this->paid_amount;
+        }
         return ($this->merchandise?->price ?? 0) * $this->quantity;
     }
 

@@ -12,7 +12,7 @@ use App\Http\Actions\Web\Admin\Scheduler\ValidateWalkInFieldAction;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('admin/scheduler')
-    ->middleware(['web', 'auth'])
+    ->middleware(['web', 'auth', 'cache.api.get'])
     ->name('admin.scheduler.')
     ->group(function (): void {
         Route::get('/', IndexAction::class)->name('index');

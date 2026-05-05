@@ -1,6 +1,16 @@
 @extends('layouts.operations')
 
+@php
+    use App\Services\Currency\CurrencyService;
+    $currencyService = app(
+    CurrencyService::class);
+    $activeCurrencies = $currencyService->getAllActiveCurrencies();
+@endphp
+
 @section('content')
+    <script>
+        window.OperationsCurrencies = @json($activeCurrencies);
+    </script>
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
 
         @include('admin.operations.partials.sidebar')
