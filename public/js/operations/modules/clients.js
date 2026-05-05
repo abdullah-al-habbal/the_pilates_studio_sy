@@ -108,10 +108,10 @@ function renderPagination(meta) {
             Page ${p.current_page} of ${p.total_pages} (${p.total} clients)
         </span>
         <div class="flex gap-1">
-            <button onclick="window.renderClients('', ${p.current_page - 1})"
+            <button onclick="window.renderClients(document.getElementById('client-search')?.value ?? '', ${p.current_page - 1})"
                 ${p.current_page === 1 ? 'disabled' : ''}
                 class="px-3 py-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg disabled:opacity-50">&larr;</button>
-            <button onclick="window.renderClients('', ${p.current_page + 1})"
+            <button onclick="window.renderClients(document.getElementById('client-search')?.value ?? '', ${p.current_page + 1})"
                 ${p.current_page === p.total_pages ? 'disabled' : ''}
                 class="px-3 py-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg disabled:opacity-50">&rarr;</button>
         </div>`;

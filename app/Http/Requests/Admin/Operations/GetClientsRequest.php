@@ -17,7 +17,8 @@ class GetClientsRequest extends FormRequest
     {
         return [
             'search' => ['nullable', 'string', 'max:255'],
-            'page'   => ['nullable', 'integer', 'min:1'],
+            'page' => ['nullable', 'integer', 'min:1'],
+            'filter' => ['nullable', 'string', 'in:best_user,most_active_booking,best_seller,most_attended'],
         ];
     }
 }

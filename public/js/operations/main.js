@@ -1,3 +1,4 @@
+// public\js\operations\main.js
 import { initTheme } from './modules/theme.js';
 import { initTabs, loadTab, updateGlobalStats } from './modules/tabs.js';
 import { initClientsTab } from './modules/clients.js';

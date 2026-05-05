@@ -33,8 +33,8 @@ const OperationsAPI = {
         }
     },
 
-    getClients(search = '', page = 1) {
-        return this.request(`/admin/operations/clients?search=${encodeURIComponent(search)}&page=${page}`);
+    getClients(search = '', page = 1, filter = '') {
+        return this.request(`/admin/operations/clients?search=${encodeURIComponent(search)}&page=${page}&filter=${encodeURIComponent(filter)}`);
     },
 
     getClientDetails(userId) {

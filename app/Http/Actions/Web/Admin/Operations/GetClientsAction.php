@@ -25,9 +25,9 @@ final readonly class GetClientsAction
         try {
             $paginator = $this->handler->handle(
                 $request->query('search'),
-                (int) $request->query('page', 1)
+                (int) $request->query('page', 1),
+                $request->query('filter')
             );
-            Log::info('paginator data: ' . $paginator);
 
             return $this->paginated(
                 $paginator,

@@ -33,10 +33,10 @@ class ClientDetailsResource extends JsonResource
             ] : null,
             'activity_snapshot' => [
                 'total_sessions_attended' => $this->bookingSessions()
-                    ->where('attendance_status', 'attended')
+                    ->where('booking_sessions.attendance_status', 'attended')
                     ->count(),
                 'total_sessions_cancelled' => $this->bookingSessions()
-                    ->where('status', 'cancelled')
+                    ->where('booking_sessions.status', 'cancelled')
                     ->count(),
             ],
             'store_purchases' => $this->merchandiseOrders()

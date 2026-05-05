@@ -6,12 +6,5 @@
             <span class="text-sm text-slate-500">Balance</span>
             <span id="stat-balance" class="font-bold text-slate-900 dark:text-white">...</span>
         </div>
-        <div class="w-full bg-slate-200 dark:bg-slate-800 h-1.5 rounded-full overflow-hidden">
-            <div id="balance-progress" class="bg-primary-500 h-full w-0 transition-all duration-1000"></div>
-        </div>
-        <div class="flex justify-between items-center text-xs">
-            <span class="text-slate-400">Daily Goal</span>
-            <span id="stat-percentage" class="text-primary-600 font-medium">0%</span>
-        </div>
     </div>
 </div>
