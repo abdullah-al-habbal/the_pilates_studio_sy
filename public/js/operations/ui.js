@@ -156,25 +156,23 @@ const OperationsUI = {
                 </div>
             </div>`).join('');
 
-        const defaultCode   = document.body.dataset.currencyCode || 'USD';
-        const defaultBlock  = data.find(c => c.currency_code === defaultCode) ?? data[0];
-        const statBalance   = document.getElementById('stat-balance');
-        const progress      = document.getElementById('balance-progress');
-        const pct           = document.getElementById('stat-percentage');
+        const statsList = document.getElementById('quick-stats-currency-list');
+        if (!statsList) return;
 
-        if (statBalance && defaultBlock) {
-            statBalance.textContent = fmt(
-                defaultBlock.true_balance,
-                defaultBlock.currency_decimals,
-                defaultBlock.currency_code
-            );
+        if (!Array.isArray(data) || data.length === 0) {
+            statsList.innerHTML = '<p class="text-sm text-slate-400">No data</p>';
+            return;
         }
 
-        if (progress && pct && defaultBlock) {
-            const target     = 5000 * (10 ** defaultBlock.currency_decimals);
-            const percentage = Math.min(100, Math.round((defaultBlock.true_balance / target) * 100));
-            progress.style.width = `${percentage}%`;
-            pct.textContent      = `${percentage}%`;
-        }
+        statsList.innerHTML = data.map(c => `
+            <div class="flex justify-between items-center">
+                <span class="text-sm font-medium text-slate-600 dark:text-slate-300">
+                    ${c.currency_code} (${c.currency_symbol})
+                </span>
+                <span class="font-bold text-slate-900 dark:text-white">
+                    ${fmt(c.true_balance, c.currency_decimals, c.currency_code)}
+                </span>
+            </div>
+        `).join('');
     },
 };

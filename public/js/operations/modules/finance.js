@@ -1,9 +1,20 @@
+async function loadCategories() {
+    try {
+        const result = await OperationsAPI.request('/admin/operations/finance/categories');
+        const datalist = document.getElementById('category-list');
+        if (datalist && result.data) {
+            datalist.innerHTML = result.data.map(name => `<option value="${name}">`).join('');
+        }
+    } catch (_) {}
+}
+
 export function initFinanceTab() {
     const dateInput = document.getElementById('balance-date');
     if (!dateInput) return;
 
     dateInput.addEventListener('change', (e) => renderBalance(e.target.value));
     renderBalance(dateInput.value);
+    loadCategories();
 
     document.getElementById('expense-form')?.addEventListener('submit', async (e) => {
         e.preventDefault();

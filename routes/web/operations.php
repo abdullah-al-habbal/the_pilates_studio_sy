@@ -2,6 +2,7 @@
 // routes\web\operations.php
 declare(strict_types=1);
 
+use App\Http\Actions\Web\Admin\Operations\GetExpenseCategoriesAction;
 use App\Http\Actions\Web\Admin\Operations\OperationsIndexAction;
 use App\Http\Actions\Web\Admin\Operations\GetPackagesAction;
 use App\Http\Actions\Web\Admin\Operations\AssignPackageAction;
@@ -31,6 +32,7 @@ Route::prefix('admin/operations')
         Route::post('/store/walk-in-order', StoreWalkInOrderAction::class)->name('store.walk-in-order');
 
         Route::get('/finance/daily', GetDailyBalanceAction::class)->name('finance.daily');
+        Route::get('/finance/categories', GetExpenseCategoriesAction::class)->name('finance.categories');
         Route::post('/finance/expenses', RecordExpenseAction::class)->name('finance.expenses');
 
         Route::get('/clients', GetClientsAction::class)->name('clients.index');

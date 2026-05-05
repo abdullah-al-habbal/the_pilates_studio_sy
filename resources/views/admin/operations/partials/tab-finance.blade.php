@@ -45,8 +45,10 @@
                 <div class="grid grid-cols-2 gap-4">
                     <div class="space-y-1">
                         <label class="text-xs font-semibold text-slate-500 uppercase">Category</label>
-                        <input type="text" name="category_name" required placeholder="Rent, Electricity…"
+                        <input type="text" name="category_name" list="category-list" id="category-input" required
+                               placeholder="Rent, Electricity…"
                                class="w-full px-4 py-2 bg-slate-50 dark:bg-slate-800 rounded-lg border-transparent focus:ring-2 focus:ring-primary-500 outline-none">
+                        <datalist id="category-list"></datalist>
                     </div>
                     <div class="space-y-1">
                         <label class="text-xs font-semibold text-slate-500 uppercase">Amount <span class="text-slate-400">(smallest unit)</span></label>
