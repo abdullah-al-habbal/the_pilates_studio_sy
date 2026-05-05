@@ -12,39 +12,34 @@ class ClientDetailsResource extends JsonResource
 {
     public function toArray(Request $request): array
     {
-        $activeBooking = $this->resource->bookings
-            ->where('status', BookingStatusEnum::ACTIVE)
-            ->where(fn($b) => is_null($b->expires_at) || $b->expires_at->isFuture())
-            ->first();
-
         return [
-            'id'            => $this->resource->id,
-            'fullname'      => $this->resource->fullname,
-            'phone_number'  => $this->resource->phone_number,
-            'email'         => $this->resource->email,
-            'member_since'  => $this->resource->created_at?->format('M Y'),
-            'is_active'     => $this->resource->isActive(),
-            'active_package' => $activeBooking ? [
-                'id' => $activeBooking->id,
-                'name' => $activeBooking->package?->getTranslation('name', app()->getLocale()),
-                'total_credits' => $activeBooking->total_credits,
-                'remaining_credits' => $activeBooking->remaining_credits,
-                'status' => $activeBooking->status,
-                'expires_at' => $activeBooking->expires_at?->format('M d, Y'),
-                'source_type' => $activeBooking->source_type,
-                'remaining_days' => $activeBooking->expires_at 
-                    ? now()->diffInDays($activeBooking->expires_at, false) 
+            'id' => $this->id,
+            'fullname' => $this->fullname,
+            'phone_number' => $this->phone_number,
+            'email' => $this->email,
+            'member_since' => $this->created_at?->format('M Y'),
+            'is_active' => $this->isActive(),
+            'active_package' => $this->activeCreditBooking ? [
+                'id' => $this->activeCreditBooking->id,
+                'name' => $this->activeCreditBooking->package?->getTranslation('name', app()->getLocale()),
+                'total_credits' => $this->activeCreditBooking->total_credits,
+                'remaining_credits' => $this->activeCreditBooking->remaining_credits,
+                'status' => $this->activeCreditBooking->status,
+                'expires_at' => $this->activeCreditBooking->expires_at?->format('M d, Y'),
+                'source_type' => $this->activeCreditBooking->source_type,
+                'remaining_days' => $this->activeCreditBooking->expires_at
+                    ? now()->diffInDays($this->activeCreditBooking->expires_at, false)
                     : null,
             ] : null,
             'activity_snapshot' => [
-                'total_sessions_attended' => $this->resource->bookingSessions()
+                'total_sessions_attended' => $this->bookingSessions()
                     ->where('attendance_status', 'attended')
                     ->count(),
-                'total_sessions_cancelled' => $this->resource->bookingSessions()
-                    ->where('booking_sessions.status', 'cancelled')
+                'total_sessions_cancelled' => $this->bookingSessions()
+                    ->where('status', 'cancelled')
                     ->count(),
             ],
-            'store_purchases' => $this->resource->merchandiseOrders()
+            'store_purchases' => $this->merchandiseOrders()
                 ->with('merchandise')
                 ->latest()
                 ->limit(5)

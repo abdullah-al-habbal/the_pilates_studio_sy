@@ -120,13 +120,13 @@
                 class="w-10 h-10 bg-primary-600 rounded-xl flex items-center justify-center text-white font-bold text-xl shadow-lg shadow-primary-500/30">
                 P</div>
             <h1 class="text-xl font-bold tracking-tight">Operations <span class="text-primary-500">Hub</span></h1>
-            <a href="{{ url('/admin') }}" target="_blank"
-                class="px-3 py-1.5 text-sm bg-primary-50 dark:bg-primary-900/30 text-primary-700 dark:text-primary-400 rounded-lg hover:bg-primary-100 dark:hover:bg-primary-900/50 transition-colors flex items-center gap-1.5 font-medium">
+            <a href="{{ url('/admin') }}"
+                class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-sm transition-all flex items-center gap-2">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                        d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
                 </svg>
-                Filament Admin
+                Filament Dashboard
             </a>
         </div>
 
@@ -146,7 +146,8 @@
         </div>
     </nav>
 
-    <main class="w-full px-4 py-6 lg:px-6">
+    <!-- <main class="w-full px-4 py-6 lg:px-6"></main> -->
+    <main class="w-full px-6 py-6">
         @yield('content')
     </main>
 
@@ -161,12 +162,7 @@
 
     <script src="{{ asset('js/operations/api.js') }}"></script>
     <script src="{{ asset('js/operations/ui.js') }}"></script>
-    <script src="{{ asset('js/operations/theme.js') }}"></script>
-    <script src="{{ asset('js/operations/tabs.js') }}"></script>
-    <script src="{{ asset('js/operations/clients.js') }}"></script>
-    <script src="{{ asset('js/operations/store.js') }}"></script>
-    <script src="{{ asset('js/operations/finance.js') }}"></script>
-    <script src="{{ asset('js/operations/main.js') }}"></script>
+    <script type="module" src="{{ asset('js/operations/main.js') }}"></script>
 </body>
 
 </html>

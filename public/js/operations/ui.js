@@ -106,14 +106,17 @@ const OperationsUI = {
 
         container.innerHTML = data.map(c => `
             <div class="glass-card rounded-2xl p-6 space-y-4 mb-4 border border-slate-200 dark:border-slate-800">
-                <div class="flex items-center gap-2">
+                <button onclick="this.nextElementSibling.classList.toggle('hidden')" 
+                        class="flex items-center gap-2 w-full text-left">
                     <span class="text-xs font-black uppercase tracking-widest text-primary-500 bg-primary-50 dark:bg-primary-900/30 px-3 py-1 rounded-full">
                         ${c.currency_code}
                     </span>
                     <span class="text-xs text-slate-400">${c.currency_symbol}</span>
-                </div>
-
-                <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+                    <svg class="w-4 h-4 ml-auto transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                    </svg>
+                </button>
+                <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mt-4">
                     <div class="glass-card rounded-xl p-4 border-b-2 border-primary-400">
                         <p class="text-[10px] font-bold text-slate-400 uppercase mb-1">Total Revenue</p>
                         <p class="text-lg font-black text-slate-900 dark:text-white truncate">

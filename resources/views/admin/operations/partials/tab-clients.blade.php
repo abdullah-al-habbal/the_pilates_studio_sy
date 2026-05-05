@@ -15,21 +15,21 @@
         </div>
     </div>
     <div class="flex flex-wrap gap-2" id="client-filter-pills">
-        <button data-filter="" onclick="applyClientFilter(this)"
-            class="filter-pill active-pill px-4 py-1.5 rounded-full text-xs font-bold bg-primary-600 text-white transition-all">
-            All
-        </button>
-        <button data-filter="most_attended" onclick="applyClientFilter(this)"
-            class="filter-pill px-4 py-1.5 rounded-full text-xs font-bold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-primary-50 transition-all">
-            Most Attended
+        <button data-filter="best_user" onclick="applyClientFilter(this)"
+            class="filter-pill px-3 py-1.5 text-xs font-medium rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-primary-100 dark:hover:bg-primary-900/30 transition-colors">
+            🏆 Best User
         </button>
         <button data-filter="most_active_booking" onclick="applyClientFilter(this)"
-            class="filter-pill px-4 py-1.5 rounded-full text-xs font-bold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-primary-50 transition-all">
-            Most Credits Left
+            class="filter-pill px-3 py-1.5 text-xs font-medium rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-primary-100 dark:hover:bg-primary-900/30 transition-colors">
+            📦 Most Active Booking
         </button>
         <button data-filter="best_seller" onclick="applyClientFilter(this)"
-            class="filter-pill px-4 py-1.5 rounded-full text-xs font-bold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-primary-50 transition-all">
-            Top Store Buyers
+            class="filter-pill px-3 py-1.5 text-xs font-medium rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-primary-100 dark:hover:bg-primary-900/30 transition-colors">
+            💰 Best Seller
+        </button>
+        <button data-filter="most_attended" onclick="applyClientFilter(this)"
+            class="filter-pill px-3 py-1.5 text-xs font-medium rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-primary-100 dark:hover:bg-primary-900/30 transition-colors">
+            ✅ Most Attended
         </button>
     </div>
     <div class="glass-card rounded-2xl overflow-hidden shadow-sm">
@@ -39,7 +39,7 @@
                     <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Client</th>
                     <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Phone</th>
                     <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Status</th>
-                    <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Package</th>
+                    <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Current Package</th>
                     <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Sessions</th>
                     <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider text-right">Actions
                     </th>
