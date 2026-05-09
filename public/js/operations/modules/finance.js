@@ -12,7 +12,10 @@ export function initFinanceTab() {
     const dateInput = document.getElementById('balance-date');
     if (!dateInput) return;
 
-    dateInput.addEventListener('change', (e) => renderBalance(e.target.value));
+    dateInput.addEventListener('change', (e) => {
+        renderBalance(e.target.value);
+        if (window.updateGlobalStats) window.updateGlobalStats(e.target.value);
+    });
     renderBalance(dateInput.value);
     loadCategories();
 
@@ -26,6 +29,7 @@ export function initFinanceTab() {
             OperationsUI.toast('Expense recorded!', 'success');
             e.target.reset();
             renderBalance(dateInput.value);
+            if (window.updateGlobalStats) window.updateGlobalStats(dateInput.value);
         } catch (err) {
             OperationsUI.toast(err.message, 'error');
         } finally {

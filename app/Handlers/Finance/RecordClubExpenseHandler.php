@@ -6,11 +6,6 @@ use App\Models\ClubExpenseCategory;
 use Illuminate\Support\Facades\DB;
 class RecordClubExpenseHandler
 {
-    /**
-     * Record a new club expense; creates category if name is new
-     *
-     * @param array{category_name:string,amount:int,notes?:string,recorded_by:int,expense_date?:string} $data
-     */
     public function handle(array $data): ClubExpense
     {
         return DB::transaction(function () use ($data) {

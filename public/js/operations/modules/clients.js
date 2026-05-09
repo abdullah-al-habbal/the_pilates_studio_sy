@@ -226,14 +226,30 @@ export async function showClientDetails(userId) {
                                                 class="flex-1 bg-emerald-100 text-emerald-700 py-2 rounded-lg font-bold text-xs uppercase tracking-wider hover:bg-emerald-200 transition-colors btn-single-action">
                                                 Unfreeze Now
                                            </button>`
-                                        : `<div class="flex flex-1 gap-2"><button onclick="window.handleFreeze(${user.active_package.id}, ${user.id})"
-                                                class="flex-1 bg-amber-100 text-amber-700 py-2 rounded-lg font-bold text-xs uppercase tracking-wider hover:bg-amber-200 transition-colors btn-single-action">
-                                                Freeze
-                                           </button>
-                                           <button onclick="window.showRefundModal(${user.active_package.id}, ${user.active_package.paid_amount || 0}, ${user.active_package.currency_id || null}, ${user.id})"
-                                                class="flex-1 bg-rose-100 text-rose-700 py-2 rounded-lg font-bold text-xs uppercase tracking-wider hover:bg-rose-200 transition-colors btn-single-action">
-                                                Refund
-                                           </button></div>`
+                                        : (() => {
+                                             const paidAmount = user.active_package.paid_amount ?? null;
+                                             const currencyId = user.active_package.currency_id ?? null;
+                                             const refundBtnDisabled = paidAmount === null;
+                                             const refundTitle = refundBtnDisabled ? 'title="Payment amount not recorded — refund unavailable"' : '';
+                                             const refundCls = refundBtnDisabled ? 'opacity-50 cursor-not-allowed' : 'hover:bg-rose-200';
+                                             
+                                             const paidAmountJs = paidAmount !== null ? paidAmount : 'null';
+                                             const currencyIdJs = currencyId !== null ? currencyId : 'null';
+
+                                             return `
+                                                <div class="flex flex-1 gap-2">
+                                                    <button onclick="window.handleFreeze(${user.active_package.id}, ${user.id})"
+                                                        class="flex-1 bg-amber-100 text-amber-700 py-2 rounded-lg font-bold text-xs uppercase tracking-wider hover:bg-amber-200 transition-colors btn-single-action">
+                                                        Freeze
+                                                    </button>
+                                                    <button onclick="window.showRefundModal(${user.active_package.id}, ${paidAmountJs}, ${currencyIdJs}, ${user.id})"
+                                                        ${refundBtnDisabled ? 'disabled' : ''}
+                                                        ${refundTitle}
+                                                        class="flex-1 bg-rose-100 text-rose-700 py-2 rounded-lg font-bold text-xs uppercase tracking-wider ${refundCls} transition-colors btn-single-action">
+                                                        Refund
+                                                    </button>
+                                                </div>`;
+                                          })()
                                     }
                                 </div>
                             </div>` : `
@@ -297,31 +313,71 @@ export async function showClientDetails(userId) {
 }
 
 export function showRefundModal(bookingId, maxAmount, currencyId, userId) {
+    if (maxAmount === null || maxAmount === undefined || maxAmount <= 0) {
+        OperationsUI.toast(
+            'Refund unavailable: no payment amount was recorded for this booking.',
+            'error'
+        );
+        return;
+    }
+
     const currency = window.OperationsCurrencies?.find(c => c.id == currencyId);
     const code = currency?.code || 'USD';
     const decimals = currency?.decimal_places || 2;
-    const amountStr = maxAmount ? OperationsUI.formatCurrencyBlock(maxAmount, decimals, code) : 'Unknown';
+    const amountStr = OperationsUI.formatCurrencyBlock(maxAmount, decimals, code);
 
     const content = `
         <div class="space-y-4">
-            <p class="text-sm text-slate-600">The original payment was <strong>${amountStr}</strong>.</p>
+            <p class="text-sm text-slate-600">
+                The original payment was <strong>${amountStr}</strong>.
+                You may issue a partial refund or leave the field empty for a full refund.
+            </p>
             <div class="space-y-1">
                 <label class="text-xs font-bold text-slate-500 uppercase">Refund Amount (optional)</label>
-                <input type="number" id="refund-amount" placeholder="Leave empty for full refund" max="${maxAmount || ''}"
-                    class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 rounded-xl border-transparent focus:ring-2 focus:ring-primary-500 outline-none">
+                <input
+                    type="number"
+                    id="refund-amount"
+                    placeholder="Leave empty for full refund (${amountStr})"
+                    min="1"
+                    max="${maxAmount}"
+                    class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 rounded-xl border-transparent focus:ring-2 focus:ring-primary-500 outline-none"
+                >
+                <p class="text-xs text-slate-400">
+                    Minimum: 1 &bull; Maximum: ${amountStr}
+                </p>
             </div>
-            <button onclick="window.submitRefund(${bookingId}, ${userId})" class="w-full bg-rose-600 text-white py-3 rounded-xl font-bold text-sm hover:bg-rose-700 transition-colors btn-single-action">
-                Confirm Refund
+            <div class="rounded-xl bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 px-4 py-3 text-xs text-amber-700 dark:text-amber-300">
+                ⚠ Confirming will <strong>cancel the subscription</strong> immediately.
+            </div>
+            <button
+                onclick="window.submitRefund(${bookingId}, ${userId}, ${maxAmount})"
+                class="w-full bg-rose-600 text-white py-3 rounded-xl font-bold text-sm hover:bg-rose-700 transition-colors btn-single-action">
+                Confirm Refund &amp; Cancel Subscription
             </button>
         </div>`;
     OperationsUI.openModal('Refund Package', content);
 }
 
-export async function submitRefund(bookingId, userId) {
-    const amount = document.getElementById('refund-amount').value;
+export async function submitRefund(bookingId, userId, maxAmount) {
+    const input = document.getElementById('refund-amount');
+    const rawVal = input?.value?.trim();
+
+    if (rawVal !== '' && rawVal !== null && rawVal !== undefined) {
+        const parsed = Number(rawVal);
+        if (isNaN(parsed) || parsed < 1) {
+            OperationsUI.toast('Refund amount must be a positive number.', 'error');
+            return;
+        }
+        if (parsed > maxAmount) {
+            OperationsUI.toast(`Refund amount cannot exceed the paid amount (${maxAmount}).`, 'error');
+            return;
+        }
+    }
+
+    const amount = rawVal !== '' ? rawVal : undefined;
     try {
         await OperationsAPI.refundBooking(bookingId, amount);
-        OperationsUI.toast('Refund processed successfully', 'success');
+        OperationsUI.toast('Refund processed and subscription cancelled successfully.', 'success');
         OperationsUI.closeModal();
         showClientDetails(userId);
     } catch (e) {

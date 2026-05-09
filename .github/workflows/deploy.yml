@@ -129,15 +129,28 @@ jobs:
 
             cd "$TARGET"
 
-            # Ensure storage structure exists
+            # ── GUARD: .env must exist before any artisan command ──────────
+            if [ ! -f .env ]; then
+              echo "❌ FATAL: .env is missing at $TARGET"
+              echo "   Place the environment file on the server before re-deploying."
+              exit 1
+            fi
+
+            # ── Ensure storage structure exists ────────────────────────────
             mkdir -p storage/logs
             mkdir -p storage/framework/{cache,sessions,views}
             mkdir -p storage/app/public
 
-            # Backup uploads if present
+            # ── Backup uploads before extraction ──────────────────────────
             if [ -d storage/app ]; then
               mv storage/app storage/app.bak.$(date +%s)
             fi
+
+            # ── Snapshot server migrations BEFORE extraction ───────────────
+            # (compare against artifact list post-extraction to find orphans)
+            find database/migrations -type f -name '*.php' ! -name '.*' -printf '%f\n' 2>/dev/null \
+              | sort > /tmp/server_migrations_pre.txt \
+              || touch /tmp/server_migrations_pre.txt
 
             # Extract artifact
             tar -xzf release.tar.gz -C .
@@ -151,23 +164,25 @@ jobs:
               rm -rf storage/app.bak.* || true
             fi
 
-            # Clean up orphaned migration files
-            echo "Cleaning up orphaned migration files..."
-            find database/migrations -type f -name '*.php' ! -name '.*' -printf '%f\n' > /tmp/server_migrations.txt
-            find database/migrations -type f -name '*.php' ! -name '.*' -printf '%f\n' > /tmp/artifact_migrations.txt
-            comm -23 /tmp/server_migrations.txt /tmp/artifact_migrations.txt | while read -r orphan; do
+            # ── Clean orphaned migrations (server-only files) ──────────────
+            echo "Checking for orphaned migration files..."
+            find database/migrations -type f -name '*.php' ! -name '.*' -printf '%f\n' 2>/dev/null \
+              | sort > /tmp/artifact_migrations_post.txt \
+              || touch /tmp/artifact_migrations_post.txt
+
+            comm -23 /tmp/server_migrations_pre.txt /tmp/artifact_migrations_post.txt | while read -r orphan; do
               if [ -n "$orphan" ]; then
-                echo "Removing orphaned migration: $orphan"
+                echo "⚠ Removing orphaned migration: $orphan"
                 rm -f "database/migrations/$orphan"
               fi
             done
-            rm -f /tmp/server_migrations.txt /tmp/artifact_migrations.txt
+            rm -f /tmp/server_migrations_pre.txt /tmp/artifact_migrations_post.txt
 
             # Permissions
             chmod -R 775 storage bootstrap/cache || true
 
-            # Laravel commands
-            $PHP_BIN artisan migrate --force || true
+            # ── Laravel bootstrap ──────────────────────────────────────────
+            $PHP_BIN artisan migrate --force
             $PHP_BIN artisan config:cache || true
             $PHP_BIN artisan route:cache || true
             $PHP_BIN artisan view:cache || true

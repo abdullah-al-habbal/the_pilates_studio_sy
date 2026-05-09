@@ -8,8 +8,10 @@ import { initFinanceTab } from './modules/finance.js';
 document.addEventListener('DOMContentLoaded', () => {
     initTheme();
     initTabs();
-    loadTab('clients');
-    updateGlobalStats();
+    
+    const balanceDate = document.getElementById('balance-date')?.value || '';
+    updateGlobalStats(balanceDate);
+    window.updateGlobalStats = updateGlobalStats;
 });
 
 document.addEventListener('click', function(e) {

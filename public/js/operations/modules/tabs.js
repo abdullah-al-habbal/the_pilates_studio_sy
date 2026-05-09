@@ -4,19 +4,34 @@ import { initFinanceTab } from './finance.js';
 
 export function initTabs() {
     const buttons = document.querySelectorAll('[data-tab]');
+    
+    const switchTabFromHash = () => {
+        const hash = window.location.hash.replace('#', '');
+        const tab = ['clients', 'store', 'finance'].includes(hash) ? hash : 'clients';
+        
+        loadTab(tab);
+
+        buttons.forEach(b => {
+            const isActive = b.dataset.tab === tab;
+            b.classList.toggle('bg-primary-600', isActive);
+            b.classList.toggle('text-white', isActive);
+            b.classList.toggle('shadow-lg', isActive);
+            b.classList.toggle('shadow-primary-500/20', isActive);
+            b.classList.toggle('active-tab', isActive);
+            b.classList.toggle('hover:bg-slate-100', !isActive);
+            b.classList.toggle('dark:hover:bg-slate-800', !isActive);
+        });
+    };
+
     buttons.forEach(btn => {
         btn.addEventListener('click', () => {
-            const tab = btn.dataset.tab;
-            loadTab(tab);
-
-            buttons.forEach(b => {
-                b.classList.remove('bg-primary-600','text-white','shadow-lg','shadow-primary-500/20','active-tab');
-                b.classList.add('hover:bg-slate-100','dark:hover:bg-slate-800');
-            });
-            btn.classList.add('bg-primary-600','text-white','shadow-lg','shadow-primary-500/20','active-tab');
-            btn.classList.remove('hover:bg-slate-100','dark:hover:bg-slate-800');
+            window.location.hash = btn.dataset.tab;
         });
     });
+
+    window.addEventListener('hashchange', switchTabFromHash);
+    
+    switchTabFromHash();
 }
 
 export function loadTab(tab) {
@@ -26,17 +41,23 @@ export function loadTab(tab) {
 
     container.innerHTML = template.innerHTML;
 
-    if (tab === 'clients') initClientsTab();
-    if (tab === 'store')   initStoreTab();
-    if (tab === 'finance') initFinanceTab();
+    if (tab === 'clients') setTimeout(initClientsTab, 0);
+    if (tab === 'store')   setTimeout(initStoreTab, 0);
+    if (tab === 'finance') setTimeout(initFinanceTab, 0);
 }
 
-export async function updateGlobalStats() {
+export async function updateGlobalStats(date = '') {
+    const container = document.getElementById('quick-stats-currency-list');
+    if (!container) return;
+
+    container.innerHTML = '<p class="text-sm text-slate-400">Loading snapshot...</p>';
+
     try {
-        const result = await OperationsAPI.getDailyBalance();
-        OperationsUI.renderBalance(result.data);
+        const result = await OperationsAPI.getDailyBalance(date, []);
+        OperationsUI.renderDailySnapshot(result.data);
     } catch (e) {
         console.error('Failed to load global stats:', e);
+        container.innerHTML = `<p class="text-rose-500 text-sm">Snapshot unavailable. <button onclick="window.updateGlobalStats()" class="underline">Retry</button></p>`;
     }
 }
 

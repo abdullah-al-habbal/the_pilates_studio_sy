@@ -43,15 +43,22 @@ final readonly class ProcessBookingRefundHandler
                 ]);
             }
 
-            return Refund::create([
+            $refund = Refund::create([
                 'refundable_type' => Booking::class,
-                'refundable_id'   => $booking->id,
-                'user_id'         => $booking->user_id,
-                'currency_id'     => $booking->currency_id,
-                'amount'          => $refundAmount,
-                'refunded_by'     => auth()->id(),
-                'refunded_at'     => now(),
+                'refundable_id' => $booking->id,
+                'user_id' => $booking->user_id,
+                'currency_id' => $booking->currency_id,
+                'amount' => $refundAmount,
+                'refunded_by' => auth()->id(),
+                'refunded_at' => now(),
             ]);
+
+            $booking->update([
+                'status' => BookingStatusEnum::CANCELLED,
+                'remaining_credits' => 0,
+            ]);
+
+            return $refund;
         });
     }
 }

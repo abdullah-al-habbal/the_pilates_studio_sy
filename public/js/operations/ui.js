@@ -155,24 +155,30 @@ const OperationsUI = {
                     </div>
                 </div>
             </div>`).join('');
+    },
 
-        const statsList = document.getElementById('quick-stats-currency-list');
-        if (!statsList) return;
+    renderDailySnapshot(data) {
+        const container = document.getElementById('quick-stats-currency-list');
+        if (!container) return;
 
         if (!Array.isArray(data) || data.length === 0) {
-            statsList.innerHTML = '<p class="text-sm text-slate-400">No data</p>';
+            container.innerHTML = '<p class="text-sm text-slate-500">No data for today.</p>';
             return;
         }
 
-        statsList.innerHTML = data.map(c => `
-            <div class="flex justify-between items-center">
+        const fmt = (amount, decimals, code) =>
+            this.formatCurrencyBlock(amount, decimals, code);
+
+        container.innerHTML = data.map(c => `
+            <div class="flex justify-between items-center py-2 border-b border-slate-100 dark:border-slate-800 last:border-0">
                 <span class="text-sm font-medium text-slate-600 dark:text-slate-300">
-                    ${c.currency_code} (${c.currency_symbol})
+                    ${c.currency_code} ${c.currency_symbol}
                 </span>
-                <span class="font-bold text-slate-900 dark:text-white">
+                <span class="text-sm font-bold ${c.true_balance >= 0 ? 'text-emerald-600' : 'text-rose-600'}">
                     ${fmt(c.true_balance, c.currency_decimals, c.currency_code)}
                 </span>
             </div>
         `).join('');
     },
+
 };

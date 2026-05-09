@@ -15,8 +15,24 @@ class ProcessBookingRefundRequest extends FormRequest
 
     public function rules(): array
     {
+        $bookingId = (int) $this->route('bookingId');
+        $paidAmount = \App\Models\Booking::find($bookingId)?->paid_amount;
+
+        $amountRules = ['nullable', 'numeric', 'min:1'];
+        if ($paidAmount !== null) {
+            $amountRules[] = "max:{$paidAmount}";
+        }
+
         return [
-            'amount' => ['nullable', 'numeric', 'min:1'],
+            'amount' => $amountRules,
+        ];
+    }
+
+    public function messages(): array
+    {
+        return [
+            'amount.max' => 'Refund amount cannot exceed the original paid amount.',
+            'amount.min' => 'Refund amount must be at least 1.',
         ];
     }
 }

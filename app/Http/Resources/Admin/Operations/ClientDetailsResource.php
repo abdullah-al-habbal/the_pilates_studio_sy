@@ -30,6 +30,8 @@ class ClientDetailsResource extends JsonResource
                 'remaining_days' => $this->activeCreditBooking->expires_at
                     ? now()->diffInDays($this->activeCreditBooking->expires_at, false)
                     : null,
+                'paid_amount' => $this->activeCreditBooking->paid_amount,
+                'currency_id' => $this->activeCreditBooking->currency_id,
             ] : null,
             'activity_snapshot' => [
                 'total_sessions_attended' => $this->bookingSessions()
