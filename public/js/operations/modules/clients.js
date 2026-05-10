@@ -4,6 +4,8 @@ import { showPackageAssignment, handleFreeze, handleUnfreeze } from './packages.
 
 let clientSearchTimeout = null;
 let activeClientFilter  = '';
+let currentClientSearch = '';
+let currentClientPage   = 1;
 
 function humanizeRemainingDays(daysTotal) {
     if (daysTotal == null || isNaN(daysTotal)) return '';
@@ -51,6 +53,8 @@ export function initClientsTab() {
 }
 
 export async function renderClients(search = '', page = 1) {
+    currentClientSearch = search;
+    currentClientPage   = page;
     renderShimmerRows('client-table-body', 6, 6);
     const tbody = document.getElementById('client-table-body');
 
@@ -380,6 +384,7 @@ export async function submitRefund(bookingId, userId, maxAmount) {
         OperationsUI.toast('Refund processed and subscription cancelled successfully.', 'success');
         OperationsUI.closeModal();
         showClientDetails(userId);
+        renderClients(currentClientSearch, currentClientPage);
     } catch (e) {
         OperationsUI.toast(e.message, 'error');
     }

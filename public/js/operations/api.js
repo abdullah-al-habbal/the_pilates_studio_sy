@@ -102,4 +102,28 @@ const OperationsAPI = {
     refundBooking(bookingId, amount) {
         return this.request(`/admin/operations/bookings/${bookingId}/refund`, 'POST', { amount: amount ? parseFloat(amount) : null });
     },
+
+    updatePackage(packageId, data) {
+        return this.request(`/admin/operations/packages/${packageId}`, 'PUT', {
+            name:          data.name,
+            total_credits: parseInt(data.total_credits, 10),
+            validity_days: data.validity_days ? parseInt(data.validity_days, 10) : null,
+            currency_id:   parseInt(data.currency_id, 10),
+            amount:        parseInt(data.amount, 10),
+        });
+    },
+
+    deletePackage(packageId) {
+        return this.request(`/admin/operations/packages/${packageId}`, 'DELETE');
+    },
+
+    createPackage(data) {
+        return this.request('/admin/operations/packages', 'POST', {
+            name:          data.name,
+            total_credits: parseInt(data.total_credits, 10),
+            validity_days: data.validity_days ? parseInt(data.validity_days, 10) : null,
+            currency_id:   parseInt(data.currency_id, 10),
+            amount:        parseInt(data.amount, 10),
+        });
+    },
 };

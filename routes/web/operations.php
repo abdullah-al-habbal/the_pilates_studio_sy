@@ -2,19 +2,24 @@
 // routes\web\operations.php
 declare(strict_types=1);
 
-use App\Http\Actions\Web\Admin\Operations\GetExpenseCategoriesAction;
-use App\Http\Actions\Web\Admin\Operations\OperationsIndexAction;
-use App\Http\Actions\Web\Admin\Operations\GetPackagesAction;
-use App\Http\Actions\Web\Admin\Operations\AssignPackageAction;
-use App\Http\Actions\Web\Admin\Operations\GetStoreItemsAction;
-use App\Http\Actions\Web\Admin\Operations\PlaceOrderAction;
-use App\Http\Actions\Web\Admin\Operations\GetDailyBalanceAction;
-use App\Http\Actions\Web\Admin\Operations\ProcessBookingRefundAction;
-use App\Http\Actions\Web\Admin\Operations\RecordExpenseAction;
-use App\Http\Actions\Web\Admin\Operations\GetClientsAction;
-use App\Http\Actions\Web\Admin\Operations\FreezeBookingAction;
-use App\Http\Actions\Web\Admin\Operations\UnfreezeBookingAction;
-use App\Http\Actions\Web\Admin\Operations\StoreWalkInOrderAction;
+use App\Http\Actions\Web\Admin\Operations\{
+    GetExpenseCategoriesAction,
+    OperationsIndexAction,
+    GetPackagesAction,
+    AssignPackageAction,
+    GetStoreItemsAction,
+    PlaceOrderAction,
+    GetDailyBalanceAction,
+    ProcessBookingRefundAction,
+    RecordExpenseAction,
+    GetClientsAction,
+    FreezeBookingAction,
+    UnfreezeBookingAction,
+    StoreWalkInOrderAction,
+    CreatePackageAction,
+    UpdatePackageAction,
+    DeletePackageAction
+};
 use App\Http\Actions\Web\Admin\Client\ClientDetailsAction;
 use Illuminate\Support\Facades\Route;
 
@@ -25,6 +30,9 @@ Route::prefix('admin/operations')
         Route::get('/', OperationsIndexAction::class)->name('index');
 
         Route::get('/packages', GetPackagesAction::class)->name('packages.index');
+        Route::post('/packages', CreatePackageAction::class)->name('packages.store');
+        Route::put('/packages/{package}', UpdatePackageAction::class)->name('packages.update');
+        Route::delete('/packages/{package}', DeletePackageAction::class)->name('packages.destroy');
         Route::post('/packages/{packageId}/assign', AssignPackageAction::class)->name('packages.assign');
 
         Route::get('/store/items', GetStoreItemsAction::class)->name('store.index');
