@@ -102,6 +102,16 @@ jobs:
             echo "ENVIRONMENT=dev" >> $GITHUB_ENV
           fi
 
+      - name: Check for fresh-migration flag
+        id: check_fresh
+        run: |
+          if echo "${{ github.event.head_commit.message }}" | grep -qF '[fresh-migrate]'; then
+            echo "FRESH=true" >> $GITHUB_ENV
+            echo "✅ Fresh migration flag detected"
+          else
+            echo "FRESH=false" >> $GITHUB_ENV
+          fi
+
       - name: Upload artifact to server
         uses: appleboy/scp-action@v0.1.5
         with:
@@ -121,6 +131,7 @@ jobs:
           username: ${{ secrets.HOSTINGER_SSH_USERNAME }}
           key: ${{ secrets.HOSTINGER_SSH_PRIVATE_KEY }}
           port: ${{ secrets.HOSTINGER_SSH_PORT }}
+          envs: FRESH
           script: |
             set -e
             TARGET="${{ env.TARGET }}"
@@ -147,7 +158,6 @@ jobs:
             fi
 
             # ── Snapshot server migrations BEFORE extraction ───────────────
-            # (compare against artifact list post-extraction to find orphans)
             find database/migrations -type f -name '*.php' ! -name '.*' -printf '%f\n' 2>/dev/null \
               | sort > /tmp/server_migrations_pre.txt \
               || touch /tmp/server_migrations_pre.txt
@@ -181,8 +191,17 @@ jobs:
             # Permissions
             chmod -R 775 storage bootstrap/cache || true
 
-            # ── Laravel bootstrap ──────────────────────────────────────────
-            $PHP_BIN artisan migrate --force
+            # ── Laravel migration logic (normal or fresh) ──────────────────
+            if [ "${FRESH}" = "true" ] && [ "${ENVIRONMENT}" != "production" ]; then
+              echo "🔄 Fresh migration requested. Dropping all tables and reseeding..."
+              $PHP_BIN artisan migrate:fresh --seed --force
+            else
+              if [ "${FRESH}" = "true" ]; then
+                echo "⚠️  Skipping fresh migration because environment is PRODUCTION."
+              fi
+              $PHP_BIN artisan migrate --force
+            fi
+
             $PHP_BIN artisan config:cache || true
             $PHP_BIN artisan route:cache || true
             $PHP_BIN artisan view:cache || true

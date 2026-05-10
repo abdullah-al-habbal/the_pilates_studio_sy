@@ -22,6 +22,9 @@ return new class extends Migration {
             $table->timestamps();
             $table->softDeletes();
 
+            $table->foreignId('currency_id')->nullable()->constrained('currencies');
+            $table->unsignedInteger('paid_amount')->nullable();
+
             $table->index('merchandise_id', 'idx_order_merchandise');
             $table->index('customer_id', 'idx_order_customer');
             $table->index('ordered_at', 'idx_order_date');
