@@ -157,9 +157,8 @@ jobs:
               mv storage/app storage/app.bak.$(date +%s)
             fi
 
-            # ── Snapshot server migrations BEFORE extraction ───────────────
-            find database/migrations -type f -name '*.php' ! -name '.*' -printf '%f\n' 2>/dev/null \
-              | sort > /tmp/server_migrations_pre.txt \
+            # ── Portable snapshot BEFORE extraction ──
+            (ls database/migrations/*.php 2>/dev/null | xargs -n1 basename | sort) > /tmp/server_migrations_pre.txt \
               || touch /tmp/server_migrations_pre.txt
 
             # Extract artifact
@@ -174,10 +173,9 @@ jobs:
               rm -rf storage/app.bak.* || true
             fi
 
-            # ── Clean orphaned migrations (server-only files) ──────────────
+            # ── Portable snapshot AFTER extraction & orphan removal ──
             echo "Checking for orphaned migration files..."
-            find database/migrations -type f -name '*.php' ! -name '.*' -printf '%f\n' 2>/dev/null \
-              | sort > /tmp/artifact_migrations_post.txt \
+            (ls database/migrations/*.php 2>/dev/null | xargs -n1 basename | sort) > /tmp/artifact_migrations_post.txt \
               || touch /tmp/artifact_migrations_post.txt
 
             comm -23 /tmp/server_migrations_pre.txt /tmp/artifact_migrations_post.txt | while read -r orphan; do

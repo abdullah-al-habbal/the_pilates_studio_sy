@@ -1,3 +1,4 @@
+// public\js\operations\modules\packages.js
 import { renderClients, showClientDetails } from './clients.js';
 
 async function createNewPackage(userId, formData) {
