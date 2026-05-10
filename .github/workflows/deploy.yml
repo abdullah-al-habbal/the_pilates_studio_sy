@@ -158,7 +158,7 @@ jobs:
             fi
 
             # ── Portable snapshot BEFORE extraction ──
-            (ls database/migrations/*.php 2>/dev/null | xargs -n1 basename | sort) > /tmp/server_migrations_pre.txt \
+            (find database/migrations -maxdepth 1 -type f -name "*.php" -exec basename {} \; | sort) > /tmp/server_migrations_pre.txt \
               || touch /tmp/server_migrations_pre.txt
 
             # Extract artifact
@@ -175,7 +175,7 @@ jobs:
 
             # ── Portable snapshot AFTER extraction & orphan removal ──
             echo "Checking for orphaned migration files..."
-            (ls database/migrations/*.php 2>/dev/null | xargs -n1 basename | sort) > /tmp/artifact_migrations_post.txt \
+            (find database/migrations -maxdepth 1 -type f -name "*.php" -exec basename {} \; | sort) > /tmp/artifact_migrations_post.txt \
               || touch /tmp/artifact_migrations_post.txt
 
             comm -23 /tmp/server_migrations_pre.txt /tmp/artifact_migrations_post.txt | while read -r orphan; do
@@ -202,6 +202,7 @@ jobs:
 
             $PHP_BIN artisan config:cache || true
             $PHP_BIN artisan route:cache || true
+            $PHP_BIN artisan view:clear || true
             $PHP_BIN artisan view:cache || true
             $PHP_BIN artisan optimize || true
 
