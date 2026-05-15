@@ -32,9 +32,9 @@ class BookingService
         return $this->repository->userHasActiveCreditBooking($user->id);
     }
 
-    public function createBookingFromPackage(User $user, Package $package, ?Carbon $expiresAt = null, ?int $currencyId = null, ?int $paidAmount = null): Booking
+    public function createBookingFromPackage(User $user, Package $package, ?Carbon $expiresAt = null, ?int $currencyId = null, ?int $paidAmount = null, ?float $exchangeRateSnapshot = null): Booking
     {
-        return $this->createFromPackage($user, $package, $expiresAt, $currencyId, $paidAmount);
+        return $this->createFromPackage($user, $package, $expiresAt, $currencyId, $paidAmount, $exchangeRateSnapshot);
     }
 
     public function find(int $id, bool $lockForUpdate = false, array $relations = []): Booking
@@ -65,11 +65,11 @@ class BookingService
         }
     }
 
-    public function createFromPackage(User $user, Package $package, ?Carbon $expiresAt = null, ?int $currencyId = null, ?int $paidAmount = null): Booking
+    public function createFromPackage(User $user, Package $package, ?Carbon $expiresAt = null, ?int $currencyId = null, ?int $paidAmount = null, ?float $exchangeRateSnapshot = null): Booking
     {
         $this->assertNoActiveBooking($user);
 
-        return DB::transaction(function () use ($user, $package, $expiresAt, $currencyId, $paidAmount): Booking {
+        return DB::transaction(function () use ($user, $package, $expiresAt, $currencyId, $paidAmount, $exchangeRateSnapshot): Booking {
             return $this->repository->create([
                 'user_id' => $user->id,
                 'package_id' => $package->id,
@@ -79,6 +79,7 @@ class BookingService
                 'expires_at' => $expiresAt,
                 'currency_id' => $currencyId,
                 'paid_amount' => $paidAmount,
+                'exchange_rate_snapshot' => $exchangeRateSnapshot,
             ]);
         });
     }

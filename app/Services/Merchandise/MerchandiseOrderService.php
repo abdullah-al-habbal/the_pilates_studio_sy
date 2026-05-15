@@ -47,6 +47,8 @@ class MerchandiseOrderService
 
             $item->decrement('stock_quantity', $quantity);
 
+            $exchangeRateSnapshot = $this->pricingService->getExchangeRateForSnapshot($currencyId);
+
             return MerchandiseOrder::create([
                 'merchandise_id' => $merchandiseId,
                 'customer_id' => $customerId,
@@ -54,6 +56,7 @@ class MerchandiseOrderService
                 'ordered_at' => now(),
                 'currency_id' => $currencyId,
                 'paid_amount' => $paidAmount,
+                'exchange_rate_snapshot' => $exchangeRateSnapshot,
             ]);
         });
     }

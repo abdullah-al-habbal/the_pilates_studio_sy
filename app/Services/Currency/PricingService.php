@@ -69,4 +69,20 @@ final readonly class PricingService
     {
         return $this->currencyService->getBaseCurrency()->id;
     }
+
+    /**
+     * Returns the exchange rate to be snapshotted for a target currency.
+     * Returns 1.0 if target IS the base currency.
+     */
+    public function getExchangeRateForSnapshot(int $targetCurrencyId): float
+    {
+        $targetCurrency = Currency::findOrFail($targetCurrencyId);
+        $baseCode = strtoupper(config('currency.base_currency', 'USD'));
+
+        if (strtoupper($targetCurrency->code) === $baseCode) {
+            return 1.0;
+        }
+
+        return (float) $targetCurrency->exchange_rate;
+    }
 }

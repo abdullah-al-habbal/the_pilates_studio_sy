@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Http\Requests\Admin\Operations;
 
-use App\Models\Booking;
 use Illuminate\Foundation\Http\FormRequest;
 
 class ProcessBookingRefundRequest extends FormRequest
@@ -16,24 +15,8 @@ class ProcessBookingRefundRequest extends FormRequest
 
     public function rules(): array
     {
-        $bookingId = (int) $this->route('bookingId');
-        $paidAmount = Booking::find($bookingId)?->paid_amount;
-
-        $amountRules = ['nullable', 'numeric', 'min:1'];
-        if ($paidAmount !== null) {
-            $amountRules[] = "max:{$paidAmount}";
-        }
-
         return [
-            'amount' => $amountRules,
-        ];
-    }
-
-    public function messages(): array
-    {
-        return [
-            'amount.max' => 'Refund amount cannot exceed the original paid amount.',
-            'amount.min' => 'Refund amount must be at least 1.',
+            'amount' => ['nullable', 'integer', 'min:1'],
         ];
     }
 }
