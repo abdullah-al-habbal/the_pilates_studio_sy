@@ -45,6 +45,10 @@ return new class extends Migration
                 ->constrained('currencies')
                 ->nullOnDelete();
             
+            $table->decimal('exchange_rate_snapshot', 12, 6)
+                ->nullable()
+                ->comment('Rate at purchase time relative to base currency');
+            
             $table->string('source_type')
                 ->default('standard')
                 ->comment('standard | freeze_origin | freeze_resume');

@@ -10,6 +10,14 @@ use Illuminate\Support\Facades\Cache;
 
 class CurrencyService
 {
+    public function getBaseCurrency(): Currency
+    {
+        $code = config('currency.base_currency', 'USD');
+        return Currency::where('code', strtoupper($code))
+            ->where('is_active', true)
+            ->firstOrFail();
+    }
+
     public function getDefaultCurrency(): Currency
     {
         return Currency::where('code', 'USD')->where('is_active', true)->firstOrFail();

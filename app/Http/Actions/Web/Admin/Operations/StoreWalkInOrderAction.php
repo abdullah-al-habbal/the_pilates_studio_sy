@@ -22,6 +22,7 @@ final readonly class StoreWalkInOrderAction
     {
         try {
             $order = $this->handler->handle(
+                // fix: use a command class to hande the attributes
                 merchandiseId: (int) $request->merchandise_id,
                 quantity: (int) $request->quantity,
                 currencyId: (int) $request->currency_id,

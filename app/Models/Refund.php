@@ -21,6 +21,7 @@ class Refund extends Model
         'reason',
         'refunded_by',
         'refunded_at',
+        'exchange_rate_snapshot',
     ];
 
     protected function casts(): array
@@ -28,6 +29,7 @@ class Refund extends Model
         return [
             'amount' => 'integer',
             'refunded_at' => 'datetime',
+            'exchange_rate_snapshot' => 'float',
         ];
     }
 

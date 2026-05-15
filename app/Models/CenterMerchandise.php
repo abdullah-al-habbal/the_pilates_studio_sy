@@ -3,6 +3,7 @@ declare(strict_types=1);
 namespace App\Models;
 
 use App\Services\Currency\CurrencyService;
+use App\Services\Currency\PricingService;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -66,21 +67,36 @@ class CenterMerchandise extends Model
 
     public function getPriceForCurrency(int $currencyId): ?int
     {
-        return $this->prices
-            ->firstWhere('currency_id', $currencyId)
-                ?->amount;
+        $pricing = app(PricingService::class);
+        $basePrice = $pricing->getBasePrice($this);
+
+        if ($basePrice === null) {
+            return null;
+        }
+
+        $baseCurrencyId = $pricing->getBaseCurrencyId();
+
+        if ($currencyId === $baseCurrencyId) {
+            return $basePrice;
+        }
+
+        return $pricing->calculateAmount($basePrice, $currencyId);
+    }
+
+    public function getBasePrice(): ?int
+    {
+        return app(PricingService::class)->getBasePrice($this);
     }
     private function getCurrentCurrencyId(): int
     {
         return app(CurrencyService::class)->getDefaultCurrency()->id;
     }
+
     public function getPriceForCurrentCurrency(): ?int
     {
         $currencyId = $this->getCurrentCurrencyId();
 
-        return $this->prices()
-            ->where('currency_id', $currencyId)
-            ->value('amount');
+        return $this->getPriceForCurrency($currencyId);
     }
     protected function price(): Attribute
     {

@@ -53,6 +53,15 @@ class MerchandiseOrderForm
                             : null
                         )
                         ->live(),
+
+                    TextInput::make('exchange_rate_snapshot')
+                        ->label('Exchange Rate Snapshot')
+                        ->numeric()
+                        ->readOnly()
+                        ->hiddenOn('create')
+                        ->disabledOn('create')
+                        ->hint('Auto-populated at transaction time')
+                        ->columnSpan('full'),
                 ]),
 
             Section::make(__('dashboard.resources.merchandise_orders.sections.customer'))

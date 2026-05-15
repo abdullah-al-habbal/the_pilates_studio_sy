@@ -5,6 +5,7 @@ namespace App\Http\Actions\Web\Admin\Operations;
 
 use App\Handlers\Admin\Operations\RecordExpenseHandler;
 use App\Http\Requests\Admin\Operations\RecordExpenseRequest;
+use App\Services\Log\LoggingService;
 use App\Traits\ApiResponseTrait;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
@@ -23,6 +24,7 @@ final readonly class RecordExpenseAction
     {
         try {
             $expense = $this->handler->handle(
+                // fix: use a command class
                 categoryName: $request->category_name,
                 currencyId: (int) $request->currency_id,
                 amount: (int) $request->amount,
@@ -36,6 +38,7 @@ final readonly class RecordExpenseAction
                 message: 'Expense recorded successfully.'
             );
         } catch (\Throwable $e) {
+            // fix: use the LoggingService from the 
             Log::error('Operations - RecordExpense failed: ' . $e->getMessage(), [
                 'exception' => $e,
                 'category_name' => $request->category_name,

@@ -23,6 +23,7 @@ final readonly class PlaceOrderAction
     {
         try {
             $order = $this->handler->handle(
+                // fix: use a command class to hande the attrivutes.
                 (int) $request->customer_id,
                 (int) $request->merchandise_id,
                 (int) $request->quantity,

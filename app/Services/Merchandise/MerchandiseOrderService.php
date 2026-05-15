@@ -8,6 +8,7 @@ use App\Models\CenterMerchandise;
 use App\Models\MerchandiseOrder;
 use App\Repositories\Eloquent\CenterMerchandise\CenterMerchandiseEloquentRepository;
 use App\Repositories\Eloquent\MerchandiseOrder\MerchandiseOrderEloquentRepository;
+use App\Services\Currency\PricingService;
 use App\Services\Log\LoggingService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
@@ -17,7 +18,8 @@ class MerchandiseOrderService
     public function __construct(
         private readonly CenterMerchandiseEloquentRepository $merchandiseRepo,
         private readonly MerchandiseOrderEloquentRepository $orderRepo,
-        private readonly LoggingService $logger
+        private readonly LoggingService $logger,
+        private readonly PricingService $pricingService,
     ) {
     }
 
@@ -33,12 +35,15 @@ class MerchandiseOrderService
                 ]);
             }
 
-            $price = $item->getPriceForCurrency($currencyId);
-            if (!$price) {
+            $basePrice = $this->pricingService->getBasePrice($item);
+
+            if ($basePrice === null) {
                 throw ValidationException::withMessages([
-                    'currency_id' => 'No price defined for this currency.',
+                    'merchandise_id' => 'No base price defined for this item.',
                 ]);
             }
+
+            $paidAmount = $this->pricingService->calculateAmount($basePrice * $quantity, $currencyId);
 
             $item->decrement('stock_quantity', $quantity);
 
@@ -48,7 +53,7 @@ class MerchandiseOrderService
                 'quantity' => $quantity,
                 'ordered_at' => now(),
                 'currency_id' => $currencyId,
-                'paid_amount' => $price * $quantity,
+                'paid_amount' => $paidAmount,
             ]);
         });
     }

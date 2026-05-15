@@ -31,6 +31,7 @@ class Booking extends Model
         'parent_booking_id',
         'frozen_at',
         'unfrozen_at',
+        'exchange_rate_snapshot',
     ];
 
     protected function casts(): array
@@ -44,6 +45,7 @@ class Booking extends Model
             'unfrozen_at'       => 'datetime',
             'status'            => BookingStatusEnum::class,
             'source_type'       => BookingSourceTypeEnum::class,
+            'exchange_rate_snapshot' => 'float',
         ];
     }
 

@@ -101,6 +101,11 @@ class BookingInfolist
                                 ->color('gray')
                                 ->copyable()
                                 ->icon('heroicon-o-clipboard'),
+                            TextEntry::make('exchange_rate_snapshot')
+                                ->label('Exchange Rate Snapshot')
+                                ->numeric(6)
+                                ->placeholder('—')
+                                ->icon('heroicon-o-currency-dollar'),
                             TextEntry::make('deleted_at')
                                 ->label(__('dashboard.resources.bookings.fields.deleted_at'))
                                 ->dateTime()

@@ -17,6 +17,7 @@ class MerchandiseOrder extends Model
         'ordered_at',
         'currency_id',
         'paid_amount',
+        'exchange_rate_snapshot',
     ];
 
     protected function casts(): array
@@ -25,6 +26,7 @@ class MerchandiseOrder extends Model
             'quantity' => 'integer',
             'ordered_at' => 'datetime',
             'paid_amount' => 'integer',
+            'exchange_rate_snapshot' => 'float',
         ];
     }
 

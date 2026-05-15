@@ -6,13 +6,16 @@ namespace Database\Seeders;
 
 use App\Models\CenterMerchandise;
 use App\Models\CenterMerchandiseCategory;
-use App\Models\Currency;
+use App\Services\Currency\PricingService;
 use Illuminate\Database\Seeder;
 
 class CenterMerchandiseSeeder extends Seeder
 {
     public function run(): void
     {
+        $pricing = app(PricingService::class);
+        $baseCurrencyId = $pricing->getBaseCurrencyId();
+
         $categories = CenterMerchandiseCategory::all();
         if ($categories->isEmpty()) {
             return;
@@ -20,42 +23,35 @@ class CenterMerchandiseSeeder extends Seeder
 
         $items = [
             [
-                'name' => ['en' => 'Yoga Mat', 'ar' => 'سجادة يوغا'],
-                'description' => ['en' => 'High quality non-slip yoga mat.', 'ar' => 'سجادة يوغا عالية الجودة مانعة للانزلاق.'],
-                'prices' => [
-                    'USD' => 2500,
-                    'SYP' => 325000,
-                ],
+                'name' => ['en' => 'Yoga Mat', 'ar' => 'حصيرة يوجا'],
+                'description' => ['en' => 'High quality non-slip yoga mat.', 'ar' => 'حصيرة يوجا عالية الجودة غير قابلة للانزلاق.'],
+                'base_price' => 325000,
                 'stock_quantity' => 10,
                 'category_id' => $categories->random()->id,
             ],
             [
-                'name' => ['en' => 'Water Bottle', 'ar' => 'زجاجة ماء'],
-                'description' => ['en' => '1L stainless steel water bottle.', 'ar' => 'زجاجة ماء سعة 1 لتر من الفولاذ المقاوم للصدأ.'],
-                'prices' => [
-                    'USD' => 1500,
-                    'SYP' => 195000,
-                ],
+                'name' => ['en' => 'Water Bottle', 'ar' => 'قنينة ماء'],
+                'description' => ['en' => '1L stainless steel water bottle.', 'ar' => 'قنينة ماء سعة 1 لتر من الفولاذ المقاوم للصدأ.'],
+                'base_price' => 195000,
                 'stock_quantity' => 20,
                 'category_id' => $categories->random()->id,
             ],
         ];
 
         foreach ($items as $itemData) {
-            $prices = $itemData['prices'];
-            unset($itemData['prices']);
+            $basePrice = $itemData['base_price'];
+            unset($itemData['base_price']);
 
             $merchandise = CenterMerchandise::create($itemData);
 
-            foreach ($prices as $currencyCode => $amount) {
-                $currency = Currency::where('code', $currencyCode)->first();
-                if ($currency) {
-                    $merchandise->prices()->create([
-                        'currency_id' => $currency->id,
-                        'amount' => $amount,
-                    ]);
-                }
-            }
+            $merchandise->prices()->create([
+                'currency_id' => $baseCurrencyId,
+                'amount' => $basePrice,
+            ]);
+
+            $merchandise->prices()
+                ->where('currency_id', '!=', $baseCurrencyId)
+                ->delete();
         }
     }
 }

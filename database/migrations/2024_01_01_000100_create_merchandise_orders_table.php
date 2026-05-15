@@ -24,6 +24,9 @@ return new class extends Migration {
 
             $table->foreignId('currency_id')->nullable()->constrained('currencies');
             $table->unsignedInteger('paid_amount')->nullable();
+            $table->decimal('exchange_rate_snapshot', 12, 6)
+                ->nullable()
+                ->comment('Rate at purchase time relative to base currency');
 
             $table->index('merchandise_id', 'idx_order_merchandise');
             $table->index('customer_id', 'idx_order_customer');

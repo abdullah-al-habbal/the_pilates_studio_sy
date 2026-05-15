@@ -7,6 +7,7 @@ namespace App\Models;
 use App\Enums\BookingStatusEnum;
 use App\Enums\PackageTypeEnum;
 use App\Services\Currency\CurrencyService;
+use App\Services\Currency\PricingService;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Collection;
@@ -89,15 +90,32 @@ class Package extends Model
 
     public function getPriceForCurrency(int $currencyId): ?int
     {
-        return $this->prices
-            ->firstWhere('currency_id', $currencyId)
-                ?->amount;
+        $pricing = app(PricingService::class);
+        $basePrice = $pricing->getBasePrice($this);
+
+        if ($basePrice === null) {
+            return null;
+        }
+
+        $baseCurrencyId = $pricing->getBaseCurrencyId();
+
+        if ($currencyId === $baseCurrencyId) {
+            return $basePrice;
+        }
+
+        return $pricing->calculateAmount($basePrice, $currencyId);
+    }
+
+    public function getBasePrice(): ?int
+    {
+        return app(PricingService::class)->getBasePrice($this);
     }
 
     public function isSystemGenerated(): bool
     {
         return $this->type !== PackageTypeEnum::STANDARD;
     }
+
     private function getCurrentCurrencyId(): int
     {
         return app(CurrencyService::class)->getDefaultCurrency()->id;
@@ -107,9 +125,7 @@ class Package extends Model
     {
         $currencyId = $this->getCurrentCurrencyId();
 
-        return $this->prices()
-            ->where('currency_id', $currencyId)
-            ->value('amount');
+        return $this->getPriceForCurrency($currencyId);
     }
 
     private function getCheapestPriceForCurrentCurrency(): ?int

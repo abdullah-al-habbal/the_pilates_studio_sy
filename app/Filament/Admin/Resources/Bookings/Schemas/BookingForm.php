@@ -173,6 +173,15 @@ class BookingForm
                         ->hint(__('dashboard.resources.bookings.helpers.expiration_hint'))
                         ->hintIcon('heroicon-m-information-circle'),
 
+                    TextInput::make('exchange_rate_snapshot')
+                        ->label('Exchange Rate Snapshot')
+                        ->numeric()
+                        ->readOnly()
+                        ->hiddenOn('create')
+                        ->disabledOn('create')
+                        ->hint('Auto-populated at transaction time')
+                        ->columnSpan('full'),
+
                     Hidden::make('total_credits')->default(0),
                     Hidden::make('remaining_credits')->default(0),
                     Hidden::make('status')->default(BookingStatusEnum::ACTIVE->value),

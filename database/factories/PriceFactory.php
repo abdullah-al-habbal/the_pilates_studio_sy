@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Database\Factories;
 
-use App\Models\Currency;
+use App\Services\Currency\PricingService;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class PriceFactory extends Factory
@@ -12,23 +12,29 @@ class PriceFactory extends Factory
 
     public function definition(): array
     {
+        $pricing = app(PricingService::class);
+        $baseCurrencyId = $pricing->getBaseCurrencyId();
+
         return [
-            'currency_id' => Currency::factory(),
+            'currency_id' => $baseCurrencyId,
             'amount' => fake()->numberBetween(1000, 100000),
         ];
     }
 
     public function usd(): static
     {
+        $pricing = app(PricingService::class);
+        $baseCurrencyId = $pricing->getBaseCurrencyId();
+
         return $this->state(fn(array $attributes) => [
-            'currency_id' => Currency::where('code', 'USD')->first()?->id ?? Currency::factory(),
+            'currency_id' => $baseCurrencyId,
         ]);
     }
 
-    public function syp(): static
+    public function forCurrency(int $currencyId): static
     {
         return $this->state(fn(array $attributes) => [
-            'currency_id' => Currency::where('code', 'SYP')->first()?->id ?? Currency::factory(),
+            'currency_id' => $currencyId,
         ]);
     }
 }

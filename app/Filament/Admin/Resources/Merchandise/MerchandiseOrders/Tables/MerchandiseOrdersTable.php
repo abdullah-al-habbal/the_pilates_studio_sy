@@ -34,6 +34,12 @@ class MerchandiseOrdersTable
                 TextColumn::make('ordered_at')
                     ->label(__('dashboard.resources.merchandise_orders.fields.ordered_at'))
                     ->dateTime()->sortable(),
+                TextColumn::make('exchange_rate_snapshot')
+                    ->label('Rate')
+                    ->numeric(decimalPlaces: 6)
+                    ->default('-')
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->actions([ViewAction::make(), EditAction::make(), DeleteAction::make()])
             ->emptyStateHeading(__('dashboard.resources.merchandise_orders.empty_state.heading'))

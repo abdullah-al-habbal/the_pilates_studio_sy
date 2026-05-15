@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\DB;
 
 class BookingEloquentRepository
 {
+    // fix: use __construct to inject the model class
     public function getTotalRevenue(?CarbonInterface $startDate = null, ?CarbonInterface $endDate = null): float
     {
         return (float) Booking::query()

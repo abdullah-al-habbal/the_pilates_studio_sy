@@ -99,6 +99,13 @@ class BookingsTable
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
+
+                TextColumn::make('exchange_rate_snapshot')
+                    ->label('Rate')
+                    ->numeric(decimalPlaces: 6)
+                    ->default('-')
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
                 TrashedFilter::make(),

@@ -12,12 +12,15 @@ return new class extends Migration {
             $table->id();
             $table->morphs('refundable');
             $table->foreignId('user_id')->constrained('users')->restrictOnDelete();
-            
+
             $table->foreignId('currency_id')
                 ->constrained('currencies')
                 ->restrictOnDelete();
-                
+
             $table->unsignedInteger('amount');
+            $table->decimal('exchange_rate_snapshot', 12, 6)
+                ->nullable()
+                ->comment('Rate at refund time relative to base currency');
             $table->text('reason')->nullable();
             $table->foreignId('refunded_by')->constrained('users')->restrictOnDelete();
             $table->timestamp('refunded_at');

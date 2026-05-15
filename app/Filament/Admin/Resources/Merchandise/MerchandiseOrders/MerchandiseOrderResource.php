@@ -100,6 +100,11 @@ class MerchandiseOrderResource extends Resource
                         TextEntry::make('ordered_at')
                             ->label(__('dashboard.resources.merchandise_orders.fields.ordered_at'))
                             ->dateTime(),
+
+                        TextEntry::make('exchange_rate_snapshot')
+                            ->label('Exchange Rate Snapshot')
+                            ->numeric(6)
+                            ->placeholder('—'),
                     ]),
 
                 Section::make(__('dashboard.resources.merchandise_orders.sections.customer'))
