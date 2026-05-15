@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Requests\Admin\Operations;
 
+use App\Models\Booking;
 use Illuminate\Foundation\Http\FormRequest;
 
 class ProcessBookingRefundRequest extends FormRequest
@@ -16,7 +17,7 @@ class ProcessBookingRefundRequest extends FormRequest
     public function rules(): array
     {
         $bookingId = (int) $this->route('bookingId');
-        $paidAmount = \App\Models\Booking::find($bookingId)?->paid_amount;
+        $paidAmount = Booking::find($bookingId)?->paid_amount;
 
         $amountRules = ['nullable', 'numeric', 'min:1'];
         if ($paidAmount !== null) {

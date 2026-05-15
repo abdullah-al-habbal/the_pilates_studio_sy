@@ -65,6 +65,11 @@ export async function showPackageAssignment(userId) {
         OperationsUI.openModal('Assign New Package', content);
         // Attach handlers after modal is rendered
         attachGlobalHandlers(userId);
+
+        // Initial trigger to ensure correct amounts are shown for each card
+        packages.forEach(p => {
+            setTimeout(() => window.updatePackageAmount(p.id), 0);
+        });
     } catch (e) {
         console.error('Failed to load packages:', e);
         OperationsUI.toast('Failed to load packages', 'error');
@@ -72,8 +77,15 @@ export async function showPackageAssignment(userId) {
 }
 
 function renderPackageCard(p, userId) {
-    const price = p.prices && p.prices.length > 0 ? p.prices[0].amount : 0;
+    const prices = (p.prices || []).reduce((acc, pr) => {
+        acc[pr.currency_id] = pr.amount;
+        return acc;
+    }, {});
+    const pricesJson = JSON.stringify(prices).replace(/"/g, '&quot;');
+    
     const currId = p.prices && p.prices.length > 0 ? p.prices[0].currency_id : (window.OperationsCurrencies?.[0]?.id || 1);
+    const price = prices[currId] ?? 0;
+
     return `
         <div id="card-${p.id}" class="flex flex-col p-6 rounded-2xl border-2 border-slate-100 dark:border-slate-800 transition-all text-left group">
             <div class="flex justify-between items-start">
@@ -92,12 +104,17 @@ function renderPackageCard(p, userId) {
             </span>
             <div class="space-y-3 mt-auto">
                 <div class="flex gap-2">
-                    <select id="currency-${p.id}" class="flex-1 px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-sm outline-none focus:ring-2 focus:ring-primary-500">
+                    <select id="currency-${p.id}" onchange="window.updatePackageAmount(${p.id})"
+                            class="flex-1 px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-sm outline-none focus:ring-2 focus:ring-primary-500">
                         ${(window.OperationsCurrencies || []).map(c => `<option value="${c.id}" ${c.id == currId ? 'selected' : ''}>${c.code} (${c.symbol})</option>`).join('')}
                     </select>
-                    <input type="number" id="amount-${p.id}" value="${price}" min="0" class="flex-1 px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-sm outline-none focus:ring-2 focus:ring-primary-500" placeholder="Amount">
+                    <input type="number" id="amount-${p.id}" value="${price}" min="0" readonly
+                           class="flex-1 px-3 py-2 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm outline-none cursor-not-allowed"
+                           placeholder="Amount"
+                           data-prices="${pricesJson}">
                 </div>
-                <button onclick="window.handlePackageAssign(${userId}, ${p.id})" class="w-full bg-primary-600 hover:bg-primary-700 text-white font-bold py-2 rounded-xl transition-colors btn-single-action">
+                <button id="assign-btn-${p.id}" onclick="window.handlePackageAssign(${userId}, ${p.id})" 
+                        class="w-full bg-primary-600 hover:bg-primary-700 text-white font-bold py-2 rounded-xl transition-colors btn-single-action">
                     Assign Package
                 </button>
             </div>
@@ -274,7 +291,37 @@ export async function handleUnfreeze(bookingId, userId) {
     }
 }
 
+window.updatePackageAmount = function(packageId) {
+    const currencySelect = document.getElementById(`currency-${packageId}`);
+    const amountInput = document.getElementById(`amount-${packageId}`);
+    if (!currencySelect || !amountInput) return;
+
+    const pricesJson = amountInput.getAttribute('data-prices');
+    if (!pricesJson) return;
+
+    const prices = JSON.parse(pricesJson.replace(/&quot;/g, '"'));
+    const selectedCurrencyId = parseInt(currencySelect.value, 10);
+    const amount = prices[selectedCurrencyId] ?? 0;
+
+    amountInput.value = amount;
+
+    // Optionally show a warning if no price exists for this currency
+    const assignBtn = document.getElementById(`assign-btn-${packageId}`);
+    if (assignBtn) {
+        if (amount === 0 && !prices.hasOwnProperty(selectedCurrencyId)) {
+            assignBtn.disabled = true;
+            assignBtn.title = 'No price available for this currency';
+            assignBtn.classList.add('opacity-50', 'cursor-not-allowed');
+        } else {
+            assignBtn.disabled = false;
+            assignBtn.removeAttribute('title');
+            assignBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+        }
+    }
+};
+
 window.showPackageAssignment = showPackageAssignment;
 window.handlePackageAssign = handlePackageAssign;
 window.handleFreeze = handleFreeze;
 window.handleUnfreeze = handleUnfreeze;
+window.updatePackageAmount = window.updatePackageAmount;

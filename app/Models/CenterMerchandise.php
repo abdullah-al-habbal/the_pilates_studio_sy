@@ -2,6 +2,7 @@
 declare(strict_types=1);
 namespace App\Models;
 
+use App\Services\Currency\CurrencyService;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -71,7 +72,7 @@ class CenterMerchandise extends Model
     }
     private function getCurrentCurrencyId(): int
     {
-        return app(\App\Services\Currency\CurrencyService::class)->getDefaultCurrency()->id;
+        return app(CurrencyService::class)->getDefaultCurrency()->id;
     }
     public function getPriceForCurrentCurrency(): ?int
     {
