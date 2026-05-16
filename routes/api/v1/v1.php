@@ -16,6 +16,7 @@ Route::prefix('v1')->name('v1.')->middleware('api')->group(function () {
         require_once __DIR__ . '/public/instructors.php';
         require_once __DIR__ . '/public/languages.php';
         require_once __DIR__ . '/public/mobile_app_version.php';
+        require_once __DIR__ . '/public/health.php';
     });
 
     Route::middleware('auth:sanctum')->group(function () {
