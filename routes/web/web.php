@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Route;
 
 require __DIR__ . '/scheduler.php';
 require __DIR__ . '/operations.php';
+require __DIR__ . '/admin.php';
 
 Route::middleware(['web'])->group(function () {
     Route::get('/web/static-pages/{slug}', GetStaticPageBySlugAction::class)

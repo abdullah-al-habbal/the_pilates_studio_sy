@@ -1,4 +1,5 @@
 <?php
+// filePath: config\currency.php
 declare(strict_types=1);
 
 return [
