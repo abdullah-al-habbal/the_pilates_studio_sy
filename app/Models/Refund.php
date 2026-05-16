@@ -8,6 +8,9 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 
+/**
+ * @property-read float|null $exchange_rate_snapshot Immutable rate at transaction time for audit accuracy
+ */
 class Refund extends Model
 {
     use HasFactory;

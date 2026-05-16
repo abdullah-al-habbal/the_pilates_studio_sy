@@ -14,6 +14,9 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use InvalidArgumentException;
 
+/**
+ * @property-read float|null $exchange_rate_snapshot Immutable rate at transaction time for audit accuracy
+ */
 class Booking extends Model
 {
     use HasFactory, SoftDeletes;
