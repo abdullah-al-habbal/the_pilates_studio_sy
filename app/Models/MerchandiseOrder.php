@@ -2,6 +2,7 @@
 declare(strict_types=1);
 namespace App\Models;
 
+use App\Services\Currency\PricingService;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -35,7 +36,16 @@ class MerchandiseOrder extends Model
         if ($this->paid_amount !== null) {
             return $this->paid_amount;
         }
-        return ($this->merchandise?->price ?? 0) * $this->quantity;
+
+        if ($this->merchandise) {
+            $pricing = app(PricingService::class);
+            $basePrice = $pricing->getBasePrice($this->merchandise);
+            if ($basePrice !== null && $this->currency_id) {
+                return $pricing->calculateAmount($basePrice * $this->quantity, $this->currency_id);
+            }
+        }
+
+        return 0;
     }
 
     public function merchandise(): BelongsTo

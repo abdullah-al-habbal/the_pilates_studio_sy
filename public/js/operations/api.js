@@ -1,13 +1,14 @@
 // public/js/operations/api.js
 const OperationsAPI = {
-    async request(url, method = 'GET', body = null, timeoutMs = 10_000) {
+    async request(url, method = "GET", body = null, timeoutMs = 10_000) {
         const controller = new AbortController();
         const timer = setTimeout(() => controller.abort(), timeoutMs);
 
         const headers = {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json',
-            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+            "Content-Type": "application/json",
+            Accept: "application/json",
+            "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]')
+                .content,
         };
 
         const config = { method, headers, signal: controller.signal };
@@ -19,22 +20,26 @@ const OperationsAPI = {
             const data = await response.json();
 
             if (!response.ok) {
-                throw new Error(data.message || 'Something went wrong');
+                throw new Error(data.message || "Something went wrong");
             }
 
             return data;
         } catch (error) {
             clearTimeout(timer);
-            if (error.name === 'AbortError') {
-                throw new Error('Request timed out. The server took too long to respond.');
+            if (error.name === "AbortError") {
+                throw new Error(
+                    "Request timed out. The server took too long to respond.",
+                );
             }
-            console.error('API Error:', error);
+            console.error("API Error:", error);
             throw error;
         }
     },
 
-    getClients(search = '', page = 1, filter = '') {
-        return this.request(`/admin/operations/clients?search=${encodeURIComponent(search)}&page=${page}&filter=${encodeURIComponent(filter)}`);
+    getClients(search = "", page = 1, filter = "") {
+        return this.request(
+            `/admin/operations/clients?search=${encodeURIComponent(search)}&page=${page}&filter=${encodeURIComponent(filter)}`,
+        );
     },
 
     getClientDetails(userId) {
@@ -42,23 +47,32 @@ const OperationsAPI = {
     },
 
     getPackages() {
-        return this.request('/admin/operations/packages');
+        return this.request("/admin/operations/packages");
     },
 
-    assignPackage(userId, packageId, currencyId, paidAmount) {
-        return this.request(`/admin/operations/packages/${packageId}/assign`, 'POST', { 
-            user_id: userId,
-            currency_id: parseInt(currencyId, 10),
-            paid_amount: parseInt(paidAmount, 10)
-        });
+    assignPackage(userId, packageId, currencyId, paidAmount = null) {
+        if (paidAmount != null) {
+            console.warn(
+                "OperationsAPI.assignPackage: paid_amount is deprecated and ignored. The server computes the final amount from currency_id only.",
+            );
+        }
+
+        return this.request(
+            `/admin/operations/packages/${packageId}/assign`,
+            "POST",
+            {
+                user_id: userId,
+                currency_id: parseInt(currencyId, 10),
+            },
+        );
     },
 
     getStoreItems() {
-        return this.request('/admin/operations/store/items');
+        return this.request("/admin/operations/store/items");
     },
 
     placeOrder(customerId, merchandiseId, quantity, currencyId) {
-        return this.request('/admin/operations/store/orders', 'POST', {
+        return this.request("/admin/operations/store/orders", "POST", {
             customer_id: customerId,
             merchandise_id: merchandiseId,
             quantity: parseInt(quantity, 10),
@@ -66,8 +80,15 @@ const OperationsAPI = {
         });
     },
 
-    storeWalkInOrder(merchandiseId, quantity, currencyId, fullname, phoneNumber, email = null) {
-        return this.request('/admin/operations/store/walk-in-order', 'POST', {
+    storeWalkInOrder(
+        merchandiseId,
+        quantity,
+        currencyId,
+        fullname,
+        phoneNumber,
+        email = null,
+    ) {
+        return this.request("/admin/operations/store/walk-in-order", "POST", {
             merchandise_id: merchandiseId,
             quantity: parseInt(quantity, 10),
             currency_id: parseInt(currencyId, 10),
@@ -77,10 +98,10 @@ const OperationsAPI = {
         });
     },
 
-    getDailyBalance(date = '', currencies = []) {
+    getDailyBalance(date = "", currencies = []) {
         let url = `/admin/operations/finance/daily?date=${date}`;
         if (currencies && currencies.length > 0) {
-            currencies.forEach(c => {
+            currencies.forEach((c) => {
                 url += `&currencies[]=${encodeURIComponent(c)}`;
             });
         }
@@ -88,42 +109,65 @@ const OperationsAPI = {
     },
 
     recordExpense(data) {
-        return this.request('/admin/operations/finance/expenses', 'POST', data);
+        return this.request("/admin/operations/finance/expenses", "POST", data);
     },
 
     freezeBooking(bookingId) {
-        return this.request(`/admin/operations/bookings/${bookingId}/freeze`, 'POST');
+        return this.request(
+            `/admin/operations/bookings/${bookingId}/freeze`,
+            "POST",
+        );
     },
 
     unfreezeBooking(bookingId) {
-        return this.request(`/admin/operations/bookings/${bookingId}/unfreeze`, 'POST');
+        return this.request(
+            `/admin/operations/bookings/${bookingId}/unfreeze`,
+            "POST",
+        );
     },
 
     refundBooking(bookingId, amount) {
-        return this.request(`/admin/operations/bookings/${bookingId}/refund`, 'POST', { amount: amount ? parseFloat(amount) : null });
+        const parsedAmount =
+            amount == null || amount === ""
+                ? null
+                : parseInt(String(amount), 10);
+        return this.request(
+            `/admin/operations/bookings/${bookingId}/refund`,
+            "POST",
+            {
+                amount: Number.isNaN(parsedAmount) ? null : parsedAmount,
+            },
+        );
     },
 
     updatePackage(packageId, data) {
-        return this.request(`/admin/operations/packages/${packageId}`, 'PUT', {
-            name:          data.name,
+        return this.request(`/admin/operations/packages/${packageId}`, "PUT", {
+            name: data.name,
             total_credits: parseInt(data.total_credits, 10),
-            validity_days: data.validity_days ? parseInt(data.validity_days, 10) : null,
-            currency_id:   parseInt(data.currency_id, 10),
-            amount:        parseInt(data.amount, 10),
+            validity_days: data.validity_days
+                ? parseInt(data.validity_days, 10)
+                : null,
+            currency_id: parseInt(data.currency_id, 10),
+            amount: parseInt(data.amount, 10),
         });
     },
 
     deletePackage(packageId) {
-        return this.request(`/admin/operations/packages/${packageId}`, 'DELETE');
+        return this.request(
+            `/admin/operations/packages/${packageId}`,
+            "DELETE",
+        );
     },
 
     createPackage(data) {
-        return this.request('/admin/operations/packages', 'POST', {
-            name:          data.name,
+        return this.request("/admin/operations/packages", "POST", {
+            name: data.name,
             total_credits: parseInt(data.total_credits, 10),
-            validity_days: data.validity_days ? parseInt(data.validity_days, 10) : null,
-            currency_id:   parseInt(data.currency_id, 10),
-            amount:        parseInt(data.amount, 10),
+            validity_days: data.validity_days
+                ? parseInt(data.validity_days, 10)
+                : null,
+            currency_id: parseInt(data.currency_id, 10),
+            amount: parseInt(data.amount, 10),
         });
     },
 };

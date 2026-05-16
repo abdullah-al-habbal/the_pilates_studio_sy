@@ -16,11 +16,15 @@ class PackageResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
-            'id'            => $this->resource->id,
-            'name'          => $this->resource->getTranslation('name', app()->getLocale()),
+            'id' => $this->resource->id,
+            'name' => $this->resource->getTranslation('name', app()->getLocale()),
             'total_credits' => $this->resource->total_credits,
             'validity_days' => $this->resource->validity_days,
-            'price'         => $this->resource->getPriceForCurrentCurrency(),
+            'base_price' => $this->resource->getBasePrice(),
+            'prices' => $this->resource->prices->map(fn($price) => [
+                'currency_id' => $price->currency_id,
+                'amount' => $price->amount,
+            ])->all(),
         ];
     }
 }

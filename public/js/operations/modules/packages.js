@@ -1,52 +1,63 @@
 // public\js\operations\modules\packages.js
-import { renderClients, showClientDetails } from './clients.js';
+import { renderClients, showClientDetails } from "./clients.js";
 
 async function createNewPackage(userId, formData) {
     try {
         await OperationsAPI.createPackage(formData);
-        OperationsUI.toast('Package created!', 'success');
+        OperationsUI.toast("Package created!", "success");
         showPackageAssignment(userId);
     } catch (e) {
-        OperationsUI.toast(e.message, 'error');
+        OperationsUI.toast(e.message, "error");
     }
 }
 
 async function updatePackage(userId, packageId, formData) {
     try {
         await OperationsAPI.updatePackage(packageId, formData);
-        OperationsUI.toast('Package updated!', 'success');
+        OperationsUI.toast("Package updated!", "success");
         showPackageAssignment(userId);
     } catch (e) {
-        OperationsUI.toast(e.message, 'error');
+        OperationsUI.toast(e.message, "error");
     }
 }
 
 async function deletePackage(userId, packageId) {
-    if (!confirm('Delete this package? It will no longer be assignable.')) return;
+    if (!confirm("Delete this package? It will no longer be assignable."))
+        return;
     try {
         await OperationsAPI.deletePackage(packageId);
-        OperationsUI.toast('Package deleted.', 'success');
+        OperationsUI.toast("Package deleted.", "success");
         showPackageAssignment(userId);
     } catch (e) {
-        OperationsUI.toast(e.message, 'error');
+        OperationsUI.toast(e.message, "error");
     }
 }
 
 export async function showPackageAssignment(userId) {
-    OperationsUI.openModal('Assign New Package', `
+    OperationsUI.openModal(
+        "Assign New Package",
+        `
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            ${Array(4).fill('').map(() => `
+            ${Array(4)
+                .fill("")
+                .map(
+                    () => `
                 <div class="rounded-2xl border-2 border-slate-100 dark:border-slate-800 p-6 space-y-3">
                     <div class="shimmer-cell w-50" style="height:20px;border-radius:4px;"></div>
                     <div class="shimmer-cell w-30" style="height:14px;"></div>
                     <div class="shimmer-cell w-20" style="height:28px;border-radius:6px;margin-top:1rem;"></div>
-                </div>`).join('')}
-        </div>`);
+                </div>`,
+                )
+                .join("")}
+        </div>`,
+    );
 
     try {
         const result = await OperationsAPI.getPackages();
         const packages = result.data;
-        const gridHtml = packages.map(p => renderPackageCard(p, userId)).join('');
+        const gridHtml = packages
+            .map((p) => renderPackageCard(p, userId))
+            .join("");
 
         const content = `
             <div class="mb-4">
@@ -58,21 +69,19 @@ export async function showPackageAssignment(userId) {
                 ${gridHtml}
             </div>
             <!-- Creation form -->
-            <div id="create-package-form" class="hidden space-y-4">${renderPackageForm('create', userId, null)}</div>
+            <div id="create-package-form" class="hidden space-y-4">${renderPackageForm("create", userId, null)}</div>
             <!-- Global hidden edit container (will be populated dynamically) -->
             <div id="edit-package-container" class="hidden"></div>`;
 
-        OperationsUI.openModal('Assign New Package', content);
-        // Attach handlers after modal is rendered
+        OperationsUI.openModal("Assign New Package", content);
         attachGlobalHandlers(userId);
 
-        // Initial trigger to ensure correct amounts are shown for each card
-        packages.forEach(p => {
+        packages.forEach((p) => {
             setTimeout(() => window.updatePackageAmount(p.id), 0);
         });
     } catch (e) {
-        console.error('Failed to load packages:', e);
-        OperationsUI.toast('Failed to load packages', 'error');
+        console.error("Failed to load packages:", e);
+        OperationsUI.toast("Failed to load packages", "error");
     }
 }
 
@@ -81,10 +90,13 @@ function renderPackageCard(p, userId) {
         acc[pr.currency_id] = pr.amount;
         return acc;
     }, {});
-    const pricesJson = JSON.stringify(prices).replace(/"/g, '&quot;');
-    
-    const currId = p.prices && p.prices.length > 0 ? p.prices[0].currency_id : (window.OperationsCurrencies?.[0]?.id || 1);
-    const price = prices[currId] ?? 0;
+    const pricesJson = JSON.stringify(prices).replace(/"/g, "&quot;");
+    const defaultCurrencyId = window.OperationsCurrencies?.[0]?.id || 1;
+    const selectedCurrencyId =
+        p.prices && p.prices.length > 0
+            ? p.prices[0].currency_id
+            : defaultCurrencyId;
+    const amount = getPackageAmount(p, selectedCurrencyId);
 
     return `
         <div id="card-${p.id}" class="flex flex-col p-6 rounded-2xl border-2 border-slate-100 dark:border-slate-800 transition-all text-left group">
@@ -100,20 +112,21 @@ function renderPackageCard(p, userId) {
                 </div>
             </div>
             <span class="text-sm text-slate-500 mb-4">
-                ${p.total_credits} Sessions &bull; ${p.validity_days ? `${p.validity_days} Days` : 'No expiry'}
+                ${p.total_credits} Sessions &bull; ${p.validity_days ? `${p.validity_days} Days` : "No expiry"}
             </span>
             <div class="space-y-3 mt-auto">
                 <div class="flex gap-2">
                     <select id="currency-${p.id}" onchange="window.updatePackageAmount(${p.id})"
                             class="flex-1 px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-sm outline-none focus:ring-2 focus:ring-primary-500">
-                        ${(window.OperationsCurrencies || []).map(c => `<option value="${c.id}" ${c.id == currId ? 'selected' : ''}>${c.code} (${c.symbol})</option>`).join('')}
+                        ${(window.OperationsCurrencies || []).map((c) => `<option value="${c.id}" ${c.id == selectedCurrencyId ? "selected" : ""}>${c.code} (${c.symbol})</option>`).join("")}
                     </select>
-                    <input type="number" id="amount-${p.id}" value="${price}" min="0" readonly
+                    <input type="number" id="amount-${p.id}" value="${amount}" min="0" readonly
                            class="flex-1 px-3 py-2 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm outline-none cursor-not-allowed"
                            placeholder="Amount"
-                           data-prices="${pricesJson}">
+                           data-prices="${pricesJson}"
+                           data-base-price="${p.base_price ?? 0}">
                 </div>
-                <button id="assign-btn-${p.id}" onclick="window.handlePackageAssign(${userId}, ${p.id})" 
+                <button id="assign-btn-${p.id}" onclick="window.handlePackageAssign(${userId}, ${p.id})"
                         class="w-full bg-primary-600 hover:bg-primary-700 text-white font-bold py-2 rounded-xl transition-colors btn-single-action">
                     Assign Package
                 </button>
@@ -121,13 +134,25 @@ function renderPackageCard(p, userId) {
         </div>`;
 }
 
+function getPackageAmount(packageData, currencyId) {
+    const basePrice = Number(packageData.base_price || 0);
+    const converted =
+        basePrice > 0
+            ? OperationsUI.computeAmountFromBase(basePrice, currencyId)
+            : 0;
+
+    return converted > 0 ? converted : 0;
+}
+
 function renderPackageForm(context, userId, packageData = null) {
-    const isEdit = context === 'edit';
-    const defaultValidity = packageData?.validity_days ?? '';
-    const defaultCredits  = packageData?.total_credits ?? 10;
-    const defaultName     = packageData?.name ?? '';
-    const defaultCurrId   = packageData?.prices?.[0]?.currency_id ?? (window.OperationsCurrencies?.[0]?.id || 1);
-    const defaultAmount   = packageData?.prices?.[0]?.amount ?? 0;
+    const isEdit = context === "edit";
+    const defaultValidity = packageData?.validity_days ?? "";
+    const defaultCredits = packageData?.total_credits ?? 10;
+    const defaultName = packageData?.name ?? "";
+    const defaultCurrId =
+        packageData?.prices?.[0]?.currency_id ??
+        (window.OperationsCurrencies?.[0]?.id || 1);
+    const defaultAmount = packageData?.prices?.[0]?.amount ?? 0;
 
     return `
         <div class="space-y-4 p-6 glass-card rounded-2xl border-2 border-primary-500/20">
@@ -149,7 +174,7 @@ function renderPackageForm(context, userId, packageData = null) {
                 <div>
                     <label class="text-xs font-bold text-slate-500 uppercase">Currency</label>
                     <select id="${context}-pkg-currency" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-sm outline-none focus:ring-2 focus:ring-primary-500">
-                        ${(window.OperationsCurrencies || []).map(c => `<option value="${c.id}" ${c.id == defaultCurrId ? 'selected' : ''}>${c.code} (${c.symbol})</option>`).join('')}
+                        ${(window.OperationsCurrencies || []).map((c) => `<option value="${c.id}" ${c.id == defaultCurrId ? "selected" : ""}>${c.code} (${c.symbol})</option>`).join("")}
                     </select>
                 </div>
                 <div>
@@ -160,162 +185,205 @@ function renderPackageForm(context, userId, packageData = null) {
             <div class="flex gap-2 pt-2">
                 <button id="cancel-${context}-package" class="flex-1 bg-slate-100 dark:bg-slate-800 py-2.5 rounded-xl text-sm font-medium btn-single-action transition-colors">Cancel</button>
                 <button id="submit-${context}-package" class="flex-1 bg-primary-600 hover:bg-primary-700 text-white py-2.5 rounded-xl text-sm font-bold btn-single-action transition-all">
-                    ${isEdit ? 'Save Changes' : 'Create & Reload'}
+                    ${isEdit ? "Save Changes" : "Create & Reload"}
                 </button>
             </div>
         </div>`;
 }
 
 function attachGlobalHandlers(userId) {
-    document.getElementById('show-create-package-form')?.addEventListener('click', () => {
-        document.getElementById('package-grid').classList.add('hidden');
-        document.getElementById('edit-package-container').classList.add('hidden');
-        document.getElementById('create-package-form').classList.remove('hidden');
-        document.getElementById('show-create-package-form').classList.add('hidden');
-    });
+    document
+        .getElementById("show-create-package-form")
+        ?.addEventListener("click", () => {
+            document.getElementById("package-grid").classList.add("hidden");
+            document
+                .getElementById("edit-package-container")
+                .classList.add("hidden");
+            document
+                .getElementById("create-package-form")
+                .classList.remove("hidden");
+            document
+                .getElementById("show-create-package-form")
+                .classList.add("hidden");
+        });
 
-    document.getElementById('cancel-create-package')?.addEventListener('click', () => {
-        document.getElementById('create-package-form').classList.add('hidden');
-        document.getElementById('package-grid').classList.remove('hidden');
-        document.getElementById('show-create-package-form').classList.remove('hidden');
-    });
+    document
+        .getElementById("cancel-create-package")
+        ?.addEventListener("click", () => {
+            document
+                .getElementById("create-package-form")
+                .classList.add("hidden");
+            document.getElementById("package-grid").classList.remove("hidden");
+            document
+                .getElementById("show-create-package-form")
+                .classList.remove("hidden");
+        });
 
-    document.getElementById('submit-create-package')?.addEventListener('click', () => {
-        const data = {
-            name:          document.getElementById('create-pkg-name')?.value,
-            total_credits: document.getElementById('create-pkg-credits')?.value,
-            validity_days: document.getElementById('create-pkg-validity')?.value,
-            currency_id:   document.getElementById('create-pkg-currency')?.value,
-            amount:        document.getElementById('create-pkg-price')?.value,
-        };
+    document
+        .getElementById("submit-create-package")
+        ?.addEventListener("click", () => {
+            const data = {
+                name: document.getElementById("create-pkg-name")?.value,
+                total_credits:
+                    document.getElementById("create-pkg-credits")?.value,
+                validity_days: document.getElementById("create-pkg-validity")
+                    ?.value,
+                currency_id: document.getElementById("create-pkg-currency")
+                    ?.value,
+                amount: document.getElementById("create-pkg-price")?.value,
+            };
 
-        if (!data.name || !data.total_credits) {
-            OperationsUI.toast('Name and sessions are required.', 'error');
-            return;
-        }
+            if (!data.name || !data.total_credits) {
+                OperationsUI.toast("Name and sessions are required.", "error");
+                return;
+            }
 
-        createNewPackage(userId, data);
-    });
+            createNewPackage(userId, data);
+        });
 }
 
-window.editPackage = async function(userId, packageId) {
+window.editPackage = async function (userId, packageId) {
     try {
         const result = await OperationsAPI.getPackages();
         const packages = result.data;
-        const pkg = packages.find(p => p.id == packageId);
-        if (!pkg) throw new Error('Package not found.');
+        const pkg = packages.find((p) => p.id == packageId);
+        if (!pkg) throw new Error("Package not found.");
 
         const card = document.getElementById(`card-${packageId}`);
         if (!card) return;
 
-        // Hide the grid and other forms
-        document.getElementById('package-grid').classList.add('hidden');
-        document.getElementById('show-create-package-form').classList.add('hidden');
-        document.getElementById('create-package-form').classList.add('hidden');
+        document.getElementById("package-grid").classList.add("hidden");
+        document
+            .getElementById("show-create-package-form")
+            .classList.add("hidden");
+        document.getElementById("create-package-form").classList.add("hidden");
 
-        const container = document.getElementById('edit-package-container');
-        container.innerHTML = renderPackageForm('edit', userId, pkg);
-        container.classList.remove('hidden');
+        const container = document.getElementById("edit-package-container");
+        container.innerHTML = renderPackageForm("edit", userId, pkg);
+        container.classList.remove("hidden");
 
-        // Cancel edit
-        document.getElementById('cancel-edit-package')?.addEventListener('click', () => {
-            container.classList.add('hidden');
-            document.getElementById('package-grid').classList.remove('hidden');
-            document.getElementById('show-create-package-form').classList.remove('hidden');
-        });
+        document
+            .getElementById("cancel-edit-package")
+            ?.addEventListener("click", () => {
+                container.classList.add("hidden");
+                document
+                    .getElementById("package-grid")
+                    .classList.remove("hidden");
+                document
+                    .getElementById("show-create-package-form")
+                    .classList.remove("hidden");
+            });
 
-        // Submit edit
-        document.getElementById('submit-edit-package')?.addEventListener('click', () => {
-            const data = {
-                name:          document.getElementById('edit-pkg-name')?.value,
-                total_credits: document.getElementById('edit-pkg-credits')?.value,
-                validity_days: document.getElementById('edit-pkg-validity')?.value,
-                currency_id:   document.getElementById('edit-pkg-currency')?.value,
-                amount:        document.getElementById('edit-pkg-price')?.value,
-            };
+        document
+            .getElementById("submit-edit-package")
+            ?.addEventListener("click", () => {
+                const data = {
+                    name: document.getElementById("edit-pkg-name")?.value,
+                    total_credits:
+                        document.getElementById("edit-pkg-credits")?.value,
+                    validity_days:
+                        document.getElementById("edit-pkg-validity")?.value,
+                    currency_id:
+                        document.getElementById("edit-pkg-currency")?.value,
+                    amount: document.getElementById("edit-pkg-price")?.value,
+                };
 
-            if (!data.name || !data.total_credits) {
-                OperationsUI.toast('Name and sessions are required.', 'error');
-                return;
-            }
+                if (!data.name || !data.total_credits) {
+                    OperationsUI.toast(
+                        "Name and sessions are required.",
+                        "error",
+                    );
+                    return;
+                }
 
-            updatePackage(userId, packageId, data);
-        });
+                updatePackage(userId, packageId, data);
+            });
     } catch (e) {
-        OperationsUI.toast('Could not load package for editing.', 'error');
+        OperationsUI.toast("Could not load package for editing.", "error");
     }
 };
 
-window.deletePackage = function(userId, packageId) {
+window.deletePackage = function (userId, packageId) {
     deletePackage(userId, packageId);
 };
 
 export async function handlePackageAssign(userId, packageId) {
     const currencyId = document.getElementById(`currency-${packageId}`)?.value;
-    const paidAmount = document.getElementById(`amount-${packageId}`)?.value;
 
-    if (!currencyId || !paidAmount) {
-        OperationsUI.toast('Please select a currency and enter a valid amount.', 'error');
+    if (!currencyId) {
+        OperationsUI.toast("Please select a currency.", "error");
         return;
     }
 
     try {
-        await OperationsAPI.assignPackage(userId, packageId, currencyId, paidAmount);
-        OperationsUI.toast('Package assigned successfully!', 'success');
+        await OperationsAPI.assignPackage(userId, packageId, currencyId);
+        OperationsUI.toast("Package assigned successfully!", "success");
         OperationsUI.closeModal();
         renderClients();
     } catch (e) {
-        OperationsUI.toast(e.message, 'error');
+        OperationsUI.toast(e.message, "error");
     }
 }
 
 export async function handleFreeze(bookingId, userId) {
-    if (!confirm('Freeze this package? Validity calculations will pause until unfrozen.')) return;
+    if (
+        !confirm(
+            "Freeze this package? Validity calculations will pause until unfrozen.",
+        )
+    )
+        return;
     try {
         await OperationsAPI.freezeBooking(bookingId);
-        OperationsUI.toast('Package frozen successfully.', 'success');
+        OperationsUI.toast("Package frozen successfully.", "success");
         showClientDetails(userId);
     } catch (e) {
-        OperationsUI.toast(e.message, 'error');
+        OperationsUI.toast(e.message, "error");
     }
 }
 
 export async function handleUnfreeze(bookingId, userId) {
-    if (!confirm('Unfreeze package? A new replacement booking will be created for the remaining validity.')) return;
+    if (
+        !confirm(
+            "Unfreeze package? A new replacement booking will be created for the remaining validity.",
+        )
+    )
+        return;
     try {
         await OperationsAPI.unfreezeBooking(bookingId);
-        OperationsUI.toast('Package unfrozen and resumed.', 'success');
+        OperationsUI.toast("Package unfrozen and resumed.", "success");
         showClientDetails(userId);
     } catch (e) {
-        OperationsUI.toast(e.message, 'error');
+        OperationsUI.toast(e.message, "error");
     }
 }
 
-window.updatePackageAmount = function(packageId) {
+window.updatePackageAmount = function (packageId) {
     const currencySelect = document.getElementById(`currency-${packageId}`);
     const amountInput = document.getElementById(`amount-${packageId}`);
     if (!currencySelect || !amountInput) return;
 
-    const pricesJson = amountInput.getAttribute('data-prices');
-    if (!pricesJson) return;
-
-    const prices = JSON.parse(pricesJson.replace(/&quot;/g, '"'));
     const selectedCurrencyId = parseInt(currencySelect.value, 10);
-    const amount = prices[selectedCurrencyId] ?? 0;
+    const basePrice = Number(amountInput.dataset.basePrice || 0);
+    let amount = 0;
+    if (basePrice > 0) {
+        amount = OperationsUI.computeAmountFromBase(
+            basePrice,
+            selectedCurrencyId,
+        );
+    }
 
     amountInput.value = amount;
 
-    // Optionally show a warning if no price exists for this currency
     const assignBtn = document.getElementById(`assign-btn-${packageId}`);
     if (assignBtn) {
-        if (amount === 0 && !prices.hasOwnProperty(selectedCurrencyId)) {
+        if (amount === 0) {
             assignBtn.disabled = true;
-            assignBtn.title = 'No price available for this currency';
-            assignBtn.classList.add('opacity-50', 'cursor-not-allowed');
+            assignBtn.title = "No price available for this currency";
+            assignBtn.classList.add("opacity-50", "cursor-not-allowed");
         } else {
             assignBtn.disabled = false;
-            assignBtn.removeAttribute('title');
-            assignBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+            assignBtn.removeAttribute("title");
+            assignBtn.classList.remove("opacity-50", "cursor-not-allowed");
         }
     }
 };

@@ -17,7 +17,7 @@ class PackageInfolist
                     ->numeric(),
                 TextEntry::make('price')
                     ->label('Price (Default Currency)')
-                    ->getStateUsing(fn($record) => $record->getPriceForCurrentCurrency())
+                    ->getStateUsing(fn($record) => $record->getBasePrice())
                     ->money(),
                 TextEntry::make('created_at')
                     ->dateTime()
@@ -27,7 +27,7 @@ class PackageInfolist
                     ->placeholder('-'),
                 TextEntry::make('deleted_at')
                     ->dateTime()
-                    ->visible(fn (Package $record): bool => $record->trashed()),
+                    ->visible(fn(Package $record): bool => $record->trashed()),
             ]);
     }
 }

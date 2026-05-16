@@ -21,16 +21,6 @@ class PriceFactory extends Factory
         ];
     }
 
-    public function usd(): static
-    {
-        $pricing = app(PricingService::class);
-        $baseCurrencyId = $pricing->getBaseCurrencyId();
-
-        return $this->state(fn(array $attributes) => [
-            'currency_id' => $baseCurrencyId,
-        ]);
-    }
-
     public function forCurrency(int $currencyId): static
     {
         return $this->state(fn(array $attributes) => [

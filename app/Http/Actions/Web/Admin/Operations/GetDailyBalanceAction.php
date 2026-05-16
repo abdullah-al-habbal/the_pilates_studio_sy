@@ -20,9 +20,17 @@ final readonly class GetDailyBalanceAction
 
     public function __invoke(Request $request): JsonResponse
     {
+        // fix: make a FormRequest and a Command class.
         try {
-            $currencies = $request->query('currencies');
-            $summary = $this->balanceService->getSummary($request->query('date'), is_array($currencies) ? $currencies : null);
+            $date = $request->query('date', now()->toDateString());
+            $currencies = $request->query('currencies', []);
+            $convertToBase = $request->boolean('convertToBase', false);
+
+            $summary = $this->balanceService->getSummary(
+                date: $date,
+                currencies: is_array($currencies) ? $currencies : null,
+                convertToBase: $convertToBase
+            );
 
             return $this->success(
                 data: $summary->values()->all(),

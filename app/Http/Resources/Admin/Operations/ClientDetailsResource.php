@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Http\Resources\Admin\Operations;
 
-use App\Enums\BookingStatusEnum;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -49,7 +48,7 @@ class ClientDetailsResource extends JsonResource
                 ->map(fn($order) => [
                     'item_name' => $order->merchandise?->getTranslation('name', app()->getLocale()),
                     'quantity' => $order->quantity,
-                    'total_price' => $order->merchandise?->getPriceForCurrentCurrency() * $order->quantity,
+                    'total_price' => $order->paid_amount,
                     'ordered_at' => $order->ordered_at?->format('M d, Y'),
                 ]),
         ];

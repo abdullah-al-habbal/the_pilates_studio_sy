@@ -34,9 +34,8 @@ use Spatie\Translatable\HasTranslations;
  *
  * @property-read Collection<int, Booking> $bookings
  * @property-read Collection<int, Price> $prices
- * @property-read int|null $price
+ * @property-read int|null $base_price
  * @property-read bool $is_available_for_purchase
- * @property-read bool $is_cheapest_option
  *
  * @method static Builder|Package newModelQuery()
  * @method static Builder|Package newQuery()
@@ -116,40 +115,6 @@ class Package extends Model
         return $this->type !== PackageTypeEnum::STANDARD;
     }
 
-    private function getCurrentCurrencyId(): int
-    {
-        return app(CurrencyService::class)->getDefaultCurrency()->id;
-    }
-
-    public function getPriceForCurrentCurrency(): ?int
-    {
-        $currencyId = $this->getCurrentCurrencyId();
-
-        return $this->getPriceForCurrency($currencyId);
-    }
-
-    private function getCheapestPriceForCurrentCurrency(): ?int
-    {
-        $currencyId = $this->getCurrentCurrencyId();
-
-        $cheapestAmount = Package::query()->where('is_active', true)
-            ->whereHas('prices', function ($query) use ($currencyId) {
-                $query->where('currency_id', $currencyId);
-            })
-            ->with([
-                'prices' => function ($query) use ($currencyId) {
-                    $query->where('currency_id', $currencyId);
-                }
-            ])
-            ->get()
-            ->min(function (Package $package) {
-                $price = $package->prices->first();
-                return $price?->amount ?? PHP_INT_MAX;
-            });
-
-        return $cheapestAmount !== PHP_INT_MAX ? $cheapestAmount : null;
-    }
-
     protected function isAvailableForPurchase(): Attribute
     {
         return Attribute::make(
@@ -168,29 +133,5 @@ class Package extends Model
         );
     }
 
-    protected function isCheapestOption(): Attribute
-    {
-        return Attribute::make(
-            get: function (): bool {
-                if (!$this->is_active) {
-                    return false;
-                }
 
-                $currentPrice = $this->getPriceForCurrentCurrency();
-                $cheapestPrice = $this->getCheapestPriceForCurrentCurrency();
-
-                if ($currentPrice === null || $cheapestPrice === null) {
-                    return false;
-                }
-
-                return $currentPrice === $cheapestPrice;
-            }
-        );
-    }
-    protected function price(): Attribute
-    {
-        return Attribute::make(
-            get: fn(): ?int => $this->getPriceForCurrentCurrency()
-        );
-    }
 }

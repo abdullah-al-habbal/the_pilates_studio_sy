@@ -16,11 +16,11 @@ class MerchandiseResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
-            'id'             => $this->resource->id,
-            'name'           => $this->resource->getTranslation('name', app()->getLocale()),
-            'price'          => $this->resource->getPriceForCurrentCurrency(),
+            'id' => $this->resource->id,
+            'name' => $this->resource->getTranslation('name', app()->getLocale()),
+            'base_price' => $this->resource->getBasePrice(),
             'stock_quantity' => $this->resource->stock_quantity,
-            'category'       => $this->resource->category?->name,
+            'category' => $this->resource->category?->name,
         ];
     }
 }

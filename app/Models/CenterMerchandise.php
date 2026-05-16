@@ -1,8 +1,6 @@
 <?php
 declare(strict_types=1);
 namespace App\Models;
-
-use App\Services\Currency\CurrencyService;
 use App\Services\Currency\PricingService;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -11,7 +9,6 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Database\Eloquent\Casts\Attribute;
 use Spatie\Translatable\HasTranslations;
 
 class CenterMerchandise extends Model
@@ -87,21 +84,5 @@ class CenterMerchandise extends Model
     {
         return app(PricingService::class)->getBasePrice($this);
     }
-    private function getCurrentCurrencyId(): int
-    {
-        return app(CurrencyService::class)->getDefaultCurrency()->id;
-    }
 
-    public function getPriceForCurrentCurrency(): ?int
-    {
-        $currencyId = $this->getCurrentCurrencyId();
-
-        return $this->getPriceForCurrency($currencyId);
-    }
-    protected function price(): Attribute
-    {
-        return Attribute::make(
-            get: fn(): ?int => $this->getPriceForCurrentCurrency()
-        );
-    }
 }

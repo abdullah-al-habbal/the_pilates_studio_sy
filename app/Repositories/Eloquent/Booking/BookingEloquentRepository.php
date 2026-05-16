@@ -10,16 +10,50 @@ use App\Models\Booking;
 use Carbon\CarbonInterface;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
-
+use Illuminate\Support\Collection;
 class BookingEloquentRepository
 {
-    // fix: use __construct to inject the model class
-    public function getTotalRevenue(?CarbonInterface $startDate = null, ?CarbonInterface $endDate = null): float
-    {
-        return (float) Booking::query()
+    public function getRevenueByCurrency(
+        ?CarbonInterface $startDate = null,
+        ?CarbonInterface $endDate = null,
+    ): Collection {
+        return Booking::query()
+            ->selectRaw('currency_id, SUM(paid_amount) as total, COUNT(*) as count')
+            ->whereNotNull('paid_amount')
             ->when($startDate, fn($q) => $q->where('created_at', '>=', $startDate))
             ->when($endDate, fn($q) => $q->where('created_at', '<=', $endDate))
-            ->sum('paid_amount');
+            ->groupBy('currency_id')
+            ->get()
+            ->map(fn($item) => (object) [
+                'currency_id' => (int) $item->currency_id,
+                'total_revenue' => (int) $item->total,
+                'booking_count' => (int) $item->count,
+            ]);
+    }
+
+    public function getRevenueWithExchangeSnapshot(
+        ?CarbonInterface $startDate = null,
+        ?CarbonInterface $endDate = null,
+    ): Collection {
+        return Booking::query()
+            ->selectRaw('
+                currency_id,
+                SUM(paid_amount) as total,
+                COUNT(*) as count,
+                AVG(exchange_rate_snapshot) as avg_snapshot_rate
+            ')
+            ->whereNotNull('paid_amount')
+            ->whereNotNull('exchange_rate_snapshot')
+            ->when($startDate, fn($q) => $q->where('created_at', '>=', $startDate))
+            ->when($endDate, fn($q) => $q->where('created_at', '<=', $endDate))
+            ->groupBy('currency_id')
+            ->get()
+            ->map(fn($item) => (object) [
+                'currency_id' => (int) $item->currency_id,
+                'total_revenue' => (int) $item->total,
+                'booking_count' => (int) $item->count,
+                'avg_exchange_rate_snapshot' => $item->avg_snapshot_rate ? (float) $item->avg_snapshot_rate : null,
+            ]);
     }
 
     public function getTotalCount(?CarbonInterface $startDate = null, ?CarbonInterface $endDate = null): int
@@ -57,15 +91,17 @@ class BookingEloquentRepository
         return (int) Booking::sum(DB::raw('total_credits - remaining_credits'));
     }
 
-    public function getRevenueByPackage(): \Illuminate\Support\Collection
+    public function getRevenueByPackage(): Collection
     {
         return Booking::with(['package' => fn($q) => $q->withTrashed()])
-            ->selectRaw('package_id, COUNT(*) as bookings_count, SUM(paid_amount) as total_revenue')
-            ->groupBy('package_id')
+            ->selectRaw('package_id, currency_id, COUNT(*) as bookings_count, SUM(paid_amount) as total_revenue')
+            ->groupBy('package_id', 'currency_id')
             ->get()
             ->map(fn($item) => (object) [
                 'package_name' => $item->package?->getTranslation('name', app()->getLocale()) ?? 'Deleted Package',
+                'currency_id' => (int) $item->currency_id,
                 'revenue' => (int) ($item->total_revenue ?? 0),
+                'bookings_count' => (int) $item->bookings_count,
             ]);
     }
 

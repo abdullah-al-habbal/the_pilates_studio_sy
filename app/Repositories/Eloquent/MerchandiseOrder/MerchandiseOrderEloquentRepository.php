@@ -34,27 +34,69 @@ class MerchandiseOrderEloquentRepository
         return (bool) $this->model->where('id', $id)->delete();
     }
 
+    /**
+     * @deprecated Use getRevenueByCurrency() for per-currency accuracy
+     */
     public function getTotalRevenueByCurrency(
         int $currencyId,
         ?CarbonInterface $startDate = null,
         ?CarbonInterface $endDate = null,
     ): int {
         return (int) MerchandiseOrder::query()
-            ->join('prices', function ($join) use ($currencyId): void {
-                $join->on('prices.priceable_id', '=', 'merchandise_orders.merchandise_id')
-                    ->where('prices.priceable_type', '=', CenterMerchandise::class)
-                    ->where('prices.currency_id', '=', $currencyId);
-            })
-            ->when($startDate, fn($q) => $q->where('merchandise_orders.ordered_at', '>=', $startDate))
-            ->when($endDate, fn($q) => $q->where('merchandise_orders.ordered_at', '<=', $endDate))
-            ->sum(DB::raw('merchandise_orders.quantity * prices.amount'));
+            ->where('currency_id', $currencyId)
+            ->when($startDate, fn($q) => $q->where('ordered_at', '>=', $startDate))
+            ->when($endDate, fn($q) => $q->where('ordered_at', '<=', $endDate))
+            ->sum('paid_amount');
     }
 
-    public function getTotalRevenue(?CarbonInterface $startDate = null, ?CarbonInterface $endDate = null): int
-    {
-        $defaultCurrencyId = $this->currencyService->getDefaultCurrency()->id;
+    /**
+     * Returns revenue grouped by currency_id — NO joins to prices table.
+     * Uses only stored paid_amount + currency_id for historical accuracy.
+     */
+    public function getRevenueByCurrency(
+        ?CarbonInterface $startDate = null,
+        ?CarbonInterface $endDate = null,
+    ): Collection {
+        return MerchandiseOrder::query()
+            ->selectRaw('currency_id, SUM(paid_amount) as total, COUNT(*) as count')
+            ->whereNotNull('paid_amount')
+            ->when($startDate, fn($q) => $q->where('ordered_at', '>=', $startDate))
+            ->when($endDate, fn($q) => $q->where('ordered_at', '<=', $endDate))
+            ->groupBy('currency_id')
+            ->get()
+            ->map(fn($item) => (object) [
+                'currency_id' => (int) $item->currency_id,
+                'total_revenue' => (int) $item->total,
+                'order_count' => (int) $item->count,
+            ]);
+    }
 
-        return $this->getTotalRevenueByCurrency($defaultCurrencyId, $startDate, $endDate);
+    /**
+     * Returns revenue with historical exchange rate snapshot for base-currency conversion.
+     */
+    public function getRevenueWithExchangeSnapshot(
+        ?CarbonInterface $startDate = null,
+        ?CarbonInterface $endDate = null,
+    ): Collection {
+        return MerchandiseOrder::query()
+            ->selectRaw('
+                currency_id,
+                SUM(paid_amount) as total,
+                COUNT(*) as count,
+                AVG(exchange_rate_snapshot) as avg_snapshot_rate
+            ')
+            ->whereNotNull('paid_amount')
+            ->whereNotNull('exchange_rate_snapshot')
+            ->when($startDate, fn($q) => $q->where('ordered_at', '>=', $startDate))
+            ->when($endDate, fn($q) => $q->where('ordered_at', '<=', $endDate))
+            ->groupBy('currency_id')
+            ->get()
+            ->map(fn($item) => (object) [
+                'currency_id' => (int) $item->currency_id,
+                'total_revenue' => (int) $item->total,
+                'order_count' => (int) $item->count,
+                'avg_exchange_rate_snapshot' => $item->avg_snapshot_rate ? (float) $item->avg_snapshot_rate : null,
+            ]);
     }
 
     public function getTotalCount(?CarbonInterface $startDate = null, ?CarbonInterface $endDate = null): int
@@ -70,19 +112,12 @@ class MerchandiseOrderEloquentRepository
         ?CarbonInterface $startDate = null,
         ?CarbonInterface $endDate = null
     ): Collection {
-        $defaultCurrencyId = $this->currencyService->getDefaultCurrency()->id;
-
         return MerchandiseOrder::query()
             ->select([
                 'merchandise_orders.merchandise_id',
                 DB::raw('SUM(merchandise_orders.quantity) as quantity'),
-                DB::raw('SUM(merchandise_orders.quantity * prices.amount) as revenue'),
+                DB::raw('SUM(merchandise_orders.paid_amount) as revenue'),
             ])
-            ->join('prices', function ($join) use ($defaultCurrencyId) {
-                $join->on('prices.priceable_id', '=', 'merchandise_orders.merchandise_id')
-                    ->where('prices.priceable_type', '=', CenterMerchandise::class)
-                    ->where('prices.currency_id', '=', $defaultCurrencyId);
-            })
             ->when($startDate, fn($q) => $q->where('merchandise_orders.ordered_at', '>=', $startDate))
             ->when($endDate, fn($q) => $q->where('merchandise_orders.ordered_at', '<=', $endDate))
             ->groupBy('merchandise_orders.merchandise_id')

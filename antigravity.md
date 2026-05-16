@@ -89,10 +89,10 @@ Refund → morphTo → Booking | MerchandiseOrder
 
 ## Phase 5: Financial Reporting
 
-- [ ] Deprecate cross-currency `SUM(paid_amount)` aggregations
-- [ ] Update `DailyBalanceService` to report per-currency or base-converted totals
-- [ ] Fix Filament `Reports` page: group metrics by currency
-- [ ] Add disclaimer when displaying base-converted totals
+- [x] Deprecate cross-currency `SUM(paid_amount)` aggregations
+- [x] Update `DailyBalanceService` to report per-currency or base-converted totals
+- [x] Fix Filament `Reports` page: group metrics by currency
+- [x] Add disclaimer when displaying base-converted totals
 
 ## Phase 6: Data Migration & Backfill
 
