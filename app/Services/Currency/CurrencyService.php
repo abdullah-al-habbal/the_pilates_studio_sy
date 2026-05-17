@@ -10,8 +10,8 @@ use Illuminate\Support\Facades\Cache;
 
 class CurrencyService
 {
-    private const CACHE_TTL_PRODUCTION = 600; // 10 minutes
-    private const CACHE_TTL_DEV = 3600; // 1 hour for dev
+    private const CACHE_TTL_PRODUCTION = 600;
+    private const CACHE_TTL_DEV = 3600;
 
     public function getBaseCurrency(): Currency
     {
@@ -71,16 +71,12 @@ class CurrencyService
         $isProduction = config('app.env') === 'production';
         $ttl = $isProduction ? self::CACHE_TTL_PRODUCTION : self::CACHE_TTL_DEV;
 
-        return Cache::tags(['currencies'])->remember(
-            'active_currencies',
-            $ttl,
-            fn() => Currency::where('is_active', true)->get()
-        );
+        return Cache::remember('active_currencies', $ttl, fn() => Currency::where('is_active', true)->get());
     }
 
     public function refreshCurrencyCache(int $currencyId): void
     {
-        Cache::tags(['currencies'])->forget('active_currencies');
+        Cache::forget('active_currencies');
         Cache::forget("currency_{$currencyId}");
     }
 }

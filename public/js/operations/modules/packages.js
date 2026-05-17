@@ -22,8 +22,18 @@ async function updatePackage(userId, packageId, formData) {
 }
 
 async function deletePackage(userId, packageId) {
-    if (!confirm("Delete this package? It will no longer be assignable."))
-        return;
+    const result = await Swal.fire({
+        title: "Delete package?",
+        text: "It will no longer be assignable.",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#e11d48",
+        cancelButtonColor: "#64748b",
+        confirmButtonText: "Yes, delete it!",
+    });
+
+    if (!result.isConfirmed) return;
+
     try {
         await OperationsAPI.deletePackage(packageId);
         OperationsUI.toast("Package deleted.", "success");
@@ -326,12 +336,18 @@ export async function handlePackageAssign(userId, packageId) {
 }
 
 export async function handleFreeze(bookingId, userId) {
-    if (
-        !confirm(
-            "Freeze this package? Validity calculations will pause until unfrozen.",
-        )
-    )
-        return;
+    const result = await Swal.fire({
+        title: "Freeze this package?",
+        text: "Validity calculations will pause until unfrozen.",
+        icon: "question",
+        showCancelButton: true,
+        confirmButtonColor: "#f59e0b",
+        cancelButtonColor: "#64748b",
+        confirmButtonText: "Yes, freeze it!",
+    });
+
+    if (!result.isConfirmed) return;
+
     try {
         await OperationsAPI.freezeBooking(bookingId);
         OperationsUI.toast("Package frozen successfully.", "success");
@@ -342,12 +358,18 @@ export async function handleFreeze(bookingId, userId) {
 }
 
 export async function handleUnfreeze(bookingId, userId) {
-    if (
-        !confirm(
-            "Unfreeze package? A new replacement booking will be created for the remaining validity.",
-        )
-    )
-        return;
+    const result = await Swal.fire({
+        title: "Unfreeze package?",
+        text: "A new replacement booking will be created for the remaining validity.",
+        icon: "info",
+        showCancelButton: true,
+        confirmButtonColor: "#10b981",
+        cancelButtonColor: "#64748b",
+        confirmButtonText: "Yes, unfreeze!",
+    });
+
+    if (!result.isConfirmed) return;
+
     try {
         await OperationsAPI.unfreezeBooking(bookingId);
         OperationsUI.toast("Package unfrozen and resumed.", "success");

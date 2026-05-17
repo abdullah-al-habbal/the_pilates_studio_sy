@@ -29,6 +29,12 @@ class BookingFreezeService
                 ]);
             }
 
+            if ($booking->remaining_credits <= 0) {
+                throw ValidationException::withMessages([
+                    'booking_id' => 'Cannot freeze a package with no remaining credits. Assign a new package first.',
+                ]);
+            }
+
             $booking->update([
                 'status'      => BookingStatusEnum::FROZEN,
                 'frozen_at'   => now(),

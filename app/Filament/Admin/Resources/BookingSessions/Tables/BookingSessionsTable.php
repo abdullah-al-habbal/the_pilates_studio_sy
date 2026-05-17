@@ -32,7 +32,9 @@ class BookingSessionsTable
                     ->label(__('dashboard.resources.booking_sessions.fields.booking_id'))
                     ->sortable()
                     ->searchable(query: function (Builder $query, string $search): Builder {
-                        return $query->whereHas('booking', fn($q) =>
+                        return $query->whereHas(
+                            'booking',
+                            fn($q) =>
                             $q->where('id', 'like', "%{$search}%")
                         );
                     })
@@ -41,7 +43,9 @@ class BookingSessionsTable
                 TextColumn::make('booking.user.fullname')
                     ->label(__('dashboard.resources.booking_sessions.fields.user'))
                     ->searchable(query: function (Builder $query, string $search): Builder {
-                        return $query->whereHas('booking.user', fn($q) =>
+                        return $query->whereHas(
+                            'booking.user',
+                            fn($q) =>
                             $q->where('fullname', 'like', "%{$search}%")
                         );
                     })
@@ -87,9 +91,9 @@ class BookingSessionsTable
                 TextColumn::make('status')
                     ->label(__('dashboard.resources.booking_sessions.fields.status'))
                     ->badge()
-                    ->color(fn (BookingSessionStatusEnum $state): string => $state->getColor())
-                    ->icon(fn (BookingSessionStatusEnum $state): ?string => $state->getIcon())
-                    ->formatStateUsing(fn (BookingSessionStatusEnum $state): string => $state->getLabel())
+                    ->color(fn(BookingSessionStatusEnum $state): string => $state->getColor())
+                    ->icon(fn(BookingSessionStatusEnum $state): ?string => $state->getIcon())
+                    ->formatStateUsing(fn(BookingSessionStatusEnum $state): string => $state->getLabel())
                     ->sortable()
                     ->searchable()
                     ->toggleable(),
@@ -99,7 +103,7 @@ class BookingSessionsTable
                     ->dateTime('M d, Y H:i')
                     ->sortable()
                     ->placeholder('—')
-                    ->color(fn ($state): string => $state ? 'danger' : 'success')
+                    ->color(fn($state): string => $state ? 'danger' : 'success')
                     ->toggleable(),
 
                 TextColumn::make('created_at')
@@ -139,7 +143,7 @@ class BookingSessionsTable
                             ->whereHas('class')
                             ->get()
                             ->mapWithKeys(function (ClassSession $session) use ($locale) {
-                                $classTitle = $session->class?->getTranslation('title', $locale) ?? 'Unknown Class';
+                                $classTitle = $session->class?->getTranslation('title', $locale);
                                 return [
                                     $session->id => $classTitle . ' - ' .
                                         $session->date->format('M d, Y') . ' ' .

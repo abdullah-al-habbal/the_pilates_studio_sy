@@ -142,6 +142,7 @@ function buildStatusBadge(status) {
         deactivated: "bg-slate-100 text-slate-500",
     };
     const cls = map[status] ?? "bg-slate-100 text-slate-500";
+    // fix: why the status always UNKNOWN?
     const label = status?.toUpperCase() ?? "UNKNOWN";
     return `<span class="px-2 py-1 rounded-full text-xs font-bold ${cls}">${label}</span>`;
 }
@@ -191,17 +192,22 @@ export async function showClientDetails(userId) {
         if (!user) throw new Error("Empty response from server.");
 
         const actionButton =
-            user.active_package?.status === "frozen"
-                ? `<button onclick="window.handleUnfreeze(${user.active_package.id}, ${user.id})"
-                   class="bg-primary-600 text-white px-5 py-2.5 rounded-xl font-bold text-sm hover:scale-105 transition-all btn-single-action">
-                   🔓 Unfreeze Package
-               </button>`
-                : !user.active_package
-                  ? `<button onclick="window.showPackageAssignment(${user.id})"
+            user.active_package?.remaining_credits === 0
+                ? `<button onclick="window.showPackageAssignment(${user.id})"
                         class="bg-primary-600 text-white px-5 py-2.5 rounded-xl font-bold text-sm hover:scale-105 transition-all btn-single-action">
-                        + Assign Package
-                    </button>`
-                  : "";
+                        + Assign New Package
+                   </button>`
+                : user.active_package?.status === "frozen"
+                  ? `<button onclick="window.handleUnfreeze(${user.active_package.id}, ${user.id})"
+                       class="bg-primary-600 text-white px-5 py-2.5 rounded-xl font-bold text-sm hover:scale-105 transition-all btn-single-action">
+                       🔓 Unfreeze Package
+                   </button>`
+                  : !user.active_package
+                    ? `<button onclick="window.showPackageAssignment(${user.id})"
+                          class="bg-primary-600 text-white px-5 py-2.5 rounded-xl font-bold text-sm hover:scale-105 transition-all btn-single-action">
+                          + Assign Package
+                      </button>`
+                    : "";
 
         const remainingDaysRaw = user.active_package?.remaining_days;
         const daysLeftText = humanizeRemainingDays(remainingDaysRaw);
@@ -269,34 +275,48 @@ export async function showClientDetails(userId) {
                                                 class="flex-1 bg-emerald-100 text-emerald-700 py-2 rounded-lg font-bold text-xs uppercase tracking-wider hover:bg-emerald-200 transition-colors btn-single-action">
                                                 Unfreeze Now
                                            </button>`
-                                            : (() => {
-                                                  const paidAmount =
-                                                      user.active_package
-                                                          .paid_amount ?? null;
-                                                  const currencyId =
-                                                      user.active_package
-                                                          .currency_id ?? null;
-                                                  const refundBtnDisabled =
-                                                      paidAmount === null;
-                                                  const refundTitle =
-                                                      refundBtnDisabled
-                                                          ? 'title="Payment amount not recorded — refund unavailable"'
-                                                          : "";
-                                                  const refundCls =
-                                                      refundBtnDisabled
-                                                          ? "opacity-50 cursor-not-allowed"
-                                                          : "hover:bg-rose-200";
+                                            : user.active_package
+                                                    .remaining_credits === 0
+                                              ? `<div class="space-y-3 pt-2">
+                                                <div class="rounded-xl bg-amber-50 dark:bg-amber-900/20 border border-amber-200 px-4 py-3 text-sm text-amber-700 dark:text-amber-300">
+                                                    ⚠ This package has been fully used (0 credits remaining).<br>
+                                                    <strong>Assign a new package to continue.</strong>
+                                                </div>
+                                                <button onclick="window.showPackageAssignment(${user.id})"
+                                                    class="w-full bg-primary-600 text-white py-2.5 rounded-lg font-bold text-sm hover:bg-primary-700 transition-colors btn-single-action">
+                                                    + Assign Package
+                                                </button>
+                                            </div>`
+                                              : (() => {
+                                                    const paidAmount =
+                                                        user.active_package
+                                                            .paid_amount ??
+                                                        null;
+                                                    const currencyId =
+                                                        user.active_package
+                                                            .currency_id ??
+                                                        null;
+                                                    const refundBtnDisabled =
+                                                        paidAmount === null;
+                                                    const refundTitle =
+                                                        refundBtnDisabled
+                                                            ? 'title="Payment amount not recorded — refund unavailable"'
+                                                            : "";
+                                                    const refundCls =
+                                                        refundBtnDisabled
+                                                            ? "opacity-50 cursor-not-allowed"
+                                                            : "hover:bg-rose-200";
 
-                                                  const paidAmountJs =
-                                                      paidAmount !== null
-                                                          ? paidAmount
-                                                          : "null";
-                                                  const currencyIdJs =
-                                                      currencyId !== null
-                                                          ? currencyId
-                                                          : "null";
+                                                    const paidAmountJs =
+                                                        paidAmount !== null
+                                                            ? paidAmount
+                                                            : "null";
+                                                    const currencyIdJs =
+                                                        currencyId !== null
+                                                            ? currencyId
+                                                            : "null";
 
-                                                  return `
+                                                    return `
                                                 <div class="flex flex-1 gap-2">
                                                     <button onclick="window.handleFreeze(${user.active_package.id}, ${user.id})"
                                                         class="flex-1 bg-amber-100 text-amber-700 py-2 rounded-lg font-bold text-xs uppercase tracking-wider hover:bg-amber-200 transition-colors btn-single-action">
@@ -309,7 +329,7 @@ export async function showClientDetails(userId) {
                                                         Refund
                                                     </button>
                                                 </div>`;
-                                              })()
+                                                })()
                                     }
                                 </div>
                             </div>`
@@ -445,7 +465,7 @@ export async function submitRefund(bookingId, userId, maxAmount) {
 
     if (rawVal !== "" && rawVal !== null && rawVal !== undefined) {
         if (!/^[0-9]+$/.test(rawVal)) {
-            OperationsUI.toast(
+            OperationsUI.toast( 
                 "Refund amount must be a whole number in the smallest currency unit.",
                 "error",
             );

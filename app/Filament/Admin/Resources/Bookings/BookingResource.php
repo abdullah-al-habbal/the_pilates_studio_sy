@@ -38,8 +38,8 @@ class BookingResource extends Resource
         if (!$record) {
             return static::getModelLabel();
         }
-        $userName = $record->user?->fullname ?? 'Unknown User';
-        $packageName = $record->package?->getTranslation('name', app()->getLocale()) ?? 'Unknown Package';
+        $userName = $record->user?->fullname;
+        $packageName = $record->package?->getTranslation('name', app()->getLocale());
 
         return "{$userName} — {$packageName}";
     }

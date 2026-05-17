@@ -13,6 +13,13 @@ class ProcessBookingRefundRequest extends FormRequest
         return true;
     }
 
+    protected function prepareForValidation(): void
+    {
+        if ($this->has('amount') && $this->amount === '') {
+            $this->merge(['amount' => null]);
+        }
+    }
+
     public function rules(): array
     {
         return [

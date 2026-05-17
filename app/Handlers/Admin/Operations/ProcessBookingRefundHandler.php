@@ -33,7 +33,10 @@ final readonly class ProcessBookingRefundHandler
                 'user_id' => $booking->user_id,
                 'currency_id' => $booking->currency_id,
                 'amount' => $refundAmount,
-                'exchange_rate_snapshot' => $booking->exchange_rate_snapshot,
+                'exchange_rate_snapshot' => $booking->exchange_rate_snapshot ?? [
+                    'rate' => 1,
+                    'currency' => $booking->currency?->code,
+                ],
                 'refunded_by' => Auth::id(),
                 'refunded_at' => now(),
             ]);

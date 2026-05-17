@@ -305,8 +305,8 @@ class Reports extends Page implements HasInfolists
                         : $classes->values()->map(function ($class, int $i) use ($stats): TextEntry {
                             $locale = app()->getLocale();
                             $title = is_array($class->title)
-                                ? ($class->title[$locale] ?? $class->title['en'] ?? 'Unknown')
-                                : ($class->title ?? 'Unknown');
+                                ? ($class->title[$locale] ?? $class->title['en'])
+                                : ($class->title);
                             $pct = $stats['total_bookings'] > 0
                                 ? min(100, round(($class->total_attendance / $stats['total_bookings']) * 100))
                                 : 0;

@@ -30,6 +30,12 @@ final readonly class RefundValidatorService
             ]);
         }
 
+        if ($booking->remaining_credits <= 0) {
+            throw ValidationException::withMessages([
+                'booking' => 'Cannot refund a booking that has no remaining credits. Please assign a new package instead.',
+            ]);
+        }
+
         $refundAmount = $requestedAmount ?? $booking->paid_amount;
 
         if ($refundAmount > $booking->paid_amount) {
@@ -38,9 +44,9 @@ final readonly class RefundValidatorService
             ]);
         }
 
-        if ($refundAmount <= 0) {
+        if ($refundAmount < 0 || ($refundAmount === 0 && $booking->paid_amount !== 0)) {
             throw ValidationException::withMessages([
-                'amount' => 'Refund amount must be at least 1.',
+                'amount' => 'Refund amount must be positive, or zero only if the original payment was zero.',
             ]);
         }
     }

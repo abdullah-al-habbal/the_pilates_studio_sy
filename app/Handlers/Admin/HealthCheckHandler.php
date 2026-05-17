@@ -32,12 +32,12 @@ final readonly class HealthCheckHandler
             'base_currency' => $this->checkBaseCurrency(),
         ];
 
-        $status = collect($checks)->every(fn ($c) => $c['ok']) ? 'healthy' : 'degraded';
+        $status = collect($checks)->every(fn($c) => $c['ok']) ? 'healthy' : 'degraded';
 
         return [
             'status' => $status,
             'checks' => $checks,
-            'version' => config('app.version', 'unknown'),
+            'version' => config('app.version'),
         ];
     }
 
@@ -70,7 +70,7 @@ final readonly class HealthCheckHandler
     private function checkExchangeRates(): array
     {
         $activeCurrencies = Currency::where('is_active', true)->get();
-        $invalid = $activeCurrencies->filter(fn ($c) => $c->exchange_rate <= 0);
+        $invalid = $activeCurrencies->filter(fn($c) => $c->exchange_rate <= 0);
 
         $result = [
             'ok' => $invalid->isEmpty(),
