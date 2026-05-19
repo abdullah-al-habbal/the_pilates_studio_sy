@@ -26,6 +26,7 @@ use App\Services\Dashboard\StatsService;
 use App\Services\Instructor\InstructorService;
 use App\Services\User\UserService;
 use App\Services\Currency\CurrencyService;
+use App\Services\EnvironmentValidator;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
@@ -70,6 +71,10 @@ class ApplicationServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
+        if ($this->app->environment() !== 'testing') {
+            (new EnvironmentValidator())->validate();
+        }
+
         $this->registerPolicies();
         StaticPage::observe(StaticPageObserver::class);
 
@@ -115,7 +120,7 @@ class ApplicationServiceProvider extends ServiceProvider
     protected function configureDatabase(): void
     {
 
-        DB::prohibitDestructiveCommands($this->app->environment('production'));
+        // DB::prohibitDestructiveCommands($this->app->environment('production'));
 
         if ($this->app->environment('production')) {
             if (config('app.force_https', false)) {

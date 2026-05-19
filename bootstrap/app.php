@@ -41,7 +41,7 @@ use Illuminate\View\Middleware\ShareErrorsFromSession;
 use Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
-return Application::configure(basePath: dirname(__DIR__))
+$app = Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
         web: __DIR__ . '/../routes/web/web.php',
         api: __DIR__ . '/../routes/api/api.php',
@@ -179,4 +179,6 @@ return Application::configure(basePath: dirname(__DIR__))
             ], 500);
         });
 
-    })->create();
+    })
+    ->create();
+return $app;
