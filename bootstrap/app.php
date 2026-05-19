@@ -179,6 +179,6 @@ $app = Application::configure(basePath: dirname(__DIR__))
             ], 500);
         });
 
-    })
-    ->create();
-return $app;
+    });
+
+return $app->create();
