@@ -1,43 +1,50 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Bootstrap;
 
 final readonly class EnvironmentVariables
 {
-    public const REQUIRED = [
+    public const REQUIRED_BOOTSTRAP = [
         'APP_NAME',
         'APP_ENV',
         'APP_KEY',
         'APP_DEBUG',
         'APP_URL',
         'DB_CONNECTION',
-        'DB_HOST',
-        'DB_PORT',
-        'DB_DATABASE',
-        'DB_USERNAME',
-        'DB_PASSWORD',
-        'CACHE_STORE',
-        'QUEUE_CONNECTION',
-        'SESSION_DRIVER',
-        'AUTH_GUARD',
-        'AUTH_PASSWORD_BROKER',
-        'AUTH_MODEL',
-        'AUTH_PASSWORD_RESET_TOKEN_TABLE',
     ];
+
+    public const BOOLEAN_KEYS = [
+        'APP_DEBUG',
+        'SESSION_SECURE_COOKIE',
+        'SESSION_ENCRYPT',
+        'AWS_USE_PATH_STYLE_ENDPOINT',
+        'RETURN_OTP_IN_RESPONSE',
+    ];
+
+    public const BOOLEAN_VALUES = [
+        true,
+        false,
+    ];
+
+    public const NUMERIC_KEYS = [
+        'DB_PORT',
+        'BCRYPT_ROUNDS',
+        'AUTH_PASSWORD_TIMEOUT',
+        'SESSION_LIFETIME',
+    ];
+
     public const ALLOWED_ENVIRONMENTS = [
         'local',
         'staging',
         'production',
         'testing',
     ];
+
     public const ALLOWED_DATABASE_DRIVERS = [
         'mysql',
         'pgsql',
         'sqlite',
-    ];
-    public const BOOLEAN_VALUES = [
-        true,
-        false,
     ];
 }

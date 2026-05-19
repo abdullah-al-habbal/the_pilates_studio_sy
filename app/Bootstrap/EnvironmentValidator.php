@@ -28,7 +28,7 @@ final readonly class EnvironmentValidator
     {
         $missing = [];
 
-        foreach (EnvironmentVariables::REQUIRED as $key) {
+        foreach (EnvironmentVariables::REQUIRED_BOOTSTRAP as $key) {
             $value = Env::get($key);
 
             if ($value === null) {
@@ -110,15 +110,7 @@ final readonly class EnvironmentValidator
 
     private static function validateBooleanValues(): void
     {
-        $keys = [
-            'APP_DEBUG',
-            'SESSION_SECURE_COOKIE',
-            'SESSION_ENCRYPT',
-            'AWS_USE_PATH_STYLE_ENDPOINT',
-            'RETURN_OTP_IN_RESPONSE',
-        ];
-
-        foreach ($keys as $key) {
+        foreach (EnvironmentVariables::BOOLEAN_KEYS as $key) {
             self::validateBoolean($key);
         }
     }
@@ -149,14 +141,7 @@ final readonly class EnvironmentValidator
 
     private static function validateNumericValues(): void
     {
-        $keys = [
-            'DB_PORT',
-            'BCRYPT_ROUNDS',
-            'AUTH_PASSWORD_TIMEOUT',
-            'SESSION_LIFETIME',
-        ];
-
-        foreach ($keys as $key) {
+        foreach (EnvironmentVariables::NUMERIC_KEYS as $key) {
             self::validateInteger($key);
         }
     }
