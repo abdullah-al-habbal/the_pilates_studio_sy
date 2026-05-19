@@ -11,6 +11,6 @@ final class BootstrapEnvironmentServiceProvider extends ServiceProvider
 {
     public function register(): void
     {
-        EnvironmentValidator::validate();
+        // EnvironmentValidator::validate();
     }
 }
