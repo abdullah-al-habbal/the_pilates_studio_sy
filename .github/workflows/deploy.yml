@@ -30,6 +30,10 @@ jobs:
         run: |
           cp .env.example .env
           echo "APP_KEY=base64:$(openssl rand -base64 32)" >> .env
+          echo "DB_PORT=3306" >> .env
+          echo "BCRYPT_ROUNDS=12" >> .env
+          echo "AUTH_PASSWORD_TIMEOUT=10800" >> .env
+          echo "SESSION_LIFETIME=120" >> .env
 
       - name: Install Composer dependencies
         run: |

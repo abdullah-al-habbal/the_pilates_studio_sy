@@ -119,7 +119,7 @@ final readonly class EnvironmentValidator
     {
         $value = Env::get($key);
 
-        if ($value === null) {
+        if ($value === null || $value === '') {
             return;
         }
 
@@ -149,17 +149,12 @@ final readonly class EnvironmentValidator
     private static function validateInteger(string $key): void
     {
         $value = Env::get($key);
-
-        if ($value === null) {
+        if ($value === null || $value === '') {
             return;
         }
-
         if (!is_numeric($value)) {
             self::fail([
-                sprintf(
-                    '%s must be numeric',
-                    $key
-                ),
+                sprintf('%s must be numeric', $key),
             ]);
         }
     }
