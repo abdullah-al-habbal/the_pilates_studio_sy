@@ -9,6 +9,7 @@ use App\Repositories\Eloquent\ClubExpense\ClubExpenseEloquentRepository;
 use App\Repositories\Eloquent\MerchandiseOrder\MerchandiseOrderEloquentRepository;
 use App\Repositories\Eloquent\Refund\RefundEloquentRepository;
 use Carbon\Carbon;
+use Carbon\CarbonInterface;
 use Illuminate\Support\Collection;
 
 final class DailyBalanceService
@@ -25,19 +26,29 @@ final class DailyBalanceService
     public function getSummary(?string $date = null, ?array $currencies = null, bool $convertToBase = false): Collection
     {
         [$start, $end] = $this->resolveDateRange($date);
+
+        return $this->getSummaryForRange($start, $end, $currencies, $convertToBase);
+    }
+
+    public function getSummaryForRange(
+        CarbonInterface $start,
+        CarbonInterface $end,
+        ?array $currencies = null,
+        bool $convertToBase = false,
+    ): Collection {
+        $start = Carbon::parse($start)->startOfDay();
+        $end = Carbon::parse($end)->endOfDay();
         $baseCurrency = $this->snapshotService->currencyService->getBaseCurrency();
 
         $expenseTotals = $this->expenseRepo->getTotalsByCurrency($start, $end);
         $refundTotals = $this->refundRepo->getTotalsByCurrency($start, $end);
 
         $query = Currency::where('is_active', true)->orderBy('id');
-        if (!empty($currencies)) {
+        if (! empty($currencies)) {
             $query->whereIn('code', $currencies);
         }
 
         return $query->get()->map(function (Currency $currency) use ($start, $end, $expenseTotals, $refundTotals, $convertToBase, $baseCurrency): array {
-
-
             $pkgRevenueRaw = $this->bookingRepo->getRevenueByCurrency($start, $end)
                 ->firstWhere('currency_id', $currency->id)?->total_revenue ?? 0;
             $merchRevenueRaw = $this->orderRepo->getRevenueByCurrency($start, $end)
@@ -98,6 +109,7 @@ final class DailyBalanceService
     private function resolveDateRange(?string $date): array
     {
         $d = $date ? Carbon::parse($date) : Carbon::today();
+
         return [$d->copy()->startOfDay(), $d->copy()->endOfDay()];
     }
 }

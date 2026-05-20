@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Http\Resources\Admin\Operations;
 
+use App\Support\Operations\BookingPackageMapper;
+use App\Support\Operations\ClientDisplayStatusResolver;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -18,20 +20,9 @@ class ClientDetailsResource extends JsonResource
             'email' => $this->email,
             'member_since' => $this->created_at?->format('M Y'),
             'is_active' => $this->isActive(),
-            'active_package' => $this->activeCreditBooking ? [
-                'id' => $this->activeCreditBooking->id,
-                'name' => $this->activeCreditBooking->package?->getTranslation('name', app()->getLocale()),
-                'total_credits' => $this->activeCreditBooking->total_credits,
-                'remaining_credits' => $this->activeCreditBooking->remaining_credits,
-                'status' => $this->activeCreditBooking->status,
-                'expires_at' => $this->activeCreditBooking->expires_at?->format('M d, Y'),
-                'source_type' => $this->activeCreditBooking->source_type,
-                'remaining_days' => $this->activeCreditBooking->expires_at
-                    ? now()->diffInDays($this->activeCreditBooking->expires_at, false)
-                    : null,
-                'paid_amount' => $this->activeCreditBooking->paid_amount,
-                'currency_id' => $this->activeCreditBooking->currency_id,
-            ] : null,
+            'status' => ClientDisplayStatusResolver::resolve($this->resource),
+            'active_package' => BookingPackageMapper::toArray($this->activeCreditBooking),
+            'frozen_package' => BookingPackageMapper::toArray($this->frozenCreditBooking),
             'activity_snapshot' => [
                 'total_sessions_attended' => $this->bookingSessions()
                     ->where('booking_sessions.attendance_status', 'attended')
@@ -45,10 +36,11 @@ class ClientDetailsResource extends JsonResource
                 ->latest()
                 ->limit(5)
                 ->get()
-                ->map(fn($order) => [
+                ->map(fn ($order) => [
                     'item_name' => $order->merchandise?->getTranslation('name', app()->getLocale()),
                     'quantity' => $order->quantity,
                     'total_price' => $order->paid_amount,
+                    'currency_id' => $order->currency_id,
                     'ordered_at' => $order->ordered_at?->format('M d, Y'),
                 ]),
         ];

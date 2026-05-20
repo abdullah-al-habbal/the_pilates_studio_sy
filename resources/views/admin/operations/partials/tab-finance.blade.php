@@ -33,6 +33,11 @@
         @endforeach
         <button onclick="document.querySelectorAll('.currency-filter-cb').forEach(c=>c.checked=true);OperationsFinance.applyCurrencyFilter()"
                 class="text-xs text-primary-600 underline ml-1 hover:text-primary-700">All</button>
+        <label class="flex items-center gap-2 ml-4 text-xs font-medium text-slate-600 dark:text-slate-300 cursor-pointer">
+            <input type="checkbox" id="convert-to-base" class="rounded border-slate-300"
+                   onchange="OperationsFinance.applyCurrencyFilter()">
+            Convert to base ({{ $defaultCurrency->code }})
+        </label>
     </div>
 
     <div id="balance-container"></div>

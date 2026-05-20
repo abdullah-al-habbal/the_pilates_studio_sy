@@ -8,6 +8,7 @@ use App\Commands\Admin\Scheduler\UpdateAttendanceCommand;
 use App\Enums\AttendanceStatusEnum;
 use App\Repositories\Eloquent\BookingSession\BookingSessionEloquentRepository;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Validation\ValidationException;
 
 final readonly class UpdateAttendanceHandler
 {
@@ -21,6 +22,12 @@ final readonly class UpdateAttendanceHandler
 
         if (! $bookingSession) {
             throw new ModelNotFoundException("Booking session with id {$command->bookingSessionId} not found.");
+        }
+
+        if ((int) $bookingSession->class_session_id !== $command->classSessionId) {
+            throw ValidationException::withMessages([
+                'booking_session_id' => 'This booking session does not belong to the selected class session.',
+            ]);
         }
 
         if ($bookingSession->attendance_status === $command->status) {

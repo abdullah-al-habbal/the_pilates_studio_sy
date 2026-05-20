@@ -28,6 +28,7 @@ final class UpdateAttendanceAction
         try {
             $this->handler->handle(
                 new UpdateAttendanceCommand(
+                    classSessionId: $sessionId,
                     bookingSessionId: $bookingSessionId,
                     status: AttendanceStatusEnum::from($request->validated('status')),
                 )

@@ -111,12 +111,60 @@ class Reports extends Page implements HasInfolists
         };
     }
 
+    public function updatedPeriod(): void
+    {
+        $this->resetReportCaches();
+    }
+
+    public function updatedDailyDate(): void
+    {
+        $this->resetReportCaches();
+    }
+
+    public function updatedMonth(): void
+    {
+        $this->resetReportCaches();
+    }
+
+    public function updatedYear(): void
+    {
+        $this->resetReportCaches();
+    }
+
+    public function updatedCustomStart(): void
+    {
+        $this->resetReportCaches();
+    }
+
+    public function updatedCustomEnd(): void
+    {
+        $this->resetReportCaches();
+    }
+
+    public function updatedConvertToBase(): void
+    {
+        $this->resetReportCaches();
+    }
+
+    private function resetReportCaches(): void
+    {
+        $this->_stats = null;
+        $this->_classes = null;
+        $this->_merch = null;
+    }
+
     private function buildSummaryData(): Collection
     {
-        $summary = app(DailyBalanceService::class)->getSummary(
-            date: $this->period === 'custom'
-            ? null
-            : ($this->dailyDate ?: now()->toDateString()),
+        [$start, $end] = $this->getPeriodDates();
+
+        if ($start === null || $end === null) {
+            $start = Carbon::today()->startOfDay();
+            $end = Carbon::today()->endOfDay();
+        }
+
+        $summary = app(DailyBalanceService::class)->getSummaryForRange(
+            start: $start,
+            end: $end,
             currencies: $this->selectedCurrencies ?: null,
             convertToBase: $this->convertToBase,
         );
@@ -292,8 +340,6 @@ class Reports extends Page implements HasInfolists
         $classes = $this->popularClasses();
         $merch = $this->merchandiseSales();
         $stats = $this->stats();
-        $currency = app(CurrencyService::class)->getDefaultCurrency();
-        $divisor = 10 ** $currency->decimal_places;
 
         return Grid::make(['default' => 1, 'lg' => 2])
             ->schema([
@@ -329,15 +375,20 @@ class Reports extends Page implements HasInfolists
                     ->schema(
                         $merch->isEmpty()
                         ? [TextEntry::make('no_merch')->hiddenLabel()->state('No sales for this period.')->color('gray')]
-                        : $merch->values()->map(function ($item, int $i) use ($currency, $divisor): TextEntry {
+                        : $merch->values()->map(function ($item, int $i): TextEntry {
                             $locale = app()->getLocale();
                             $name = is_array($item->name)
                                 ? ($item->name[$locale] ?? $item->name['en'] ?? '')
                                 : ($item->name ?? '');
+                            $itemCurrency = Currency::find($item->currency_id ?? 0);
+                            $decimals = $itemCurrency?->decimal_places ?? 2;
+                            $symbol = $itemCurrency?->symbol ?? '';
+                            $code = $itemCurrency?->code ?? '';
                             return TextEntry::make('merch_' . $i)
                                 ->label($name)
                                 ->state(
-                                    number_format($item->revenue / $divisor, $currency->decimal_places) . ' ' . $currency->symbol
+                                    number_format($item->revenue / (10 ** $decimals), $decimals) . ' ' . $symbol
+                                    . " ({$code})"
                                     . ' · '
                                     . __('dashboard.pages.reports.top_merchandise.sold', ['count' => $item->quantity])
                                 )

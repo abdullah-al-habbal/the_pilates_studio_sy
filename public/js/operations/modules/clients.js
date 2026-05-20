@@ -93,9 +93,10 @@ export async function renderClients(search = "", page = 1) {
         tbody.innerHTML = result.data
             .map((user) => {
                 const statusBadge = buildStatusBadge(user.status);
-                const packageCell = user.active_package
-                    ? `<span class="text-sm font-medium">${user.active_package.name}</span>
-                   <span class="text-xs text-slate-400 ml-1">(${user.active_package.remaining_credits}/${user.active_package.total_credits})</span>`
+                const listPackage = user.frozen_package ?? user.active_package;
+                const packageCell = listPackage
+                    ? `<span class="text-sm font-medium">${listPackage.name}${user.frozen_package ? ' <span class="text-sky-600 text-xs">(frozen)</span>' : ''}</span>
+                   <span class="text-xs text-slate-400 ml-1">(${listPackage.remaining_credits}/${listPackage.total_credits})</span>`
                     : '<span class="text-xs text-slate-400 italic">No package</span>';
 
                 return `
@@ -191,32 +192,34 @@ export async function showClientDetails(userId) {
 
         if (!user) throw new Error("Empty response from server.");
 
-        const actionButton =
-            user.active_package?.remaining_credits === 0
-                ? `<button onclick="window.showPackageAssignment(${user.id})"
-                        class="bg-primary-600 text-white px-5 py-2.5 rounded-xl font-bold text-sm hover:scale-105 transition-all btn-single-action">
-                        + Assign New Package
-                   </button>`
-                : user.active_package?.status === "frozen"
-                  ? `<button onclick="window.handleUnfreeze(${user.active_package.id}, ${user.id})"
+        const currentPackage = user.frozen_package ?? user.active_package;
+        const isFrozen = Boolean(user.frozen_package);
+
+        const actionButton = isFrozen
+            ? `<button onclick="window.handleUnfreeze(${user.frozen_package.id}, ${user.id})"
                        class="bg-primary-600 text-white px-5 py-2.5 rounded-xl font-bold text-sm hover:scale-105 transition-all btn-single-action">
                        🔓 Unfreeze Package
                    </button>`
-                  : !user.active_package
-                    ? `<button onclick="window.showPackageAssignment(${user.id})"
+            : user.active_package?.remaining_credits === 0
+              ? `<button onclick="window.showPackageAssignment(${user.id})"
+                        class="bg-primary-600 text-white px-5 py-2.5 rounded-xl font-bold text-sm hover:scale-105 transition-all btn-single-action">
+                        + Assign New Package
+                   </button>`
+              : !user.active_package
+                ? `<button onclick="window.showPackageAssignment(${user.id})"
                           class="bg-primary-600 text-white px-5 py-2.5 rounded-xl font-bold text-sm hover:scale-105 transition-all btn-single-action">
                           + Assign Package
                       </button>`
-                    : "";
+                : "";
 
-        const remainingDaysRaw = user.active_package?.remaining_days;
+        const remainingDaysRaw = currentPackage?.remaining_days;
         const daysLeftText = humanizeRemainingDays(remainingDaysRaw);
         const daysBadge =
             remainingDaysRaw != null
                 ? `<span class="px-2 py-0.5 rounded-lg bg-gold-100 text-gold-700 text-xs font-bold">
                    ${daysLeftText}
                </span>`
-                : user.active_package?.expires_at
+                : currentPackage?.expires_at
                   ? '<span class="px-2 py-0.5 rounded-lg bg-rose-100 text-rose-700 text-xs font-bold">No days left</span>'
                   : "";
 
@@ -244,38 +247,38 @@ export async function showClientDetails(userId) {
                 <!-- Package + Activity -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <!-- Current Package -->
-                    <div class="glass-card rounded-2xl p-6 border-l-4 ${user.active_package?.status === "frozen" ? "border-sky-500" : "border-gold-500"}">
-                        <h5 class="text-xs font-bold text-slate-400 uppercase mb-4">Current Package</h5>
+                    <div class="glass-card rounded-2xl p-6 border-l-4 ${isFrozen ? "border-sky-500" : "border-gold-500"}">
+                        <h5 class="text-xs font-bold text-slate-400 uppercase mb-4">${isFrozen ? "Frozen Package" : "Current Package"}</h5>
                         ${
-                            user.active_package
+                            currentPackage
                                 ? `
                             <div class="space-y-4">
                                 <div class="flex justify-between items-start">
                                     <div>
-                                        <p class="text-xl font-bold">${user.active_package.name}</p>
-                                        <p class="text-sm text-slate-500">Source: ${user.active_package.source_type ?? "—"}</p>
+                                        <p class="text-xl font-bold">${currentPackage.name}</p>
+                                        <p class="text-sm text-slate-500">Source: ${currentPackage.source_type ?? "—"}</p>
                                     </div>
                                     <div class="text-right">
                                         <p class="text-2xl font-black text-primary-600">
-                                            ${user.active_package.remaining_credits} / ${user.active_package.total_credits}
+                                            ${currentPackage.remaining_credits} / ${currentPackage.total_credits}
                                         </p>
                                         <p class="text-xs font-bold text-slate-400">CREDITS</p>
                                     </div>
                                 </div>
                                 <div class="flex justify-between items-center pt-2">
                                     <span class="text-sm font-medium text-slate-600 dark:text-slate-400">
-                                        Expires: ${user.active_package.expires_at ?? "Never"}
+                                        Expires: ${currentPackage.expires_at ?? "Never"}
                                     </span>
                                     ${daysBadge}
                                 </div>
                                 <div class="flex gap-2 pt-2">
                                     ${
-                                        user.active_package.status === "frozen"
-                                            ? `<button onclick="window.handleUnfreeze(${user.active_package.id}, ${user.id})"
+                                        isFrozen
+                                            ? `<button onclick="window.handleUnfreeze(${currentPackage.id}, ${user.id})"
                                                 class="flex-1 bg-emerald-100 text-emerald-700 py-2 rounded-lg font-bold text-xs uppercase tracking-wider hover:bg-emerald-200 transition-colors btn-single-action">
                                                 Unfreeze Now
                                            </button>`
-                                            : user.active_package
+                                            : currentPackage
                                                     .remaining_credits === 0
                                               ? `<div class="space-y-3 pt-2">
                                                 <div class="rounded-xl bg-amber-50 dark:bg-amber-900/20 border border-amber-200 px-4 py-3 text-sm text-amber-700 dark:text-amber-300">
@@ -289,11 +292,11 @@ export async function showClientDetails(userId) {
                                             </div>`
                                               : (() => {
                                                     const paidAmount =
-                                                        user.active_package
+                                                        currentPackage
                                                             .paid_amount ??
                                                         null;
                                                     const currencyId =
-                                                        user.active_package
+                                                        currentPackage
                                                             .currency_id ??
                                                         null;
                                                     const refundBtnDisabled =
@@ -318,11 +321,11 @@ export async function showClientDetails(userId) {
 
                                                     return `
                                                 <div class="flex flex-1 gap-2">
-                                                    <button onclick="window.handleFreeze(${user.active_package.id}, ${user.id})"
+                                                    <button onclick="window.handleFreeze(${currentPackage.id}, ${user.id})"
                                                         class="flex-1 bg-amber-100 text-amber-700 py-2 rounded-lg font-bold text-xs uppercase tracking-wider hover:bg-amber-200 transition-colors btn-single-action">
                                                         Freeze
                                                     </button>
-                                                    <button onclick="window.showRefundModal(${user.active_package.id}, ${paidAmountJs}, ${currencyIdJs}, ${user.id})"
+                                                    <button onclick="window.showRefundModal(${currentPackage.id}, ${paidAmountJs}, ${currencyIdJs}, ${user.id})"
                                                         ${refundBtnDisabled ? "disabled" : ""}
                                                         ${refundTitle}
                                                         class="flex-1 bg-rose-100 text-rose-700 py-2 rounded-lg font-bold text-xs uppercase tracking-wider ${refundCls} transition-colors btn-single-action">

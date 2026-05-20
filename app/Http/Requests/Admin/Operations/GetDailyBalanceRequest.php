@@ -17,6 +17,27 @@ class GetDailyBalanceRequest extends FormRequest
     {
         return [
             'date' => ['nullable', 'date'],
+            'currencies' => ['nullable', 'array'],
+            'currencies.*' => ['string', 'max:10'],
+            'convertToBase' => ['nullable', 'boolean'],
         ];
+    }
+
+    public function date(): string
+    {
+        return $this->validated('date') ?? now()->toDateString();
+    }
+
+    /** @return list<string>|null */
+    public function currencyCodes(): ?array
+    {
+        $currencies = $this->validated('currencies');
+
+        return is_array($currencies) && $currencies !== [] ? $currencies : null;
+    }
+
+    public function convertToBase(): bool
+    {
+        return $this->boolean('convertToBase');
     }
 }

@@ -46,9 +46,10 @@ export async function renderBalance(date = '') {
 
     const checkboxes = document.querySelectorAll('.currency-filter-cb:checked');
     const selectedCurrencies = Array.from(checkboxes).map(cb => cb.value);
+    const convertToBase = document.getElementById('convert-to-base')?.checked ?? false;
 
     try {
-        const result = await OperationsAPI.getDailyBalance(date, selectedCurrencies);
+        const result = await OperationsAPI.getDailyBalance(date, selectedCurrencies, convertToBase);
         OperationsUI.renderBalance(result.data);
     } catch (e) {
         console.error('Failed to load balance:', e);

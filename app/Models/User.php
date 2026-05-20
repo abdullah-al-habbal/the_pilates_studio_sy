@@ -203,6 +203,13 @@ class User extends Authenticatable
             ->latest();
     }
 
+    public function frozenCreditBooking(): HasOne
+    {
+        return $this->hasOne(Booking::class)
+            ->where('status', BookingStatusEnum::FROZEN)
+            ->latest();
+    }
+
     public function deletedBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'deleted_by');

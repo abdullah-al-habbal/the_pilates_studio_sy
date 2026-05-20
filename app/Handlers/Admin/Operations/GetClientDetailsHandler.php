@@ -11,7 +11,8 @@ final readonly class GetClientDetailsHandler
     public function handle(int $userId): User
     {
         return User::with([
-            'bookings.package',
+            'activeCreditBooking.package',
+            'frozenCreditBooking.package',
             'merchandiseOrders.merchandise',
             'settings',
         ])->findOrFail($userId);

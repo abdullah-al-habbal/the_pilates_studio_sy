@@ -8,6 +8,7 @@ use App\Enums\AttendanceStatusEnum;
 final readonly class UpdateAttendanceCommand
 {
     public function __construct(
+        public int $classSessionId,
         public int $bookingSessionId,
         public AttendanceStatusEnum $status,
     ) {

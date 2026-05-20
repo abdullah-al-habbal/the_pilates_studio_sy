@@ -115,12 +115,13 @@ class MerchandiseOrderEloquentRepository
         return MerchandiseOrder::query()
             ->select([
                 'merchandise_orders.merchandise_id',
+                'merchandise_orders.currency_id',
                 DB::raw('SUM(merchandise_orders.quantity) as quantity'),
                 DB::raw('SUM(merchandise_orders.paid_amount) as revenue'),
             ])
             ->when($startDate, fn($q) => $q->where('merchandise_orders.ordered_at', '>=', $startDate))
             ->when($endDate, fn($q) => $q->where('merchandise_orders.ordered_at', '<=', $endDate))
-            ->groupBy('merchandise_orders.merchandise_id')
+            ->groupBy('merchandise_orders.merchandise_id', 'merchandise_orders.currency_id')
             ->orderByDesc('revenue')
             ->limit($limit)
             ->get()

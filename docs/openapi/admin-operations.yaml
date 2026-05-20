@@ -1,0 +1,194 @@
+openapi: 3.0.3
+info:
+  title: Studio Admin JSON APIs
+  description: Operations POS and Scheduler (session cookie + CSRF)
+  version: 1.0.0
+servers:
+  - url: /admin/operations
+    description: Operations
+  - url: /admin/scheduler
+    description: Scheduler
+
+components:
+  securitySchemes:
+    sessionAuth:
+      type: apiKey
+      in: cookie
+      name: laravel_session
+  schemas:
+    ApiEnvelope:
+      type: object
+      properties:
+        success: { type: boolean }
+        code: { type: string }
+        message: { type: string }
+        data: {}
+        timestamp: { type: string, format: date-time }
+        status_code: { type: integer }
+        meta:
+          type: object
+          properties:
+            pagination:
+              $ref: '#/components/schemas/Pagination'
+    Pagination:
+      type: object
+      properties:
+        total: { type: integer }
+        count: { type: integer }
+        per_page: { type: integer }
+        current_page: { type: integer }
+        total_pages: { type: integer }
+    MoneyInt:
+      type: integer
+      description: Amount in currency smallest unit
+    PackageBooking:
+      type: object
+      properties:
+        id: { type: integer }
+        name: { type: string }
+        total_credits: { type: integer }
+        remaining_credits: { type: integer }
+        status: { type: string, enum: [active, frozen] }
+        expires_at: { type: string, nullable: true }
+        paid_amount: { $ref: '#/components/schemas/MoneyInt' }
+        currency_id: { type: integer }
+    ClientListItem:
+      type: object
+      properties:
+        id: { type: integer }
+        fullname: { type: string }
+        phone_number: { type: string }
+        is_active: { type: boolean }
+        status: { type: string, enum: [active, frozen, deactivated] }
+        member_since: { type: string }
+        active_package: { $ref: '#/components/schemas/PackageBooking', nullable: true }
+        frozen_package: { $ref: '#/components/schemas/PackageBooking', nullable: true }
+        sessions_attended: { type: integer }
+        sessions_cancelled: { type: integer }
+    DailyBalanceItem:
+      type: object
+      properties:
+        currency_id: { type: integer }
+        currency_code: { type: string }
+        currency_symbol: { type: string }
+        currency_decimals: { type: integer }
+        package_revenue: { $ref: '#/components/schemas/MoneyInt' }
+        merchandise_revenue: { $ref: '#/components/schemas/MoneyInt' }
+        total_revenue: { $ref: '#/components/schemas/MoneyInt' }
+        total_expenses: { $ref: '#/components/schemas/MoneyInt' }
+        total_refunds: { $ref: '#/components/schemas/MoneyInt' }
+        true_balance: { $ref: '#/components/schemas/MoneyInt' }
+        base_conversion_applied: { type: boolean }
+        total_revenue_in_base: { $ref: '#/components/schemas/MoneyInt', nullable: true }
+        true_balance_in_base: { $ref: '#/components/schemas/MoneyInt', nullable: true }
+
+security:
+  - sessionAuth: []
+
+paths:
+  /clients:
+    get:
+      tags: [Operations]
+      summary: List clients
+      parameters:
+        - { name: search, in: query, schema: { type: string } }
+        - { name: page, in: query, schema: { type: integer } }
+        - { name: filter, in: query, schema: { type: string } }
+      responses:
+        '200':
+          description: Paginated clients
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiEnvelope'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items: { $ref: '#/components/schemas/ClientListItem' }
+  /clients/{userId}/details:
+    get:
+      tags: [Operations]
+      summary: Client details
+      parameters:
+        - { name: userId, in: path, required: true, schema: { type: integer } }
+      responses:
+        '200': { description: Client workspace data }
+  /packages/{packageId}/assign:
+    post:
+      tags: [Operations]
+      summary: Assign package to client
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [user_id, currency_id]
+              properties:
+                user_id: { type: integer }
+                currency_id: { type: integer }
+      responses:
+        '200': { description: Booking created }
+        '422': { description: Validation error }
+  /finance/daily:
+    get:
+      tags: [Operations]
+      summary: Daily or range balance (single date via query)
+      parameters:
+        - { name: date, in: query, schema: { type: string, format: date } }
+        - { name: currencies[], in: query, schema: { type: array, items: { type: string } } }
+        - { name: convertToBase, in: query, schema: { type: boolean } }
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiEnvelope'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items: { $ref: '#/components/schemas/DailyBalanceItem' }
+  /bookings/{bookingId}/refund:
+    post:
+      tags: [Operations]
+      summary: Refund booking
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                amount: { $ref: '#/components/schemas/MoneyInt', nullable: true }
+      responses:
+        '200': { description: Refund processed }
+        '422': { description: Invalid amount or state }
+
+  /sessions:
+    get:
+      tags: [Scheduler]
+      summary: Daily sessions
+      parameters:
+        - { name: date, in: query, required: true, schema: { type: string, format: date } }
+        - { name: page, in: query, schema: { type: integer } }
+        - { name: per_page, in: query, schema: { type: integer } }
+      responses:
+        '200': { description: Paginated sessions }
+  /sessions/{sessionId}/attendance/{bookingSessionId}:
+    post:
+      tags: [Scheduler]
+      summary: Update attendance
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [status]
+              properties:
+                status: { type: string, enum: [attended, missed] }
+      responses:
+        '200': { description: Updated }
+        '422': { description: Session mismatch or validation }

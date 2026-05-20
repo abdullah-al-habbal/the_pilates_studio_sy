@@ -1,0 +1,85 @@
+openapi: 3.0.3
+info:
+  title: Studio Mobile API v1
+  description: Laravel Sanctum bearer token for protected routes
+  version: 1.0.0
+servers:
+  - url: /api/v1
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: Sanctum
+  schemas:
+    ApiEnvelope:
+      type: object
+      properties:
+        success: { type: boolean }
+        code: { type: string }
+        message: { type: string }
+        data: {}
+        timestamp: { type: string, format: date-time }
+        status_code: { type: integer }
+
+paths:
+  /public/class-sessions:
+    get:
+      tags: [Public]
+      summary: List class sessions
+      security: []
+      responses:
+        '200': { description: Session list }
+  /public/class-sessions/{id}:
+    get:
+      tags: [Public]
+      summary: Show class session
+      security: []
+      responses:
+        '200': { description: Session detail }
+
+  /booking-sessions:
+    get:
+      tags: [Protected]
+      summary: List booking sessions
+      security: [{ bearerAuth: [] }]
+      responses:
+        '200': { description: OK }
+        '401': { description: Unauthorized }
+  /booking-sessions/reserve:
+    post:
+      tags: [Protected]
+      summary: Reserve a class session
+      security: [{ bearerAuth: [] }]
+      responses:
+        '200': { description: Reserved }
+        '422': { description: No active booking / full session }
+  /booking-sessions/{id}/cancel:
+    post:
+      tags: [Protected]
+      summary: Cancel reservation
+      security: [{ bearerAuth: [] }]
+      responses:
+        '200': { description: Cancelled }
+
+  /bookings:
+    get:
+      tags: [Protected]
+      summary: List user bookings
+      security: [{ bearerAuth: [] }]
+    post:
+      tags: [Protected]
+      summary: Create booking (purchase package)
+      security: [{ bearerAuth: [] }]
+  /bookings/{id}:
+    get:
+      tags: [Protected]
+      summary: Show booking
+      security: [{ bearerAuth: [] }]
+
+  /profiles:
+    get:
+      tags: [Protected]
+      summary: User profile
+      security: [{ bearerAuth: [] }]

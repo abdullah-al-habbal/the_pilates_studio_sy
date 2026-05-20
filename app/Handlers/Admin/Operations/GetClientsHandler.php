@@ -12,7 +12,7 @@ final readonly class GetClientsHandler
 
     public function handle(?string $search = null, int $page = 1, ?string $filter = null): LengthAwarePaginator
     {
-        return User::with(['bookings.package', 'bookingSessions'])
+        return User::with(['bookings.package', 'activeCreditBooking.package', 'frozenCreditBooking.package', 'bookingSessions'])
             ->when($search, function ($q) use ($search) {
                 $q->where(function ($subQ) use ($search) {
                     $subQ->where('fullname', 'like', "%{$search}%")

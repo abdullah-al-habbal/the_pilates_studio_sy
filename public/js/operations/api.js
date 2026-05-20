@@ -98,8 +98,11 @@ const OperationsAPI = {
         });
     },
 
-    getDailyBalance(date = "", currencies = []) {
+    getDailyBalance(date = "", currencies = [], convertToBase = false) {
         let url = `/admin/operations/finance/daily?date=${date}`;
+        if (convertToBase) {
+            url += "&convertToBase=1";
+        }
         if (currencies && currencies.length > 0) {
             currencies.forEach((c) => {
                 url += `&currencies[]=${encodeURIComponent(c)}`;
