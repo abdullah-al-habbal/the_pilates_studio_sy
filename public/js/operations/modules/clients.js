@@ -143,7 +143,6 @@ function buildStatusBadge(status) {
         deactivated: "bg-slate-100 text-slate-500",
     };
     const cls = map[status] ?? "bg-slate-100 text-slate-500";
-    // fix: why the status always UNKNOWN?
     const label = status?.toUpperCase() ?? "UNKNOWN";
     return `<span class="px-2 py-1 rounded-full text-xs font-bold ${cls}">${label}</span>`;
 }

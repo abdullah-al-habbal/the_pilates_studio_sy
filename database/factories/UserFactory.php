@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Enums\UserStatusEnum;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Facades\Hash;
 
@@ -20,6 +21,7 @@ class UserFactory extends Factory
             'otp_expires_at'    => null,
             'deactivated_at'    => null,
             'deleted_by'        => null,
+            'status'            => UserStatusEnum::ACTIVE,
         ];
     }
 

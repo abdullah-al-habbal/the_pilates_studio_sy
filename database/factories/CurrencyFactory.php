@@ -11,10 +11,14 @@ class CurrencyFactory extends Factory
 
     public function definition(): array
     {
+        $code = $this->faker->unique()->currencyCode();
+
         return [
-            'code' => $this->faker->unique()->currencyCode(),
+            'code' => $code,
+            'name' => ['en' => $code, 'ar' => $code],
             'symbol' => '$',
             'decimal_places' => 2,
+            'exchange_rate' => 1.0,
             'is_active' => true,
         ];
     }

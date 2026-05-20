@@ -3,9 +3,9 @@ declare(strict_types=1);
 
 namespace App\Http\Actions\Web\Admin\Operations;
 
+use App\Commands\Admin\Operations\RecordExpenseCommand;
 use App\Handlers\Admin\Operations\RecordExpenseHandler;
 use App\Http\Requests\Admin\Operations\RecordExpenseRequest;
-use App\Services\Log\LoggingService;
 use App\Traits\ApiResponseTrait;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
@@ -23,8 +23,7 @@ final readonly class RecordExpenseAction
     public function __invoke(RecordExpenseRequest $request): JsonResponse
     {
         try {
-            $expense = $this->handler->handle(
-                // fix: use a command class
+            $command = new RecordExpenseCommand(
                 categoryName: $request->category_name,
                 currencyId: (int) $request->currency_id,
                 amount: (int) $request->amount,
@@ -33,12 +32,20 @@ final readonly class RecordExpenseAction
                 expenseDate: $request->date ? Carbon::parse($request->date) : null,
             );
 
+            $expense = $this->handler->handle(
+                categoryName: $command->categoryName,
+                currencyId: $command->currencyId,
+                amount: $command->amount,
+                recordedBy: $command->recordedBy,
+                notes: $command->notes,
+                expenseDate: $command->expenseDate,
+            );
+
             return $this->created(
                 data: $expense,
                 message: 'Expense recorded successfully.'
             );
         } catch (\Throwable $e) {
-            // fix: use the LoggingService from the 
             Log::error('Operations - RecordExpense failed: ' . $e->getMessage(), [
                 'exception' => $e,
                 'category_name' => $request->category_name,

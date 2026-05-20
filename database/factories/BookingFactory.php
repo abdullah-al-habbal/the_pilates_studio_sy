@@ -51,4 +51,12 @@ class BookingFactory extends Factory
             'status' => BookingStatusEnum::CANCELLED->value,
         ]);
     }
+
+    public function frozen(): static
+    {
+        return $this->state(fn() => [
+            'status' => BookingStatusEnum::FROZEN->value,
+            'frozen_at' => now(),
+        ]);
+    }
 }

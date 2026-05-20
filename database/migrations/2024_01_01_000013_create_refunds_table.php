@@ -31,7 +31,9 @@ return new class extends Migration {
             $table->index('refunded_by');
             $table->index('currency_id');
         });
-        DB::statement("ALTER TABLE refunds MODIFY refundable_type VARCHAR(255) COMMENT 'bookings or merchandise_orders'");
+        if (Schema::getConnection()->getDriverName() !== 'sqlite') {
+            DB::statement("ALTER TABLE refunds MODIFY refundable_type VARCHAR(255) COMMENT 'bookings or merchandise_orders'");
+        }
     }
     public function down(): void
     {
