@@ -51,14 +51,14 @@ class User extends Authenticatable
     protected function casts(): array
     {
         return [
-            'date_of_birth'      => 'date',
-            'email_verified_at'  => 'datetime',
-            'otp_expires_at'     => 'datetime',
-            'frozen_at'          => 'datetime',
-            'deactivated_at'     => 'datetime',
-            'password'           => 'hashed',
-            'status'             => UserStatusEnum::class,
-            'is_active'          => 'boolean',
+            'date_of_birth' => 'date',
+            'email_verified_at' => 'datetime',
+            'otp_expires_at' => 'datetime',
+            'frozen_at' => 'datetime',
+            'deactivated_at' => 'datetime',
+            'password' => 'hashed',
+            'status' => UserStatusEnum::class,
+            'is_active' => 'boolean',
         ];
     }
 
@@ -83,20 +83,20 @@ class User extends Authenticatable
 
     protected function name(): Attribute
     {
-        return Attribute::make(get: fn () => $this->fullname);
+        return Attribute::make(get: fn() => $this->fullname);
     }
 
     protected function hasCredits(): Attribute
     {
         return Attribute::make(
-            get: fn () => $this->total_remaining_credits > 0
+            get: fn() => $this->total_remaining_credits > 0
         );
     }
 
     protected function canBookNewPackage(): Attribute
     {
         return Attribute::make(
-            get: fn () => ! $this->bookings()
+            get: fn() => !$this->bookings()
                 ->where('status', BookingStatusEnum::ACTIVE)
                 ->where('remaining_credits', '>', 0)
                 ->exists()
@@ -106,28 +106,28 @@ class User extends Authenticatable
     protected function canReserveClass(): Attribute
     {
         return Attribute::make(
-            get: fn () => $this->total_remaining_credits > 0 && $this->isActive()
+            get: fn() => $this->total_remaining_credits > 0 && $this->isActive()
         );
     }
 
     protected function isVerified(): Attribute
     {
         return Attribute::make(
-            get: fn () => ! is_null($this->email_verified_at)
+            get: fn() => !is_null($this->email_verified_at)
         );
     }
 
     protected function isDeactivated(): Attribute
     {
         return Attribute::make(
-            get: fn () => ! is_null($this->deactivated_at)
+            get: fn() => !is_null($this->deactivated_at)
         );
     }
 
     protected function hasActiveBooking(): Attribute
     {
         return Attribute::make(
-            get: fn () => ! is_null($this->activeCreditBooking)
+            get: fn() => !is_null($this->activeCreditBooking)
         );
     }
 
@@ -135,9 +135,10 @@ class User extends Authenticatable
 
     public function getTotalRemainingCreditsAttribute(): int
     {
-        return $this->bookings()->where('status', BookingStatusEnum::ACTIVE->value)->sum('remaining_credits');
+        return (int) $this->bookings()
+            ->where('status', BookingStatusEnum::ACTIVE->value)
+            ->sum('remaining_credits');
     }
-
     public function getAllowNotificationsAttribute(): bool
     {
         return (bool) $this->settings?->allow_notifications;
@@ -186,7 +187,7 @@ class User extends Authenticatable
             ->where('status', BookingStatusEnum::ACTIVE->value)
             ->where(function ($query) {
                 $query->whereNull('expires_at')
-                      ->orWhere('expires_at', '>', now());
+                    ->orWhere('expires_at', '>', now());
             })
             ->latest();
     }
@@ -198,7 +199,7 @@ class User extends Authenticatable
             ->where('remaining_credits', '>', 0)
             ->where(function ($query) {
                 $query->whereNull('expires_at')
-                      ->orWhere('expires_at', '>', now());
+                    ->orWhere('expires_at', '>', now());
             })
             ->latest();
     }

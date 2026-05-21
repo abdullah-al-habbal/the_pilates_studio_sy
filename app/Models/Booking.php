@@ -40,14 +40,14 @@ class Booking extends Model
     protected function casts(): array
     {
         return [
-            'total_credits'     => 'integer',
+            'total_credits' => 'integer',
             'remaining_credits' => 'integer',
-            'paid_amount'       => 'integer',
-            'expires_at'        => 'datetime',
-            'frozen_at'         => 'datetime',
-            'unfrozen_at'       => 'datetime',
-            'status'            => BookingStatusEnum::class,
-            'source_type'       => BookingSourceTypeEnum::class,
+            'paid_amount' => 'integer',
+            'expires_at' => 'datetime',
+            'frozen_at' => 'datetime',
+            'unfrozen_at' => 'datetime',
+            'status' => BookingStatusEnum::class,
+            'source_type' => BookingSourceTypeEnum::class,
             'exchange_rate_snapshot' => 'float',
         ];
     }
@@ -127,7 +127,7 @@ class Booking extends Model
         return match (true) {
             $ratio > 0.5 => 'success',
             $ratio > 0.2 => 'warning',
-            default      => 'danger',
+            default => 'danger',
         };
     }
 
@@ -139,22 +139,22 @@ class Booking extends Model
     protected function hasCreditsRemaining(): Attribute
     {
         return Attribute::make(
-            get: fn () => $this->remaining_credits > 0
+            get: fn() => $this->remaining_credits > 0
         );
     }
 
     protected function canDeductCredit(): Attribute
     {
         return Attribute::make(
-            get: fn () => $this->isActive() && $this->remaining_credits > 0
+            get: fn() => $this->isActive() && $this->remaining_credits > 0
         );
     }
 
     protected function canBeCancelled(): Attribute
     {
         return Attribute::make(
-            get: fn () => $this->status === BookingStatusEnum::ACTIVE
-                && $this->remaining_credits === $this->total_credits
+            get: fn() => $this->status === BookingStatusEnum::ACTIVE
+            && $this->remaining_credits === $this->total_credits
         );
     }
 
@@ -191,5 +191,26 @@ class Booking extends Model
     public function resumeBookings(): HasMany
     {
         return $this->hasMany(Booking::class, 'parent_booking_id');
+    }
+
+    protected function isExhausted(): Attribute
+    {
+        return Attribute::make(
+            get: fn() => $this->status === BookingStatusEnum::EXHAUSTED
+        );
+    }
+
+    protected function isWithinValidity(): Attribute
+    {
+        return Attribute::make(
+            get: fn() => !$this->isExpired()
+        );
+    }
+
+    protected function creditsNearEmpty(): Attribute
+    {
+        return Attribute::make(
+            get: fn() => $this->remaining_credits > 0 && $this->remaining_credits <= 2
+        );
     }
 }
