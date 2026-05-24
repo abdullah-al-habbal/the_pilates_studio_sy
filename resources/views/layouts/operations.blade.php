@@ -1,3 +1,4 @@
+{{-- filePath: /home/lenovo/work/projects/the_pilates_studio_sy/resources/views/layouts/operations.blade.php --}}
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 

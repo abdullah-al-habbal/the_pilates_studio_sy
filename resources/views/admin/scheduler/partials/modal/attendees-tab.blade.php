@@ -21,6 +21,18 @@
         @endfor
     </div>
 
+    <div id="attendees-error" class="hidden flex flex-col items-center py-16 gap-4 text-red-400">
+        <div
+            class="w-16 h-16 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center border border-red-200 dark:border-red-800">
+            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                    d="M12 8v4m0 4h.01M21 12A9 9 0 113 12a9 9 0 0118 0z" />
+            </svg>
+        </div>
+        <p class="text-sm font-bold text-red-500">Unable to load reservations</p>
+        <p id="attendees-error-message" class="text-xs text-red-300">Something went wrong while fetching attendees.</p>
+    </div>
+
     <div id="attendees-empty" class="hidden flex flex-col items-center py-16 gap-4 text-gray-400">
         <div
             class="w-16 h-16 bg-gray-50 dark:bg-gray-800/50 rounded-full flex items-center justify-center border border-gray-100 dark:border-gray-800">
@@ -29,7 +41,8 @@
                     d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0" />
             </svg>
         </div>
-        <p class="text-sm font-bold text-gray-500">Waiting for reservations...</p>
+        <p class="text-sm font-bold text-gray-500">No reservations yet</p>
+        <p class="text-xs text-gray-400">Attendees will appear here once they book.</p>
     </div>
 
     <div id="attendees-list" class="hidden grid gap-3"></div>

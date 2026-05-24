@@ -48,12 +48,15 @@
             <h3 class="text-lg font-bold">Record Expense</h3>
             <form id="expense-form" class="space-y-4">
                 <div class="grid grid-cols-2 gap-4">
-                    <div class="space-y-1">
+                    <div class="space-y-1 relative">
                         <label class="text-xs font-semibold text-slate-500 uppercase">Category</label>
-                        <input type="text" name="category_name" list="category-list" id="category-input" required
+                        <input type="text" name="category_name" id="category-input" required
+                               autocomplete="off"
                                placeholder="Rent, Electricity…"
                                class="w-full px-4 py-2 bg-slate-50 dark:bg-slate-800 rounded-lg border-transparent focus:ring-2 focus:ring-primary-500 outline-none">
-                        <datalist id="category-list"></datalist>
+                        <div id="category-dropdown"
+                             class="hidden absolute z-20 w-full mt-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl shadow-lg max-h-48 overflow-y-auto">
+                        </div>
                     </div>
                     <div class="space-y-1">
                         <label class="text-xs font-semibold text-slate-500 uppercase">Amount <span class="text-slate-400">(smallest unit)</span></label>

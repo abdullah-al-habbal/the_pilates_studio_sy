@@ -11,6 +11,7 @@
                 session: null,
                 bookings: [],
                 successMsg: '',
+                error: '',
                 sessionId: sessionId
             };
             
@@ -45,6 +46,7 @@
 
         fetchDetails: async (sessionId) => {
             state.modal.loading = true;
+            state.modal.error = '';
             render.modalHeader();
             render.attendeesTab();
             
@@ -56,6 +58,8 @@
                 }
             } catch (err) {
                 console.error('Session Details Error:', err);
+                state.modal.error = err.message || 'Unable to load session attendees.';
+                state.modal.bookings = [];
             } finally {
                 state.modal.loading = false;
                 render.modalHeader();

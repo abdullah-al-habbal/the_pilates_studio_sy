@@ -14,6 +14,8 @@ const OperationsNotifications = (() => {
         users: [],
         // Dropdown scroll element reference
         dropdownEl: null,
+        isFocused: false,
+        blurTimer: null,
     };
     const PER_PAGE = 15;   // matches backend default
 
@@ -55,6 +57,39 @@ const OperationsNotifications = (() => {
         const input = document.getElementById('notif-user-search');
         if (!input) return;
 
+        input.addEventListener('focus', () => {
+            state.isFocused = true;
+            clearTimeout(state.blurTimer);
+            if (state.users.length > 0 || state.isLoading) {
+                _renderDropdown();
+                return;
+            }
+            _resetAndSearch('');
+        });
+
+        input.addEventListener('blur', () => {
+            state.blurTimer = setTimeout(() => {
+                if (state.isFocused) return;
+                _hideDropdown();
+            }, 200);
+        });
+
+        const dropdown = document.getElementById('notif-user-results');
+        if (dropdown) {
+            dropdown.addEventListener('mouseenter', () => {
+                clearTimeout(state.blurTimer);
+                state.isFocused = true;
+            });
+            dropdown.addEventListener('mouseleave', () => {
+                state.isFocused = false;
+                if (document.activeElement !== input) {
+                    state.blurTimer = setTimeout(() => {
+                        if (!state.isFocused) _hideDropdown();
+                    }, 200);
+                }
+            });
+        }
+
         input.addEventListener('input', (e) => {
             clearTimeout(state.searchTimeout);
             state.searchTimeout = setTimeout(() => {
@@ -63,6 +98,13 @@ const OperationsNotifications = (() => {
                 _resetAndSearch(query);
             }, 300);
         });
+    }
+
+    // ─── Hide dropdown helper ─────────────────────────────────────────────────
+    function _hideDropdown() {
+        const dropdown = state.dropdownEl;
+        if (!dropdown) return;
+        dropdown.classList.add('hidden');
     }
 
     // ─── Dropdown scroll listener ─────────────────────────────────────────────
@@ -86,7 +128,7 @@ const OperationsNotifications = (() => {
         state.currentPage = 1;
         state.lastPage = 1;
         state.users = [];
-        state.isLoading = false;
+        state.isLoading = true;
         _renderDropdown();          // show loading
         _fetchPage(1);
     }
@@ -134,8 +176,9 @@ const OperationsNotifications = (() => {
         const dropdown = state.dropdownEl;
         if (!dropdown) return;
 
-        // Show / hide based on search length
-        if (state.searchQuery.length < 2) {
+        const shouldShow = (state.isFocused && (state.users.length > 0 || state.isLoading)) ||
+                           (state.searchQuery.length >= 2);
+        if (!shouldShow) {
             dropdown.classList.add('hidden');
             return;
         }

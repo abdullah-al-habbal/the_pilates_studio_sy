@@ -1,3 +1,4 @@
+{{-- /home/lenovo/work/projects/the_pilates_studio_sy/resources/views/admin/operations/index.blade.php --}}
 @extends('layouts.operations')
 
 @php

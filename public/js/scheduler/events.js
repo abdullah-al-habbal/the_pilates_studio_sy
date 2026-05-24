@@ -43,8 +43,11 @@
                 state.walkin.dropdownOpen = true;
                 render.walkinExisting();
             });
-            walkinSearch?.addEventListener('focus', () => {
+            walkinSearch?.addEventListener('focus', async () => {
                 state.walkin.dropdownOpen = true;
+                if (!state.walkin.usersLoaded && state.modal.sessionId) {
+                    await S.walkin.loadUsers(state.modal.sessionId);
+                }
                 render.walkinExisting();
             });
 

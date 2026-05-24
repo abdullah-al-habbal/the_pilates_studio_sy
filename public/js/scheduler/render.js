@@ -152,11 +152,15 @@
             }
 
             ui.hide('attendees-skeleton');
+            ui.hide('attendees-error');
             ui.hide('attendees-empty');
             ui.hide('attendees-list');
 
             if (state.modal.loading && state.modal.bookings.length === 0) {
                 ui.show('attendees-skeleton');
+            } else if (state.modal.error) {
+                ui.show('attendees-error');
+                ui.text('attendees-error-message', state.modal.error);
             } else if (state.modal.bookings.length === 0) {
                 ui.show('attendees-empty');
             } else {
@@ -202,7 +206,7 @@
 
             w.usersLoading ? ui.show('walkin-users-loading') : ui.hide('walkin-users-loading');
 
-            if (w.dropdownOpen && w.search.length >= 1) {
+            if (w.dropdownOpen) {
                 ui.show('walkin-dropdown');
                 const users = S.walkin.filter();
                 if (users.length === 0) {
