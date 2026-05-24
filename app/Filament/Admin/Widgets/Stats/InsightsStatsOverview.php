@@ -9,7 +9,6 @@ use App\Models\UserSetting;
 use Carbon\Carbon;
 use Filament\Widgets\StatsOverviewWidget as BaseWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 
 class InsightsStatsOverview extends BaseWidget
@@ -36,63 +35,55 @@ class InsightsStatsOverview extends BaseWidget
 
     private function optInData(): array
     {
-        return Cache::remember('widget.insights.optin', now()->addMinutes(10), function () {
-            $total   = UserSetting::count();
-            $enabled = UserSetting::where('allow_notifications', true)->count();
+        $total   = UserSetting::count();
+        $enabled = UserSetting::where('allow_notifications', true)->count();
 
-            return [
-                'total'   => $total,
-                'enabled' => $enabled,
-                'rate'    => $total > 0 ? round(($enabled / $total) * 100) : 0,
-            ];
-        });
+        return [
+            'total'   => $total,
+            'enabled' => $enabled,
+            'rate'    => $total > 0 ? round(($enabled / $total) * 100) : 0,
+        ];
     }
 
     private function topPackageData(): array
     {
-        return Cache::remember('widget.insights.top_package', now()->addMinutes(15), function () {
-            $package = Package::withCount('bookings')->orderByDesc('bookings_count')->first();
+        $package = Package::withCount('bookings')->orderByDesc('bookings_count')->first();
 
-            return [
-                'name'  => $package?->getTranslation('name', app()->getLocale()) ?? __('widgets.insights.na'),
-                'count' => $package?->bookings_count ?? 0,
-            ];
-        });
+        return [
+            'name'  => $package?->getTranslation('name', app()->getLocale()) ?? __('widgets.insights.na'),
+            'count' => $package?->bookings_count ?? 0,
+        ];
     }
 
     private function topRecurrenceData(): array
     {
-        return Cache::remember('widget.insights.top_recurrence', now()->addMinutes(15), function () {
-            $pattern = RecurrencePattern::withCount('classes')->orderByDesc('classes_count')->first();
+        $pattern = RecurrencePattern::withCount('classes')->orderByDesc('classes_count')->first();
 
-            return [
-                'label' => $pattern?->getTranslation('label', app()->getLocale()) ?? __('widgets.insights.na'),
-                'count' => $pattern?->classes_count ?? 0,
-            ];
-        });
+        return [
+            'label' => $pattern?->getTranslation('label', app()->getLocale()) ?? __('widgets.insights.na'),
+            'count' => $pattern?->classes_count ?? 0,
+        ];
     }
 
     private function sessionMetricsData(): array
     {
-        return Cache::remember('widget.insights.session_metrics', now()->addMinutes(15), function () {
-            $avgSpots = round(ClassSession::avg('total_spots') ?? 0, 1);
+        $avgSpots = round(ClassSession::avg('total_spots') ?? 0, 1);
 
-            $peak = ClassSession::select('start_time', DB::raw('count(*) as total'))
-                ->groupBy('start_time')
-                ->orderByDesc('total')
-                ->first();
+        $peak = ClassSession::select('start_time', DB::raw('count(*) as total'))
+            ->groupBy('start_time')
+            ->orderByDesc('total')
+            ->first();
 
-            $avgDuration = ClassSession::select('start_time', 'end_time')->get()->avg(
-                fn($s) => Carbon::parse($s->start_time)->diffInMinutes(Carbon::parse($s->end_time))
-            );
+        $avgDuration = ClassSession::select('start_time', 'end_time')->get()->avg(
+            fn($s) => Carbon::parse($s->start_time)->diffInMinutes(Carbon::parse($s->end_time))
+        );
 
-            return [
-                'avg_spots'        => $avgSpots,
-                'peak_time'        => $peak ? Carbon::parse($peak->start_time)->format('H:i') : null,
-                'peak_count'       => $peak?->total ?? 0,
-                'avg_duration'     => round($avgDuration ?? 0),
-            ];
-        });
+        return [
+            'avg_spots'        => $avgSpots,
+            'peak_time'        => $peak ? Carbon::parse($peak->start_time)->format('H:i') : null,
+            'peak_count'       => $peak?->total ?? 0,
+            'avg_duration'     => round($avgDuration ?? 0),
+        ];
     }
 
     private function notificationsOptInStat(): Stat

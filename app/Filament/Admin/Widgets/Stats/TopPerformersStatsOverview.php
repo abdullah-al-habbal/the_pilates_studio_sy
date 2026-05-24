@@ -3,7 +3,6 @@
 namespace App\Filament\Admin\Widgets\Stats;
 
 use App\Enums\AttendanceStatusEnum;
-use App\Enums\BookingSessionStatusEnum;
 use App\Models\BookingSession;
 use App\Models\ClassCategory;
 use App\Models\Classes;
@@ -11,7 +10,6 @@ use App\Models\Instructor;
 use App\Models\User;
 use Filament\Widgets\StatsOverviewWidget as BaseWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 
 class TopPerformersStatsOverview extends BaseWidget
@@ -38,98 +36,86 @@ class TopPerformersStatsOverview extends BaseWidget
 
     private function topInstructorData(): array
     {
-        return Cache::remember('widget.top.instructor', now()->addMinutes(15), function () {
-            $instructor = Instructor::withCount('classes')->orderByDesc('classes_count')->first();
+        $instructor = Instructor::withCount('classes')->orderByDesc('classes_count')->first();
 
-            $attendance = $instructor
-                ? BookingSession::where('attendance_status', AttendanceStatusEnum::ATTENDED->value)
-                ->whereHas('classSession.class', fn($q) => $q->where('instructor_id', $instructor->id))
-                ->count()
-                : 0;
+        $attendance = $instructor
+            ? BookingSession::where('attendance_status', AttendanceStatusEnum::ATTENDED->value)
+            ->whereHas('classSession.class', fn($q) => $q->where('instructor_id', $instructor->id))
+            ->count()
+            : 0;
 
-            return [
-                'name'       => $instructor?->getTranslation('name', app()->getLocale()) ?? __('widgets.top_performers.na'),
-                'classes'    => $instructor?->classes_count ?? 0,
-                'attendance' => $attendance,
-            ];
-        });
+        return [
+            'name'       => $instructor?->getTranslation('name', app()->getLocale()) ?? __('widgets.top_performers.na'),
+            'classes'    => $instructor?->classes_count ?? 0,
+            'attendance' => $attendance,
+        ];
     }
 
     private function topClassBySessionsData(): array
     {
-        return Cache::remember('widget.top.class_sessions', now()->addMinutes(15), function () {
-            $class = Classes::withCount('sessions')->orderByDesc('sessions_count')->first();
+        $class = Classes::withCount('sessions')->orderByDesc('sessions_count')->first();
 
-            return [
-                'title' => $class?->getTranslation('title', app()->getLocale()) ?? __('widgets.top_performers.na'),
-                'count' => $class?->sessions_count ?? 0,
-            ];
-        });
+        return [
+            'title' => $class?->getTranslation('title', app()->getLocale()) ?? __('widgets.top_performers.na'),
+            'count' => $class?->sessions_count ?? 0,
+        ];
     }
 
     private function topClassByAttendanceData(): array
     {
-        return Cache::remember('widget.top.class_attendance', now()->addMinutes(15), function () {
-            $result = BookingSession::select('class_sessions.class_id', DB::raw('count(*) as attendance_count'))
-                ->join('class_sessions', 'booking_sessions.class_session_id', '=', 'class_sessions.id')
-                ->where('booking_sessions.attendance_status', AttendanceStatusEnum::ATTENDED->value)
-                ->groupBy('class_sessions.class_id')
-                ->orderByDesc('attendance_count')
-                ->first();
+        $result = BookingSession::select('class_sessions.class_id', DB::raw('count(*) as attendance_count'))
+            ->join('class_sessions', 'booking_sessions.class_session_id', '=', 'class_sessions.id')
+            ->where('booking_sessions.attendance_status', AttendanceStatusEnum::ATTENDED->value)
+            ->groupBy('class_sessions.class_id')
+            ->orderByDesc('attendance_count')
+            ->first();
 
-            $class = $result ? Classes::find($result->class_id) : null;
+        $class = $result ? Classes::find($result->class_id) : null;
 
-            return [
-                'title' => $class?->getTranslation('title', app()->getLocale()) ?? __('widgets.top_performers.na'),
-                'count' => $result?->attendance_count ?? 0,
-            ];
-        });
+        return [
+            'title' => $class?->getTranslation('title', app()->getLocale()) ?? __('widgets.top_performers.na'),
+            'count' => $result?->attendance_count ?? 0,
+        ];
     }
 
     private function topCategoriesData(): array
     {
-        return Cache::remember('widget.top.categories', now()->addMinutes(15), function () {
-            return ClassCategory::withCount('classes')
-                ->orderByDesc('classes_count')
-                ->limit(3)
-                ->get()
-                ->map(fn($c) => [
-                    'name'  => $c->getTranslation('name', app()->getLocale()),
-                    'count' => $c->classes_count,
-                ])
-                ->toArray();
-        });
+        return ClassCategory::withCount('classes')
+            ->orderByDesc('classes_count')
+            ->limit(3)
+            ->get()
+            ->map(fn($c) => [
+                'name'  => $c->getTranslation('name', app()->getLocale()),
+                'count' => $c->classes_count,
+            ])
+            ->toArray();
     }
 
     private function topUserByBookingsData(): array
     {
-        return Cache::remember('widget.top.user_bookings', now()->addMinutes(15), function () {
-            $user = User::withCount('bookings')->orderByDesc('bookings_count')->first();
+        $user = User::withCount('bookings')->orderByDesc('bookings_count')->first();
 
-            return [
-                'name'  => $user?->fullname ?? __('widgets.top_performers.na'),
-                'count' => $user?->bookings_count ?? 0,
-            ];
-        });
+        return [
+            'name'  => $user?->fullname ?? __('widgets.top_performers.na'),
+            'count' => $user?->bookings_count ?? 0,
+        ];
     }
 
     private function topUserByAttendanceData(): array
     {
-        return Cache::remember('widget.top.user_attendance', now()->addMinutes(15), function () {
-            $result = BookingSession::select('bookings.user_id', DB::raw('count(*) as attended_count'))
-                ->join('bookings', 'booking_sessions.booking_id', '=', 'bookings.id')
-                ->where('booking_sessions.attendance_status', AttendanceStatusEnum::ATTENDED->value)
-                ->groupBy('bookings.user_id')
-                ->orderByDesc('attended_count')
-                ->first();
+        $result = BookingSession::select('bookings.user_id', DB::raw('count(*) as attended_count'))
+            ->join('bookings', 'booking_sessions.booking_id', '=', 'bookings.id')
+            ->where('booking_sessions.attendance_status', AttendanceStatusEnum::ATTENDED->value)
+            ->groupBy('bookings.user_id')
+            ->orderByDesc('attended_count')
+            ->first();
 
-            $user = $result ? User::find($result->user_id) : null;
+        $user = $result ? User::find($result->user_id) : null;
 
-            return [
-                'name'  => $user?->fullname ?? __('widgets.top_performers.na'),
-                'count' => $result?->attended_count ?? 0,
-            ];
-        });
+        return [
+            'name'  => $user?->fullname ?? __('widgets.top_performers.na'),
+            'count' => $result?->attended_count ?? 0,
+        ];
     }
 
     private function topInstructorStat(): Stat

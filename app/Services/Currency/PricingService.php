@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Services\Currency;
 
 use App\Models\Currency;
-use Illuminate\Support\Facades\Cache;
 
 final readonly class PricingService
 {
@@ -58,11 +57,7 @@ final readonly class PricingService
             return 1.0;
         }
 
-        return Cache::remember(
-            "exchange_rate_{$currency->id}",
-            300,
-            fn() => $currency->exchange_rate
-        );
+        return $currency->exchange_rate;
     }
 
     public function getBaseCurrencyId(): int

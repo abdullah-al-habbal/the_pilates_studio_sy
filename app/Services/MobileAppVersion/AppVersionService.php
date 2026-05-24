@@ -9,7 +9,6 @@ use App\Enums\MobileAppVersion\AppNameEnum;
 use App\Enums\MobileAppVersion\MobilePlatformEnum;
 use App\Models\MobileAppVersion\MobileAppVersion;
 use App\Repositories\Eloquent\MobileAppVersion\MobileAppVersionEloquentRepository;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 use InvalidArgumentException;
 use RuntimeException;
@@ -18,8 +17,7 @@ readonly class AppVersionService
 {
     public function __construct(
         private MobileAppVersionEloquentRepository $repository
-    ) {
-    }
+    ) {}
 
     public function getCompatibility(
         AppNameEnum $appName,
@@ -59,13 +57,7 @@ readonly class AppVersionService
         AppNameEnum $appName,
         MobilePlatformEnum $platform,
     ): ?MobileAppVersion {
-        $cacheKey = "mobile_version:{$appName->value}:{$platform->value}";
-
-        return Cache::remember(
-            $cacheKey,
-            now()->addMinutes(5),
-            fn() => $this->repository->findActiveByAppAndPlatform($appName, $platform)
-        );
+        return $this->repository->findActiveByAppAndPlatform($appName, $platform);
     }
 
     public function validateConfiguration(): void
@@ -79,7 +71,7 @@ readonly class AppVersionService
             );
         }
     }
-    
+
     private function isBelowVersion(string $clientVersion, string $targetVersion): bool
     {
         return $this->compareSemver($clientVersion, $targetVersion) < 0;

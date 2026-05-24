@@ -5,7 +5,6 @@ namespace App\Filament\Admin\Widgets\Stats;
 use App\Models\User;
 use Filament\Widgets\StatsOverviewWidget as BaseWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
-use Illuminate\Support\Facades\Cache;
 
 class UserStatsOverview extends BaseWidget
 {
@@ -37,15 +36,13 @@ class UserStatsOverview extends BaseWidget
 
     private function data(): array
     {
-        return Cache::remember('widget.users.stats', now()->addMinutes(10), function () {
-            return [
-                self::KEY_TOTAL       => User::withTrashed()->count(),
-                self::KEY_ACTIVE      => User::whereNull('deactivated_at')->whereNull('deleted_at')->count(),
-                self::KEY_DEACTIVATED => User::whereNotNull('deactivated_at')->whereNull('deleted_at')->count(),
-                self::KEY_UNVERIFIED  => User::whereNull('email_verified_at')->whereNull('deleted_at')->count(),
-                self::KEY_DELETED     => User::onlyTrashed()->count(),
-            ];
-        });
+        return [
+            self::KEY_TOTAL       => User::withTrashed()->count(),
+            self::KEY_ACTIVE      => User::whereNull('deactivated_at')->whereNull('deleted_at')->count(),
+            self::KEY_DEACTIVATED => User::whereNotNull('deactivated_at')->whereNull('deleted_at')->count(),
+            self::KEY_UNVERIFIED  => User::whereNull('email_verified_at')->whereNull('deleted_at')->count(),
+            self::KEY_DELETED     => User::onlyTrashed()->count(),
+        ];
     }
 
     private function totalStat(): Stat

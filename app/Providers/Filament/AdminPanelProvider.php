@@ -77,7 +77,7 @@ class AdminPanelProvider extends PanelProvider
             ->authMiddleware($this->getAuthMiddleware())
             ->renderHook(
                 'panels::user-menu.before',
-                fn (): string => Blade::render('
+                fn(): string => Blade::render('
                     <div class="flex items-center gap-x-3 mr-4">
                         <x-filament::button
                             href="/admin/scheduler"
@@ -106,18 +106,20 @@ class AdminPanelProvider extends PanelProvider
                     ->icon('heroicon-o-calendar-days')
                     ->sort(1)
                     ->group(__('dashboard.navigation.groups.operations'))
-                    ->badge(function (): string {
-                        $count = ClassSession::where('status', 'scheduled')
-                            ->whereDate('date', today())
-                            ->count();
-                        return (string) $count;
-                    })
-                    ->badgeColor(function (): string {
-                        $count = ClassSession::where('status', 'scheduled')
-                            ->whereDate('date', today())
-                            ->count();
-                        return $count > 0 ? 'primary' : 'gray';
-                    })
+                    ->badge(
+                        function (): string {
+                            $count = ClassSession::where('status', 'scheduled')
+                                ->whereDate('date', today())
+                                ->count();
+                            return (string) $count;
+                        },
+                        function (): string {
+                            $count = ClassSession::where('status', 'scheduled')
+                                ->whereDate('date', today())
+                                ->count();
+                            return $count > 0 ? 'primary' : 'gray';
+                        }
+                    )
                     ->isActiveWhen(fn(): bool => request()->is('admin/scheduler*')),
 
                 NavigationItem::make(__('dashboard.navigation.groups.operations'))

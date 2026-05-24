@@ -6,7 +6,6 @@ use App\Models\Language;
 use App\Models\UserSetting;
 use Filament\Widgets\StatsOverviewWidget as BaseWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
-use Illuminate\Support\Facades\Cache;
 
 class LanguageStatsOverview extends BaseWidget
 {
@@ -26,25 +25,23 @@ class LanguageStatsOverview extends BaseWidget
 
     private function data(): array
     {
-        return Cache::remember('widget.language.stats', now()->addMinutes(15), function () {
-            $total = UserSetting::count();
+        $total = UserSetting::count();
 
-            return [
-                'total'     => $total,
-                'languages' => Language::where('is_active', true)
-                    ->withCount('userSettings')
-                    ->orderByDesc('user_settings_count')
-                    ->get()
-                    ->map(fn(Language $lang) => [
-                        'name'       => $lang->name,
-                        'count'      => $lang->user_settings_count,
-                        'rate'       => $total > 0 ? round(($lang->user_settings_count / $total) * 100) : 0,
-                        'direction'  => $lang->direction,
-                        'is_default' => $lang->is_default,
-                    ])
-                    ->toArray(),
-            ];
-        });
+        return [
+            'total'     => $total,
+            'languages' => Language::where('is_active', true)
+                ->withCount('userSettings')
+                ->orderByDesc('user_settings_count')
+                ->get()
+                ->map(fn(Language $lang) => [
+                    'name'       => $lang->name,
+                    'count'      => $lang->user_settings_count,
+                    'rate'       => $total > 0 ? round(($lang->user_settings_count / $total) * 100) : 0,
+                    'direction'  => $lang->direction,
+                    'is_default' => $lang->is_default,
+                ])
+                ->toArray(),
+        ];
     }
 
     private function languageStats(): array

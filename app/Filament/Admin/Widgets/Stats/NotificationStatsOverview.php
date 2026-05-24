@@ -5,7 +5,6 @@ namespace App\Filament\Admin\Widgets\Stats;
 use App\Models\AppNotification;
 use Filament\Widgets\StatsOverviewWidget as BaseWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
-use Illuminate\Support\Facades\Cache;
 
 class NotificationStatsOverview extends BaseWidget
 {
@@ -31,18 +30,16 @@ class NotificationStatsOverview extends BaseWidget
 
     private function data(): array
     {
-        return Cache::remember('widget.notifications.stats', now()->addMinutes(10), function () {
-            $total = AppNotification::count();
-            $read  = AppNotification::whereNotNull('read_at')->count();
+        $total = AppNotification::count();
+        $read  = AppNotification::whereNotNull('read_at')->count();
 
-            return [
-                'total'      => $total,
-                'read'       => $read,
-                'unread'     => AppNotification::whereNull('read_at')->count(),
-                'read_rate'  => $total > 0 ? round(($read / $total) * 100) : 0,
-                'sent_today' => AppNotification::whereDate('created_at', today())->count(),
-            ];
-        });
+        return [
+            'total'      => $total,
+            'read'       => $read,
+            'unread'     => AppNotification::whereNull('read_at')->count(),
+            'read_rate'  => $total > 0 ? round(($read / $total) * 100) : 0,
+            'sent_today' => AppNotification::whereDate('created_at', today())->count(),
+        ];
     }
 
     private function totalStat(): Stat

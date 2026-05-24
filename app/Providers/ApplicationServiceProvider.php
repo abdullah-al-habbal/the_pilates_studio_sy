@@ -4,12 +4,9 @@
 
 namespace App\Providers;
 
-use App\Models\Booking;
 use App\Models\BookingSession;
 use App\Models\Classes;
 use App\Models\ClassSession;
-use App\Models\StaticPage;
-use App\Observers\StaticPageObserver;
 use App\Policies\BookingSessionPolicy;
 use App\Repositories\Eloquent\Booking\BookingEloquentRepository;
 use App\Repositories\Eloquent\BookingSession\BookingSessionEloquentRepository;
@@ -29,7 +26,6 @@ use App\Services\Currency\CurrencyService;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\RateLimiter;
@@ -72,7 +68,6 @@ class ApplicationServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $this->registerPolicies();
-        StaticPage::observe(StaticPageObserver::class);
 
         RateLimiter::for('api', function (Request $request) {
             return Limit::perMinute(60)->by($request->user()?->id ?: $request->ip());
