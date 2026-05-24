@@ -6,13 +6,9 @@ namespace App\Services\Currency;
 
 use App\Models\Currency;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\Cache;
 
 class CurrencyService
 {
-    private const CACHE_TTL_PRODUCTION = 600;
-    private const CACHE_TTL_DEV = 3600;
-
     public function getBaseCurrency(): Currency
     {
         $code = config('currency.base_currency', 'USD');
@@ -68,15 +64,6 @@ class CurrencyService
 
     public function getAllActiveCurrencies(): Collection
     {
-        $isProduction = config('app.env') === 'production';
-        $ttl = $isProduction ? self::CACHE_TTL_PRODUCTION : self::CACHE_TTL_DEV;
-
-        return Cache::remember('active_currencies', $ttl, fn() => Currency::where('is_active', true)->get());
-    }
-
-    public function refreshCurrencyCache(int $currencyId): void
-    {
-        Cache::forget('active_currencies');
-        Cache::forget("currency_{$currencyId}");
+        return Currency::where('is_active', true)->get();
     }
 }

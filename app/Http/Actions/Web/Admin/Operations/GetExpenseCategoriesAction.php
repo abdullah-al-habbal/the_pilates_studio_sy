@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace App\Http\Actions\Web\Admin\Operations;
 
-use App\Models\ClubExpenseCategory;
+use App\Repositories\Eloquent\ClubExpenseCategory\ClubExpenseCategoryEloquentRepository;
 use App\Traits\ApiResponseTrait;
 use Illuminate\Http\JsonResponse;
 
@@ -11,9 +11,8 @@ final class GetExpenseCategoriesAction
 {
     use ApiResponseTrait;
 
-    public function __invoke(): JsonResponse
+    public function __invoke(ClubExpenseCategoryEloquentRepository $categoryRepository): JsonResponse
     {
-        $categories = ClubExpenseCategory::pluck('name');
-        return $this->success(data: $categories->toArray());
+        return $this->success(data: $categoryRepository->getAllNames());
     }
 }

@@ -1,7 +1,6 @@
 <?php
-// filePath: app\Filament\Admin\Pages\Reports.php
-declare(strict_types=1);
 
+declare(strict_types=1);
 
 namespace App\Filament\Admin\Pages;
 
@@ -10,7 +9,6 @@ use App\Repositories\Eloquent\Booking\BookingEloquentRepository;
 use App\Repositories\Eloquent\Classes\ClassesEloquentRepository;
 use App\Repositories\Eloquent\MerchandiseOrder\MerchandiseOrderEloquentRepository;
 use App\Services\Currency\CurrencyService;
-use App\Services\Finance\DailyBalanceService;
 use BackedEnum;
 use Filament\Forms\Components\Checkbox;
 use Filament\Forms\Components\Toggle;
@@ -25,6 +23,7 @@ use Filament\Support\Enums\FontWeight;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 use App\Data\Reports\CurrencySummaryData;
+use App\Services\Finance\DailyBalanceService;
 
 class Reports extends Page implements HasInfolists
 {
@@ -75,21 +74,21 @@ class Reports extends Page implements HasInfolists
 
     public static function getNavigationBadge(): ?string
     {
-        return cache()->remember('filament.reports.today_revenue', now()->addMinutes(5), function () {
-            $service = app(DailyBalanceService::class);
-            $currency = app(CurrencyService::class)->getDefaultCurrency();
-            $summary = $service->getSummary(now()->toDateString(), [$currency->code]);
-            $item = $summary->firstWhere('currency_code', $currency->code);
-            if (!$item)
-                return '—';
+        $service = app(DailyBalanceService::class);
+        $currency = app(CurrencyService::class)->getDefaultCurrency();
+        $summary = $service->getSummary(now()->toDateString(), [$currency->code]);
+        $item = $summary->firstWhere('currency_code', $currency->code);
 
-            $divisor = 10 ** $currency->decimal_places;
-            $amount = $item['base_conversion_applied'] && $item['total_revenue_in_base'] !== null
-                ? $item['total_revenue_in_base']
-                : $item['total_revenue'];
+        if (!$item) {
+            return '—';
+        }
 
-            return number_format($amount / $divisor, $currency->decimal_places) . ' ' . $currency->symbol;
-        });
+        $divisor = 10 ** $currency->decimal_places;
+        $amount = $item['base_conversion_applied'] && $item['total_revenue_in_base'] !== null
+            ? $item['total_revenue_in_base']
+            : $item['total_revenue'];
+
+        return number_format($amount / $divisor, $currency->decimal_places) . ' ' . $currency->symbol;
     }
 
     public static function getNavigationBadgeColor(): string|array|null

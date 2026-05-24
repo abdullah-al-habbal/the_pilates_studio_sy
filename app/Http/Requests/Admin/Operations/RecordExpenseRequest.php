@@ -5,6 +5,9 @@ namespace App\Http\Requests\Admin\Operations;
 
 use Illuminate\Foundation\Http\FormRequest;
 
+use App\Commands\Admin\Operations\RecordExpenseCommand;
+use Illuminate\Support\Facades\Auth;
+
 final class RecordExpenseRequest extends FormRequest
 {
     public function authorize(): bool
@@ -21,5 +24,13 @@ final class RecordExpenseRequest extends FormRequest
             'notes' => ['nullable', 'string', 'max:2000'],
             'date' => ['nullable', 'date'],
         ];
+    }
+
+    public function toCommand(): RecordExpenseCommand
+    {
+        return RecordExpenseCommand::fromRequest(
+            request: $this,
+            recordedBy: (int) Auth::id(),
+        );
     }
 }

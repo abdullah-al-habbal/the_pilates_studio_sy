@@ -3,40 +3,34 @@ declare(strict_types=1);
 
 namespace App\Handlers\Admin\Operations;
 
+use App\Commands\Admin\Operations\RecordExpenseCommand;
 use App\Models\ClubExpense;
-use App\Models\ClubExpenseCategory;
 use App\Repositories\Eloquent\ClubExpense\ClubExpenseEloquentRepository;
+use App\Repositories\Eloquent\ClubExpenseCategory\ClubExpenseCategoryEloquentRepository;
 use Carbon\Carbon;
-use Carbon\CarbonInterface;
+use Illuminate\Support\Facades\DB;
 
 final readonly class RecordExpenseHandler
 {
     public function __construct(
         private ClubExpenseEloquentRepository $repository,
+        private ClubExpenseCategoryEloquentRepository $categoryRepository,
     ) {
     }
 
-    public function handle(
-        string $categoryName,
-        int $currencyId,
-        int $amount,
-        int $recordedBy,
-        ?string $notes,
-        ?CarbonInterface $expenseDate,
-    ): ClubExpense {
-        $category = ClubExpenseCategory::firstOrCreate(
-            ['name' => $categoryName],
-            ['name' => $categoryName],
-        );
+    public function handle(RecordExpenseCommand $command): ClubExpense
+    {
+        return DB::transaction(function () use ($command) {
+            $category = $this->categoryRepository->firstOrCreateByName($command->categoryName);
 
-        return $this->repository->create([
-            'category_id' => $category->id,
-            'category_label' => $categoryName,
-            'currency_id' => $currencyId,
-            'amount' => $amount,
-            'notes' => $notes,
-            'recorded_by' => $recordedBy,
-            'expense_date' => ($expenseDate ?? Carbon::today())->toDateString(),
-        ]);
+            return $this->repository->create([
+                'category_id' => $category->id,
+                'currency_id' => $command->currencyId,
+                'amount' => $command->amount,
+                'notes' => $command->notes,
+                'recorded_by' => $command->recordedBy,
+                'expense_date' => ($command->expenseDate ?? Carbon::today())->toDateString(),
+            ]);
+        });
     }
 }

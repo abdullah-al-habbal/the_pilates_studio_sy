@@ -29,7 +29,6 @@ readonly class AppVersionService
         $config = $this->getActiveConfig($appName, $platform);
 
         if ($config === null) {
-            // Log the missing configuration
             Log::error('Missing mobile app version configuration', [
                 'app_name' => $appName->value,
                 'platform' => $platform->value,
@@ -42,10 +41,8 @@ readonly class AppVersionService
             );
         }
 
-        // Check if client version is below min_version
         $updateRequired = $this->isBelowVersion($clientVersion, $config->min_version);
 
-        // Check if there's an update available (not required but newer version exists)
         $updateAvailable = !$updateRequired && $this->isBelowVersion($clientVersion, $config->latest_version);
 
         return [
@@ -71,9 +68,6 @@ readonly class AppVersionService
         );
     }
 
-    /**
-     * Validate the overall configuration
-     */
     public function validateConfiguration(): void
     {
         $isValid = $this->repository->validateConfiguration();
@@ -85,11 +79,7 @@ readonly class AppVersionService
             );
         }
     }
-
-    /**
-     * Check if client version is below the target version
-     * Returns true if clientVersion < targetVersion
-     */
+    
     private function isBelowVersion(string $clientVersion, string $targetVersion): bool
     {
         return $this->compareSemver($clientVersion, $targetVersion) < 0;

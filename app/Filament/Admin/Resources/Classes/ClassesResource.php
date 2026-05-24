@@ -58,13 +58,9 @@ class ClassesResource extends Resource
 
     public static function getNavigationBadge(): ?string
     {
-        return cache()->remember(
-            'filament.classes.count',
-            now()->addMinutes(5),
-            fn() => (string) static::getModel()::query()
-                ->where('status', 'active')
-                ->count()
-        );
+        return (string) static::getModel()::query()
+            ->where('status', 'active')
+            ->count();
     }
 
     public static function getNavigationBadgeColor(): string|array|null

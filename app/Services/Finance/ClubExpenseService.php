@@ -10,11 +10,6 @@ use Illuminate\Support\Facades\DB;
 
 class ClubExpenseService
 {
-    /**
-     * Record a new club expense.
-     * 
-     * @param string $categoryName Either an existing name or a new one typed by the admin.
-     */
     public function record(
         string $categoryName,
         int $amount,
@@ -27,7 +22,6 @@ class ClubExpenseService
 
             return ClubExpense::create([
                 'category_id'    => $category->id,
-                'category_label' => $category->name,
                 'amount'         => $amount,
                 'notes'          => $notes,
                 'recorded_by'    => $recordedBy,
@@ -35,10 +29,7 @@ class ClubExpenseService
             ]);
         });
     }
-
-    /**
-     * Get the total expenses for a specific date.
-     */
+    
     public function getDailyTotal(\DateTimeInterface $date): int
     {
         return (int) ClubExpense::whereDate('expense_date', $date)->sum('amount');

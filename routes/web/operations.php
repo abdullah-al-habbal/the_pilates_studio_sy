@@ -10,6 +10,7 @@ use App\Http\Actions\Web\Admin\Operations\{
     GetStoreItemsAction,
     PlaceOrderAction,
     GetDailyBalanceAction,
+    GetExpenseBreakdownAction,
     ProcessBookingRefundAction,
     RecordExpenseAction,
     GetClientsAction,
@@ -42,6 +43,7 @@ Route::prefix('admin/operations')
 
         Route::get('/finance/daily', GetDailyBalanceAction::class)->name('finance.daily');
         Route::get('/finance/categories', GetExpenseCategoriesAction::class)->name('finance.categories');
+        Route::get('/finance/expenses/breakdown', GetExpenseBreakdownAction::class)->name('finance.expenses.breakdown');
         Route::post('/finance/expenses', RecordExpenseAction::class)->name('finance.expenses');
 
         Route::get('/clients', GetClientsAction::class)->name('clients.index');

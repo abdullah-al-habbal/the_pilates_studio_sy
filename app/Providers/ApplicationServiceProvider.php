@@ -80,7 +80,6 @@ class ApplicationServiceProvider extends ServiceProvider
         $this->configureModelProtections();
         $this->configureDatabase();
         $this->configurePasswordDefaults();
-        $this->configureDashboardCache();
         $this->shareViewData();
     }
 
@@ -115,9 +114,6 @@ class ApplicationServiceProvider extends ServiceProvider
 
     protected function configureDatabase(): void
     {
-
-        // DB::prohibitDestructiveCommands($this->app->environment('production'));
-
         if ($this->app->environment('production')) {
             if (config('app.force_https', false)) {
                 URL::forceScheme('https');
@@ -151,22 +147,4 @@ class ApplicationServiceProvider extends ServiceProvider
         });
     }
 
-    protected function configureDashboardCache(): void
-    {
-        $models = [Booking::class, BookingSession::class, ClassSession::class];
-        foreach ($models as $model) {
-            $model::saved(function () {
-                $this->invalidateDashboardCache();
-            });
-            $model::deleted(function () {
-                $this->invalidateDashboardCache();
-            });
-        }
-    }
-
-    protected function invalidateDashboardCache(): void
-    {
-        Cache::forget('dashboard.overview.stats');
-        Cache::forget('dashboard.attendance_trend.30');
-    }
 }

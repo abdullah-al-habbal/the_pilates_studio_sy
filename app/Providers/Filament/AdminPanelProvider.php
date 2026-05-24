@@ -1,6 +1,5 @@
 <?php
 
-// filePath: app\Providers\Filament\AdminPanelProvider.php
 declare(strict_types=1);
 
 namespace App\Providers\Filament;
@@ -17,11 +16,13 @@ use App\Filament\Admin\Widgets\Stats\{
 };
 use App\Filament\Admin\Widgets\StatsOverview;
 use App\Filament\Admin\Widgets\TopInstructorsWidget;
+use App\Models\ClassSession;
 use Filament\Auth\Pages\EditProfile;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
+use Filament\Navigation\NavigationItem;
 use Filament\Pages\Dashboard;
 use Filament\Panel;
 use Filament\PanelProvider;
@@ -31,11 +32,9 @@ use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Http\Middleware\ValidateCsrfToken;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
+use Illuminate\Support\Facades\Blade;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 use LaraZeus\SpatieTranslatable\SpatieTranslatablePlugin;
-use Illuminate\Support\Facades\Blade;
-use Filament\Navigation\NavigationItem;
-use App\Models\ClassSession;
 
 class AdminPanelProvider extends PanelProvider
 {
@@ -107,15 +106,18 @@ class AdminPanelProvider extends PanelProvider
                     ->icon('heroicon-o-calendar-days')
                     ->sort(1)
                     ->group(__('dashboard.navigation.groups.operations'))
-                    ->badge(fn(): string => (string) cache()->remember(
-                        'filament.scheduler.today_count',
-                        now()->addMinutes(5),
-                        fn() => ClassSession::where('status', 'scheduled')
+                    ->badge(function (): string {
+                        $count = ClassSession::where('status', 'scheduled')
                             ->whereDate('date', today())
-                            ->count()
-                    ), color: fn(): string => ClassSession::where('status', 'scheduled')
+                            ->count();
+                        return (string) $count;
+                    })
+                    ->badgeColor(function (): string {
+                        $count = ClassSession::where('status', 'scheduled')
                             ->whereDate('date', today())
-                            ->count() > 0 ? 'primary' : 'gray')
+                            ->count();
+                        return $count > 0 ? 'primary' : 'gray';
+                    })
                     ->isActiveWhen(fn(): bool => request()->is('admin/scheduler*')),
 
                 NavigationItem::make(__('dashboard.navigation.groups.operations'))

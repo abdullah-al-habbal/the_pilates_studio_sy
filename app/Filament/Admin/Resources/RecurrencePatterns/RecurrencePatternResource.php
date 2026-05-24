@@ -37,11 +37,7 @@ class RecurrencePatternResource extends Resource
 
     public static function getNavigationBadge(): ?string
     {
-        return cache()->remember(
-            'filament.recurrence_patterns.count',
-            now()->addMinutes(5),
-            fn() => (string) static::getModel()::query()->count()
-        );
+        return  (string) static::getModel()::query()->count();
     }
 
     public static function getNavigationBadgeColor(): string|array|null

@@ -10,7 +10,6 @@ use App\Models\ClassSession;
 use App\Models\Instructor;
 use Filament\Widgets\StatsOverviewWidget as BaseWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
-use Illuminate\Support\Facades\Cache;
 
 class ClassStatsOverview extends BaseWidget
 {
@@ -40,35 +39,29 @@ class ClassStatsOverview extends BaseWidget
 
     private function classData(): array
     {
-        return Cache::remember('widget.classes.stats', now()->addMinutes(10), function () {
-            return [
-                'total'                          => Classes::withTrashed()->count(),
-                ClassStatusEnum::ACTIVE->value   => Classes::where('status', ClassStatusEnum::ACTIVE->value)->count(),
-                ClassStatusEnum::INACTIVE->value => Classes::where('status', ClassStatusEnum::INACTIVE->value)->count(),
-            ];
-        });
+        return [
+            'total'                          => Classes::withTrashed()->count(),
+            ClassStatusEnum::ACTIVE->value   => Classes::where('status', ClassStatusEnum::ACTIVE->value)->count(),
+            ClassStatusEnum::INACTIVE->value => Classes::where('status', ClassStatusEnum::INACTIVE->value)->count(),
+        ];
     }
 
     private function sessionData(): array
     {
-        return Cache::remember('widget.class_sessions.stats', now()->addMinutes(10), function () {
-            return [
-                ClassSessionStatusEnum::SCHEDULED->value => ClassSession::where('status', ClassSessionStatusEnum::SCHEDULED->value)->count(),
-                ClassSessionStatusEnum::COMPLETED->value => ClassSession::where('status', ClassSessionStatusEnum::COMPLETED->value)->count(),
-                ClassSessionStatusEnum::CANCELLED->value => ClassSession::where('status', ClassSessionStatusEnum::CANCELLED->value)->count(),
-                'today'                                   => ClassSession::where('status', ClassSessionStatusEnum::SCHEDULED->value)->whereDate('date', today())->count(),
-            ];
-        });
+        return [
+            ClassSessionStatusEnum::SCHEDULED->value => ClassSession::where('status', ClassSessionStatusEnum::SCHEDULED->value)->count(),
+            ClassSessionStatusEnum::COMPLETED->value => ClassSession::where('status', ClassSessionStatusEnum::COMPLETED->value)->count(),
+            ClassSessionStatusEnum::CANCELLED->value => ClassSession::where('status', ClassSessionStatusEnum::CANCELLED->value)->count(),
+            'today'                                   => ClassSession::where('status', ClassSessionStatusEnum::SCHEDULED->value)->whereDate('date', today())->count(),
+        ];
     }
 
     private function configData(): array
     {
-        return Cache::remember('widget.classes.config_counts', now()->addMinutes(30), function () {
-            return [
-                'instructors' => Instructor::count(),
-                'categories'  => ClassCategory::count(),
-            ];
-        });
+        return [
+            'instructors' => Instructor::count(),
+            'categories'  => ClassCategory::count(),
+        ];
     }
 
     private function totalClassesStat(): Stat

@@ -18,6 +18,8 @@ document.addEventListener('DOMContentLoaded', () => {
 document.addEventListener('click', function(e) {
     const btn = e.target.closest('.btn-single-action');
     if (!btn || btn.disabled) return;
+    if (btn.type === 'submit') return;
+
     btn.disabled = true;
     const originalText = btn.textContent;
     btn.innerHTML = '<span class="btn-spinner"></span>' + originalText;

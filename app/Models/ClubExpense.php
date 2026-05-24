@@ -13,7 +13,6 @@ class ClubExpense extends Model
 
     protected $fillable = [
         'category_id',
-        'category_label',
         'currency_id',
         'amount',
         'notes',

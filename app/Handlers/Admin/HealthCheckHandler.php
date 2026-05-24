@@ -9,20 +9,6 @@ use Illuminate\Support\Facades\DB;
 
 final readonly class HealthCheckHandler
 {
-    /**
-     * Execute all health checks and return structured results.
-     *
-     * @return array{
-     *     status: 'healthy'|'degraded',
-     *     checks: array{
-     *         database: array{ok: bool, message: string},
-     *         cache: array{ok: bool, message: string},
-     *         exchange_rates: array{ok: bool, message: string, last_sync?: string},
-     *         base_currency: array{ok: bool, message: string}
-     *     },
-     *     version: string
-     * }
-     */
     public function handle(): array
     {
         $checks = [

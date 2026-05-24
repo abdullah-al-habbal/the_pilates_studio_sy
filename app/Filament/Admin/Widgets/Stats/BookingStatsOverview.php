@@ -9,7 +9,6 @@ use App\Models\Booking;
 use App\Models\BookingSession;
 use Filament\Widgets\StatsOverviewWidget as BaseWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
-use Illuminate\Support\Facades\Cache;
 
 class BookingStatsOverview extends BaseWidget
 {
@@ -41,29 +40,25 @@ class BookingStatsOverview extends BaseWidget
 
     private function bookingData(): array
     {
-        return Cache::remember('widget.bookings.stats', now()->addMinutes(10), function () {
-            return [
-                'total' => Booking::withTrashed()->count(),
-                BookingStatusEnum::ACTIVE->value => Booking::where('status', BookingStatusEnum::ACTIVE->value)->count(),
-                BookingStatusEnum::EXHAUSTED->value => Booking::where('status', BookingStatusEnum::EXHAUSTED->value)->count(),
-                BookingStatusEnum::EXPIRED->value => Booking::where('status', BookingStatusEnum::EXPIRED->value)->count(),
-                BookingStatusEnum::CANCELLED->value => Booking::where('status', BookingStatusEnum::CANCELLED->value)->count(),
-                'credits' => Booking::where('status', BookingStatusEnum::ACTIVE->value)->sum('remaining_credits'),
-            ];
-        });
+        return [
+            'total' => Booking::withTrashed()->count(),
+            BookingStatusEnum::ACTIVE->value => Booking::where('status', BookingStatusEnum::ACTIVE->value)->count(),
+            BookingStatusEnum::EXHAUSTED->value => Booking::where('status', BookingStatusEnum::EXHAUSTED->value)->count(),
+            BookingStatusEnum::EXPIRED->value => Booking::where('status', BookingStatusEnum::EXPIRED->value)->count(),
+            BookingStatusEnum::CANCELLED->value => Booking::where('status', BookingStatusEnum::CANCELLED->value)->count(),
+            'credits' => Booking::where('status', BookingStatusEnum::ACTIVE->value)->sum('remaining_credits'),
+        ];
     }
 
     private function sessionData(): array
     {
-        return Cache::remember('widget.booking_sessions.stats', now()->addMinutes(10), function () {
-            return [
-                'total' => BookingSession::count(),
-                BookingSessionStatusEnum::RESERVED->value => BookingSession::where('status', BookingSessionStatusEnum::RESERVED->value)->count(),
-                'attended' => BookingSession::where('attendance_status', AttendanceStatusEnum::ATTENDED->value)->count(),
-                BookingSessionStatusEnum::CANCELLED->value => BookingSession::where('status', BookingSessionStatusEnum::CANCELLED->value)->count(),
-                'missed' => BookingSession::where('attendance_status', AttendanceStatusEnum::MISSED->value)->count(),
-            ];
-        });
+        return [
+            'total' => BookingSession::count(),
+            BookingSessionStatusEnum::RESERVED->value => BookingSession::where('status', BookingSessionStatusEnum::RESERVED->value)->count(),
+            'attended' => BookingSession::where('attendance_status', AttendanceStatusEnum::ATTENDED->value)->count(),
+            BookingSessionStatusEnum::CANCELLED->value => BookingSession::where('status', BookingSessionStatusEnum::CANCELLED->value)->count(),
+            'missed' => BookingSession::where('attendance_status', AttendanceStatusEnum::MISSED->value)->count(),
+        ];
     }
 
     private function totalBookingsStat(): Stat

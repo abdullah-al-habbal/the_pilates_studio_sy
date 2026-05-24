@@ -59,8 +59,8 @@
                         </div>
                     </div>
                     <div class="space-y-1">
-                        <label class="text-xs font-semibold text-slate-500 uppercase">Amount <span class="text-slate-400">(smallest unit)</span></label>
-                        <input type="number" name="amount" required placeholder="0" min="1"
+                        <label class="text-xs font-semibold text-slate-500 uppercase">Amount</label>
+                        <input type="number" name="amount" required placeholder="0" step="1" min="0"
                                class="w-full px-4 py-2 bg-slate-50 dark:bg-slate-800 rounded-lg border-transparent focus:ring-2 focus:ring-primary-500 outline-none">
                     </div>
                 </div>
@@ -93,8 +93,8 @@
         </div>
 
         <div class="glass-card rounded-2xl p-6 space-y-4">
-            <h3 class="text-lg font-bold">Revenue Breakdown</h3>
-            <div id="revenue-chart-placeholder" class="h-48 flex items-end gap-2 px-4"></div>
+            <h3 class="text-lg font-bold">Expense Breakdown</h3>
+            <div id="expense-breakdown" class="h-64 overflow-y-auto py-2"></div>
         </div>
 
     </div>
