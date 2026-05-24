@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <title>FCM Debug Console</title>
+    <style>
+        body { font-family: monospace; padding: 20px; background: #0d1117; color: #c9d1d9; }
+        h2   { color: #58a6ff; }
+
+        .controls { display: flex; gap: 10px; margin-bottom: 16px; }
+
+        button {
+            padding: 8px 16px;
+            background: #238636;
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        button:hover { background: #2ea043; }
+        button.secondary { background: #21262d; border: 1px solid #30363d; }
+        button.secondary:hover { background: #30363d; }
+
+        #status {
+            padding: 8px 12px;
+            border-radius: 6px;
+            background: #161b22;
+            border: 1px solid #30363d;
+            margin-bottom: 12px;
+            font-size: 13px;
+            color: #8b949e;
+        }
+
+        #token {
+            width: 100%;
+            background: #161b22;
+            color: #79c0ff;
+            border: 1px solid #30363d;
+            border-radius: 6px;
+            padding: 8px;
+            font-size: 12px;
+            box-sizing: border-box;
+            margin-bottom: 16px;
+        }
+
+        #debug {
+            background: #010409;
+            border: 1px solid #21262d;
+            border-radius: 6px;
+            padding: 12px;
+            height: 420px;
+            overflow-y: auto;
+            font-size: 12px;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+
+        .log-info       { color: #8b949e; }
+        .log-success    { color: #3fb950; }
+        .log-warning    { color: #d29922; }
+        .log-error      { color: #f85149; }
+        .log-notify     { color: #58a6ff; font-weight: bold; }
+        .log-sw         { color: #bc8cff; }
+    </style>
+</head>
+<body>
+
+<h2>FCM Debug Console</h2>
+
+<div class="controls">
+    <button onclick="startFCMFlow()">▶ Start Full FCM Flow</button>
+    <button class="secondary" onclick="clearLog()">✕ Clear Log</button>
+</div>
+
+<div id="status">Idle — click Start to initialize</div>
+
+<textarea id="token" rows="3" placeholder="FCM token will appear here" readonly></textarea>
+
+<pre id="debug"></pre>
+
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-messaging-compat.js"></script>
+<script>
+    // ─── Config ──────────────────────────────────────────────────────────────
+    const FIREBASE_CONFIG = {
+        apiKey:            "AIzaSyADdYLSu_oY1zihFmTGwX3KrPTm2Xl8P8Q",
+        authDomain:        "pintoursindoormapping.firebaseapp.com",
+        projectId:         "pintoursindoormapping",
+        storageBucket:     "pintoursindoormapping.firebasestorage.app",
+        messagingSenderId: "999155327407",
+        appId:             "1:999155327407:web:ae304113f56707d54ecf5a",
+    };
+    const VAPID_KEY = "BFZTVQZ5QdDYbe2ybpev5omSQtJanXcAWqYA3FfWfpgbc6dbzp0qpTruHfHGvR-dAF1k2XNXqssztZbEBWWB4yo";
+
+    // ─── Logger ───────────────────────────────────────────────────────────────
+    const LEVELS = {
+        info:    'log-info',
+        success: 'log-success',
+        warning: 'log-warning',
+        error:   'log-error',
+        notify:  'log-notify',
+        sw:      'log-sw',
+    };
+
+    function log(step, data = null, level = 'info') {
+        const ts  = new Date().toISOString();
+        const msg = `[${ts}] ${step}`;
+        const out = data !== null ? `${msg}  ${JSON.stringify(data, null, 2)}` : msg;
+
+        if (level === 'error') {
+            console.error(msg, data ?? '');
+        } else if (level === 'warning') {
+            console.warn(msg, data ?? '');
+        } else {
+            console.log(msg, data ?? '');
+        }
+
+        const panel = document.getElementById('debug');
+        const span  = document.createElement('span');
+        span.className = LEVELS[level] ?? 'log-info';
+        span.textContent = out + '\n';
+        panel.appendChild(span);
+        panel.scrollTop = panel.scrollHeight;
+    }
+
+    function setStatus(text, ok = true) {
+        const el = document.getElementById('status');
+        el.textContent  = text;
+        el.style.color  = ok ? '#3fb950' : '#f85149';
+        el.style.border = `1px solid ${ok ? '#238636' : '#da3633'}`;
+    }
+
+    function clearLog() {
+        document.getElementById('debug').innerHTML = '';
+        log('LOG_CLEARED', null, 'info');
+    }
+
+    if (!firebase.apps.length) {
+        firebase.initializeApp(FIREBASE_CONFIG);
+    }
+    const messaging = firebase.messaging();
+    
+    navigator.serviceWorker?.addEventListener('message', (event) => {
+        const { type, payload } = event.data ?? {};
+
+        switch (type) {
+            case 'SW_BACKGROUND_MESSAGE':
+                log('SW_BACKGROUND_MESSAGE_RECEIVED', payload, 'sw');
+                log('SW_NOTIFICATION_SHOWN', {
+                    title: payload?.notification?.title,
+                    body:  payload?.notification?.body,
+                }, 'notify');
+                break;
+
+            case 'SW_NOTIFICATION_CLICK':
+                log('SW_NOTIFICATION_CLICKED', payload, 'sw');
+                break;
+
+            case 'SW_LOG':
+                log(`SW_LOG:${payload?.step}`, payload?.data ?? null, 'sw');
+                break;
+
+            default:
+                log('SW_UNKNOWN_MESSAGE', event.data, 'warning');
+        }
+    });
+
+    messaging.onMessage((payload) => {
+        log('FOREGROUND_MESSAGE_RECEIVED', payload, 'notify');
+
+        const title = payload.notification?.title ?? 'No Title';
+        const body  = payload.notification?.body  ?? 'No Body';
+        const data  = payload.data ?? {};
+
+        log('FOREGROUND_NOTIFICATION_DETAIL', { title, body, data }, 'notify');
+
+        if (Notification.permission === 'granted') {
+            new Notification(title, { body, icon: '/favicon.ico' });
+        }
+
+        log('FOREGROUND_MESSAGE_HANDLED', null, 'success');
+    });
+
+    async function startFCMFlow() {
+        log('FLOW_START', 'Starting full FCM initialization flow');
+
+        try {
+            log('STEP_1_INIT_FIREBASE', 'Firebase already initialized');
+
+            if (! ('serviceWorker' in navigator)) {
+                throw new Error('Service Worker not supported in this browser');
+            }
+            log('STEP_2_SW_SUPPORT_OK', null, 'success');
+
+            log('STEP_3_REQUEST_PERMISSION_START');
+            const permission = await Notification.requestPermission();
+            log('STEP_3_REQUEST_PERMISSION_RESULT', permission,
+                permission === 'granted' ? 'success' : 'error');
+
+            if (permission !== 'granted') {
+                setStatus('Permission denied — notifications blocked', false);
+                return;
+            }
+
+            log('STEP_4_REGISTER_SW_START');
+            const registration = await navigator.serviceWorker.register('/firebase-messaging-sw.js');
+            log('STEP_4_SW_REGISTERED', { scope: registration.scope }, 'success');
+
+            await navigator.serviceWorker.ready;
+            log('STEP_5_SW_READY', null, 'success');
+
+            log('STEP_6_GET_TOKEN_START', { vapidKey: VAPID_KEY });
+            const token = await messaging.getToken({
+                vapidKey: VAPID_KEY,
+                serviceWorkerRegistration: registration,
+            });
+            log('STEP_6_TOKEN_RESPONSE', token, token ? 'success' : 'error');
+
+            if (! token) {
+                setStatus('No FCM token generated', false);
+                return;
+            }
+
+            document.getElementById('token').value = token;
+            setStatus('✓ Token generated — ready to receive notifications');
+            log('STEP_7_TOKEN_STORED', null, 'success');
+
+        } catch (err) {
+            log('FATAL_ERROR', { message: err.message, stack: err.stack }, 'error');
+            setStatus(`Error: ${err.message}`, false);
+        }
+    }
+
+    log('SCRIPT_LOADED', 'FCM debug script ready', 'success');
+</script>
+</body>
+</html>

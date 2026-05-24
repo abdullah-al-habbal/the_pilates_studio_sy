@@ -25,4 +25,10 @@ class UserSettingService
 
         return $this->repository->updateAndLoad($settings, $data);
     }
+
+    public function updateFcmToken(int $userId, string $token): UserSetting
+    {
+        $settings = $this->repository->firstOrCreateForUser($userId);
+        return $this->repository->updateAndLoad($settings, ['fcm_token' => $token]);
+    }
 }

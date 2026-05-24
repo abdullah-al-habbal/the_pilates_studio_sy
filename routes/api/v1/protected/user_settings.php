@@ -9,4 +9,6 @@ use Illuminate\Support\Facades\Route;
 Route::prefix('user-settings')->name('user-settings.')->group(function () {
     Route::get('/', [UserSettingController::class, 'show'])->name('show');
     Route::patch('/', [UserSettingController::class, 'update'])->name('update');
+    Route::post('settings/fcm-token', [UserSettingController::class, 'updateFcmToken'])
+    ->name('settings.fcm-token');
 });

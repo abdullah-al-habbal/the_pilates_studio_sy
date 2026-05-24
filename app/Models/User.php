@@ -79,8 +79,6 @@ class User extends Authenticatable
         return $this->status === UserStatusEnum::DEACTIVATED;
     }
 
-    // ─── Computed attributes ─────────────────────────────────────────────────
-
     protected function name(): Attribute
     {
         return Attribute::make(get: fn() => $this->fullname);
@@ -131,8 +129,6 @@ class User extends Authenticatable
         );
     }
 
-    // ─── Accessors ───────────────────────────────────────────────────────────
-
     public function getTotalRemainingCreditsAttribute(): int
     {
         return (int) $this->bookings()
@@ -154,8 +150,6 @@ class User extends Authenticatable
         return $this->settings?->resolvedLocale() ?? config('app.locale', 'en');
     }
 
-    // ─── Relations ───────────────────────────────────────────────────────────
-
     public function settings(): HasOne
     {
         return $this->hasOne(UserSetting::class);
@@ -176,7 +170,7 @@ class User extends Authenticatable
         return $this->hasMany(MerchandiseOrder::class, 'customer_id');
     }
 
-    public function notifications(): HasMany
+    public function appNotifications(): HasMany
     {
         return $this->hasMany(AppNotification::class);
     }

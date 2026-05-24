@@ -13,6 +13,10 @@ final readonly class EnvironmentVariables
         'APP_DEBUG',
         'APP_URL',
         'DB_CONNECTION',
+        'AUTH_GUARD',
+        'AUTH_PASSWORD_BROKER',
+        'AUTH_MODEL',
+        'AUTH_PASSWORD_RESET_TOKEN_TABLE',
     ];
 
     public const BOOLEAN_KEYS = [

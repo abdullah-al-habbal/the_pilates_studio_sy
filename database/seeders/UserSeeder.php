@@ -10,7 +10,6 @@ class UserSeeder extends Seeder
 {
     public function run(): void
     {
-        // fix: we must make those a config from .env
         User::firstOrCreate(
             ['email' => 'adam.kim@gmail.com'],
             [

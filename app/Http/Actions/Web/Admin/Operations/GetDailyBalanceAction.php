@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Http\Actions\Web\Admin\Operations;
@@ -16,14 +17,13 @@ final readonly class GetDailyBalanceAction
 
     public function __construct(
         private DailyBalanceService $balanceService
-    ) {
-    }
+    ) {}
 
     public function __invoke(GetDailyBalanceRequest $request): JsonResponse
     {
         try {
             $command = new GetDailyBalanceCommand(
-                date: $request->date(),
+                date: $request->getDate(),
                 currencyCodes: $request->currencyCodes(),
                 convertToBase: $request->convertToBase(),
             );

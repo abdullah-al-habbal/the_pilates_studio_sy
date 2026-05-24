@@ -23,7 +23,7 @@ class GetDailyBalanceRequest extends FormRequest
         ];
     }
 
-    public function date(): string
+    public function getDate(): string
     {
         return $this->validated('date') ?? now()->toDateString();
     }

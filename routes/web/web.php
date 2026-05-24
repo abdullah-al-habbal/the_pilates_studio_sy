@@ -16,3 +16,14 @@ Route::middleware(['web'])->group(function () {
     Route::get('/locale/{code}', SwitchLocaleAction::class)
         ->name('locale.switch');
 });
+
+Route::get('/debug/fcm', function () {
+    $user = App\Models\User::with('settings')->first();
+
+    $user->notify(new App\Notifications\ManualPushNotification(
+        'Test',
+        'Direct HTTP check'
+    ));
+
+    return 'sent';
+});

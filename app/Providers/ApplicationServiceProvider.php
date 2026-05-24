@@ -37,6 +37,7 @@ use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
+use Illuminate\Support\Facades\Log;
 
 class ApplicationServiceProvider extends ServiceProvider
 {
@@ -127,7 +128,7 @@ class ApplicationServiceProvider extends ServiceProvider
         } else {
             DB::listen(function ($query) {
                 if ($query->time > 500) {
-                    logger()->warning('Slow query detected', [
+                    Log::warning('Slow query detected', [
                         'sql' => $query->sql,
                         'bindings' => $query->bindings,
                         'time' => $query->time,

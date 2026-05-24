@@ -68,4 +68,21 @@ class UserSettingController extends Controller
             );
         }
     }
+
+    #[Endpoint('Update FCM Token', description: 'Update the FCM token for the authenticated user.')]
+    public function updateFcmToken(Request $request): JsonResponse
+    {
+        $request->validate(['token' => 'required|string']);
+
+        try {
+            $settings = $this->userSettingService->updateFcmToken(
+                $request->user()->id,
+                $request->token
+            );
+
+            return $this->success(data: ['token' => $settings->fcm_token], message: 'FCM token updated.');
+        } catch (\Exception $e) {
+            return $this->error(ErrorCodeEnum::BAD_REQUEST, 'Failed to update FCM token: ' . $e->getMessage());
+        }
+    }
 }

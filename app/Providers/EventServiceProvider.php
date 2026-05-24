@@ -21,9 +21,6 @@ class EventServiceProvider extends ServiceProvider
         UserSuccessfullyRegisteredEvent::class => [
             CreateInitialBookingForUserSuccessfullyRegisteredListener::class,
         ],
-        \Illuminate\Database\Events\ModelUpdated::class => [
-            \App\Listeners\RefreshCurrencyCacheOnUpdate::class,
-        ],
     ];
 
     public function boot(): void

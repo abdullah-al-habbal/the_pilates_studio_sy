@@ -11,26 +11,20 @@ use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Log;
 use Throwable;
 
-final class SendSessionRemindersCommand extends Command
+final class Send24HourSessionReminders extends Command
 {
-    protected $signature = 'sessions:send-reminders';
-
-    protected $description = 'Send reminders for class sessions starting within the next hour';
+    protected $signature = 'sessions:remind-24h';
+    protected $description = 'Send push notifications 24 hours before class sessions start';
 
     public function handle(): int
     {
-        Log::info('Session reminder command started');
+        Log::info('24-hour session reminder command started');
 
-        $windowStart = now();
-        $windowEnd = now()->addHour();
+        $target = now()->addDay()->startOfDay();
 
         $sessions = ClassSession::query()
             ->where('status', ClassSessionStatusEnum::SCHEDULED)
-            ->whereDate('date', $windowStart->toDateString())
-            ->whereBetween('start_time', [
-                $windowStart->format('H:i:s'),
-                $windowEnd->format('H:i:s'),
-            ])
+            ->whereDate('date', $target->toDateString())
             ->with(['class.instructor', 'bookingSessions.user.settings'])
             ->get();
 
@@ -63,12 +57,12 @@ final class SendSessionRemindersCommand extends Command
 
                     $user->notify(new SessionReminderNotification($session));
 
-                    Log::info('Reminder notification dispatched', [
+                    Log::info('24-hour reminder notification dispatched', [
                         'user_id' => $user->id,
                         'session_id' => $session->id,
                     ]);
                 } catch (Throwable $exception) {
-                    Log::error('Failed sending session reminder', [
+                    Log::error('Failed sending 24-hour session reminder', [
                         'user_id' => $user?->id,
                         'session_id' => $session->id,
                         'error' => $exception->getMessage(),
@@ -78,7 +72,7 @@ final class SendSessionRemindersCommand extends Command
             }
         }
 
-        $this->info("Processed {$sessions->count()} session reminder(s).");
+        $this->info("Reminders sent for {$sessions->count()} sessions.");
         return self::SUCCESS;
     }
 }

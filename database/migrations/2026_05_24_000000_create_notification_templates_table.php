@@ -1,7 +1,5 @@
 <?php
-
-declare(strict_types=1);
-
+// /home/lenovo/work/projects/the_pilates_studio_sy/database/migrations/2026_05_24_000000_create_notification_templates_table.php
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -10,20 +8,19 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('app_notifications', function (Blueprint $table) {
+        Schema::create('notification_templates', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
+            $table->string('key')->unique();
             $table->json('title');
-            $table->json('message');
+            $table->json('body');
             $table->json('data')->nullable();
-            $table->timestamp('read_at')->nullable();
+            $table->boolean('is_active')->default(true);
             $table->timestamps();
-            $table->index(['user_id', 'read_at']);
         });
     }
 
     public function down(): void
     {
-        Schema::dropIfExists('app_notifications');
+        Schema::dropIfExists('notification_templates');
     }
 };
