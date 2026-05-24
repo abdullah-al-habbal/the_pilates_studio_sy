@@ -42,6 +42,10 @@ const OperationsAPI = {
         );
     },
 
+    sendNotification(payload) {
+        return this.request('/admin/operations/notifications/send', 'POST', payload);
+    },
+
     getClientDetails(userId) {
         return this.request(`/admin/operations/clients/${userId}/details`);
     },

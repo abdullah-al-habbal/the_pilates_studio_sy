@@ -1,13 +1,15 @@
+// filePath: /home/lenovo/work/projects/the_pilates_studio_sy/public/js/operations/modules/tabs.js
 import { initClientsTab } from './clients.js';
 import { initStoreTab } from './store.js';
 import { initFinanceTab } from './finance.js';
+import { initNotificationsTab } from './notifications.js';
 
 export function initTabs() {
     const buttons = document.querySelectorAll('[data-tab]');
     
     const switchTabFromHash = () => {
         const hash = window.location.hash.replace('#', '');
-        const tab = ['clients', 'store', 'finance'].includes(hash) ? hash : 'clients';
+        const tab = ['clients', 'store', 'finance', 'notifications'].includes(hash) ? hash : 'clients';
         
         loadTab(tab);
 
@@ -44,6 +46,7 @@ export function loadTab(tab) {
     if (tab === 'clients') setTimeout(initClientsTab, 0);
     if (tab === 'store')   setTimeout(initStoreTab, 0);
     if (tab === 'finance') setTimeout(initFinanceTab, 0);
+    if (tab === 'notifications') setTimeout(initNotificationsTab, 0);
 }
 
 export async function updateGlobalStats(date = '') {

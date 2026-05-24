@@ -35,4 +35,7 @@
     <template id="tpl-finance">
         @include('admin.operations.partials.tab-finance')
     </template>
+    <template id="tpl-notifications">
+        @include('admin.operations.partials.tab-notifications')
+    </template>
 @endsection

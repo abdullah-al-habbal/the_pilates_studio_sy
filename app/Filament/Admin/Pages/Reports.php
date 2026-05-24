@@ -413,7 +413,12 @@ class Reports extends Page implements HasInfolists
                 ? Section::make('⚠️ Base Currency Conversion Notice')
                     ->icon('heroicon-o-exclamation-triangle')
                     ->iconColor('amber')
-                    ->content("All amounts marked 'Converted to {$baseCurrency->code}' use historical exchange rates captured at the time of each transaction. This ensures audit accuracy even if current rates change.")
+                    ->schema([
+                        TextEntry::make('conversion_notice')
+                            ->state("All amounts marked 'Converted to {$baseCurrency->code}' use historical exchange rates captured at the time of each transaction. This ensures audit accuracy even if current rates change.")
+                            ->hiddenLabel()
+                            ->columnSpanFull(),
+                    ])
                     ->collapsible()
                     ->collapsed()
                 : null,

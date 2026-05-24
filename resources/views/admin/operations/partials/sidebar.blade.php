@@ -24,6 +24,13 @@
                 </svg>
                 <span>Finance & Balance</span>
             </button>
+            <button data-tab="notifications"
+                class="w-full text-left px-4 py-3 rounded-xl transition-all flex items-center gap-3 hover:bg-slate-100 dark:hover:bg-slate-800">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11c0-2.21-1.343-4.088-3.293-4.753A1 1 0 0014 7h-4a1 1 0 00-.707 1.747C7.343 6.912 6 8.79 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0a3 3 0 11-6 0h6z"></path>
+                </svg>
+                <span>Push Notifications</span>
+            </button>
         </nav>
     </div>
 </aside>

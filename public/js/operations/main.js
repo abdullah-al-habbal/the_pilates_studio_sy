@@ -4,6 +4,7 @@ import { initTabs, loadTab, updateGlobalStats } from './modules/tabs.js';
 import { initClientsTab } from './modules/clients.js';
 import { initStoreTab } from './modules/store.js';
 import { initFinanceTab } from './modules/finance.js';
+import { initNotificationsTab } from './modules/notifications.js';
 
 document.addEventListener('DOMContentLoaded', () => {
     initTheme();

@@ -18,7 +18,8 @@ use App\Http\Actions\Web\Admin\Operations\{
     StoreWalkInOrderAction,
     CreatePackageAction,
     UpdatePackageAction,
-    DeletePackageAction
+    DeletePackageAction,
+    SendPushNotificationAction,
 };
 use App\Http\Actions\Web\Admin\Client\ClientDetailsAction;
 use Illuminate\Support\Facades\Route;
@@ -45,6 +46,8 @@ Route::prefix('admin/operations')
 
         Route::get('/clients', GetClientsAction::class)->name('clients.index');
         Route::get('/clients/{userId}/details', ClientDetailsAction::class)->name('clients.details');
+
+        Route::post('/notifications/send', SendPushNotificationAction::class)->name('notifications.send');
 
         Route::post('/bookings/{bookingId}/freeze', FreezeBookingAction::class)->name('bookings.freeze');
         Route::post('/bookings/{bookingId}/unfreeze', UnfreezeBookingAction::class)->name('bookings.unfreeze');

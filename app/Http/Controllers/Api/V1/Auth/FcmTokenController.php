@@ -17,7 +17,7 @@ final class FcmTokenController extends BaseApiController
         $user = $request->user();
 
         $user->settings()->updateOrCreate(
-            [],
+            ['user_id' => $user->id],
             ['fcm_token' => $request->validated('fcm_token')]
         );
 

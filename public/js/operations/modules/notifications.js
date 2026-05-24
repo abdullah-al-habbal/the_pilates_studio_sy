@@ -1,18 +1,16 @@
+// filePath: /home/lenovo/work/projects/the_pilates_studio_sy/public/js/operations/modules/notifications.js
 const OperationsNotifications = (() => {
-    // ─── State ────────────────────────────────────────────────────────────────
     const state = {
-        selectedUsers: new Map(), // id → { id, fullname, phone_number }
+        selectedUsers: new Map(), 
         searchTimeout: null,
     };
 
-    // ─── Init ─────────────────────────────────────────────────────────────────
     function init() {
         _bindCharCounters();
         _bindTargetToggle();
         _bindUserSearch();
     }
 
-    // ─── Character counters ───────────────────────────────────────────────────
     function _bindCharCounters() {
         document.getElementById('notif-title')?.addEventListener('input', (e) => {
             document.getElementById('notif-title-count').textContent = e.target.value.length;
@@ -22,7 +20,6 @@ const OperationsNotifications = (() => {
         });
     }
 
-    // ─── Target toggle ────────────────────────────────────────────────────────
     function _bindTargetToggle() {
         document.querySelectorAll('input[name="notif-target"]').forEach((radio) => {
             radio.addEventListener('change', () => {
@@ -37,7 +34,6 @@ const OperationsNotifications = (() => {
         });
     }
 
-    // ─── User search ──────────────────────────────────────────────────────────
     function _bindUserSearch() {
         const input = document.getElementById('notif-user-search');
         if (!input) return;
@@ -87,14 +83,12 @@ const OperationsNotifications = (() => {
         }
     }
 
-    // ─── User selection ───────────────────────────────────────────────────────
     function selectUser(id, fullname, phone) {
         if (state.selectedUsers.has(id)) return;
 
         state.selectedUsers.set(id, { id, fullname, phone_number: phone });
         _renderSelectedUsers();
 
-        // Clear search
         const input = document.getElementById('notif-user-search');
         if (input) input.value = '';
         document.getElementById('notif-user-results')?.classList.add('hidden');
@@ -125,7 +119,6 @@ const OperationsNotifications = (() => {
         `).join('');
     }
 
-    // ─── Send ─────────────────────────────────────────────────────────────────
     async function send() {
         const title  = document.getElementById('notif-title')?.value.trim();
         const body   = document.getElementById('notif-body')?.value.trim();
@@ -163,7 +156,6 @@ const OperationsNotifications = (() => {
         }
     }
 
-    // ─── Results panel ────────────────────────────────────────────────────────
     function _setResultsPanel(state, data = null) {
         const panel = document.getElementById('notif-results-panel');
         if (!panel) return;
@@ -187,7 +179,6 @@ const OperationsNotifications = (() => {
             return;
         }
 
-        // success
         const metrics = [
             { label: 'Dispatched',  value: data?.dispatched  ?? 0, color: 'text-emerald-600' },
             { label: 'Users Found', value: data?.total_users ?? 0, color: 'text-primary-600' },
@@ -231,7 +222,6 @@ const OperationsNotifications = (() => {
         container.prepend(entry);
     }
 
-    // ─── Helpers ──────────────────────────────────────────────────────────────
     function _esc(str) {
         return String(str ?? '')
             .replace(/&/g, '&amp;')
@@ -240,8 +230,11 @@ const OperationsNotifications = (() => {
             .replace(/"/g, '&quot;');
     }
 
-    // Public API
     return { init, send, selectUser, deselectUser };
 })();
 
 window.OperationsNotifications = OperationsNotifications;
+
+export function initNotificationsTab() {
+    OperationsNotifications.init();
+}

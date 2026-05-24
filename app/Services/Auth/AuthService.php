@@ -81,5 +81,9 @@ class AuthService
     public function logout(User $user): void
     {
         $user->currentAccessToken()?->delete();
+
+        if ($user->settings) {
+            $user->settings->forceFill(['fcm_token' => null])->save();
+        }
     }
 }
