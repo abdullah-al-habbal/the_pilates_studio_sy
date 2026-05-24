@@ -36,9 +36,9 @@ const OperationsAPI = {
         }
     },
 
-    getClients(search = "", page = 1, filter = "") {
+    getClients(search = "", page = 1, filter = "", perPage = 15) {
         return this.request(
-            `/admin/operations/clients?search=${encodeURIComponent(search)}&page=${page}&filter=${encodeURIComponent(filter)}`,
+            `/admin/operations/clients?search=${encodeURIComponent(search)}&page=${page}&filter=${encodeURIComponent(filter)}&per_page=${perPage}`,
         );
     },
 

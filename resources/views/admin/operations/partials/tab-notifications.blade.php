@@ -58,15 +58,20 @@
             <div id="notif-user-picker" class="space-y-3 hidden">
                 <div class="relative">
                     <input type="text" id="notif-user-search" placeholder="Search by name or phone…"
-                        class="w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-slate-800 rounded-xl
-                               border border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-primary-500 outline-none text-sm">
+                           class="w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-slate-800 rounded-xl
+                                  border border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-primary-500 outline-none text-sm">
                     <svg class="w-4 h-4 absolute left-3 top-3 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
                     </svg>
                 </div>
-                <div id="notif-user-results" class="max-h-40 overflow-y-auto space-y-1 rounded-xl border border-slate-200 dark:border-slate-700 hidden"></div>
+                {{-- Scrollable results list --}}
+                <div id="notif-user-results"
+                     class="hidden max-h-56 overflow-y-auto rounded-xl border border-slate-200 dark:border-slate-700 
+                            bg-white dark:bg-slate-900 shadow-sm divide-y divide-slate-100 dark:divide-slate-800">
+                </div>
+                {{-- Selected user tags --}}
                 <div id="notif-selected-users" class="flex flex-wrap gap-2 min-h-[2rem]">
-                    <p class="text-xs text-slate-400 italic" id="notif-no-users-hint">No users selected yet.</p>
+                    <p class="text-xs text-slate-400 italic">No users selected yet.</p>
                 </div>
             </div>
 

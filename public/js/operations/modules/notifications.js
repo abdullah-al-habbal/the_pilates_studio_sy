@@ -1,16 +1,31 @@
 // filePath: /home/lenovo/work/projects/the_pilates_studio_sy/public/js/operations/modules/notifications.js
+// public/js/operations/modules/notifications.js
 const OperationsNotifications = (() => {
+    // ─── State ────────────────────────────────────────────────────────────────
     const state = {
-        selectedUsers: new Map(), 
+        selectedUsers: new Map(),          // id → { id, fullname, phone_number }
         searchTimeout: null,
+        // Pagination
+        currentPage: 1,
+        lastPage: 1,
+        isLoading: false,
+        searchQuery: '',
+        // Cached user data for the current search (to avoid re‑fetching)
+        users: [],
+        // Dropdown scroll element reference
+        dropdownEl: null,
     };
+    const PER_PAGE = 15;   // matches backend default
 
+    // ─── Init ─────────────────────────────────────────────────────────────────
     function init() {
         _bindCharCounters();
         _bindTargetToggle();
         _bindUserSearch();
+        _bindDropdownScroll();
     }
 
+    // ─── Character counters ───────────────────────────────────────────────────
     function _bindCharCounters() {
         document.getElementById('notif-title')?.addEventListener('input', (e) => {
             document.getElementById('notif-title-count').textContent = e.target.value.length;
@@ -20,92 +35,171 @@ const OperationsNotifications = (() => {
         });
     }
 
+    // ─── Target toggle ────────────────────────────────────────────────────────
     function _bindTargetToggle() {
         document.querySelectorAll('input[name="notif-target"]').forEach((radio) => {
             radio.addEventListener('change', () => {
                 const picker = document.getElementById('notif-user-picker');
                 picker?.classList.toggle('hidden', radio.value !== 'specific');
-
                 if (radio.value !== 'specific') {
                     state.selectedUsers.clear();
                     _renderSelectedUsers();
+                    _clearSearch();
                 }
             });
         });
     }
 
+    // ─── Search input ─────────────────────────────────────────────────────────
     function _bindUserSearch() {
         const input = document.getElementById('notif-user-search');
         if (!input) return;
 
         input.addEventListener('input', (e) => {
             clearTimeout(state.searchTimeout);
-            const q = e.target.value.trim();
-
-            if (q.length < 2) {
-                document.getElementById('notif-user-results')?.classList.add('hidden');
-                return;
-            }
-
-            state.searchTimeout = setTimeout(() => _searchUsers(q), 300);
+            state.searchTimeout = setTimeout(() => {
+                const query = e.target.value.trim();
+                if (query === state.searchQuery) return;
+                _resetAndSearch(query);
+            }, 300);
         });
     }
 
-    async function _searchUsers(query) {
-        const resultsEl = document.getElementById('notif-user-results');
-        if (!resultsEl) return;
-
-        resultsEl.classList.remove('hidden');
-        resultsEl.innerHTML = '<p class="text-xs text-slate-400 px-3 py-2">Searching…</p>';
-
-        try {
-            const result = await OperationsAPI.getClients(query, 1, '');
-            const users  = result.data ?? [];
-
-            if (users.length === 0) {
-                resultsEl.innerHTML = '<p class="text-xs text-slate-400 px-3 py-2 italic">No users found.</p>';
-                return;
+    // ─── Dropdown scroll listener ─────────────────────────────────────────────
+    function _bindDropdownScroll() {
+        const dropdown = document.getElementById('notif-user-results');
+        if (!dropdown) return;
+        state.dropdownEl = dropdown;
+        dropdown.addEventListener('scroll', () => {
+            if (state.isLoading) return;
+            const { scrollTop, scrollHeight, clientHeight } = dropdown;
+            // Fire when within 40px of the bottom
+            if (scrollTop + clientHeight >= scrollHeight - 40) {
+                _loadNextPage();
             }
+        });
+    }
 
-            resultsEl.innerHTML = users.map((u) => `
-                <button
-                    onclick="OperationsNotifications.selectUser(${u.id}, '${_esc(u.fullname)}', '${_esc(u.phone_number)}')"
-                    class="w-full text-left px-3 py-2 text-sm hover:bg-primary-50 dark:hover:bg-primary-900/20
-                           flex items-center justify-between transition-colors
-                           ${state.selectedUsers.has(u.id) ? 'opacity-40 pointer-events-none' : ''}">
-                    <span class="font-medium">${_esc(u.fullname)}</span>
-                    <span class="text-xs text-slate-400">${_esc(u.phone_number)}</span>
-                </button>
-            `).join('');
+    // ─── Reset search & load page 1 ───────────────────────────────────────────
+    function _resetAndSearch(query) {
+        state.searchQuery = query;
+        state.currentPage = 1;
+        state.lastPage = 1;
+        state.users = [];
+        state.isLoading = false;
+        _renderDropdown();          // show loading
+        _fetchPage(1);
+    }
 
+    // ─── Load next page (if available) ────────────────────────────────────────
+    function _loadNextPage() {
+        if (state.isLoading) return;
+        if (state.currentPage >= state.lastPage) return;
+        state.isLoading = true;
+        _renderDropdown();
+        _fetchPage(state.currentPage + 1);
+    }
+
+    // ─── Fetch a specific page from the API ───────────────────────────────────
+    async function _fetchPage(page) {
+        const dropdown = state.dropdownEl;
+        if (!dropdown) return;
+        try {
+            const result = await OperationsAPI.getClients(
+                state.searchQuery,
+                page,
+                '',           // filter
+                PER_PAGE
+            );
+            const users = result.data ?? [];
+            const meta = result.meta?.pagination ?? {};
+            state.lastPage = meta.total_pages ?? 1;
+            state.currentPage = page;
+            if (page === 1) {
+                state.users = users;
+            } else {
+                state.users = state.users.concat(users);
+            }
+            state.isLoading = false;
+            _renderDropdown();
         } catch (e) {
-            resultsEl.innerHTML = `<p class="text-xs text-rose-500 px-3 py-2">${e.message}</p>`;
+            console.error('User search failed', e);
+            state.isLoading = false;
+            _renderDropdown();
         }
     }
 
-    function selectUser(id, fullname, phone) {
-        if (state.selectedUsers.has(id)) return;
+    // ─── Render the dropdown list (users + loading indicator) ─────────────────
+    function _renderDropdown() {
+        const dropdown = state.dropdownEl;
+        if (!dropdown) return;
 
-        state.selectedUsers.set(id, { id, fullname, phone_number: phone });
+        // Show / hide based on search length
+        if (state.searchQuery.length < 2) {
+            dropdown.classList.add('hidden');
+            return;
+        }
+
+        dropdown.classList.remove('hidden');
+
+        let html = '';
+
+        // Items
+        if (state.users.length > 0) {
+            html += state.users.map((u) => {
+                const checked = state.selectedUsers.has(u.id) ? 'checked' : '';
+                return `
+                <label class="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-primary-50 dark:hover:bg-primary-900/20 
+                              cursor-pointer transition-colors rounded-lg">
+                    <input type="checkbox" 
+                           class="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+                           ${checked}
+                           onchange="OperationsNotifications.toggleUser(${u.id}, '${_esc(u.fullname)}', '${_esc(u.phone_number)}', this.checked)">
+                    <span class="flex-1 text-sm font-medium text-gray-900 dark:text-white">${_esc(u.fullname)}</span>
+                    <span class="text-xs text-slate-400">${_esc(u.phone_number)}</span>
+                </label>`;
+            }).join('');
+        } else if (!state.isLoading) {
+            html += '<p class="px-4 py-3 text-xs text-slate-400 italic">No users found.</p>';
+        }
+
+        // Loading indicator at the bottom
+        if (state.isLoading) {
+            html += `
+            <div class="flex items-center justify-center px-4 py-3 text-primary-500 text-xs gap-2">
+                <div class="w-4 h-4 border-2 border-primary-500 border-t-transparent rounded-full animate-spin"></div>
+                Loading…
+            </div>`;
+        }
+
+        dropdown.innerHTML = html;
+    }
+
+    // ─── Toggle a user in/out of selection ────────────────────────────────────
+    function toggleUser(id, fullname, phone, checked) {
+        if (checked) {
+            state.selectedUsers.set(id, { id, fullname, phone_number: phone });
+        } else {
+            state.selectedUsers.delete(id);
+        }
         _renderSelectedUsers();
-
-        const input = document.getElementById('notif-user-search');
-        if (input) input.value = '';
-        document.getElementById('notif-user-results')?.classList.add('hidden');
+        // Re‑render the dropdown to reflect checkbox state
+        _renderDropdown();
     }
 
     function deselectUser(id) {
         state.selectedUsers.delete(id);
         _renderSelectedUsers();
+        _renderDropdown();
     }
 
+    // ─── Render the selected‑user tags ────────────────────────────────────────
     function _renderSelectedUsers() {
         const container = document.getElementById('notif-selected-users');
-        const hint      = document.getElementById('notif-no-users-hint');
         if (!container) return;
 
         if (state.selectedUsers.size === 0) {
-            container.innerHTML = '<p class="text-xs text-slate-400 italic" id="notif-no-users-hint">No users selected yet.</p>';
+            container.innerHTML = '<p class="text-xs text-slate-400 italic">No users selected yet.</p>';
             return;
         }
 
@@ -114,11 +208,24 @@ const OperationsNotifications = (() => {
                          text-primary-700 dark:text-primary-300 text-xs font-medium rounded-full">
                 ${_esc(u.fullname)}
                 <button onclick="OperationsNotifications.deselectUser(${u.id})"
-                    class="hover:text-rose-500 transition-colors font-bold">&times;</button>
+                        class="hover:text-rose-500 transition-colors font-bold">&times;</button>
             </span>
         `).join('');
     }
 
+    // ─── Clear search input & dropdown ─────────────────────────────────────────
+    function _clearSearch() {
+        const input = document.getElementById('notif-user-search');
+        if (input) input.value = '';
+        state.searchQuery = '';
+        state.users = [];
+        state.currentPage = 1;
+        state.lastPage = 1;
+        state.isLoading = false;
+        _renderDropdown();
+    }
+
+    // ─── Send notification (unchanged) ────────────────────────────────────────
     async function send() {
         const title  = document.getElementById('notif-title')?.value.trim();
         const body   = document.getElementById('notif-body')?.value.trim();
@@ -144,7 +251,6 @@ const OperationsNotifications = (() => {
         };
 
         _setResultsPanel('loading');
-
         try {
             const result = await OperationsAPI.sendNotification(payload);
             _setResultsPanel('success', result.data);
@@ -156,11 +262,12 @@ const OperationsNotifications = (() => {
         }
     }
 
-    function _setResultsPanel(state, data = null) {
+    // ─── Results panel (unchanged) ────────────────────────────────────────────
+    function _setResultsPanel(status, data = null) {
         const panel = document.getElementById('notif-results-panel');
         if (!panel) return;
 
-        if (state === 'loading') {
+        if (status === 'loading') {
             panel.innerHTML = `
                 <div class="flex flex-col items-center gap-3 text-primary-500">
                     <div class="w-8 h-8 border-2 border-primary-500 border-t-transparent rounded-full animate-spin"></div>
@@ -169,7 +276,7 @@ const OperationsNotifications = (() => {
             return;
         }
 
-        if (state === 'error') {
+        if (status === 'error') {
             panel.innerHTML = `
                 <div class="flex flex-col items-center gap-2 text-rose-500">
                     <span class="text-3xl">❌</span>
@@ -218,7 +325,6 @@ const OperationsNotifications = (() => {
                 <p class="font-bold text-emerald-600">${result?.dispatched ?? 0} sent</p>
                 <p class="text-slate-400">${new Date().toLocaleTimeString()}</p>
             </div>`;
-
         container.prepend(entry);
     }
 
@@ -230,7 +336,8 @@ const OperationsNotifications = (() => {
             .replace(/"/g, '&quot;');
     }
 
-    return { init, send, selectUser, deselectUser };
+    // Public API
+    return { init, send, toggleUser, deselectUser };
 })();
 
 window.OperationsNotifications = OperationsNotifications;

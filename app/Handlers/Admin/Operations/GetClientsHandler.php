@@ -10,7 +10,7 @@ use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 final readonly class GetClientsHandler
 {
 
-    public function handle(?string $search = null, int $page = 1, ?string $filter = null): LengthAwarePaginator
+    public function handle(?string $search = null, int $page = 1, ?string $filter = null, int $perPage = 15): LengthAwarePaginator
     {
         return User::with(['bookings.package', 'activeCreditBooking.package', 'frozenCreditBooking.package', 'bookingSessions'])
             ->when($search, function ($q) use ($search) {
@@ -37,6 +37,6 @@ final readonly class GetClientsHandler
             ->when(!$filter, function ($q) {
                 $q->latest();
             })
-            ->paginate(15, ['*'], 'page', $page);
+            ->paginate($perPage, ['*'], 'page', $page);
     }
 }
