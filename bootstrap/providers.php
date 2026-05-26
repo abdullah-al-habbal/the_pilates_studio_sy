@@ -5,6 +5,7 @@
 use App\Providers\ApplicationServiceProvider;
 use App\Providers\BootstrapEnvironmentServiceProvider;
 use App\Providers\EventServiceProvider;
+use App\Providers\FcmServiceProvider;
 use App\Providers\Filament\AdminPanelProvider;
 use App\Providers\ScrambleServiceProvider;
 
@@ -14,4 +15,5 @@ return [
     AdminPanelProvider::class,
     ScrambleServiceProvider::class,
     EventServiceProvider::class,
+    FcmServiceProvider::class,
 ];

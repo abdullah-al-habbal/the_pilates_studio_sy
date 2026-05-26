@@ -2,8 +2,6 @@
 
 namespace App\Filament\Admin\Resources\AppNotifications;
 
-use App\Filament\Admin\Resources\AppNotifications\Pages\CreateAppNotification;
-use App\Filament\Admin\Resources\AppNotifications\Pages\EditAppNotification;
 use App\Filament\Admin\Resources\AppNotifications\Pages\ListAppNotifications;
 use App\Filament\Admin\Resources\AppNotifications\Pages\ViewAppNotification;
 use App\Filament\Admin\Resources\AppNotifications\Schemas\AppNotificationForm;
@@ -68,9 +66,7 @@ class AppNotificationResource extends Resource
     {
         return [
             'index' => ListAppNotifications::route('/'),
-            'create' => CreateAppNotification::route('/create'),
             'view' => ViewAppNotification::route('/{record}'),
-            'edit' => EditAppNotification::route('/{record}/edit'),
         ];
     }
 }

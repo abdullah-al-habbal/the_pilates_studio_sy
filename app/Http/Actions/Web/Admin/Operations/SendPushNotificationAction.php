@@ -19,18 +19,8 @@ final readonly class SendPushNotificationAction
     public function __invoke(SendPushNotificationRequest $request): JsonResponse
     {
         try {
-            $validated = $request->validated();
-
-            // fix: make a command class instead of passing all these params directly to the handler
-            $result = $this->handler->handle(
-                title:   $validated['title'],
-                body:    $validated['body'],
-                target:  $validated['target'],
-                userIds: $validated['user_ids'] ?? [],
-            );
-
+            $result = $this->handler->handle($request->toCommand());
             return $this->success($result, message: 'Notifications dispatched successfully.');
-
         } catch (\Throwable $e) {
             Log::error('SendPushNotificationAction failed', ['error' => $e->getMessage()]);
             return $this->error(message: 'Failed to dispatch notifications.');

@@ -23,4 +23,9 @@ class LoggingService
     {
         Log::warning($message, $context);
     }
+
+    public function critical(string $message, array $context = []): void
+    {
+        Log::critical($message, $context);
+    }
 }

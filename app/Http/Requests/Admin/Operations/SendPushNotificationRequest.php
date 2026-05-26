@@ -2,6 +2,7 @@
 declare(strict_types=1);
 namespace App\Http\Requests\Admin\Operations;
 
+use App\Commands\SendPushNotificationCommand;
 use Illuminate\Foundation\Http\FormRequest;
 
 final class SendPushNotificationRequest extends FormRequest
@@ -27,5 +28,15 @@ final class SendPushNotificationRequest extends FormRequest
         return [
             'user_ids.required_if' => 'At least one user must be selected for targeted delivery.',
         ];
+    }
+
+    public function toCommand(): SendPushNotificationCommand
+    {
+        return new SendPushNotificationCommand(
+            title:   $this->validated('title'),
+            body:    $this->validated('body'),
+            target:  $this->validated('target'),
+            userIds: $this->validated('user_ids', []),
+        );
     }
 }

@@ -2,23 +2,20 @@
 declare(strict_types=1);
 namespace App\Handlers\Admin\Operations;
 
+use App\Commands\SendPushNotificationCommand;
 use App\Models\User;
 use App\Notifications\ManualPushNotification;
 use Illuminate\Support\Facades\Log;
 
 final readonly class SendPushNotificationHandler
 {
-    public function handle(
-        string $title,
-        string $body,
-        string $target,
-        array  $userIds = []
-    ): array {
+    public function handle(SendPushNotificationCommand $command): array
+    {
         $query = User::with('settings')
             ->whereHas('settings', fn($q) => $q->whereNotNull('fcm_token'));
 
-        if ($target === 'specific') {
-            $query->whereIn('id', $userIds);
+        if ($command->target === 'specific') {
+            $query->whereIn('id', $command->userIds);
         }
 
         $users = $query->get();
@@ -27,7 +24,7 @@ final readonly class SendPushNotificationHandler
             return [
                 'dispatched'   => 0,
                 'total_users'  => 0,
-                'skipped'      => count($userIds),
+                'skipped'      => count($command->userIds),
                 'reason'       => 'No users with registered FCM tokens found.',
             ];
         }
@@ -36,7 +33,7 @@ final readonly class SendPushNotificationHandler
 
         foreach ($users as $user) {
             try {
-                $user->notify(new ManualPushNotification($title, $body));
+                $user->notify(new ManualPushNotification($command->title, $command->body));
                 $dispatched++;
             } catch (\Throwable $e) {
                 Log::error('SendPushNotificationHandler: dispatch failed', [
