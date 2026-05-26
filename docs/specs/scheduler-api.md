@@ -1,7 +1,7 @@
 # Scheduler API Specification
 
 Base path: `/admin/scheduler`  
-Middleware: `web`, `auth`, `freeze.user`, `cache.api.get`
+Middleware: `web`, `auth`, `freeze.user`,
 
 ## Endpoints
 

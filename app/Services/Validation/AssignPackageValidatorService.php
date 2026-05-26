@@ -42,7 +42,7 @@ final readonly class AssignPackageValidatorService
         if ($clientSentAmount !== null && $clientSentAmount !== $computedAmount) {
             $currency = Currency::find($currencyId);
             $symbol = $currency?->symbol ?? '';
-            $formatted = number_format($computedAmount / (10 ** ($currency?->decimal_places ?? 2)), $currency?->decimal_places ?? 2) . ' ' . $symbol;
+            $formatted = number_format($computedAmount, $currency?->decimal_places ?? 2) . ' ' . $symbol;
 
             throw ValidationException::withMessages([
                 'paid_amount' => "The paid amount must equal the package price ({$formatted}).",

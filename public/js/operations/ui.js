@@ -1,4 +1,3 @@
-// public/js/operations/ui.js
 const OperationsUI = {
     toast(message, type = "info") {
         const container = document.getElementById("toast-container");
@@ -54,7 +53,7 @@ const OperationsUI = {
             style: "currency",
             currency: code,
             minimumFractionDigits: decimals,
-        }).format(amount / 10 ** decimals);
+        }).format(amount);
     },
 
     getCurrencyById(currencyId) {
@@ -90,25 +89,11 @@ const OperationsUI = {
         if (!currency || typeof baseAmount !== "number" || baseAmount <= 0) {
             return 0;
         }
-
-        const baseCurrency = (window.OperationsCurrencies || []).find(
-            (c) => Number(c.exchange_rate) === 1,
-        );
-        if (!baseCurrency) {
-            return 0;
-        }
-
-        const baseDivisor = 10 ** Number(baseCurrency.decimal_places || 2);
-        const targetDivisor = 10 ** Number(currency.decimal_places || 2);
         const exchangeRate = Number(currency.exchange_rate || 0);
-
         if (exchangeRate <= 0) {
             return 0;
         }
-
-        const baseUnits = baseAmount / baseDivisor;
-        const convertedInTargetUnits = baseUnits * exchangeRate;
-        return Math.round(convertedInTargetUnits * targetDivisor);
+        return Math.round(baseAmount * exchangeRate);
     },
 
     renderBalanceShimmer() {

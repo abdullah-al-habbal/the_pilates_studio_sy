@@ -1,3 +1,4 @@
+{{-- filePath: /home/lenovo/work/projects/the_pilates_studio_sy/resources/views/filament/admin/pages/reports.blade.php --}}
 <x-filament-panels::page>
 
     <div class="space-y-4">

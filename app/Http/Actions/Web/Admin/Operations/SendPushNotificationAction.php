@@ -21,6 +21,7 @@ final readonly class SendPushNotificationAction
         try {
             $validated = $request->validated();
 
+            // fix: make a command class instead of passing all these params directly to the handler
             $result = $this->handler->handle(
                 title:   $validated['title'],
                 body:    $validated['body'],

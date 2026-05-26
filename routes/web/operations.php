@@ -26,7 +26,7 @@ use App\Http\Actions\Web\Admin\Client\ClientDetailsAction;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('admin/operations')
-    ->middleware(['web', 'auth', 'freeze.user', 'cache.api.get'])
+    ->middleware(['web', 'auth', 'freeze.user'])
     ->name('admin.operations.')
     ->group(function (): void {
         Route::get('/', OperationsIndexAction::class)->name('index');

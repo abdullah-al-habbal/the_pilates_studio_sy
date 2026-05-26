@@ -1,7 +1,7 @@
 # Operations API Specification
 
 Base path: `/admin/operations`  
-Middleware: `web`, `auth`, `freeze.user`, `cache.api.get` (GET responses cached 30s)
+Middleware: `web`, `auth`, `freeze.user`,(GET responses cached 30s)
 
 ## Response envelope
 
@@ -17,7 +17,7 @@ Middleware: `web`, `auth`, `freeze.user`, `cache.api.get` (GET responses cached 
 }
 ```
 
-Money fields are **integers in the currency smallest unit** (e.g. cents).
+Money fields are **integers in the currency**
 
 ## Endpoints
 

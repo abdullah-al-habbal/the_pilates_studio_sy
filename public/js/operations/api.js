@@ -54,13 +54,7 @@ const OperationsAPI = {
         return this.request("/admin/operations/packages");
     },
 
-    assignPackage(userId, packageId, currencyId, paidAmount = null) {
-        if (paidAmount != null) {
-            console.warn(
-                "OperationsAPI.assignPackage: paid_amount is deprecated and ignored. The server computes the final amount from currency_id only.",
-            );
-        }
-
+    assignPackage(userId, packageId, currencyId) {
         return this.request(
             `/admin/operations/packages/${packageId}/assign`,
             "POST",

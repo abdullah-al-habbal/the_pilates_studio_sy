@@ -45,21 +45,14 @@ class CurrencyService
         return $currency?->decimal_places ?? 2;
     }
 
-    public function formatAmount(int $amountInSmallestUnit, ?int $currencyId = null): string
+    public function formatAmount(int $amount, ?int $currencyId = null): string
     {
         $currency = $currencyId ? Currency::find($currencyId) : $this->getDefaultCurrency();
         if (!$currency) {
-            return (string) $amountInSmallestUnit;
+            return (string) $amount;
         }
-        $divisor = 10 ** $currency->decimal_places;
-        $formattedNumber = number_format($amountInSmallestUnit / $divisor, $currency->decimal_places);
+        $formattedNumber = number_format($amount, $currency->decimal_places);
         return $formattedNumber . ' ' . $currency->symbol;
-    }
-
-    public function toSmallestUnit(float $amount, ?int $currencyId = null): int
-    {
-        $decimalPlaces = $this->getDecimalPlaces($currencyId);
-        return (int) round($amount * (10 ** $decimalPlaces));
     }
 
     public function getAllActiveCurrencies(): Collection

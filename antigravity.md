@@ -12,7 +12,7 @@ Implement **Option B: Base Price + Exchange Rate** architecture for a Laravel 11
 - **Data**: Commands/DTOs for handler inputs; Eloquent for persistence
 - **Frontend**: Blade + Vanilla ES6 JS (`public/js/operations/`), Tailwind, Filament v3
 - **Database**: MySQL, relational schema, soft deletes, indexed FKs
-- **Currency**: All amounts stored as **integers in smallest unit** (no floats for money)
+- **Currency**: All amounts stored as (no floats for money)
 
 ## 🔑 Core Models & Relationships
 
@@ -40,7 +40,7 @@ Refund → morphTo → Booking | MerchandiseOrder
 - Maintain `declare(strict_types=1);` on all PHP files
 - Follow `Action → Handler → Service → Repository` separation
 - Use `Command`/`DTO` objects for handler inputs
-- Store currency amounts as `int` (smallest unit)
+- Store currency amounts as `int` 
 - Keep `FormRequest` validation rules pure (no DB queries)
 - Modify existing migrations directly (DEV environment)
 - Preserve foreign keys, indexes, soft-deletes

@@ -18,7 +18,7 @@
 
 - **Toasts:** `OperationsUI.toast(message, type)`
 - **Modals:** `OperationsUI.openModal(title, html)`
-- **Currency format:** `OperationsUI.formatMoney(amount, currencyId)` — integer smallest unit
+- **Currency format:** `OperationsUI.formatMoney(amount, currencyId)`
 - **Sidebar snapshot:** `tabs.js` → `updateGlobalStats()` via `getDailyBalance(today)`
 
 ## Clients tab

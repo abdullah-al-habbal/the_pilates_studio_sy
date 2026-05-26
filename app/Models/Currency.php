@@ -12,8 +12,11 @@ use Spatie\Translatable\HasTranslations;
 class Currency extends Model
 {
     use HasFactory, HasTranslations;
+
     public array $translatable = ['name'];
+
     protected $fillable = ['code', 'name', 'symbol', 'decimal_places', 'exchange_rate', 'is_active'];
+
     protected function casts(): array
     {
         return [
@@ -22,14 +25,17 @@ class Currency extends Model
             'exchange_rate' => 'float',
         ];
     }
+
     public function prices(): HasMany
     {
         return $this->hasMany(Price::class);
     }
+
     public function bookings(): HasMany
     {
         return $this->hasMany(Booking::class);
     }
+
     public static function findByCode(string $code): ?self
     {
         return static::where('code', strtoupper($code))->where('is_active', true)->first();

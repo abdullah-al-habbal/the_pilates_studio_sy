@@ -1,5 +1,5 @@
 <?php
-
+// filePath: /home/lenovo/work/projects/the_pilates_studio_sy/config/firebase.php
 declare(strict_types=1);
 
 return [

@@ -40,7 +40,7 @@ components:
         total_pages: { type: integer }
     MoneyInt:
       type: integer
-      description: Amount in currency smallest unit
+      description: Amount in currency
     PackageBooking:
       type: object
       properties:

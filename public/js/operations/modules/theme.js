@@ -1,3 +1,4 @@
+// /home/lenovo/work/projects/the_pilates_studio_sy/public/js/operations/modules/theme.js
 export function initTheme() {
     const toggle = document.getElementById('theme-toggle');
     if (!toggle) return;

@@ -9,8 +9,8 @@ use Illuminate\Notifications\Notification;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Kreait\Firebase\Exception\MessagingException;
-use Kreait\Firebase\Messaging\AndroidConfig;          // ← ADD
-use Kreait\Firebase\Messaging\ApnsConfig;             // ← ADD
+use Kreait\Firebase\Messaging\AndroidConfig;          
+use Kreait\Firebase\Messaging\ApnsConfig;             
 use Kreait\Firebase\Messaging\CloudMessage;
 use Kreait\Firebase\Messaging\Notification as FirebaseNotification;
 use Kreait\Laravel\Firebase\Facades\Firebase;
@@ -26,7 +26,6 @@ final class FcmChannel
         try {
             $tokens = $this->getTokens($notifiable);
 
-            // FIX: log key aligned with actual class name for ELK traceability
             Log::info('FCM dispatch started', [
                 'notification'    => $notificationClass,
                 'notification_id' => $notificationId,

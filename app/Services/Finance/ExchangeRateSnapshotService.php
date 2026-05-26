@@ -64,17 +64,7 @@ final readonly class ExchangeRateSnapshotService
         if ($amount <= 0 || $snapshotRate <= 0.0) {
             return 0;
         }
-
-        $targetCurrency = Currency::findOrFail($targetCurrencyId);
-        $baseCurrency = $this->currencyService->getBaseCurrency();
-
-        $targetDivisor = 10 ** $targetCurrency->decimal_places;
-        $baseDivisor = 10 ** $baseCurrency->decimal_places;
-
-        $amountInTargetUnits = $amount / $targetDivisor;
-        $amountInBaseUnits = $amountInTargetUnits / $snapshotRate;
-        $amountInBaseSmallest = $amountInBaseUnits * $baseDivisor;
-
-        return (int) round($amountInBaseSmallest);
+        $amountInBaseUnits = $amount / $snapshotRate;
+        return (int) round($amountInBaseUnits);
     }
 }

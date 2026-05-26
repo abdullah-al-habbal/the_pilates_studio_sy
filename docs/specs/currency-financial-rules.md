@@ -4,7 +4,7 @@ Architecture: **Option B — Base Price + Exchange Rate** (see `antigravity.md`)
 
 ## Storage
 
-- All monetary amounts: **integer smallest unit** per `Currency.decimal_places`
+- All monetary amounts: **integer** per `Currency.decimal_places`
 - `exchange_rate_snapshot` on `bookings`, `merchandise_orders`, `refunds` at transaction time
 - Base prices in `prices` morph table (base currency only)
 

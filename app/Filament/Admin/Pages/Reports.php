@@ -82,13 +82,11 @@ class Reports extends Page implements HasInfolists
         if (!$item) {
             return '—';
         }
-
-        $divisor = 10 ** $currency->decimal_places;
         $amount = $item['base_conversion_applied'] && $item['total_revenue_in_base'] !== null
             ? $item['total_revenue_in_base']
             : $item['total_revenue'];
 
-        return number_format($amount / $divisor, $currency->decimal_places) . ' ' . $currency->symbol;
+        return number_format($amount, $currency->decimal_places) . ' ' . $currency->symbol;
     }
 
     public static function getNavigationBadgeColor(): string|array|null
@@ -180,10 +178,7 @@ class Reports extends Page implements HasInfolists
         string $symbol,
         int $decimals,
     ): string {
-        return number_format(
-            $amount / (10 ** $decimals),
-            $decimals
-        ) . ' ' . $symbol;
+        return number_format($amount, $decimals) . ' ' . $symbol;
     }
 
     private function buildCurrencySections(
@@ -386,7 +381,7 @@ class Reports extends Page implements HasInfolists
                             return TextEntry::make('merch_' . $i)
                                 ->label($name)
                                 ->state(
-                                    number_format($item->revenue / (10 ** $decimals), $decimals) . ' ' . $symbol
+                                    number_format($item->revenue, $decimals) . ' ' . $symbol
                                     . " ({$code})"
                                     . ' · '
                                     . __('dashboard.pages.reports.top_merchandise.sold', ['count' => $item->quantity])

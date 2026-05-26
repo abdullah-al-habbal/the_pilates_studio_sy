@@ -1,3 +1,4 @@
+// filePath: /home/lenovo/work/projects/the_pilates_studio_sy/public/js/operations/modules/store.js
 import { updateGlobalStats } from "./tabs.js";
 
 export function initStoreTab() {

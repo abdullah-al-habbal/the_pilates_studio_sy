@@ -10,7 +10,7 @@
     - **Validity**: Optional expiration in days
 4. **Pricing Section**:
     - Select **Base Currency** (pre-filled from `config/currency.base_currency`)
-    - Enter **Base Price** in smallest unit (e.g., `20000` for $200.00 USD)
+    - Enter **Base Price**
     - ⚠️ Do NOT enter prices for other currencies — they are computed automatically
 5. Save package
 
@@ -26,7 +26,7 @@ final_amount = base_price × exchange_rate_at_transaction_time
 - Example:
   - Base price: `20000` (=$200.00 USD)
   - SYP exchange rate: `13000.0`
-  - SYP smallest unit divisor: `1` (0 decimal places)
+  - SYP divisor: `1` (0 decimal places)
   - Computed amount: `(20000 / 100) × 13000 × 1 = 2,600,000` SYP
 
 ## Viewing Prices in Operations Dashboard

@@ -37,16 +37,8 @@ final readonly class PricingService
                 "Invalid exchange rate for currency: {$targetCurrency->code}"
             );
         }
-
-        $baseCurrency = $this->currencyService->getBaseCurrency();
-        $baseDivisor = 10 ** $baseCurrency->decimal_places;
-        $targetDivisor = 10 ** $targetCurrency->decimal_places;
-
-        $baseInUnits = $baseAmount / $baseDivisor;
-        $convertedInTargetUnits = $baseInUnits * $exchangeRate;
-        $convertedInSmallest = $convertedInTargetUnits * $targetDivisor;
-
-        return (int) round($convertedInSmallest);
+        $convertedInTargetUnits = $baseAmount * $exchangeRate;
+        return (int) round($convertedInTargetUnits);
     }
 
     private function getExchangeRate(Currency $currency): float
@@ -65,10 +57,6 @@ final readonly class PricingService
         return $this->currencyService->getBaseCurrency()->id;
     }
 
-    /**
-     * Returns the exchange rate to be snapshotted for a target currency.
-     * Returns 1.0 if target IS the base currency.
-     */
     public function getExchangeRateForSnapshot(int $targetCurrencyId): float
     {
         $targetCurrency = Currency::findOrFail($targetCurrencyId);

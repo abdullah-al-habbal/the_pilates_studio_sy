@@ -6,7 +6,6 @@ namespace App\Repositories\Eloquent\MerchandiseOrder;
 
 use App\Models\CenterMerchandise;
 use App\Models\MerchandiseOrder;
-use App\Services\Currency\CurrencyService;
 use Carbon\CarbonInterface;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
@@ -15,7 +14,6 @@ class MerchandiseOrderEloquentRepository
 {
     public function __construct(
         private readonly MerchandiseOrder $model,
-        private readonly CurrencyService $currencyService
     ) {
     }
 
@@ -33,26 +31,7 @@ class MerchandiseOrderEloquentRepository
     {
         return (bool) $this->model->where('id', $id)->delete();
     }
-
-    /**
-     * @deprecated Use getRevenueByCurrency() for per-currency accuracy
-     */
-    public function getTotalRevenueByCurrency(
-        int $currencyId,
-        ?CarbonInterface $startDate = null,
-        ?CarbonInterface $endDate = null,
-    ): int {
-        return (int) MerchandiseOrder::query()
-            ->where('currency_id', $currencyId)
-            ->when($startDate, fn($q) => $q->where('ordered_at', '>=', $startDate))
-            ->when($endDate, fn($q) => $q->where('ordered_at', '<=', $endDate))
-            ->sum('paid_amount');
-    }
-
-    /**
-     * Returns revenue grouped by currency_id — NO joins to prices table.
-     * Uses only stored paid_amount + currency_id for historical accuracy.
-     */
+    
     public function getRevenueByCurrency(
         ?CarbonInterface $startDate = null,
         ?CarbonInterface $endDate = null,
@@ -70,10 +49,6 @@ class MerchandiseOrderEloquentRepository
                 'order_count' => (int) $item->count,
             ]);
     }
-
-    /**
-     * Returns revenue with historical exchange rate snapshot for base-currency conversion.
-     */
     public function getRevenueWithExchangeSnapshot(
         ?CarbonInterface $startDate = null,
         ?CarbonInterface $endDate = null,

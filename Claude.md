@@ -29,7 +29,7 @@ This is a **Laravel 10+ monolithic web application** for managing a fitness cent
 
 ## Sensitive Areas
 - Any operation that alters booking status (freeze, unfreeze, refund) must validate the current state and preserve audit trails.
-- Currency amounts are stored in the smallest unit (integer) and must be displayed using the correct `decimal_places` and currency code.
+- Currency amounts are stored in  (integer) and must be displayed using the correct `decimal_places` and currency code.
 - Refund amounts must never exceed `paid_amount`.
 
 ## Testing & Debugging
