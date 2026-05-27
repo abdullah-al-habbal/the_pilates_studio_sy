@@ -15,7 +15,7 @@
         @else
             <div class="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
                 @foreach($landingData->packages as $index => $package)
-                <div class="reveal relative {{ $index === 1 ? 'md:-mt-4 md:mb-4' : '' }}" style="transition-delay: {{ $index * 0.1 }}s;">
+                <div class="reveal relative" style="transition-delay: {{ $index * 0.1 }}s;">
                     @if($index === 1)
                     <div class="absolute -top-4 left-1/2 -translate-x-1/2 z-10">
                         <span class="inline-flex items-center gap-1 px-4 py-1.5 bg-accent-500 text-white text-xs font-bold rounded-full shadow-lg">

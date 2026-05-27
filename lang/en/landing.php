@@ -81,5 +81,6 @@ return [
     'english'      => 'English',
     'day_label'    => ':day – :date',
     'open_app'     => 'Open in App',
-    'schedule_for' => 'Schedule for :day',
+    'schedule_for'         => 'Schedule for :day',
+    'no_sessions_for_day'  => 'No sessions on this day.',
 ];

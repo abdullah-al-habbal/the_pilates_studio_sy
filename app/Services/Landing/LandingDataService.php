@@ -104,18 +104,22 @@ class LandingDataService
     private function getSchedule(): ?Collection
     {
         try {
-            $start = Carbon::today()->toDateString();
-            $end = Carbon::today()->addDays(6)->toDateString();
-            $sessions = $this->classSessionService->getSessionsForWeek($start, $end);
+            $start = Carbon::today();
+            $end = Carbon::today()->addDays(6);
+            $sessions = $this->classSessionService->getSessionsForWeek($start->toDateString(), $end->toDateString());
             $grouped = $sessions->groupBy('date');
-            return $grouped->map(function ($daySessions, $date) {
+            $days = collect();
+            for ($i = 0; $i < 7; $i++) {
+                $date = $start->copy()->addDays($i)->toDateString();
+                $daySessions = $grouped->get($date, collect());
                 $dayName = Carbon::parse($date)->translatedFormat('D');
-                return new LandingScheduleDayVO(
+                $days->push(new LandingScheduleDayVO(
                     date: $date,
                     dayName: $dayName,
                     sessions: $daySessions->map(fn($s) => LandingSessionVO::fromModel($s))
-                );
-            })->values();
+                ));
+            }
+            return $days;
         } catch (\Throwable $e) {
             report($e);
             return null;

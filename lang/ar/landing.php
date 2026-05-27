@@ -81,5 +81,6 @@ return [
     'english'      => 'الإنجليزية',
     'day_label'    => ':day – :date',
     'open_app'     => 'فتح في التطبيق',
-    'schedule_for' => 'الجدول لـ :day',
+    'schedule_for'         => 'الجدول لـ :day',
+    'no_sessions_for_day'  => 'لا توجد جلسات في هذا اليوم.',
 ];

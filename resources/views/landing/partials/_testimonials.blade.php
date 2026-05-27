@@ -16,7 +16,7 @@
                 @foreach($landingData->testimonials as $index => $testimonial)
                 <div class="reveal" style="transition-delay: {{ $index * 0.1 }}s;">
                     <div class="h-full bg-white dark:bg-dark-800 rounded-2xl p-8 border border-slate-100 dark:border-dark-700 hover-lift hover:border-primary-200 dark:hover:border-primary-800 transition-all relative">
-                        <div class="absolute top-6 right-6 w-10 h-10 rounded-full bg-primary-50 dark:bg-primary-900/20 flex items-center justify-center">
+                        <div class="absolute top-6 {{ app()->getLocale() === 'ar' ? 'left-6' : 'right-6' }} w-10 h-10 rounded-full bg-primary-50 dark:bg-primary-900/20 flex items-center justify-center">
                             <i data-lucide="quote" class="w-5 h-5 text-primary-400 dark:text-primary-600"></i>
                         </div>
 
