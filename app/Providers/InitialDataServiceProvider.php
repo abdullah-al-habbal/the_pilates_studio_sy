@@ -37,11 +37,12 @@ class InitialDataServiceProvider extends ServiceProvider
         ['key' => 'testimonials_title', 'value' => '{"en":"Loved by Our Community","ar":"محبوب من مجتمعنا"}', 'type' => 'json', 'description' => 'Testimonials section title'],
         ['key' => 'cta_title', 'value' => '{"en":"Ready to Start Your Journey?","ar":"هل أنت مستعد لبدء رحلتك؟"}', 'type' => 'json', 'description' => 'CTA section title'],
         ['key' => 'cta_subtitle', 'value' => '{"en":"Download the app today and get your first class free.","ar":"حمّل التطبيق اليوم واحصل على أول حصة مجاناً."}', 'type' => 'json', 'description' => 'CTA section subtitle'],
-        ['key' => 'footer_copyright', 'value' => 'The Pilates Studio Syria', 'type' => 'string', 'description' => 'Footer copyright text'],
-        ['key' => 'social_instagram', 'value' => '#', 'type' => 'string', 'description' => 'Instagram URL'],
-        ['key' => 'social_facebook', 'value' => '#', 'type' => 'string', 'description' => 'Facebook URL'],
-        ['key' => 'social_twitter', 'value' => '#', 'type' => 'string', 'description' => 'Twitter URL'],
-        ['key' => 'social_youtube', 'value' => '#', 'type' => 'string', 'description' => 'Youtube URL'],
+        ['key' => 'deep_link_scheme', 'value' => 'thepilatesstudio', 'type' => 'string', 'description' => 'Deep link scheme for the mobile app (without ://)'],
+        ['key' => 'footer_copyright', 'value' => '{"en":"The Pilates Studio Syria","ar":"ذا بيلاتس ستوديو سوريا"}', 'type' => 'json', 'description' => 'Footer copyright text'],
+        ['key' => 'social_instagram', 'value' => '{"url":"https://instagram.com/thepilatesstudio","icon":"instagram"}', 'type' => 'string', 'description' => 'Instagram link & icon (JSON with url and icon)'],
+        ['key' => 'social_facebook', 'value' => '{"url":"https://facebook.com/thepilatesstudio","icon":"facebook"}', 'type' => 'string', 'description' => 'Facebook link & icon (JSON with url and icon)'],
+        ['key' => 'social_twitter', 'value' => '{"url":"https://twitter.com/thepilatesst","icon":"twitter"}', 'type' => 'string', 'description' => 'Twitter link & icon (JSON with url and icon)'],
+        ['key' => 'social_youtube', 'value' => '{"url":"https://youtube.com/@thepilatesstudio","icon":"youtube"}', 'type' => 'string', 'description' => 'Youtube link & icon (JSON with url and icon)'],
     ];
 
     private const REQUIRED_PAGES = [

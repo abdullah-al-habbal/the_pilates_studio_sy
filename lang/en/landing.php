@@ -79,4 +79,7 @@ return [
     'credits_unit' => 'credits',
     'days_unit'    => 'days',
     'english'      => 'English',
+    'day_label'    => ':day – :date',
+    'open_app'     => 'Open in App',
+    'schedule_for' => 'Schedule for :day',
 ];

@@ -92,8 +92,9 @@ class LandingDataService
     private function getClasses(): ?Collection
     {
         try {
-            $classes = $this->classesService->getActiveClassesForLanding();
-            return $classes->map(fn($c) => LandingClassVO::fromModel($c));
+            return $this->classesService->getActiveClassesForLanding()
+                ->take(9)
+                ->map(fn($c) => LandingClassVO::fromModel($c));
         } catch (\Throwable $e) {
             report($e);
             return null;
@@ -124,8 +125,9 @@ class LandingDataService
     private function getInstructors(): ?Collection
     {
         try {
-            $instructors = $this->instructorService->getActiveInstructorsWithProfile();
-            return $instructors->map(fn($i) => LandingInstructorVO::fromModel($i));
+            return $this->instructorService->getActiveInstructorsWithProfile()
+                ->take(5)
+                ->map(fn($i) => LandingInstructorVO::fromModel($i));
         } catch (\Throwable $e) {
             report($e);
             return null;

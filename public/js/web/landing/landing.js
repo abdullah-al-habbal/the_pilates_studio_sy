@@ -1,3 +1,4 @@
+// /home/lenovo/work/projects/the_pilates_studio_sy/public/js/web/landing/landing.js
 document.addEventListener('DOMContentLoaded', function() {
     if (typeof lucide !== 'undefined') {
         lucide.createIcons();
@@ -108,28 +109,39 @@ document.addEventListener('DOMContentLoaded', function() {
 
     const scheduleTabs = document.querySelectorAll('.schedule-tab');
     const scheduleDays = document.querySelectorAll('.schedule-day');
+    const activeDayLabel = document.getElementById('active-day-label');
 
     if (scheduleTabs.length > 0 && scheduleDays.length > 0) {
-        scheduleTabs.forEach(tab => {
-            tab.addEventListener('click', () => {
-                const dayIndex = tab.dataset.day;
+        function showDay(index) {
+            scheduleTabs.forEach(t => t.classList.remove('active'));
+            scheduleTabs[index].classList.add('active');
 
-                scheduleTabs.forEach(t => t.classList.remove('active'));
-                tab.classList.add('active');
-
-                scheduleDays.forEach(day => {
-                    day.classList.add('hidden');
-                    day.classList.remove('block');
-                });
-
-                const selectedDay = document.querySelector('.schedule-day[data-day-index="' + dayIndex + '"]');
-                if (selectedDay) {
-                    selectedDay.classList.remove('hidden');
-                    selectedDay.classList.add('block');
-                    selectedDay.classList.add('visible');
-                }
+            scheduleDays.forEach(d => {
+                d.classList.add('hidden');
+                d.classList.remove('block', 'visible');
             });
+
+            const target = document.querySelector(`.schedule-day[data-day-index="${index}"]`);
+            if (target) {
+                target.classList.remove('hidden');
+                target.classList.add('block', 'visible');
+            }
+
+            if (activeDayLabel) {
+                const tab = scheduleTabs[index];
+                const dayNameEl = tab.querySelector('span:first-child');
+                const dateEl = tab.querySelector('span:last-child');
+                const dayName = dayNameEl ? dayNameEl.textContent : '';
+                const date = dateEl ? dateEl.textContent : '';
+                activeDayLabel.innerHTML = `<span class="text-sm font-medium text-primary-600 dark:text-primary-400 bg-primary-50 dark:bg-primary-900/30 px-4 py-2 rounded-full">${dayName} \u2013 ${date}</span>`;
+            }
+        }
+
+        scheduleTabs.forEach((tab, idx) => {
+            tab.addEventListener('click', () => showDay(idx));
         });
+
+        showDay(0);
     }
 
     document.querySelectorAll('a[href^="#"]').forEach(anchor => {
@@ -151,4 +163,35 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     });
+});
+
+window.handleDeepLink = function(event, scheme, sessionId) {
+    event.preventDefault();
+    const start = Date.now();
+    const fallbackTimeout = 700;
+    const deepLink = scheme + '://sessions/' + sessionId;
+
+    window.location.href = deepLink;
+
+    setTimeout(function() {
+        const elapsed = Date.now() - start;
+        if (elapsed < fallbackTimeout + 50) {
+            document.querySelector('#download').scrollIntoView({ behavior: 'smooth' });
+        }
+    }, fallbackTimeout);
+};
+
+window.toggleLangDropdown = function() {
+    const dropdown = document.getElementById('lang-dropdown');
+    if (dropdown) {
+        dropdown.classList.toggle('hidden');
+    }
+};
+
+document.addEventListener('click', function(e) {
+    const dropdown = document.getElementById('lang-dropdown');
+    const switcher = document.getElementById('lang-switcher');
+    if (dropdown && switcher && !switcher.contains(e.target) && !dropdown.classList.contains('hidden')) {
+        dropdown.classList.add('hidden');
+    }
 });

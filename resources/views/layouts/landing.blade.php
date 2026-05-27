@@ -71,7 +71,7 @@
         }
     </script>
 
-    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+    <script src="https://unpkg.com/lucide@0.344.0/dist/umd/lucide.min.js"></script>
 
     <link rel="stylesheet" href="{{ asset('css/web/landing/landing.css') }}">
     @if(app()->getLocale() === 'ar')

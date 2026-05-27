@@ -13,19 +13,20 @@
                 </a>
                 <p class="text-sm text-slate-400 leading-relaxed mb-6">{{ $s->siteTagline }}</p>
 
+                @php
+                    $socialEntries = array_filter([
+                        $s->socialInstagram ? json_decode($s->socialInstagram) : null,
+                        $s->socialFacebook ? json_decode($s->socialFacebook) : null,
+                        $s->socialTwitter ? json_decode($s->socialTwitter) : null,
+                        $s->socialYoutube ? json_decode($s->socialYoutube) : null,
+                    ]);
+                @endphp
                 <div class="flex gap-3">
-                    <a href="{{ $s->socialInstagram }}" class="w-10 h-10 rounded-xl bg-slate-800 hover:bg-primary-600 flex items-center justify-center transition-colors">
-                        <i data-lucide="instagram" class="w-5 h-5"></i>
-                    </a>
-                    <a href="{{ $s->socialFacebook }}" class="w-10 h-10 rounded-xl bg-slate-800 hover:bg-primary-600 flex items-center justify-center transition-colors">
-                        <i data-lucide="facebook" class="w-5 h-5"></i>
-                    </a>
-                    <a href="{{ $s->socialTwitter }}" class="w-10 h-10 rounded-xl bg-slate-800 hover:bg-primary-600 flex items-center justify-center transition-colors">
-                        <i data-lucide="twitter" class="w-5 h-5"></i>
-                    </a>
-                    <a href="{{ $s->socialYoutube }}" class="w-10 h-10 rounded-xl bg-slate-800 hover:bg-primary-600 flex items-center justify-center transition-colors">
-                        <i data-lucide="youtube" class="w-5 h-5"></i>
-                    </a>
+                    @foreach($socialEntries as $entry)
+                        <a href="{{ $entry->url ?? '#' }}" target="_blank" rel="noopener" class="w-10 h-10 rounded-xl bg-slate-800 hover:bg-primary-600 flex items-center justify-center transition-colors">
+                            <i data-lucide="{{ $entry->icon ?? 'globe' }}" class="w-5 h-5"></i>
+                        </a>
+                    @endforeach
                 </div>
             </div>
 

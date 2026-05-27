@@ -34,6 +34,9 @@ class AppSettingService
     {
         $locale = $locale ?? app()->getLocale();
         $value = $this->get($key);
+        if (is_array($value)) {
+            return $value[$locale] ?? $value['en'] ?? null;
+        }
         if (is_string($value)) {
             $decoded = json_decode($value, true);
             if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {

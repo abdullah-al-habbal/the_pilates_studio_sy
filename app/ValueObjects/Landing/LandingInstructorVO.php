@@ -26,7 +26,7 @@ class LandingInstructorVO
             title: $instructor->getTranslation('title', app()->getLocale()),
             specialty: $instructor->getTranslation('specialty', app()->getLocale()),
             bio: $instructor->getTranslation('bio', app()->getLocale()),
-            imageUrl: $instructor->image,
+            imageUrl: $instructor->image ?: 'https://ui-avatars.com/api/?name=Instructor&size=400&background=10b981&color=fff',
             socialLinks: $instructor->social_links ?? [],
         );
     }

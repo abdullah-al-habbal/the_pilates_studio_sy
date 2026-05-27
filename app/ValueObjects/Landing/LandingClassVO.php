@@ -21,7 +21,8 @@ class LandingClassVO
 
     public static function fromModel(Classes $class): self
     {
-        $primaryImage = $class->primaryImage?->image_url;
+        $primaryImage = $class->primaryImage?->image_url
+            ?? 'https://ui-avatars.com/api/?name=Class&size=400&background=059669&color=fff';
         return new self(
             id: $class->id,
             title: $class->getTranslation('title', app()->getLocale()) ?? $class->title,

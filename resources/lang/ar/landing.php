@@ -79,4 +79,7 @@ return [
     'credits_unit' => 'اعتمادات',
     'days_unit'    => 'أيام',
     'english'      => 'الإنجليزية',
+    'day_label'    => ':day – :date',
+    'open_app'     => 'فتح في التطبيق',
+    'schedule_for' => 'الجدول لـ :day',
 ];

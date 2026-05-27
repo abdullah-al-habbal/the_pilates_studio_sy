@@ -1,4 +1,4 @@
-@php $s = $landingData->settings; @endphp
+@php $s = $landingData->settings; $deepScheme = $s->deepLinkScheme ?? 'thepilatesstudio'; @endphp
 <section id="schedule" class="py-24 bg-slate-50 dark:bg-dark-800/50">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="text-center max-w-2xl mx-auto mb-16 reveal">
@@ -12,6 +12,12 @@
                 <p>{{ __('landing.empty_schedule') }}</p>
             </div>
         @else
+            <div id="active-day-label" class="text-center mb-6 reveal">
+                <span class="text-sm font-medium text-primary-600 dark:text-primary-400 bg-primary-50 dark:bg-primary-900/30 px-4 py-2 rounded-full">
+                    {{ __('landing.schedule_for', ['day' => __('landing.' . strtolower($landingData->schedule->first()?->dayName ?? 'mon'))]) }}
+                </span>
+            </div>
+
             <div class="flex overflow-x-auto gap-2 mb-8 pb-2 reveal" id="schedule-tabs">
                 @foreach($landingData->schedule as $index => $day)
                 @php
@@ -94,9 +100,9 @@
                                             {{ $session->availableSpots }} {{ __('landing.nav_classes') }}
                                         </span>
                                     @endif
-                                    <a href="#download" class="px-4 py-2 rounded-xl bg-primary-600 hover:bg-primary-700 text-white text-sm font-medium transition-all hover:shadow-lg hover:shadow-primary-500/25">
-                                        {{ __('landing.download_app') }}
-                                    </a>
+                                    <button onclick="handleDeepLink(event, '{{ $deepScheme }}', {{ $session->id }})" class="px-4 py-2 rounded-xl bg-primary-600 hover:bg-primary-700 text-white text-sm font-medium transition-all hover:shadow-lg hover:shadow-primary-500/25">
+                                        {{ __('landing.open_app') }}
+                                    </button>
                                 @endif
                             </div>
                         </div>

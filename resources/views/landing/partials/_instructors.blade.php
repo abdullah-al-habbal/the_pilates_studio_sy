@@ -24,13 +24,16 @@
                                 loading="lazy"
                             >
                             <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
+                            @if(!empty($instructor->socialLinks))
                             <div class="absolute bottom-4 left-4 right-4 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity translate-y-2 group-hover:translate-y-0">
-                                @foreach($instructor->socialLinks as $platform => $url)
-                                <a href="{{ $url }}" class="w-9 h-9 rounded-lg bg-white/20 backdrop-blur flex items-center justify-center hover:bg-white/40 transition-colors">
+                                @foreach($instructor->socialLinks as $link)
+                                @php $platform = is_string($link) ? $link : ($link['platform'] ?? 'globe'); $url = is_string($link) ? '#' : ($link['url'] ?? '#'); @endphp
+                                <a href="{{ $url }}" target="_blank" rel="noopener" class="w-9 h-9 rounded-lg bg-white/20 backdrop-blur flex items-center justify-center hover:bg-white/40 transition-colors">
                                     <i data-lucide="{{ $platform === 'tiktok' ? 'music' : $platform }}" class="w-4 h-4 text-white"></i>
                                 </a>
                                 @endforeach
                             </div>
+                            @endif
                         </div>
                         <div class="p-6">
                             <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-1">{{ $instructor->name }}</h3>
