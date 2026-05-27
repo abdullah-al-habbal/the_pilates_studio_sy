@@ -29,6 +29,7 @@ class DatabaseSeeder extends Seeder
             NotificationTemplateSeeder::class,
             AppSettingSeeder::class,
             MobileAppVersionSeeder::class,
+            TestimonialSeeder::class,
         ]);
     }
 }

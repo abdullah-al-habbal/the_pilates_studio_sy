@@ -8,6 +8,7 @@ namespace App\Services\Package;
 
 use App\Models\Package;
 use App\Repositories\Eloquent\Package\PackageEloquentRepository;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class PackageService
@@ -15,6 +16,11 @@ class PackageService
     public function __construct(
         private readonly PackageEloquentRepository $repository
     ) {}
+
+    public function getTopActivePackages(int $limit = 3): Collection
+    {
+        return $this->repository->getTopActivePackages($limit);
+    }
 
     public function findById(int $id): Package
     {

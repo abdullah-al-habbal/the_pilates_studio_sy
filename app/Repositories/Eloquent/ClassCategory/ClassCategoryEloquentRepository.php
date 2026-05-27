@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Repositories\Eloquent\ClassCategory;
 
 use App\Enums\AttendanceStatusEnum;
-use App\Enums\BookingSessionStatusEnum;
 use App\Models\ClassCategory;
 use Illuminate\Database\Eloquent\Collection;
 

@@ -5,6 +5,7 @@ namespace App\Filament\Admin\Resources\StaticPages\Schemas;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Schema;
 
 class StaticPageForm
@@ -23,6 +24,11 @@ class StaticPageForm
                 Textarea::make('content')
                     ->required()
                     ->columnSpanFull(),
+                Toggle::make('is_active')
+                    ->default(true),
+                TextInput::make('sort_order')
+                    ->numeric()
+                    ->default(0),
             ]);
     }
 }

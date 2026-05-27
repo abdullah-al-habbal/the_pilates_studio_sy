@@ -7,22 +7,35 @@ namespace App\Providers;
 use App\Models\BookingSession;
 use App\Models\Classes;
 use App\Models\ClassSession;
+use App\Models\Package;
+use App\Models\Testimonial;
 use App\Policies\BookingSessionPolicy;
+use App\Repositories\Eloquent\AppSetting\AppSettingEloquentRepository;
 use App\Repositories\Eloquent\Booking\BookingEloquentRepository;
 use App\Repositories\Eloquent\BookingSession\BookingSessionEloquentRepository;
 use App\Repositories\Eloquent\ClassCategory\ClassCategoryEloquentRepository;
 use App\Repositories\Eloquent\Classes\ClassesEloquentRepository;
 use App\Repositories\Eloquent\ClassSession\ClassSessionEloquentRepository;
 use App\Repositories\Eloquent\Instructor\InstructorEloquentRepository;
+use App\Repositories\Eloquent\Package\PackageEloquentRepository;
+use App\Repositories\Eloquent\StaticPage\StaticPageEloquentRepository;
+use App\Repositories\Eloquent\Testimonial\TestimonialEloquentRepository;
 use App\Repositories\Eloquent\User\UserEloquentRepository;
+use App\Services\AppSetting\AppSettingService;
 use App\Services\Booking\BookingService;
 use App\Services\BookingSession\BookingSessionService;
 use App\Services\ClassCategory\ClassCategoryService;
 use App\Services\ClassSession\ClassSessionService;
+use App\Services\Classes\ClassesService;
 use App\Services\Dashboard\StatsService;
 use App\Services\Instructor\InstructorService;
+use App\Services\Landing\LandingDataService;
+use App\Services\Package\PackageService;
+use App\Services\StaticPage\StaticPageService;
+use App\Services\Testimonial\TestimonialService;
 use App\Services\User\UserService;
 use App\Services\Currency\CurrencyService;
+use App\Services\Currency\PricingService;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
@@ -60,9 +73,32 @@ class ApplicationServiceProvider extends ServiceProvider
         $this->app->bind(BookingSessionService::class);
         $this->app->bind(ClassCategoryService::class);
         $this->app->bind(ClassSessionService::class);
+        $this->app->bind(ClassesService::class);
         $this->app->bind(InstructorService::class);
         $this->app->bind(UserService::class);
         $this->app->bind(StatsService::class);
+
+        $this->app->bind(PackageEloquentRepository::class, function ($app) {
+            return new PackageEloquentRepository(
+                $app->make(CurrencyService::class),
+                $app->make(PricingService::class),
+                $app->make(Package::class)
+            );
+        });
+        $this->app->bind(PackageService::class);
+
+        $this->app->bind(AppSettingEloquentRepository::class);
+        $this->app->bind(AppSettingService::class);
+
+        $this->app->bind(StaticPageEloquentRepository::class);
+        $this->app->bind(StaticPageService::class);
+
+        $this->app->bind(TestimonialEloquentRepository::class, function ($app) {
+            return new TestimonialEloquentRepository($app->make(Testimonial::class));
+        });
+        $this->app->bind(TestimonialService::class);
+
+        $this->app->bind(LandingDataService::class);
     }
 
     public function boot(): void

@@ -13,6 +13,14 @@ use Illuminate\Database\Eloquent\Collection;
 
 class InstructorEloquentRepository
 {
+    public function getActiveWithProfile(): Collection
+    {
+        return Instructor::query()
+            ->whereHas('classes', fn($q) => $q->where('status', ClassStatusEnum::ACTIVE))
+            ->with(['classes' => fn($q) => $q->where('status', ClassStatusEnum::ACTIVE)])
+            ->get();
+    }
+
     public function getTopByAttendance(int $limit = 5): Collection
     {
         return Instructor::withCount([

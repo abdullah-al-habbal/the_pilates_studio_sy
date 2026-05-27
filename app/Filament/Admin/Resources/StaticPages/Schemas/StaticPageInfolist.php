@@ -18,6 +18,10 @@ class StaticPageInfolist
                     ->placeholder('-'),
                 TextEntry::make('content')
                     ->columnSpanFull(),
+                TextEntry::make('is_active')
+                    ->badge()
+                    ->color(fn($state) => $state ? 'success' : 'danger'),
+                TextEntry::make('sort_order'),
                 TextEntry::make('created_at')
                     ->dateTime()
                     ->placeholder('-'),

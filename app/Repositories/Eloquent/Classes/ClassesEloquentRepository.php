@@ -19,6 +19,14 @@ class ClassesEloquentRepository
     ) {
     }
 
+    public function getActiveClassesForLanding(): Collection
+    {
+        return $this->model->newQuery()
+            ->with(['category', 'instructor', 'primaryImage', 'images'])
+            ->where('status', ClassStatusEnum::ACTIVE)
+            ->get();
+    }
+
     public function queryActiveClasses(
         ?string $date,
         ?string $startAfter,

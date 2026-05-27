@@ -19,6 +19,17 @@ class ClassSessionEloquentRepository
     ) {
     }
 
+    public function getSessionsBetween(string $startDate, string $endDate): Collection
+    {
+        return $this->model->newQuery()
+            ->with(['class.instructor'])
+            ->whereBetween('date', [$startDate, $endDate])
+            ->where('status', 'scheduled')
+            ->orderBy('date')
+            ->orderBy('start_time')
+            ->get();
+    }
+
     public function queryUpcomingSessions(
         ?string $date,
         ?string $dateAfter,

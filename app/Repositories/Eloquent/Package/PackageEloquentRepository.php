@@ -7,6 +7,7 @@ namespace App\Repositories\Eloquent\Package;
 use App\Models\Package;
 use App\Services\Currency\CurrencyService;
 use App\Services\Currency\PricingService;
+use Illuminate\Database\Eloquent\Collection;
 
 class PackageEloquentRepository
 {
@@ -15,6 +16,17 @@ class PackageEloquentRepository
         private readonly PricingService $pricingService,
         private readonly Package $model
     ) {
+    }
+
+    public function getTopActivePackages(int $limit = 3): Collection
+    {
+        $baseCurrencyId = $this->pricingService->getBaseCurrencyId();
+        return Package::where('is_active', true)
+            ->whereHas('prices', fn($q) => $q->where('currency_id', $baseCurrencyId))
+            ->with(['prices' => fn($q) => $q->where('currency_id', $baseCurrencyId)])
+            ->get()
+            ->sortBy(fn($p) => $p->prices->first()?->amount ?? PHP_INT_MAX)
+            ->take($limit);
     }
 
     public function getCheapestActivePackage(): ?Package

@@ -2,6 +2,7 @@
 
 namespace App\Filament\Admin\Resources\Packages\Schemas;
 
+use Filament\Forms\Components\KeyValue;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
@@ -31,6 +32,8 @@ class PackageForm
                     ])
                     ->columns(2)
                     ->label('Prices by Currency'),
+                KeyValue::make('features')
+                    ->label('Features'),
             ]);
     }
 }

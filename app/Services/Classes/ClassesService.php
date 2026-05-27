@@ -9,6 +9,7 @@ namespace App\Services\Classes;
 use App\Models\Classes;
 use App\Repositories\Eloquent\Classes\ClassesEloquentRepository;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class ClassesService
@@ -16,6 +17,11 @@ class ClassesService
     public function __construct(
         private readonly ClassesEloquentRepository $repository
     ) {}
+
+    public function getActiveClassesForLanding(): Collection
+    {
+        return $this->repository->getActiveClassesForLanding();
+    }
 
     public function queryClasses(
         ?string $date = null,

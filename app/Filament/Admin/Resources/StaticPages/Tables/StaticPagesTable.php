@@ -19,6 +19,9 @@ class StaticPagesTable
                 TextColumn::make('title')
                     ->searchable(),
                 ImageColumn::make('image'),
+                TextColumn::make('is_active')
+                    ->boolean()
+                    ->toggleable(),
                 TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()

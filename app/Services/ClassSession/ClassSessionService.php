@@ -11,6 +11,7 @@ use App\Models\ClassSession;
 use App\Repositories\Eloquent\ClassSession\ClassSessionEloquentRepository;
 use App\Services\BookingSession\BookingSessionService;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class ClassSessionService
@@ -18,6 +19,11 @@ class ClassSessionService
     public function __construct(
         private readonly ClassSessionEloquentRepository $repository
     ) {
+    }
+
+    public function getSessionsForWeek(string $startDate, string $endDate): Collection
+    {
+        return $this->repository->getSessionsBetween($startDate, $endDate);
     }
 
     public function querySessions(

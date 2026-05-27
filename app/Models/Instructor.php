@@ -12,9 +12,23 @@ class Instructor extends Model
 {
     use HasFactory, SoftDeletes, HasTranslations;
 
-    public array $translatable = ['name'];
+    public array $translatable = ['name', 'title', 'specialty', 'bio'];
 
-    protected $fillable = ['name'];
+    protected $fillable = [
+        'name',
+        'title',
+        'specialty',
+        'bio',
+        'social_links',
+        'image',
+    ];
+
+    protected function casts(): array
+    {
+        return [
+            'social_links' => 'array',
+        ];
+    }
 
     public function classes(): HasMany
     {

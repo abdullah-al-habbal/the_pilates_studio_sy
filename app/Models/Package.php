@@ -6,7 +6,6 @@ namespace App\Models;
 
 use App\Enums\BookingStatusEnum;
 use App\Enums\PackageTypeEnum;
-use App\Services\Currency\CurrencyService;
 use App\Services\Currency\PricingService;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
@@ -66,6 +65,7 @@ class Package extends Model
         'type',
         'generated_reason',
         'validity_days',
+        'features',
     ];
 
     protected function casts(): array
@@ -75,6 +75,7 @@ class Package extends Model
             'validity_days' => 'integer',
             'is_active' => 'boolean',
             'type' => PackageTypeEnum::class,
+            'features' => 'array',
         ];
     }
 
@@ -132,6 +133,4 @@ class Package extends Model
             }
         );
     }
-
-
 }

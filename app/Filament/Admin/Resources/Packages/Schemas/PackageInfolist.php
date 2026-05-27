@@ -19,6 +19,9 @@ class PackageInfolist
                     ->label('Price (Default Currency)')
                     ->getStateUsing(fn($record) => $record->getBasePrice())
                     ->money(),
+                TextEntry::make('features')
+                    ->badge()
+                    ->placeholder('-'),
                 TextEntry::make('created_at')
                     ->dateTime()
                     ->placeholder('-'),

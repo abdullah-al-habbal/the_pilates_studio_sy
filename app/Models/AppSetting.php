@@ -17,6 +17,7 @@ class AppSetting extends Model
         'key',
         'value',
         'description',
+        'type',
     ];
 
     protected function casts(): array
@@ -24,6 +25,7 @@ class AppSetting extends Model
         return [
             'key'   => 'string',
             'value' => 'string',
+            'type'  => 'string',
         ];
     }
 }

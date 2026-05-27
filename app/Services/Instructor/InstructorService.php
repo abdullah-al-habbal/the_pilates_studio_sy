@@ -17,6 +17,11 @@ class InstructorService
         private readonly InstructorEloquentRepository $repository
     ) {}
 
+    public function getActiveInstructorsWithProfile(): Collection
+    {
+        return $this->repository->getActiveWithProfile();
+    }
+
     public function getInstructor(int $id, array $includes = []): Instructor
     {
         $instructor = $this->repository->find($id, $includes);

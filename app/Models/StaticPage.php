@@ -13,7 +13,15 @@ class StaticPage extends Model
 
     public array $translatable = ['title', 'content'];
 
-    protected $fillable = ['slug', 'title', 'image', 'content'];
+    protected $fillable = ['slug', 'title', 'image', 'content', 'is_active', 'sort_order'];
+
+    protected function casts(): array
+    {
+        return [
+            'is_active' => 'boolean',
+            'sort_order' => 'integer',
+        ];
+    }
 
     public function getImageUrlAttribute(): ?string
     {

@@ -20,6 +20,11 @@ class InstructorsTable
             ->columns([
                 TextColumn::make('name')
                     ->searchable(),
+                TextColumn::make('title')
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('specialty')
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
