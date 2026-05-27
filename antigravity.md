@@ -6,13 +6,13 @@ Implement **Option B: Base Price + Exchange Rate** architecture for a Laravel 11
 
 ## 🏗️ Tech Stack
 
-- **Backend**: PHP 8.2+, Laravel 11, Strict Types (`declare(strict_types=1);`)
+- **Backend**: PHP 8.2+, Laravel 12, Strict Types (`declare(strict_types=1);`)
 - **Pattern**: `Action → Handler → Service → Repository → Model`
 - **Validation**: Pure `FormRequest` rules only (no business logic)
 - **Data**: Commands/DTOs for handler inputs; Eloquent for persistence
-- **Frontend**: Blade + Vanilla ES6 JS (`public/js/operations/`), Tailwind, Filament v3
+- **Frontend**: Blade + Vanilla ES6 JS (`public/js/operations/`), Tailwind, Filament v5
 - **Database**: MySQL, relational schema, soft deletes, indexed FKs
-- **Currency**: All amounts stored as (no floats for money)
+- **Currency**: All amounts stored as integers (no floats for money)
 
 ## 🔑 Core Models & Relationships
 
@@ -24,14 +24,14 @@ Booking/MerchandiseOrder/Refund → belongsTo → Currency
 Refund → morphTo → Booking | MerchandiseOrder
 ```
 
-## 🚨 Critical Issues to Fix
+## ✅ Resolved Critical Issues
 
-1. `Currency.exchange_rate` exists but is **never used** in pricing logic
-2. `Booking`, `MerchandiseOrder`, `Refund` lack `exchange_rate_snapshot` column → breaks audit trail
-3. Hybrid pricing allows `0` amount assignments when `Price` row missing for currency
-4. Financial reports aggregate `paid_amount` across currencies without conversion → meaningless totals
-5. Frontend displays prices in global default currency regardless of transaction currency
-6. `FormRequest` validation contains direct model queries (anti-pattern)
+1. `Currency.exchange_rate` is used by `PricingService` for price calculation and `ExchangeRateSnapshotService` for historical snapshots
+2. `Booking`, `MerchandiseOrder`, `Refund` have `exchange_rate_snapshot` column implemented in migrations and models
+3. Pricing enforces base-currency-only via `PricingService` — no missing `Price` row issues
+4. Financial reports show per-currency sections with optional base-converted totals (with disclaimer)
+5. Frontend computes prices via exchange rates using `OperationsCurrencies` data
+6. FormRequest validation is pure (no business logic) — all domain rules in validators/handlers
 
 ## ✅ Antigravity Agent Guidelines
 
@@ -138,5 +138,5 @@ app/Filament/Admin/Pages/Reports.php
 
 ---
 
-_Last Updated: Phase 1 Prep | Architecture: Laravel 11 Strict Types | Financial Model: Option B (Base Price + Exchange Rate)_
+_Last Updated: 2026-05-27 | Architecture: Laravel 12 Strict Types | Financial Model: Option B (Base Price + Exchange Rate)_
 ```

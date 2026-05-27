@@ -162,7 +162,7 @@ class BookingSessionService
             'fullname' => $data['fullname'],
             'phone_number' => $data['phone_number'],
             'email' => $data['email'] ?? null,
-            'password' => bcrypt($data['password'] ?? '12345678'),
+            'password' => bcrypt($data['password'] ?? \Str::random(16)),
         ]);
     }
 

@@ -27,16 +27,18 @@ final readonly class ProcessBookingRefundHandler
 
             $refundAmount = $amount ?? $booking->paid_amount;
 
+            $snapshot = $booking->exchange_rate_snapshot;
+            $exchangeRateSnapshot = $snapshot !== null && $snapshot > 0
+                ? $snapshot
+                : ($booking->currency?->exchange_rate ?? 1.0);
+
             $refund = Refund::create([
                 'refundable_type' => Booking::class,
                 'refundable_id' => $booking->id,
                 'user_id' => $booking->user_id,
                 'currency_id' => $booking->currency_id,
                 'amount' => $refundAmount,
-                'exchange_rate_snapshot' => $booking->exchange_rate_snapshot ?? [
-                    'rate' => 1,
-                    'currency' => $booking->currency?->code,
-                ],
+                'exchange_rate_snapshot' => $exchangeRateSnapshot,
                 'refunded_by' => Auth::id(),
                 'refunded_at' => now(),
             ]);

@@ -11,7 +11,7 @@ class CreatePackageRequest extends FormRequest
             'name'          => ['required', 'string', 'max:255'],
             'total_credits' => ['required', 'integer', 'min:1'],
             'validity_days' => ['nullable', 'integer', 'min:0'],
-            'currency_id'   => ['required', 'integer', 'exists:currencies,id'],
+            'currency_id'   => ['nullable', 'integer', 'exists:currencies,id'],
             'amount'        => ['required', 'integer', 'min:0'],
         ];
     }

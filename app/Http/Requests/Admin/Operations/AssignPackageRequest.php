@@ -17,7 +17,7 @@ class AssignPackageRequest extends FormRequest
     {
         return [
             'user_id' => ['required', 'exists:users,id'],
-            'currency_id' => ['required', 'integer', 'exists:currencies,id'],
+            'currency_id' => ['nullable', 'integer', 'exists:currencies,id'],
             'paid_amount' => ['nullable', 'integer', 'min:1'],
         ];
     }
