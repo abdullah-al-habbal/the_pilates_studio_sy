@@ -21,13 +21,21 @@ class ClassSessionEloquentRepository
 
     public function getSessionsBetween(string $startDate, string $endDate): Collection
     {
-        return $this->model->newQuery()
+        $query = $this->model->newQuery()
             ->with(['class.instructor'])
             ->whereBetween('date', [$startDate, $endDate])
             ->where('status', 'scheduled')
             ->orderBy('date')
-            ->orderBy('start_time')
-            ->get();
+            ->orderBy('start_time');
+
+        \Log::info('Schedule query:', [
+            'sql' => $query->toSql(),
+            'bindings' => $query->getBindings(),
+            'start' => $startDate,
+            'end' => $endDate,
+        ]);
+
+        return $query->get();
     }
 
     public function queryUpcomingSessions(

@@ -26,6 +26,9 @@
             >
                 <span class="block text-xs font-medium opacity-80">{{ __('landing.' . strtolower($day->dayName)) }}</span>
                 <span class="block text-base">{{ \Carbon\Carbon::parse($day->date)->format('M j') }}</span>
+                @if($day->count > 0)
+                    <span class="block text-xs font-bold mt-1 opacity-80">{{ $day->count }} {{ Str::plural('class', $day->count) }}</span>
+                @endif
             </button>
             @endforeach
         </div>

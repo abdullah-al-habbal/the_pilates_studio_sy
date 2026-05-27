@@ -81,11 +81,11 @@
     </style>
     @endif
 </head>
-<body class="font-sans antialiased text-slate-800 bg-white dark:bg-dark-900 dark:text-slate-100 transition-colors duration-300">
+<body class="flex flex-col min-h-screen font-sans antialiased text-slate-800 bg-white dark:bg-dark-900 dark:text-slate-100 transition-colors duration-300">
 
     @include('landing.partials._header')
 
-    <main>
+    <main class="flex-grow">
         @yield('content')
     </main>
 

@@ -107,7 +107,7 @@ class LandingDataService
             $start = Carbon::today();
             $end = Carbon::today()->addDays(6);
             $sessions = $this->classSessionService->getSessionsForWeek($start->toDateString(), $end->toDateString());
-            $grouped = $sessions->groupBy('date');
+            $grouped = $sessions->groupBy(fn($s) => $s->date->toDateString());
             $days = collect();
             for ($i = 0; $i < 7; $i++) {
                 $date = $start->copy()->addDays($i)->toDateString();
@@ -116,7 +116,8 @@ class LandingDataService
                 $days->push(new LandingScheduleDayVO(
                     date: $date,
                     dayName: $dayName,
-                    sessions: $daySessions->map(fn($s) => LandingSessionVO::fromModel($s))
+                    sessions: $daySessions->map(fn($s) => LandingSessionVO::fromModel($s)),
+                    count: $daySessions->count(),
                 ));
             }
             return $days;

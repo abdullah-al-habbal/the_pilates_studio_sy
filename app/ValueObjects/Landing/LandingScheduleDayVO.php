@@ -12,5 +12,6 @@ class LandingScheduleDayVO
         public readonly string $date,
         public readonly string $dayName,
         public readonly Collection $sessions,
+        public readonly int $count = 0,
     ) {}
 }
