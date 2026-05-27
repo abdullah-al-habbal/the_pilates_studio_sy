@@ -71,7 +71,7 @@
                                     </span>
                                     <span class="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-1">
                                         <i data-lucide="clock" class="w-3 h-3"></i>
-                                        {{ $session->durationMinutes }} min
+                                        {{ $session->durationMinutes }} {{ __('landing.minute_abbr') }}
                                     </span>
                                 </div>
                             </div>

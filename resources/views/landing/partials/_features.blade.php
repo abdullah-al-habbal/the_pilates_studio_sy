@@ -9,10 +9,10 @@
 
         @php
         $features = [
-            ['icon' => 'calendar-check', 'title' => __('landing.nav_classes'), 'description' => $s->featuresSubtitle ?: 'Browse and reserve class sessions in seconds. Real-time availability with one-tap reservation.', 'color' => 'primary'],
-            ['icon' => 'credit-card', 'title' => __('landing.nav_pricing'), 'description' => 'Flexible packages that fit your schedule. Buy credits and use them whenever you want.', 'color' => 'accent'],
-            ['icon' => 'bell', 'title' => 'Smart Notifications', 'description' => 'Never miss a class with push reminders. Get alerts for upcoming sessions and schedule changes.', 'color' => 'teal'],
-            ['icon' => 'smartphone', 'title' => 'Manage On The Go', 'description' => 'Cancel or reschedule from the app. Credits are handled automatically with our easy cancellation policy.', 'color' => 'primary'],
+            ['icon' => 'calendar-check', 'title' => __('landing.feature_instant_booking_title'), 'description' => __('landing.feature_instant_booking_desc'), 'color' => 'primary'],
+            ['icon' => 'credit-card', 'title' => __('landing.feature_credit_packages_title'), 'description' => __('landing.feature_credit_packages_desc'), 'color' => 'accent'],
+            ['icon' => 'bell', 'title' => __('landing.feature_smart_notifications_title'), 'description' => __('landing.feature_smart_notifications_desc'), 'color' => 'teal'],
+            ['icon' => 'smartphone', 'title' => __('landing.feature_manage_on_go_title'), 'description' => __('landing.feature_manage_on_go_desc'), 'color' => 'primary'],
         ];
         @endphp
 

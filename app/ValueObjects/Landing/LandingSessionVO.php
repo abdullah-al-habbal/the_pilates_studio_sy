@@ -21,8 +21,8 @@ class LandingSessionVO
 
     public static function fromModel(ClassSession $session): self
     {
-        $className = $session->class?->getTranslation('title', app()->getLocale()) ?? '';
-        $instructorName = $session->class?->instructor?->getTranslation('name', app()->getLocale()) ?? '';
+        $className = $session->class?->getTranslation('title', app()->getLocale());
+        $instructorName = $session->class?->instructor?->getTranslation('name', app()->getLocale());
         return new self(
             id: $session->id,
             time: Carbon::parse($session->start_time)->format('h:i A'),
@@ -30,7 +30,7 @@ class LandingSessionVO
             instructorName: $instructorName,
             durationMinutes: $session->duration_minutes,
             availableSpots: $session->available_spots,
-            isFull: $session->is_full,
+            isFull: $session->isFull(),
         );
     }
 }

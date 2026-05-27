@@ -66,7 +66,7 @@ class LandingDataService
         if ($staticPages === null) $hasError = true;
 
         return new LandingDataVO(
-            settings: $settings ?? LandingSettingsVO::default(),
+            settings: $settings ?? LandingSettingsVO::empty(),
             classes: $classes ?? collect(),
             schedule: $schedule ?? collect(),
             instructors: $instructors ?? collect(),

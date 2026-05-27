@@ -7,7 +7,6 @@ namespace App\Actions\Web\StaticPage;
 use App\Services\StaticPage\StaticPageService;
 use App\Services\Landing\LandingDataService;
 use Illuminate\Contracts\View\View;
-use Illuminate\Http\Request;
 
 class ShowStaticPageAction
 {
@@ -16,7 +15,7 @@ class ShowStaticPageAction
         private readonly LandingDataService $landingDataService
     ) {}
 
-    public function __invoke(Request $request, string $slug): View
+    public function __invoke(string $slug): View
     {
         $page = $this->staticPageService->findBySlug($slug);
         if (!$page) {

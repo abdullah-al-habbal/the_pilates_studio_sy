@@ -4,6 +4,7 @@ namespace App\Filament\Admin\Resources\StaticPages\Schemas;
 
 use Filament\Infolists\Components\ImageEntry;
 use Filament\Infolists\Components\TextEntry;
+use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 
 class StaticPageInfolist
@@ -12,22 +13,24 @@ class StaticPageInfolist
     {
         return $schema
             ->components([
-                TextEntry::make('slug'),
-                TextEntry::make('title'),
-                ImageEntry::make('image')
-                    ->placeholder('-'),
+                Section::make()
+                    ->columns(2)
+                    ->schema([
+                        TextEntry::make('slug'),
+                        TextEntry::make('is_active')
+                            ->label('Active')
+                            ->badge()
+                            ->color(fn($state) => $state ? 'success' : 'danger'),
+                        TextEntry::make('sort_order')
+                            ->label('Sort Order'),
+                    ]),
+                TextEntry::make('title')
+                    ->translatable(),
                 TextEntry::make('content')
+                    ->html()
+                    ->translatable()
                     ->columnSpanFull(),
-                TextEntry::make('is_active')
-                    ->badge()
-                    ->color(fn($state) => $state ? 'success' : 'danger'),
-                TextEntry::make('sort_order'),
-                TextEntry::make('created_at')
-                    ->dateTime()
-                    ->placeholder('-'),
-                TextEntry::make('updated_at')
-                    ->dateTime()
-                    ->placeholder('-'),
+                ImageEntry::make('image'),
             ]);
     }
 }

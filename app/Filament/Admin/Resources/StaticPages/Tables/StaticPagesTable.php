@@ -4,8 +4,8 @@ namespace App\Filament\Admin\Resources\StaticPages\Tables;
 
 use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
-use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Table;
 
 class StaticPagesTable
@@ -15,26 +15,26 @@ class StaticPagesTable
         return $table
             ->columns([
                 TextColumn::make('slug')
-                    ->searchable(),
+                    ->searchable()
+                    ->sortable(),
                 TextColumn::make('title')
-                    ->searchable(),
-                ImageColumn::make('image'),
-                TextColumn::make('is_active')
-                    ->boolean()
-                    ->toggleable(),
-                TextColumn::make('created_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
+                    ->searchable()
+                    ->translatable(),
+                IconColumn::make('is_active')
+                    ->label('Active')
+                    ->boolean(),
+                TextColumn::make('sort_order')
+                    ->label('Sort Order')
+                    ->sortable(),
                 TextColumn::make('updated_at')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
-            ->filters([])
-            ->recordActions([
-                ViewAction::make(),
+            ->defaultSort('sort_order')
+            ->actions([
                 EditAction::make(),
+                ViewAction::make(),
             ]);
     }
 }

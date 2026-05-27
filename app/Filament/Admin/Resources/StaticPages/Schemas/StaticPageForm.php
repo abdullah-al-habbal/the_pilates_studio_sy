@@ -3,9 +3,10 @@
 namespace App\Filament\Admin\Resources\StaticPages\Schemas;
 
 use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\Toggle;
+use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 
 class StaticPageForm
@@ -14,21 +15,31 @@ class StaticPageForm
     {
         return $schema
             ->components([
-                TextInput::make('slug')
-                    ->required()
-                    ->disabled(fn($context) => $context === 'edit'),
+                Section::make()
+                    ->columns(2)
+                    ->schema([
+                        TextInput::make('slug')
+                            ->required()
+                            ->unique(ignoreRecord: true)
+                            ->disabled(),
+                        Toggle::make('is_active')
+                            ->label('Active')
+                            ->default(true),
+                        TextInput::make('sort_order')
+                            ->label('Sort Order')
+                            ->numeric()
+                            ->default(0),
+                    ]),
                 TextInput::make('title')
-                    ->required(),
-                FileUpload::make('image')
-                    ->image(),
-                Textarea::make('content')
                     ->required()
+                    ->translatable(),
+                RichEditor::make('content')
+                    ->required()
+                    ->translatable()
                     ->columnSpanFull(),
-                Toggle::make('is_active')
-                    ->default(true),
-                TextInput::make('sort_order')
-                    ->numeric()
-                    ->default(0),
+                FileUpload::make('image')
+                    ->image()
+                    ->directory('static-pages'),
             ]);
     }
 }

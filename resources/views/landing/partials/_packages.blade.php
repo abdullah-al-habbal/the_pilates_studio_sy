@@ -20,7 +20,7 @@
                     <div class="absolute -top-4 left-1/2 -translate-x-1/2 z-10">
                         <span class="inline-flex items-center gap-1 px-4 py-1.5 bg-accent-500 text-white text-xs font-bold rounded-full shadow-lg">
                             <i data-lucide="star" class="w-3 h-3"></i>
-                            Most Popular
+                            {{ __('landing.most_popular') }}
                         </span>
                     </div>
                     @endif
@@ -31,7 +31,7 @@
                             <div class="flex items-baseline justify-center gap-1">
                                 <span class="text-4xl font-extrabold text-slate-900 dark:text-white">{{ $package->currency }} {{ number_format($package->price) }}</span>
                             </div>
-                            <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">{{ $package->credits }} credits · {{ $package->validityDays }} days</p>
+                            <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">{{ $package->credits }} {{ __('landing.credits_unit') }} · {{ $package->validityDays }} {{ __('landing.days_unit') }}</p>
                         </div>
 
                         <ul class="space-y-4 mb-8">

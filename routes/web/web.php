@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 use App\Actions\Debug\SendFcmTestNotificationAction;
 use App\Actions\V1\Locale\SwitchLocaleAction;
+use App\Actions\Web\Landing\GetLandingDataAction;
 use App\Actions\Web\StaticPage\ShowStaticPageAction;
-use App\Http\Controllers\LandingController;
 use Illuminate\Support\Facades\Route;
 
 
-Route::get('/', [LandingController::class, 'index'])->name('landing');
+Route::get('/', [GetLandingDataAction::class, 'execute'])->name('landing');
 
 require __DIR__ . '/scheduler.php';
 require __DIR__ . '/operations.php';

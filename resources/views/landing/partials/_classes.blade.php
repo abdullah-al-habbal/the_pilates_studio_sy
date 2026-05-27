@@ -68,7 +68,7 @@
                                 </span>
                                 <span class="flex items-center gap-1.5">
                                     <i data-lucide="clock" class="w-4 h-4"></i>
-                                    {{ $class->duration }}
+                                    {{ $class->durationMinutes }} {{ __('landing.minute_abbr') }}
                                 </span>
                             </div>
 

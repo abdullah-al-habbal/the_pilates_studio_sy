@@ -2,7 +2,6 @@
 
 namespace App\Filament\Admin\Resources\AppSettings;
 
-use App\Filament\Admin\Resources\AppSettings\Pages\CreateAppSetting;
 use App\Filament\Admin\Resources\AppSettings\Pages\EditAppSetting;
 use App\Filament\Admin\Resources\AppSettings\Pages\ListAppSettings;
 use App\Filament\Admin\Resources\AppSettings\Pages\ViewAppSetting;
@@ -40,6 +39,16 @@ class AppSettingResource extends Resource
         return 'primary';
     }
 
+    public static function canCreate(): bool
+    {
+        return false;
+    }
+
+    public static function canDelete(Model $record): bool
+    {
+        return false;
+    }
+
     public static function form(Schema $schema): Schema
     {
         return AppSettingForm::configure($schema);
@@ -64,7 +73,6 @@ class AppSettingResource extends Resource
     {
         return [
             'index' => ListAppSettings::route('/'),
-            'create' => CreateAppSetting::route('/create'),
             'view' => ViewAppSetting::route('/{record}'),
             'edit' => EditAppSetting::route('/{record}/edit'),
         ];

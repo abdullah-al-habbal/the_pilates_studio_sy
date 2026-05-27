@@ -2,7 +2,6 @@
 
 namespace App\Filament\Admin\Resources\StaticPages;
 
-use App\Filament\Admin\Resources\StaticPages\Pages\CreateStaticPage;
 use App\Filament\Admin\Resources\StaticPages\Pages\EditStaticPage;
 use App\Filament\Admin\Resources\StaticPages\Pages\ListStaticPages;
 use App\Filament\Admin\Resources\StaticPages\Pages\ViewStaticPage;
@@ -20,29 +19,34 @@ use UnitEnum;
 class StaticPageResource extends Resource
 {
     protected static ?string $model = StaticPage::class;
-
     protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-document-text';
-
     protected static string|UnitEnum|null $navigationGroup = 'Configuration';
-
-    protected static ?int $navigationSort = 5;
-
+    protected static ?int $navigationSort = 8;
     protected static ?string $recordTitleAttribute = 'slug';
 
     public static function getRecordTitle(?Model $record): string
     {
-        return $record?->title ?? static::getModelLabel();
+        return $record?->slug ?? static::getModelLabel();
     }
 
     public static function getNavigationBadge(): ?string
     {
-        return
-            (string) static::getModel()::query()->count();
+        return (string) static::getModel()::query()->count();
     }
 
     public static function getNavigationBadgeColor(): string|array|null
     {
         return 'primary';
+    }
+
+    public static function canCreate(): bool
+    {
+        return false;
+    }
+
+    public static function canDelete(Model $record): bool
+    {
+        return false;
     }
 
     public static function form(Schema $schema): Schema
@@ -69,7 +73,6 @@ class StaticPageResource extends Resource
     {
         return [
             'index' => ListStaticPages::route('/'),
-            'create' => CreateStaticPage::route('/create'),
             'view' => ViewStaticPage::route('/{record}'),
             'edit' => EditStaticPage::route('/{record}/edit'),
         ];

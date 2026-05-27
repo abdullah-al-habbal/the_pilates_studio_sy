@@ -13,9 +13,9 @@
             <div class="grid md:grid-cols-3 gap-12 md:gap-8">
                 @php
                 $steps = [
-                    ['number' => '01', 'icon' => 'download', 'title' => __('landing.download_app'), 'description' => 'Get the app from the App Store or Google Play. Set up your profile in under 2 minutes.', 'color' => 'primary'],
-                    ['number' => '02', 'icon' => 'credit-card', 'title' => __('landing.nav_pricing'), 'description' => 'Browse our flexible credit packages. Purchase credits securely in the app.', 'color' => 'accent'],
-                    ['number' => '03', 'icon' => 'calendar-check', 'title' => __('landing.book_class'), 'description' => 'Browse the schedule, pick your class, and reserve your spot with one tap.', 'color' => 'teal'],
+                    ['number' => '01', 'icon' => 'download', 'title' => __('landing.download_app'), 'description' => __('landing.step_1_desc'), 'color' => 'primary'],
+                    ['number' => '02', 'icon' => 'credit-card', 'title' => __('landing.nav_pricing'), 'description' => __('landing.step_2_desc'), 'color' => 'accent'],
+                    ['number' => '03', 'icon' => 'calendar-check', 'title' => __('landing.book_class'), 'description' => __('landing.step_3_desc'), 'color' => 'teal'],
                 ];
                 @endphp
 

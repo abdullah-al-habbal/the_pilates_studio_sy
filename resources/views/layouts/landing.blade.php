@@ -5,24 +5,24 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
 
-    <title>{{ $landingData->settings->siteName }} — {{ $landingData->settings->siteTagline }}</title>
-    <meta name="description" content="{{ $landingData->settings->siteDescription }}">
+    <title>{{ ($landingData->settings->siteName ?? '') . ' — ' . ($landingData->settings->siteTagline ?? '') }}</title>
+    <meta name="description" content="{{ $landingData->settings->siteDescription ?? '' }}">
     <meta name="keywords" content="yoga, pilates, dance fitness, fitness studio, wellness">
-    <meta name="author" content="{{ $landingData->settings->siteName }}">
+    <meta name="author" content="{{ $landingData->settings->siteName ?? '' }}">
     <link rel="canonical" href="{{ url('/') }}">
 
     <meta property="og:type" content="website">
     <meta property="og:url" content="{{ url('/') }}">
-    <meta property="og:title" content="{{ $landingData->settings->siteName }} — {{ $landingData->settings->siteTagline }}">
-    <meta property="og:description" content="{{ $landingData->settings->siteDescription }}">
-    <meta property="og:image" content="{{ $landingData->settings->logoUrl }}">
+    <meta property="og:title" content="{{ ($landingData->settings->siteName ?? '') . ' — ' . ($landingData->settings->siteTagline ?? '') }}">
+    <meta property="og:description" content="{{ $landingData->settings->siteDescription ?? '' }}">
+    <meta property="og:image" content="{{ $landingData->settings->logoUrl ?? '' }}">
     <meta property="og:locale" content="{{ str_replace('_', '-', app()->getLocale()) }}">
 
     <meta property="twitter:card" content="summary_large_image">
     <meta property="twitter:url" content="{{ url('/') }}">
-    <meta property="twitter:title" content="{{ $landingData->settings->siteName }} — {{ $landingData->settings->siteTagline }}">
-    <meta property="twitter:description" content="{{ $landingData->settings->siteDescription }}">
-    <meta property="twitter:image" content="{{ $landingData->settings->logoUrl }}">
+    <meta property="twitter:title" content="{{ ($landingData->settings->siteName ?? '') . ' — ' . ($landingData->settings->siteTagline ?? '') }}">
+    <meta property="twitter:description" content="{{ $landingData->settings->siteDescription ?? '' }}">
+    <meta property="twitter:image" content="{{ $landingData->settings->logoUrl ?? '' }}">
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>

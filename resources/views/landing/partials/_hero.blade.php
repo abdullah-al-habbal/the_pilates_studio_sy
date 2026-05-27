@@ -93,12 +93,12 @@
                                         </div>
                                         <div>
                                             <div class="text-white font-medium text-sm">{{ $class->title }}</div>
-                                            <div class="text-white/60 text-xs">{{ $class->duration }}</div>
+                                            <div class="text-white/60 text-xs">{{ $class->durationMinutes }} {{ __('landing.minute_abbr') }}</div>
                                         </div>
                                     </div>
                                     <div class="flex gap-2">
                                         <span class="px-2 py-1 bg-white/20 rounded-lg text-white text-xs">{{ $class->categoryName }}</span>
-                                        <span class="px-2 py-1 bg-white/20 rounded-lg text-white text-xs">{{ $class->duration }}</span>
+                                        <span class="px-2 py-1 bg-white/20 rounded-lg text-white text-xs">{{ $class->durationMinutes }} {{ __('landing.minute_abbr') }}</span>
                                     </div>
                                 </div>
                                 @endforeach

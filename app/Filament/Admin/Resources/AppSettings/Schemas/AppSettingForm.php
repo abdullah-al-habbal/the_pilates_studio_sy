@@ -15,9 +15,9 @@ class AppSettingForm
         return $schema
             ->components([
                 TextInput::make('key')
+                    ->disabled()
                     ->required()
-                    ->unique(ignoreRecord: true)
-                    ->disabled(fn($context) => $context === 'edit'),
+                    ->unique(ignoreRecord: true),
                 Select::make('type')
                     ->options([
                         'string'  => 'String',
@@ -26,8 +26,7 @@ class AppSettingForm
                         'image'   => 'Image',
                         'json'    => 'JSON',
                     ])
-                    ->default('string')
-                    ->live()
+                    ->disabled()
                     ->required(),
                 Textarea::make('value')
                     ->label('Value')

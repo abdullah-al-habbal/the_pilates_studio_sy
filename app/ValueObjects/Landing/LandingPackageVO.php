@@ -25,13 +25,13 @@ class LandingPackageVO
     {
         $pricing = app(PricingService::class);
         $currencyService = app(CurrencyService::class);
-        $basePrice = $pricing->getBasePrice($package) ?? 0;
+        $basePrice = $pricing->getBasePrice($package);
         $currencyCode = $currencyService->getBaseCurrency()->code;
         return new self(
             id: $package->id,
             name: $package->getTranslation('name', app()->getLocale()),
             credits: $package->total_credits,
-            validityDays: $package->validity_days ?? 30,
+            validityDays: $package->validity_days,
             price: (int) $basePrice,
             currency: $currencyCode,
             features: $package->features ?? [],

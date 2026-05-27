@@ -4,15 +4,19 @@ declare(strict_types=1);
 
 namespace App\Actions\Web\Landing;
 
+use App\Http\Controllers\Controller;
 use App\Services\Landing\LandingDataService;
-use App\ValueObjects\Landing\LandingDataVO;
+use Illuminate\Contracts\View\View;
 
-class GetLandingDataAction
+class GetLandingDataAction extends Controller
 {
-    public function __construct(private readonly LandingDataService $landingDataService) {}
+    public function __construct(
+        private readonly LandingDataService $landingDataService
+    ) {}
 
-    public function execute(): LandingDataVO
+    public function execute(): View
     {
-        return $this->landingDataService->getLandingData();
+        $landingData = $this->landingDataService->getLandingData();
+        return view('landing.index', compact('landingData'));
     }
 }

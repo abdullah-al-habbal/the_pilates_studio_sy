@@ -5,7 +5,7 @@
             <div class="sm:col-span-2 lg:col-span-1">
                 <a href="{{ route('landing') }}" class="flex items-center gap-2 mb-6">
                     <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-primary-500 to-teal-600 flex items-center justify-center">
-                        <img src="{{ $s->logoUrl }}" alt="{{ $s->siteName }}" class="w-8 h-8 object-contain" onerror="this.onerror=null;this.src='{{ asset('images/default-logo.png') }}';">
+                        <img src="{{ $s->logoUrl ?? '' }}" alt="{{ $s->siteName ?? '' }}" class="w-8 h-8 object-contain">
                     </div>
                     <span class="text-xl font-bold text-white">
                         {{ $s->siteName }}
@@ -80,7 +80,7 @@
             <div class="flex items-center gap-2">
                 <i data-lucide="globe" class="w-4 h-4 text-slate-500"></i>
                 <select class="bg-transparent text-sm text-slate-400 border-none focus:ring-0 cursor-pointer hover:text-slate-300 transition-colors" onchange="window.location.href='{{ url('locale') }}/' + this.value">
-                    <option value="en" {{ app()->getLocale() === 'en' ? 'selected' : '' }}>English</option>
+                    <option value="en" {{ app()->getLocale() === 'en' ? 'selected' : '' }}>{{ __('landing.english') }}</option>
                     <option value="ar" {{ app()->getLocale() === 'ar' ? 'selected' : '' }}>{{ __('landing.language') }}</option>
                 </select>
             </div>
