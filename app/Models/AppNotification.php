@@ -14,11 +14,12 @@ class AppNotification extends Model
 
     public array $translatable = ['title', 'message'];
 
-    protected $fillable = ['user_id', 'title', 'message', 'data', 'read_at'];
+    protected $fillable = ['user_id', 'type', 'title', 'message', 'data', 'image', 'read_at'];
 
     protected function casts(): array
     {
         return [
+            'type'    => 'string',
             'read_at' => 'datetime',
             'data'    => 'array',
         ];

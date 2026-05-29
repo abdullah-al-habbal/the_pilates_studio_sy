@@ -3,35 +3,109 @@
 namespace App\Filament\Admin\Resources\Instructors\Schemas;
 
 use App\Models\Instructor;
+use Filament\Infolists\Components\Grid;
 use Filament\Infolists\Components\ImageEntry;
+use Filament\Infolists\Components\RepeatableEntry;
+use Filament\Infolists\Components\Section;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Schema;
+use Filament\Support\Enums\FontWeight;
+use Filament\Support\Enums\IconPosition;
 
 class InstructorInfolist
 {
     public static function configure(Schema $schema): Schema
     {
+        $locale = app()->getLocale();
+
         return $schema
             ->components([
-                TextEntry::make('name'),
-                TextEntry::make('title')
-                    ->placeholder('-'),
-                TextEntry::make('specialty')
-                    ->placeholder('-'),
-                TextEntry::make('bio')
-                    ->placeholder('-')
-                    ->columnSpanFull(),
-                ImageEntry::make('image')
-                    ->placeholder('-'),
-                TextEntry::make('created_at')
-                    ->dateTime()
-                    ->placeholder('-'),
-                TextEntry::make('updated_at')
-                    ->dateTime()
-                    ->placeholder('-'),
-                TextEntry::make('deleted_at')
-                    ->dateTime()
-                    ->visible(fn (Instructor $record): bool => $record->trashed()),
+                Grid::make(['default' => 1, 'lg' => 3])->schema([
+                    Section::make('Photo')
+                        ->icon('heroicon-o-camera')
+                        ->columnSpan(1)
+                        ->schema([
+                            ImageEntry::make('image')
+                                ->height(200)
+                                ->width(200)
+                                ->extraImgAttributes(['class' => 'rounded-xl object-cover'])
+                                ->defaultImageUrl(url('/images/placeholder-person.jpg')),
+                        ]),
+                    Section::make('Personal Information')
+                        ->icon('heroicon-o-user')
+                        ->columnSpan(2)
+                        ->schema([
+                            TextEntry::make('name')
+                                ->weight(FontWeight::Bold)
+                                ->size(TextEntry\TextEntrySize::Large)
+                                ->formatStateUsing(fn($state, $record) =>
+                                    $record->getTranslation('name', $locale)),
+                            TextEntry::make('title')
+                                ->formatStateUsing(fn($state, $record) =>
+                                    $record->getTranslation('title', $locale))
+                                ->placeholder('No title')
+                                ->icon('heroicon-o-briefcase'),
+                            TextEntry::make('specialty')
+                                ->badge()
+                                ->color('info')
+                                ->formatStateUsing(fn($state, $record) =>
+                                    $record->getTranslation('specialty', $locale))
+                                ->placeholder('No specialty')
+                                ->icon('heroicon-o-academic-cap'),
+                        ]),
+                ]),
+                Section::make('Biography')
+                    ->icon('heroicon-o-document-text')
+                    ->schema([
+                        TextEntry::make('bio')
+                            ->html()
+                            ->prose()
+                            ->formatStateUsing(fn($state, $record) =>
+                                $record->getTranslation('bio', $locale))
+                            ->placeholder('No biography provided')
+                            ->columnSpanFull(),
+                    ]),
+                Section::make('Social Links')
+                    ->icon('heroicon-o-globe-alt')
+                    ->collapsible()
+                    ->schema([
+                        TextEntry::make('social_links')
+                            ->state(fn($record): array => $record->social_links ?? [])
+                            ->listWithLineBreaks()
+                            ->bulleted()
+                            ->placeholder('No social links configured'),
+                    ]),
+                Section::make('Statistics')
+                    ->icon('heroicon-o-chart-bar')
+                    ->columns(2)
+                    ->schema([
+                        TextEntry::make('classes_count')
+                            ->label('Classes')
+                            ->state(fn($record): int => $record->classes()->count())
+                            ->badge()
+                            ->color('info')
+                            ->icon('heroicon-o-building-library'),
+                    ]),
+                Section::make('Timestamps')
+                    ->icon('heroicon-o-clock')
+                    ->collapsed()
+                    ->columns(3)
+                    ->schema([
+                        TextEntry::make('created_at')
+                            ->label('Created')
+                            ->dateTime('M d, Y H:i')
+                            ->icon('heroicon-o-calendar'),
+                        TextEntry::make('updated_at')
+                            ->label('Updated')
+                            ->dateTime('M d, Y H:i')
+                            ->icon('heroicon-o-arrow-path'),
+                        TextEntry::make('deleted_at')
+                            ->label('Deleted')
+                            ->dateTime('M d, Y H:i')
+                            ->placeholder('Not deleted')
+                            ->color(fn($state) => $state ? 'danger' : 'success')
+                            ->visible(fn(Instructor $record): bool => $record->trashed()),
+                    ]),
             ]);
     }
 }

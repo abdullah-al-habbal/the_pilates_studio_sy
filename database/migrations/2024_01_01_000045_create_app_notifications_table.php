@@ -13,9 +13,11 @@ return new class extends Migration
         Schema::create('app_notifications', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
+            $table->string('image')->nullable();
             $table->json('title');
             $table->json('message');
             $table->json('data')->nullable();
+            $table->string('type')->default('text');
             $table->timestamp('read_at')->nullable();
             $table->timestamps();
             $table->index(['user_id', 'read_at']);
