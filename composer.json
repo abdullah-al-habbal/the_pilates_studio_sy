@@ -9,7 +9,7 @@
     ],
     "license": "MIT",
     "require": {
-        "php": "^8.2",
+        "php": "^8.4",
         "dedoc/scramble": "^0.13.14",
         "fakerphp/faker": "^1.24",
         "filament/filament": "5.0",
@@ -27,7 +27,7 @@
         "laravel/sail": "^1.41",
         "mockery/mockery": "^1.6",
         "pestphp/pest": "^3.8",
-        "phpunit/phpunit": "11.5.33"
+        "phpunit/phpunit": "^11.5.50"
     },
     "autoload": {
         "psr-4": {
@@ -93,6 +93,12 @@
         "allow-plugins": {
             "pestphp/pest-plugin": true,
             "php-http/discovery": true
+        },
+        "audit": {
+            "ignore": [
+                "PKSA-z3gr-8qht-p93v",
+                "PKSA-5bdf-2x61-v43c"
+            ]
         }
     },
     "minimum-stability": "stable",
