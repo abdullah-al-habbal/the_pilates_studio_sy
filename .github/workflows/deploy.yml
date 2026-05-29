@@ -137,84 +137,73 @@ jobs:
           port: ${{ secrets.HOSTINGER_SSH_PORT }}
           envs: FRESH
           script: |
-            set -e
+            set -euo pipefail
             TARGET="${{ env.TARGET }}"
             ENVIRONMENT="${{ env.ENVIRONMENT }}"
             PHP_BIN="$(command -v php8.4 || command -v php8.3 || command -v php8.2 || command -v php || echo /usr/bin/php)"
+            MIGRATE_LOCK="/tmp/laravel_migrate_$(echo "$TARGET" | tr '/' '_').lock"
 
             cd "$TARGET"
 
-            # ── GUARD: .env must exist before any artisan command ──────────
+            # ── PHASE 1: Environment validation ─────────────────────────────
             if [ ! -f .env ]; then
               echo "❌ FATAL: .env is missing at $TARGET"
-              echo "   Place the environment file on the server before re-deploying."
               exit 1
             fi
-
-            # ── Environment diagnostics ────────────────────────────────────
             echo "Environment check:"
-            grep -E '^(APP_ENV|APP_NAME|APP_DEBUG|LOG_LEVEL|DB_CONNECTION)=' .env || true
+            grep -E '^(APP_ENV|APP_NAME|APP_DEBUG|LOG_LEVEL|DB_CONNECTION)=' .env
 
-            # ── Ensure storage structure exists ────────────────────────────
+            # ── PHASE 2: Storage preparation ────────────────────────────────
             mkdir -p storage/logs
             mkdir -p storage/framework/{cache,sessions,views}
             mkdir -p storage/app/public
 
-            # ── Backup uploads before extraction ──────────────────────────
             if [ -d storage/app ]; then
-              mv storage/app storage/app.bak.$(date +%s)
+              mv storage/app "storage/app.bak.$(date +%s)"
             fi
 
-            # ── Portable snapshot BEFORE extraction ──
-            (find database/migrations -maxdepth 1 -type f -name "*.php" -exec basename {} \; | sort) > /tmp/server_migrations_pre.txt \
-              || touch /tmp/server_migrations_pre.txt
-
-            # Extract artifact
+            # ── PHASE 3: Code extraction ────────────────────────────────────
             tar -xzf release.tar.gz -C .
             rm -f release.tar.gz
 
-            # Restore uploads if backup exists
             if ls storage/app.bak.* 1> /dev/null 2>&1; then
               for d in storage/app.bak.*; do
-                rsync -a "$d"/ storage/app/ || true
+                rsync -a "$d"/ storage/app/
               done
-              rm -rf storage/app.bak.* || true
+              rm -rf storage/app.bak.*
             fi
 
-            # ── Portable snapshot AFTER extraction & orphan removal ──
-            echo "Checking for orphaned migration files..."
-            (find database/migrations -maxdepth 1 -type f -name "*.php" -exec basename {} \; | sort) > /tmp/artifact_migrations_post.txt \
-              || touch /tmp/artifact_migrations_post.txt
+            chmod -R 775 storage bootstrap/cache
 
-            comm -23 /tmp/server_migrations_pre.txt /tmp/artifact_migrations_post.txt | while read -r orphan; do
-              if [ -n "$orphan" ]; then
-                echo "⚠ Removing orphaned migration: $orphan"
-                rm -f "database/migrations/$orphan"
-              fi
-            done
-            rm -f /tmp/server_migrations_pre.txt /tmp/artifact_migrations_post.txt
+            # ── PHASE 4: Schema pre-check ───────────────────────────────────
+            echo "Verifying database connectivity..."
+            $PHP_BIN artisan db:show --no-interaction
 
-            # Permissions
-            chmod -R 775 storage bootstrap/cache || true
+            echo "Checking migration status..."
+            PENDING=$($PHP_BIN artisan migrate:status --no-interaction 2>&1 | grep -c "Pending" || true)
+            if [ "$PENDING" -gt 0 ]; then
+              echo "⚠ $PENDING pending migration(s) detected — will execute now."
+            else
+              echo "✓ No pending migrations."
+            fi
 
-            # ── Pre-migration diagnostics ─────────────────────────────────
-            $PHP_BIN artisan about --no-interaction || true
-
-            # ── Laravel migration logic (normal or fresh) ──────────────────
+            # ── PHASE 5: Migrations (with lock) ─────────────────────────────
             if [ "${FRESH}" = "true" ] && [ "${ENVIRONMENT}" != "production" ]; then
-              echo "🔄 Fresh migration requested. Dropping all tables and reseeding..."
-              $PHP_BIN artisan migrate:fresh --seed --force
+              echo "🔄 Fresh migration requested — dropping all tables and reseeding..."
+              flock -n "$MIGRATE_LOCK" $PHP_BIN artisan migrate:fresh --seed --force
             else
               if [ "${FRESH}" = "true" ]; then
-                echo "⚠️  Skipping fresh migration because environment is PRODUCTION."
+                echo "⚠ Skipping fresh migration because environment is PRODUCTION."
               fi
-              $PHP_BIN artisan migrate --force
+              echo "Running migrations (locked)..."
+              flock -n "$MIGRATE_LOCK" $PHP_BIN artisan migrate --force
             fi
 
-            $PHP_BIN artisan config:cache || true
-            $PHP_BIN artisan route:cache || true
-            $PHP_BIN artisan view:clear || true
-            $PHP_BIN artisan view:cache || true
-            $PHP_BIN artisan optimize || true
+            # ── PHASE 6: Cache & optimization ───────────────────────────────
+            $PHP_BIN artisan config:cache
+            $PHP_BIN artisan route:cache
+            $PHP_BIN artisan view:clear
+            $PHP_BIN artisan view:cache
+            $PHP_BIN artisan optimize
 
             echo "✅ Deployment to $ENVIRONMENT complete."
