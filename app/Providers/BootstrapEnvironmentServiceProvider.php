@@ -9,7 +9,7 @@ use Illuminate\Support\ServiceProvider;
 
 final class BootstrapEnvironmentServiceProvider extends ServiceProvider
 {
-    public function register(): void
+    public function boot(): void
     {
         EnvironmentValidator::validate();
     }
