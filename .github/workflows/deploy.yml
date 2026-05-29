@@ -151,6 +151,10 @@ jobs:
               exit 1
             fi
 
+            # ── Environment diagnostics ────────────────────────────────────
+            echo "Environment check:"
+            grep -E '^(APP_ENV|APP_NAME|APP_DEBUG|LOG_LEVEL|DB_CONNECTION)=' .env || true
+
             # ── Ensure storage structure exists ────────────────────────────
             mkdir -p storage/logs
             mkdir -p storage/framework/{cache,sessions,views}
@@ -192,6 +196,9 @@ jobs:
 
             # Permissions
             chmod -R 775 storage bootstrap/cache || true
+
+            # ── Pre-migration diagnostics ─────────────────────────────────
+            $PHP_BIN artisan about --no-interaction || true
 
             # ── Laravel migration logic (normal or fresh) ──────────────────
             if [ "${FRESH}" = "true" ] && [ "${ENVIRONMENT}" != "production" ]; then

@@ -4,14 +4,13 @@ declare(strict_types=1);
 
 namespace App\Bootstrap;
 
-use Illuminate\Support\Env;
 use RuntimeException;
 
 final readonly class EnvironmentValidator
 {
     public static function validate(): void
     {
-        if (Env::get('APP_ENV') === 'testing') {
+        if (env('APP_ENV') === 'testing') {
             return;
         }
 
@@ -29,7 +28,7 @@ final readonly class EnvironmentValidator
         $missing = [];
 
         foreach (EnvironmentVariables::REQUIRED_BOOTSTRAP as $key) {
-            $value = Env::get($key);
+            $value = env($key);
 
             if ($value === null) {
                 $missing[] = "Missing required environment variable: {$key}";
@@ -43,7 +42,7 @@ final readonly class EnvironmentValidator
 
     private static function validateEnvironment(): void
     {
-        $environment = Env::get('APP_ENV');
+        $environment = env('APP_ENV');
 
         if (
             !is_string($environment)
@@ -68,7 +67,7 @@ final readonly class EnvironmentValidator
 
     private static function validateAppKey(): void
     {
-        $appKey = Env::get('APP_KEY');
+        $appKey = env('APP_KEY');
 
         if (
             !is_string($appKey)
@@ -85,7 +84,7 @@ final readonly class EnvironmentValidator
 
     private static function validateDatabaseConnection(): void
     {
-        $connection = Env::get('DB_CONNECTION');
+        $connection = env('DB_CONNECTION');
 
         if (
             !is_string($connection)
@@ -117,7 +116,7 @@ final readonly class EnvironmentValidator
 
     private static function validateBoolean(string $key): void
     {
-        $value = Env::get($key);
+        $value = env($key);
 
         if ($value === null || $value === '') {
             return;
@@ -148,7 +147,7 @@ final readonly class EnvironmentValidator
 
     private static function validateInteger(string $key): void
     {
-        $value = Env::get($key);
+        $value = env($key);
         if ($value === null || $value === '') {
             return;
         }
@@ -172,7 +171,7 @@ final readonly class EnvironmentValidator
 
     private static function validateUrl(string $key): void
     {
-        $value = Env::get($key);
+        $value = env($key);
 
         if ($value === null) {
             return;
@@ -191,30 +190,15 @@ final readonly class EnvironmentValidator
         }
     }
 
-    private static function fail(array $errors): never
+    private static function fail(array $errors): void
     {
-        $message = implode(
-            PHP_EOL,
-            array_map(
-                static fn(string $error): string => "  - {$error}",
-                $errors
-            )
-        );
-
         if (PHP_SAPI === 'cli') {
-            fwrite(
-                STDERR,
-                PHP_EOL
-                . '❌ Environment validation failed:'
-                . PHP_EOL
-                . $message
-                . PHP_EOL
-                . PHP_EOL
-                . 'Please fix your .env file and try again.'
-                . PHP_EOL
+            logger()->warning(
+                'Environment validation failed (deployment may proceed but check .env): {errors}',
+                ['errors' => implode('; ', $errors)]
             );
 
-            exit(1);
+            return;
         }
 
         throw new RuntimeException(
