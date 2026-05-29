@@ -91,7 +91,9 @@ final readonly class EnvironmentValidator
             return;
         }
 
-        if (!in_array($value, EnvironmentVariables::BOOLEAN_VALUES, true)) {
+        $normalized = strtolower((string) $value);
+
+        if (!in_array($normalized, EnvironmentVariables::BOOLEAN_VALUES, true)) {
             self::fail([
                 sprintf('%s must be a boolean value [true|false]', $key),
             ]);

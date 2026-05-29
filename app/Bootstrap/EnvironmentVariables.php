@@ -28,8 +28,8 @@ final readonly class EnvironmentVariables
     ];
 
     public const BOOLEAN_VALUES = [
-        true,
-        false,
+        'true',
+        'false',
     ];
 
     public const NUMERIC_KEYS = [
