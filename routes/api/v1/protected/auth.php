@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Route;
 Route::post('auth/logout', [AuthController::class, 'logout'])->name('auth.logout');
 Route::get('me', [AuthController::class, 'me'])->name('me');
 
-
-Route::post('fcm-token', [FcmTokenController::class, 'store'])->name('fcm-token.store');
-Route::delete('fcm-token', [FcmTokenController::class, 'destroy'])->name('fcm-token.destroy');
+Route::prefix('fcm-token')->name('fcm-token.')->group(function () {
+    Route::post('/', [FcmTokenController::class, 'store'])->name('store');
+    Route::delete('/', [FcmTokenController::class, 'destroy'])->name('destroy');
+});
