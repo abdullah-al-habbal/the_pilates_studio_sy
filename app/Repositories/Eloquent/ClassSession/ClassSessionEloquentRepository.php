@@ -144,6 +144,19 @@ class ClassSessionEloquentRepository
             ->count();
     }
 
+    public function getScheduledDatesInMonth(int $year, int $month): array
+    {
+        return $this->model->newQuery()
+            ->whereYear('date', $year)
+            ->whereMonth('date', $month)
+            ->where('status', 'scheduled')
+            ->pluck('date')
+            ->map(fn($date) => \Carbon\Carbon::parse($date)->format('Y-m-d'))
+            ->unique()
+            ->values()
+            ->toArray();
+    }
+
     public function getAvailableSpots(int $id): int
     {
         $session = $this->model->newQuery()->find($id);

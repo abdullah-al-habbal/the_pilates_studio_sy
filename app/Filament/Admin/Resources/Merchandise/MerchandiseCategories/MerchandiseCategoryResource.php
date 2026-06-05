@@ -41,7 +41,7 @@ class MerchandiseCategoryResource extends Resource
 
     public static function getRecordTitle(?Model $record): string
     {
-        return $record?->name ?? static::getModelLabel();
+        return $record?->getTranslation('name', app()->getLocale()) ?? static::getModelLabel();
     }
 
     public static function getNavigationBadge(): ?string
@@ -67,7 +67,8 @@ class MerchandiseCategoryResource extends Resource
                 ->columns(2)
                 ->schema([
                     TextEntry::make('name')
-                        ->label(__('dashboard.resources.merchandise_categories.fields.name')),
+                        ->label(__('dashboard.resources.merchandise_categories.fields.name'))
+                        ->formatStateUsing(fn ($state, $record) => $record->getTranslation('name', app()->getLocale())),
 
                     TextEntry::make('merchandises_count')
                         ->label(__('dashboard.resources.merchandise_categories.fields.merchandises_count'))

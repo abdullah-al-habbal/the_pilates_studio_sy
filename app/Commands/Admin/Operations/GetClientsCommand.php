@@ -10,6 +10,8 @@ final readonly class GetClientsCommand
         public ?string $search = null,
         public int $page = 1,
         public ?string $filter = null,
-        public int $perPage = 15
+        public int $perPage = 15,
+        public bool $onlyClients = false,
+        public bool $withValidFcm = false,
     ) {}
 }

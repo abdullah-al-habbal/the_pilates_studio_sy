@@ -15,7 +15,8 @@ class PackageForm
         return $schema
             ->components([
                 TextInput::make('name')
-                    ->required(),
+                    ->required()
+                    ->translatable(),
                 TextInput::make('total_credits')
                     ->required()
                     ->numeric(),

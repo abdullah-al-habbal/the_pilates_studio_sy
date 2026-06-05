@@ -32,6 +32,7 @@ use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Http\Middleware\ValidateCsrfToken;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 use LaraZeus\SpatieTranslatable\SpatieTranslatablePlugin;
@@ -77,7 +78,7 @@ class AdminPanelProvider extends PanelProvider
             ->authMiddleware($this->getAuthMiddleware())
             ->renderHook(
                 'panels::user-menu.before',
-                fn(): string => auth()->user()?->isAdmin()
+                fn(): string => Auth::user()?->isAdmin()
                     ? Blade::render('
                         <div class="flex items-center gap-x-3 mr-4">
                             <x-filament::button
@@ -122,7 +123,7 @@ class AdminPanelProvider extends PanelProvider
                             return $count > 0 ? 'primary' : 'gray';
                         }
                     )
-                    ->visible(fn(): bool => auth()->user()?->isAdmin() ?? false)
+                    ->visible(fn(): bool => Auth::user()?->isAdmin() ?? false)
                     ->isActiveWhen(fn(): bool => request()->is('admin/scheduler*')),
 
                 NavigationItem::make(__('dashboard.navigation.groups.operations'))
@@ -130,7 +131,7 @@ class AdminPanelProvider extends PanelProvider
                     ->icon('heroicon-o-cog-6-tooth')
                     ->sort(2)
                     ->group(__('dashboard.navigation.groups.operations'))
-                    ->visible(fn(): bool => auth()->user()?->isAdmin() ?? false)
+                    ->visible(fn(): bool => Auth::user()?->isAdmin() ?? false)
                     ->isActiveWhen(fn(): bool => request()->is('admin/operations*')),
             ]);
     }

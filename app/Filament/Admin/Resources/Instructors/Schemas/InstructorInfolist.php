@@ -3,14 +3,12 @@
 namespace App\Filament\Admin\Resources\Instructors\Schemas;
 
 use App\Models\Instructor;
-use Filament\Infolists\Components\Grid;
 use Filament\Infolists\Components\ImageEntry;
-use Filament\Infolists\Components\RepeatableEntry;
-use Filament\Infolists\Components\Section;
 use Filament\Infolists\Components\TextEntry;
+use Filament\Schemas\Components\Grid;
+use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Filament\Support\Enums\FontWeight;
-use Filament\Support\Enums\IconPosition;
 
 class InstructorInfolist
 {
@@ -37,7 +35,6 @@ class InstructorInfolist
                         ->schema([
                             TextEntry::make('name')
                                 ->weight(FontWeight::Bold)
-                                ->size(TextEntry\TextEntrySize::Large)
                                 ->formatStateUsing(fn($state, $record) =>
                                     $record->getTranslation('name', $locale)),
                             TextEntry::make('title')

@@ -14,6 +14,18 @@
             S.render.modal();
         },
 
+        instructorDropdown: () => {
+            const select = ui.$('input-instructor');
+            if (!select) return;
+
+            select.innerHTML = '<option value="">All Instructors</option>' +
+                state.instructors.map(i => `
+                    <option value="${i.id}" ${state.selectedInstructorId == i.id ? 'selected' : ''}>
+                        ${i.name}
+                    </option>
+                `).join('');
+        },
+
         header: () => {
             ui.text('resolved-date', state.resolvedDate);
             ui.text('sessions-count', state.sessions.length);

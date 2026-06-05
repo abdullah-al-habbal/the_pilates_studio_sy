@@ -2,8 +2,8 @@
 
 namespace App\Filament\Admin\Resources\RecurrencePatterns\Schemas;
 
-use Filament\Infolists\Components\Section;
 use Filament\Infolists\Components\TextEntry;
+use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Filament\Support\Enums\FontWeight;
 
@@ -20,7 +20,6 @@ class RecurrencePatternInfolist
                         TextEntry::make('name')
                             ->label('Pattern Name')
                             ->weight(FontWeight::Bold)
-                            ->size(TextEntry\TextEntrySize::Large)
                             ->badge()
                             ->color('info'),
                         TextEntry::make('label')

@@ -16,15 +16,20 @@ class InstructorsTable
 {
     public static function configure(Table $table): Table
     {
+        $locale = app()->getLocale();
+
         return $table
             ->columns([
                 TextColumn::make('name')
-                    ->searchable(),
+                    ->searchable()
+                    ->formatStateUsing(fn ($state, $record) => $record->getTranslation('name', $locale)),
                 TextColumn::make('title')
                     ->searchable()
-                    ->toggleable(isToggledHiddenByDefault: true),
+                    ->toggleable(isToggledHiddenByDefault: true)
+                    ->formatStateUsing(fn ($state, $record) => $record->getTranslation('title', $locale)),
                 TextColumn::make('specialty')
-                    ->toggleable(isToggledHiddenByDefault: true),
+                    ->toggleable(isToggledHiddenByDefault: true)
+                    ->formatStateUsing(fn ($state, $record) => $record->getTranslation('specialty', $locale)),
                 TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()

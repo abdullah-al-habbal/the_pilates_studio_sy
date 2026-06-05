@@ -70,7 +70,8 @@ class ClassesTable
                     ->badge()
                     ->color('info')
                     ->searchable()
-                    ->toggleable(),
+                    ->toggleable()
+                    ->formatStateUsing(fn ($state, $record) => $record->category?->getTranslation('name', app()->getLocale())),
 
                 TextColumn::make('start_date')
                     ->label(__('dashboard.resources.classes.fields.start_date'))

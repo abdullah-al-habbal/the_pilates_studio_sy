@@ -34,7 +34,7 @@ class InstructorResource extends Resource
 
     public static function getRecordTitle(?Model $record): string
     {
-        return $record?->fullname ?? static::getModelLabel();
+        return $record?->getTranslation('name', app()->getLocale()) ?? static::getModelLabel();
     }
 
     public static function getNavigationBadge(): ?string

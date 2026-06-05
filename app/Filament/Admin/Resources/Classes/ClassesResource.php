@@ -75,7 +75,7 @@ class ClassesResource extends Resource
 
     public static function getRecordTitle(?Model $record): string
     {
-        return $record ? ($record->title[app()->getLocale()] ?? $record->title['en'] ?? 'Class #' . $record->id) : static::getModelLabel();
+        return $record?->getTranslation('title', app()->getLocale()) ?? 'Class #' . $record->id;
     }
 
     public static function form(Schema $schema): Schema

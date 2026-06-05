@@ -24,6 +24,7 @@ use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 use App\Data\Reports\CurrencySummaryData;
 use App\Services\Finance\DailyBalanceService;
+use Illuminate\Support\Facades\Auth;
 
 class Reports extends Page implements HasInfolists
 {
@@ -50,12 +51,12 @@ class Reports extends Page implements HasInfolists
 
     public static function canAccess(): bool
     {
-        return auth()->user()?->isMainAdmin() ?? false;
+        return Auth::user()?->isMainAdmin() ?? false;
     }
 
     public static function shouldRegisterNavigation(): bool
     {
-        return auth()->user()?->isMainAdmin() ?? false;
+        return Auth::user()?->isMainAdmin() ?? false;
     }
 
     public function mount(): void

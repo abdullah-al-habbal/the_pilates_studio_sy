@@ -3,10 +3,9 @@
 namespace App\Filament\Admin\Resources\ClassCategories\Schemas;
 
 use App\Models\ClassCategory;
-use Filament\Infolists\Components\Section;
 use Filament\Infolists\Components\TextEntry;
-use Filament\Schemas\Component;
 use Filament\Schemas\Components\Grid;
+use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Filament\Support\Enums\FontWeight;
 
@@ -22,7 +21,6 @@ class ClassCategoryInfolist
                         ->schema([
                             TextEntry::make('name')
                                 ->weight(FontWeight::Bold)
-                                ->size(TextEntry\TextEntrySize::Large)
                                 ->formatStateUsing(fn($state, $record) =>
                                     $record->getTranslation('name', app()->getLocale())),
                             TextEntry::make('slug')

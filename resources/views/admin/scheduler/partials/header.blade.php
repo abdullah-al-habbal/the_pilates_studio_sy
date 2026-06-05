@@ -37,6 +37,12 @@
         <input type="date" id="input-date" class="rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800
                    text-sm text-gray-900 dark:text-gray-100 px-3 py-1.5 shadow-sm
                    focus:border-primary-500 focus:ring-primary-500" />
+
+        <select id="input-instructor" class="rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800
+                   text-sm text-gray-900 dark:text-gray-100 px-3 py-1.5 shadow-sm
+                   focus:border-primary-500 focus:ring-primary-500">
+            <option value="">All Instructors</option>
+        </select>
     </div>
 
     <div class="ml-auto flex items-center gap-4 text-sm">

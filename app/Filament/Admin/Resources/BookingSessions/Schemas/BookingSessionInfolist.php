@@ -3,9 +3,9 @@
 namespace App\Filament\Admin\Resources\BookingSessions\Schemas;
 
 use App\Enums\BookingSessionStatusEnum;
-use Filament\Infolists\Components\Grid;
-use Filament\Infolists\Components\Section;
+use Filament\Schemas\Components\Section;
 use Filament\Infolists\Components\TextEntry;
+use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Schema;
 use Filament\Support\Enums\FontWeight;
 use Filament\Support\Enums\IconPosition;

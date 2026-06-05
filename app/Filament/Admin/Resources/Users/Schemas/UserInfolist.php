@@ -4,9 +4,9 @@ namespace App\Filament\Admin\Resources\Users\Schemas;
 
 use App\Enums\UserStatusEnum;
 use App\Models\User;
-use Filament\Infolists\Components\Grid;
+use Filament\Schemas\Components\Grid;
 use Filament\Infolists\Components\IconEntry;
-use Filament\Infolists\Components\Section;
+use Filament\Schemas\Components\Section;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Schema;
 use Filament\Support\Enums\FontWeight;

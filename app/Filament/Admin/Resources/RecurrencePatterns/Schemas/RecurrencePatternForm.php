@@ -18,7 +18,8 @@ class RecurrencePatternForm
             TextInput::make('label')
                 ->required()
                 ->maxLength(50)
-                ->helperText('Human-readable: Daily, Weekly, Bi-Weekly, Monthly'),
+                ->helperText('Human-readable: Daily, Weekly, Bi-Weekly, Monthly')
+                ->translatable(),
             TextInput::make('interval_days')
                 ->numeric()
                 ->required()

@@ -8,6 +8,7 @@ use App\Handlers\Admin\Operations\ProcessBookingRefundHandler;
 use App\Http\Requests\Admin\Operations\ProcessBookingRefundRequest;
 use App\Traits\ApiResponseTrait;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 
 final readonly class ProcessBookingRefundAction
@@ -21,7 +22,7 @@ final readonly class ProcessBookingRefundAction
 
     public function __invoke(ProcessBookingRefundRequest $request, int $bookingId): JsonResponse
     {
-        if (!auth()->user()?->isMainAdmin()) {
+        if (!Auth::user()?->isMainAdmin()) {
             return $this->forbidden('Only main admin can process refunds.');
         }
 

@@ -4,7 +4,7 @@ namespace App\Filament\Admin\Resources\AppNotifications\Schemas;
 
 use Filament\Infolists\Components\IconEntry;
 use Filament\Infolists\Components\ImageEntry;
-use Filament\Infolists\Components\Section;
+use Filament\Schemas\Components\Section;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Schema;
 use Filament\Support\Enums\FontWeight;
@@ -44,11 +44,13 @@ class AppNotificationInfolist
                         TextEntry::make('title')
                             ->weight(FontWeight::Bold)
                             ->size(TextEntry\TextEntrySize::Large)
-                            ->columnSpanFull(),
+                            ->columnSpanFull()
+                            ->formatStateUsing(fn ($state, $record) => $record->getTranslation('title', app()->getLocale())),
                         TextEntry::make('message')
                             ->markdown()
                             ->columnSpanFull()
-                            ->placeholder('No message content'),
+                            ->placeholder('No message content')
+                            ->formatStateUsing(fn ($state, $record) => $record->getTranslation('message', app()->getLocale())),
                         ImageEntry::make('image')
                             ->label('Attached Image')
                             ->visible(fn($record): bool => $record->type === 'image' && filled($record->image))

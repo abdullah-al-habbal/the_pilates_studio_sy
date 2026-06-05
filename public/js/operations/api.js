@@ -36,10 +36,11 @@ const OperationsAPI = {
         }
     },
 
-    getClients(search = "", page = 1, filter = "", perPage = 15) {
-        return this.request(
-            `/admin/operations/clients?search=${encodeURIComponent(search)}&page=${page}&filter=${encodeURIComponent(filter)}&per_page=${perPage}`,
-        );
+    getClients(search = "", page = 1, filter = "", perPage = 15, options = {}) {
+        let url = `/admin/operations/clients?search=${encodeURIComponent(search)}&page=${page}&filter=${encodeURIComponent(filter)}&per_page=${perPage}`;
+        if (options.onlyClients) url += '&only_clients=1';
+        if (options.withValidFcm) url += '&with_valid_fcm=1';
+        return this.request(url);
     },
 
     sendNotification(payload) {

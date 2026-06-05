@@ -7,6 +7,8 @@ window.Scheduler = {
         meta:         { current_page: 1, last_page: 1, per_page: 10, total: 0 },
         loading:      false,
         error:        null,
+        instructors:          [],
+        selectedInstructorId: null,
         modal: {
             show:       false,
             loading:    false,

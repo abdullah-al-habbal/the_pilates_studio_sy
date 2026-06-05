@@ -45,7 +45,7 @@ class CenterMerchandiseResource extends Resource
 
     public static function getRecordTitle(?Model $record): string
     {
-        return $record?->name ?? static::getModelLabel();
+        return $record?->getTranslation('name', app()->getLocale()) ?? static::getModelLabel();
     }
 
     public static function getNavigationBadge(): ?string

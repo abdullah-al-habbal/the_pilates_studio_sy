@@ -133,7 +133,9 @@ const OperationsNotifications = (() => {
             const result = await OperationsAPI.getClients(
                 state.searchQuery,
                 page,
-                '',       
+                '',
+                PER_PAGE,
+                { onlyClients: true, withValidFcm: true },
             );
             const users = result.data ?? [];
             const meta = result.meta?.pagination ?? {};

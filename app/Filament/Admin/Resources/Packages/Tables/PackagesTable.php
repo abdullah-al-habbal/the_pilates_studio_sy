@@ -16,10 +16,13 @@ class PackagesTable
 {
     public static function configure(Table $table, string $currencyCode): Table
     {
+        $locale = app()->getLocale();
+
         return $table
             ->columns([
                 TextColumn::make('name')
-                    ->searchable(),
+                    ->searchable()
+                    ->formatStateUsing(fn ($state, $record) => $record->getTranslation('name', $locale)),
                 TextColumn::make('total_credits')
                     ->numeric()
                     ->sortable(),

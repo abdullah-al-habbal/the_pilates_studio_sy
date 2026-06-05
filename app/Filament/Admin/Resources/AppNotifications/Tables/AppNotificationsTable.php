@@ -15,6 +15,8 @@ class AppNotificationsTable
 {
     public static function configure(Table $table): Table
     {
+        $locale = app()->getLocale();
+
         return $table
             ->columns([
                 TextColumn::make('user.fullname')
@@ -38,7 +40,8 @@ class AppNotificationsTable
                 TextColumn::make('title')
                     ->searchable()
                     ->limit(40)
-                    ->sortable(),
+                    ->sortable()
+                    ->formatStateUsing(fn ($state, $record) => $record->getTranslation('title', $locale)),
                 IconColumn::make('read_at')
                     ->label('Status')
                     ->boolean()

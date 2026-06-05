@@ -15,6 +15,8 @@ class CenterMerchandisesTable
 {
     public static function configure(Table $table, string $currencyCode): Table
     {
+        $locale = app()->getLocale();
+
         return $table
             ->columns([
                 ImageColumn::make('primaryImage.url')
@@ -24,13 +26,15 @@ class CenterMerchandisesTable
                 TextColumn::make('name')
                     ->label(__('dashboard.resources.center_merchandises.fields.name'))
                     ->searchable()
-                    ->sortable(),
+                    ->sortable()
+                    ->formatStateUsing(fn ($state, $record) => $record->getTranslation('name', $locale)),
                 TextColumn::make('category.name')
                     ->label(__('dashboard.resources.center_merchandises.fields.category'))
                     ->badge()
                     ->color('gray')
                     ->sortable()
-                    ->searchable(),
+                    ->searchable()
+                    ->formatStateUsing(fn ($state, $record) => $record->category?->getTranslation('name', $locale)),
                 TextColumn::make('price')
                     ->label(__('dashboard.resources.center_merchandises.fields.price'))
                     ->getStateUsing(fn($record) => $record->getBasePrice())

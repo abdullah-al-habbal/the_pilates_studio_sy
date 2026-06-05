@@ -15,12 +15,16 @@ class TestimonialsTable
 {
     public static function configure(Table $table): Table
     {
+        $locale = app()->getLocale();
+
         return $table
             ->columns([
                 TextColumn::make('name')
-                    ->searchable(),
+                    ->searchable()
+                    ->formatStateUsing(fn ($state, $record) => $record->getTranslation('name', $locale)),
                 TextColumn::make('role')
-                    ->searchable(),
+                    ->searchable()
+                    ->formatStateUsing(fn ($state, $record) => $record->getTranslation('role', $locale)),
                 TextColumn::make('rating'),
                 IconColumn::make('is_active')
                     ->boolean(),

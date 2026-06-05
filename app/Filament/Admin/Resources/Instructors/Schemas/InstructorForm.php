@@ -4,6 +4,7 @@ namespace App\Filament\Admin\Resources\Instructors\Schemas;
 
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Repeater;
+use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Schema;
 
@@ -14,10 +15,15 @@ class InstructorForm
         return $schema
             ->components([
                 TextInput::make('name')
-                    ->required(),
-                TextInput::make('title'),
-                TextInput::make('specialty'),
-                TextInput::make('bio'),
+                    ->required()
+                    ->translatable(),
+                TextInput::make('title')
+                    ->translatable(),
+                TextInput::make('specialty')
+                    ->translatable(),
+                Textarea::make('bio')
+                    ->translatable()
+                    ->rows(4),
                 Repeater::make('social_links')
                     ->label('Social Links')
                     ->schema([

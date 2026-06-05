@@ -14,12 +14,15 @@ class MerchandiseCategoriesTable
 {
     public static function configure(Table $table): Table
     {
+        $locale = app()->getLocale();
+
         return $table
             ->columns([
                 TextColumn::make('name')
                     ->label(__('dashboard.resources.merchandise_categories.fields.name'))
                     ->searchable()
-                    ->sortable(),
+                    ->sortable()
+                    ->formatStateUsing(fn ($state, $record) => $record->getTranslation('name', $locale)),
 
                 TextColumn::make('merchandises_count')
                     ->label(__('dashboard.resources.merchandise_categories.fields.merchandises_count'))

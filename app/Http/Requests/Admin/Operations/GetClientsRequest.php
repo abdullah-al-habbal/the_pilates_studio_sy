@@ -21,6 +21,8 @@ class GetClientsRequest extends FormRequest
             'page'     => ['nullable', 'integer', 'min:1'],
             'per_page' => ['nullable', 'integer', 'min:1', 'max:100'],
             'filter'   => ['nullable', 'string', 'in:best_user,most_active_booking,best_seller,most_attended'],
+            'only_clients' => ['nullable', 'boolean'],
+            'with_valid_fcm' => ['nullable', 'boolean'],
         ];
     }
 
@@ -31,6 +33,8 @@ class GetClientsRequest extends FormRequest
             page: (int) $this->query('page', 1),
             filter: $this->query('filter'),
             perPage: (int) $this->query('per_page', 15),
+            onlyClients: (bool) $this->query('only_clients', false),
+            withValidFcm: (bool) $this->query('with_valid_fcm', false),
         );
     }
 }

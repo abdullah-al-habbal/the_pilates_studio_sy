@@ -12,6 +12,8 @@
         walkInExisting: (sessionId)            => `${BASE}/sessions/${sessionId}/walkin/existing`,
         walkInNew:      (sessionId)            => `${BASE}/sessions/${sessionId}/walkin/new`,
         validateField:  `${BASE}/walkin/validate`,
+        daysInMonth:    `${BASE}/sessions/days-in-month`,
+        instructors:    `${BASE}/instructors`,
     });
 
     const csrf = () => {
@@ -51,8 +53,9 @@
 
     S.api = {
 
-        getSessions: (date, page, perPage) => {
+        getSessions: (date, page, perPage, instructorId = null) => {
             const params = new URLSearchParams({ date, page, per_page: perPage });
+            if (instructorId) params.append('instructor_id', instructorId);
             return request(`${ROUTES.sessions}?${params}`);
         },
 
@@ -84,6 +87,14 @@
             const params = new URLSearchParams({ field, value });
             return request(`${ROUTES.validateField}?${params}`);
         },
+
+        getDaysInMonth: (year, month) => {
+            const params = new URLSearchParams({ year, month });
+            return request(`${ROUTES.daysInMonth}?${params}`);
+        },
+
+        getInstructors: () =>
+            request(ROUTES.instructors),
     };
 
 })(window.Scheduler);

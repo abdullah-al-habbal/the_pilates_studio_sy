@@ -29,7 +29,7 @@ class AppNotificationResource extends Resource
 
     public static function getRecordTitle(?Model $record): string
     {
-        return $record ? ($record->title ?? '#' . $record->id) : static::getModelLabel();
+        return $record?->getTranslation('title', app()->getLocale()) ?? '#' . $record->id;
     }
 
     public static function getNavigationBadge(): ?string

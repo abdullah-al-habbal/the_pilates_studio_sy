@@ -12,6 +12,7 @@ use App\Repositories\Eloquent\Refund\RefundEloquentRepository;
 use Carbon\Carbon;
 use Carbon\CarbonInterface;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Auth;
 
 final class DailyBalanceService
 {
@@ -128,7 +129,7 @@ final class DailyBalanceService
 
     private function resolveCreatorScope(): ?int
     {
-        $user = auth()->user();
+        $user = Auth::user();
         if (!$user || $user->isMainAdmin()) {
             return null;
         }

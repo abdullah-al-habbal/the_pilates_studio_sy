@@ -12,7 +12,8 @@ class ClassCategoryForm
         return $schema
             ->components([
                 TextInput::make('name')
-                    ->required(),
+                    ->required()
+                    ->translatable(),
                 TextInput::make('slug')
                     ->required(),
                 TextInput::make('color'),

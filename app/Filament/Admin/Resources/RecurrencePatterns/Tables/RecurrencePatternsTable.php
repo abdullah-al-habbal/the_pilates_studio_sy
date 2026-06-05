@@ -13,10 +13,15 @@ class RecurrencePatternsTable
 {
     public static function configure(Table $table): Table
     {
+        $locale = app()->getLocale();
+
         return $table
             ->columns([
                 TextColumn::make('name')
                     ->searchable(),
+                TextColumn::make('label')
+                    ->searchable()
+                    ->formatStateUsing(fn ($state, $record) => $record->getTranslation('label', $locale)),
                 TextColumn::make('interval_days')
                     ->numeric()
                     ->sortable(),

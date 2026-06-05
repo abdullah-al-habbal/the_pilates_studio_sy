@@ -16,8 +16,13 @@ class ClassCategoriesTable
 {
     public static function configure(Table $table): Table
     {
+        $locale = app()->getLocale();
+
         return $table
             ->columns([
+                TextColumn::make('name')
+                    ->searchable()
+                    ->formatStateUsing(fn ($state, $record) => $record->getTranslation('name', $locale)),
                 TextColumn::make('slug')
                     ->searchable(),
                 TextColumn::make('color')

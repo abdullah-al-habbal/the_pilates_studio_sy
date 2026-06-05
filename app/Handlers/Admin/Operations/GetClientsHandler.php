@@ -13,6 +13,10 @@ final readonly class GetClientsHandler
     public function handle(GetClientsCommand $command): LengthAwarePaginator
     {
         return User::with(['bookings.package', 'activeCreditBooking.package', 'frozenCreditBooking.package', 'bookingSessions'])
+            ->when($command->onlyClients, fn($q) => $q->customers())
+            ->when($command->withValidFcm, fn($q) => $q->whereHas('settings', function($q) {
+                $q->whereNotNull('fcm_token')->where('fcm_token', '!=', '');
+            }))
             ->when($command->search, function ($q) use ($command) {
                 $q->where(function ($subQ) use ($command) {
                     $subQ->where('fullname', 'like', "%{$command->search}%")

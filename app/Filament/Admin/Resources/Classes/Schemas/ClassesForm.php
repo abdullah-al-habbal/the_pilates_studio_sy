@@ -72,6 +72,7 @@ class ClassesForm
                                 ->required()
                                 ->maxLength(255)
                                 ->helperText(__('dashboard.resources.classes.helpers.title'))
+                                ->translatable()
                                 ->columnSpan(1),
 
                             Select::make('recurrence_pattern_id')
@@ -94,7 +95,8 @@ class ClassesForm
                             ->label(__('dashboard.resources.classes.fields.about'))
                             ->required()
                             ->columnSpanFull()
-                            ->helperText(__('dashboard.resources.classes.helpers.about')),
+                            ->helperText(__('dashboard.resources.classes.helpers.about'))
+                            ->translatable(),
                     ]),
 
                 Section::make(__('dashboard.resources.classes.sections.schedule'))
