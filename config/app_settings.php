@@ -208,7 +208,7 @@ return [
         ],
         [
             'key' => 'hero_image',
-            'value' => '',
+            'value' => 'assets/images/website/landing_page/hero_section/hero_image.avif',
             'type' => 'image',
             'description' => 'Hero section background image'
         ],

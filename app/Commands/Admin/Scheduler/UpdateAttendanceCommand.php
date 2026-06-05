@@ -11,6 +11,7 @@ final readonly class UpdateAttendanceCommand
         public int $classSessionId,
         public int $bookingSessionId,
         public AttendanceStatusEnum $status,
+        public ?int $updatedByAdminId = null,
     ) {
     }
 }

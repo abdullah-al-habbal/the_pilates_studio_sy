@@ -3,7 +3,7 @@
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex items-center justify-between h-20">
             <a href="{{ route('landing') }}" class="flex items-center gap-2 group">
-                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-primary-500 to-teal-600 flex items-center justify-center shadow-lg group-hover:shadow-primary-500/30 transition-shadow">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-primary-500 to-accent-600 flex items-center justify-center shadow-lg group-hover:shadow-primary-500/30 transition-shadow">
                     <img src="{{ $settings->logoUrl ?? '' }}" alt="{{ $settings->siteName ?? '' }}" class="w-8 h-8 object-contain">
                 </div>
                 <span class="text-xl font-bold tracking-tight text-slate-900 dark:text-white">

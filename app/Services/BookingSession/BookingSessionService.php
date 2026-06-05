@@ -53,11 +53,11 @@ class BookingSessionService
             ?? throw new ModelNotFoundException;
     }
 
-    public function cancel(int $bookingSessionId): void
+    public function cancel(int $bookingSessionId, ?int $cancelledByAdminId = null): void
     {
         $this->logger->info('Cancelling booking session', ['session_id' => $bookingSessionId]);
 
-        DB::transaction(function () use ($bookingSessionId) {
+        DB::transaction(function () use ($bookingSessionId, $cancelledByAdminId) {
             $bookingSession = $this->findById($bookingSessionId, true);
 
             if ($bookingSession->isCancelled()) {
@@ -83,25 +83,25 @@ class BookingSessionService
             }
 
             $this->repository->updateStatus($bookingSessionId, BookingSessionStatusEnum::CANCELLED->value);
-            $this->repository->setCancelledAt($bookingSessionId);
+            $this->repository->setCancelledAt($bookingSessionId, $cancelledByAdminId);
             $booking = $this->bookingService->find($bookingSession->booking_id);
             $this->bookingService->refundCredit($booking);
         });
     }
 
-    public function markAttended(int $bookingSessionId): void
+    public function markAttended(int $bookingSessionId, ?int $updatedByAdminId = null): void
     {
         $this->logger->info('Marking session attended', ['session_id' => $bookingSessionId]);
-        $this->repository->markAttended($bookingSessionId);
+        $this->repository->markAttended($bookingSessionId, $updatedByAdminId);
     }
 
-    public function markMissed(int $bookingSessionId): void
+    public function markMissed(int $bookingSessionId, ?int $updatedByAdminId = null): void
     {
         $this->logger->info('Marking session missed', ['session_id' => $bookingSessionId]);
-        $this->repository->markMissed($bookingSessionId);
+        $this->repository->markMissed($bookingSessionId, $updatedByAdminId);
     }
 
-    public function toggleAttendance(int $bookingSessionId, AttendanceStatusEnum $status): void
+    public function toggleAttendance(int $bookingSessionId, AttendanceStatusEnum $status, ?int $updatedByAdminId = null): void
     {
         $this->logger->info('Toggling attendance', [
             'session_id' => $bookingSessionId,
@@ -109,15 +109,15 @@ class BookingSessionService
         ]);
 
         if ($status === AttendanceStatusEnum::ATTENDED) {
-            $this->repository->markAttended($bookingSessionId);
+            $this->repository->markAttended($bookingSessionId, $updatedByAdminId);
         } else {
-            $this->repository->markMissed($bookingSessionId);
+            $this->repository->markMissed($bookingSessionId, $updatedByAdminId);
         }
     }
 
-    public function oneTimeAttend(int $userId, int $classSessionId): void
+    public function oneTimeAttend(int $userId, int $classSessionId, ?int $createdBy = null): void
     {
-        DB::transaction(function () use ($userId, $classSessionId): void {
+        DB::transaction(function () use ($userId, $classSessionId, $createdBy): void {
 
             $this->classSessionRepo->findOrFailForUpdate($classSessionId);
 
@@ -142,6 +142,7 @@ class BookingSessionService
                     'total_credits' => 1,
                     'remaining_credits' => 1,
                     'status' => BookingStatusEnum::ACTIVE,
+                    'created_by' => $createdBy,
                 ]);
             }
 
@@ -152,6 +153,7 @@ class BookingSessionService
                 'class_session_id' => $classSessionId,
                 'status' => 'reserved',
                 'attendance_status' => AttendanceStatusEnum::ATTENDED,
+                'attendance_updated_by' => $createdBy,
             ]);
         });
     }

@@ -38,7 +38,8 @@ final readonly class ProcessNewWalkInHandler
                 'password' => $command->password,
             ]);
 
-            $this->bookingSessionService->oneTimeAttend($user->id, $command->sessionId);
+            $adminId = (int) auth()->id();
+            $this->bookingSessionService->oneTimeAttend($user->id, $command->sessionId, $adminId);
         });
     }
 }

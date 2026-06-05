@@ -19,10 +19,11 @@ class LandingClassVO
         public readonly int $availableSpots,
     ) {}
 
-    public static function fromModel(Classes $class): self
+    public static function fromModel(Classes $class, ?string $primaryHex = null): self
     {
+        $primary = $primaryHex ? ltrim($primaryHex, '#') : '262D35';
         $primaryImage = $class->primaryImage?->image_url
-            ?? 'https://ui-avatars.com/api/?name=Class&size=400&background=059669&color=fff';
+            ?? "https://ui-avatars.com/api/?name=Class&size=400&background={$primary}&color=fff";
         return new self(
             id: $class->id,
             title: $class->getTranslation('title', app()->getLocale()) ?? $class->title,

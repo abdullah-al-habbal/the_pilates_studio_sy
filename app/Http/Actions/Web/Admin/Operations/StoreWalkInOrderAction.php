@@ -29,6 +29,7 @@ final readonly class StoreWalkInOrderAction
                 fullname: $request->fullname,
                 phoneNumber: $request->phone_number,
                 email: $request->email,
+                createdBy: (int) auth()->id()
             );
 
             return $this->created(

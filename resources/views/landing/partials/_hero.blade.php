@@ -1,16 +1,18 @@
 {{-- /home/lenovo/work/projects/pilates/resources/views/landing/partials/_hero.blade.php --}}
 @php $s = $landingData->settings; @endphp
 <section id="hero" class="relative min-h-screen flex items-center overflow-hidden pt-20">
+    @php $heroImageUrl = $s->heroImage ? asset($s->heroImage) : null; @endphp
+
+    @if($heroImageUrl)
     <div class="absolute inset-0 z-0">
-        <img
-            src="https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?auto=format&fit=crop&w=2000&q=80"
-            alt="Yoga studio interior with natural light"
-            class="w-full h-full object-cover opacity-90 dark:opacity-40"
-            loading="eager"
-        >
-        <div class="absolute inset-0 bg-gradient-to-r from-white/95 via-white/80 to-white/40 dark:from-dark-900/95 dark:via-dark-900/80 dark:to-dark-900/40"></div>
-        <div class="absolute inset-0 bg-gradient-to-t from-white dark:from-dark-900 via-transparent to-transparent"></div>
+        <img src="{{ $heroImageUrl }}"
+             alt="Hero background"
+             class="w-full h-full object-cover opacity-90 dark:opacity-40"
+             loading="eager">
     </div>
+    @endif
+    <div class="absolute inset-0 bg-gradient-to-r from-white/95 via-white/80 to-white/40 dark:from-dark-900/95 dark:via-dark-900/80 dark:to-dark-900/40"></div>
+    <div class="absolute inset-0 bg-gradient-to-t from-white dark:from-dark-900 via-transparent to-transparent"></div>
 
     <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 lg:py-32">
         <div class="grid lg:grid-cols-2 gap-12 items-center">
@@ -59,8 +61,8 @@
                         </div>
                     </div>
                     <div class="flex items-center gap-3">
-                        <div class="w-12 h-12 rounded-xl bg-teal-50 dark:bg-teal-900/20 flex items-center justify-center">
-                            <i data-lucide="zap" class="w-6 h-6 text-teal-600 dark:text-teal-400"></i>
+                        <div class="w-12 h-12 rounded-xl bg-accent-50 dark:bg-accent-900/20 flex items-center justify-center">
+                            <i data-lucide="zap" class="w-6 h-6 text-accent-600 dark:text-accent-400"></i>
                         </div>
                         <div>
                             <div class="text-2xl font-bold text-slate-900 dark:text-white">{{ __('landing.nav_pricing') }}</div>
@@ -73,10 +75,10 @@
             <div class="hidden lg:block reveal" style="transition-delay: 0.2s;">
                 <div class="relative">
                     <div class="absolute -top-10 -right-10 w-72 h-72 bg-primary-200/50 dark:bg-primary-900/20 rounded-full blur-3xl"></div>
-                    <div class="absolute -bottom-10 -left-10 w-72 h-72 bg-teal-200/50 dark:bg-teal-900/20 rounded-full blur-3xl"></div>
+                    <div class="absolute -bottom-10 -left-10 w-72 h-72 bg-accent-200/50 dark:bg-accent-900/20 rounded-full blur-3xl"></div>
 
                     <div class="relative mx-auto w-[320px] h-[640px] bg-dark-800 phone-mockup overflow-hidden border-4 border-slate-800 dark:border-slate-700">
-                        <div class="absolute inset-0 bg-gradient-to-b from-primary-600 to-teal-700 p-6 flex flex-col">
+                        <div class="absolute inset-0 bg-gradient-to-b from-primary-600 to-accent-700 p-6 flex flex-col">
                             <div class="flex items-center justify-between mb-8">
                                 <div class="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center">
                                     <i data-lucide="menu" class="w-4 h-4 text-white"></i>

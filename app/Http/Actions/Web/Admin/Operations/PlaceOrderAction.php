@@ -27,7 +27,8 @@ final readonly class PlaceOrderAction
                 (int) $request->customer_id,
                 (int) $request->merchandise_id,
                 (int) $request->quantity,
-                (int) $request->currency_id
+                (int) $request->currency_id,
+                createdBy: (int) auth()->id()
             );
 
             return $this->created(

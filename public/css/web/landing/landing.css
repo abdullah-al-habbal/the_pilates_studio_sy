@@ -36,7 +36,7 @@ img.loaded { opacity: 1; }
 }
 
 .gradient-text {
-    background: linear-gradient(135deg, #059669 0%, #0d9488 100%);
+    background: linear-gradient(135deg, var(--brand-primary) 0%, var(--brand-accent) 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -54,18 +54,18 @@ img.loaded { opacity: 1; }
     top: 0;
     bottom: 0;
     width: 2px;
-    background: linear-gradient(to bottom, #10b981, #0d9488);
+    background: linear-gradient(to bottom, var(--brand-primary), var(--brand-accent));
 }
 
 .filter-btn.active {
-    background-color: #059669;
+    background-color: var(--brand-primary);
     color: white;
 }
 
 .schedule-tab.active {
-    background-color: #059669;
+    background-color: var(--brand-primary);
     color: white;
-    box-shadow: 0 10px 15px -3px rgba(5, 150, 105, 0.25);
+    box-shadow: 0 10px 15px -3px color-mix(in srgb, var(--brand-primary) 25%, transparent);
 }
 
 @media (prefers-reduced-motion: reduce) {

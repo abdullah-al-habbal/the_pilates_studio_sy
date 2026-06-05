@@ -23,8 +23,9 @@ final readonly class StoreWalkInOrderHandler
         string $fullname,
         string $phoneNumber,
         ?string $email,
+        ?int $createdBy = null,
     ): MerchandiseOrder {
-        return DB::transaction(function () use ($merchandiseId, $quantity, $currencyId, $fullname, $phoneNumber, $email): MerchandiseOrder {
+        return DB::transaction(function () use ($merchandiseId, $quantity, $currencyId, $fullname, $phoneNumber, $email, $createdBy): MerchandiseOrder {
             $user = $this->bookingSessionService->createWalkInUser([
                 'fullname' => $fullname,
                 'phone_number' => $phoneNumber,
@@ -32,7 +33,7 @@ final readonly class StoreWalkInOrderHandler
                 'password' => 'pilates',
             ]);
 
-            return $this->orderService->placeOrder($user->id, $merchandiseId, $quantity, $currencyId);
+            return $this->orderService->placeOrder($user->id, $merchandiseId, $quantity, $currencyId, $createdBy);
         });
     }
 }

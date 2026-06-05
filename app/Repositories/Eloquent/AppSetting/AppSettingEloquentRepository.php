@@ -18,7 +18,7 @@ class AppSettingEloquentRepository
         return $this->model->where('key', $key)->first();
     }
 
-    public function index()
+    public function index(): \Illuminate\Database\Eloquent\Collection
     {
         return $this->model->all();
     }

@@ -42,7 +42,7 @@ class LandingDataService
         $settings = $this->getSettings();
         if ($settings === null) $hasError = true;
 
-        $classes = $this->getClasses();
+        $classes = $this->getClasses($settings?->brandPrimaryColor);
         if ($classes === null) $hasError = true;
         elseif ($classes->isNotEmpty()) $isEmpty = false;
 
@@ -89,12 +89,12 @@ class LandingDataService
         }
     }
 
-    private function getClasses(): ?Collection
+    private function getClasses(?string $primaryColor = null): ?Collection
     {
         try {
             return $this->classesService->getActiveClassesForLanding()
                 ->take(9)
-                ->map(fn($c) => LandingClassVO::fromModel($c));
+                ->map(fn($c) => LandingClassVO::fromModel($c, $primaryColor));
         } catch (\Throwable $e) {
             report($e);
             return null;

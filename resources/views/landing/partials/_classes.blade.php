@@ -45,7 +45,7 @@
                             >
                             <div class="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
                             <div class="absolute top-4 left-4">
-                                <span class="px-3 py-1 rounded-full text-xs font-semibold bg-teal-50 text-teal-700 dark:bg-teal-900/30 dark:text-teal-300">
+                                <span class="px-3 py-1 rounded-full text-xs font-semibold bg-accent-50 text-accent-700 dark:bg-accent-900/30 dark:text-accent-300">
                                     {{ $class->categoryName }}
                                 </span>
                             </div>

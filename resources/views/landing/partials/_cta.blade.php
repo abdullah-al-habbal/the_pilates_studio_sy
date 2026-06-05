@@ -1,12 +1,12 @@
 @php $s = $landingData->settings; @endphp
 <section id="download" class="py-24 bg-white dark:bg-dark-900">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="reveal relative overflow-hidden rounded-3xl bg-gradient-to-br from-primary-600 via-primary-700 to-teal-700 p-12 sm:p-16 lg:p-20">
+        <div class="reveal relative overflow-hidden rounded-3xl bg-gradient-to-br from-primary-600 via-primary-700 to-accent-700 p-12 sm:p-16 lg:p-20">
             <div class="absolute inset-0 opacity-10">
                 <div class="absolute top-0 left-0 w-full h-full" style="background-image: radial-gradient(circle at 2px 2px, white 1px, transparent 0); background-size: 40px 40px;"></div>
             </div>
             <div class="absolute top-0 right-0 w-96 h-96 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/4 blur-3xl"></div>
-            <div class="absolute bottom-0 left-0 w-72 h-72 bg-teal-400/20 rounded-full translate-y-1/2 -translate-x-1/4 blur-3xl"></div>
+            <div class="absolute bottom-0 left-0 w-72 h-72 bg-accent-400/20 rounded-full translate-y-1/2 -translate-x-1/4 blur-3xl"></div>
 
             <div class="relative text-center max-w-3xl mx-auto">
                 <h2 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-white mb-6">{{ $s->ctaTitle }}</h2>

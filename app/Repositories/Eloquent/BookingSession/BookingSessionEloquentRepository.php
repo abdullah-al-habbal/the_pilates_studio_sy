@@ -83,9 +83,12 @@ class BookingSessionEloquentRepository
             ->exists();
     }
 
-    public function setCancelledAt(int $id): bool
+    public function setCancelledAt(int $id, ?int $cancelledByAdminId = null): bool
     {
-        return (bool) $this->model->where('id', $id)->update(['cancelled_at' => now()]);
+        return (bool) $this->model->where('id', $id)->update([
+            'cancelled_at'         => now(),
+            'cancelled_by_admin_id' => $cancelledByAdminId,
+        ]);
     }
 
     public function find(int $id, bool $lockForUpdate = false): ?BookingSession
@@ -162,19 +165,21 @@ class BookingSessionEloquentRepository
             ->latest()
             ->paginate($perPage);
     }
-    public function markAttended(int $id): bool
+    public function markAttended(int $id, ?int $updatedByAdminId = null): bool
     {
         return (bool) $this->model->where('id', $id)->update([
-            'attendance_status' => AttendanceStatusEnum::ATTENDED,
-            'attended_at'       => now(),
+            'attendance_status'     => AttendanceStatusEnum::ATTENDED,
+            'attended_at'           => now(),
+            'attendance_updated_by' => $updatedByAdminId,
         ]);
     }
 
-    public function markMissed(int $id): bool
+    public function markMissed(int $id, ?int $updatedByAdminId = null): bool
     {
         return (bool) $this->model->where('id', $id)->update([
-            'attendance_status' => AttendanceStatusEnum::MISSED,
-            'attended_at'       => null,
+            'attendance_status'     => AttendanceStatusEnum::MISSED,
+            'attended_at'           => null,
+            'attendance_updated_by' => $updatedByAdminId,
         ]);
     }
 

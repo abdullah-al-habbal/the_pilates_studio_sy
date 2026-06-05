@@ -5,7 +5,7 @@
         <div class="py-16 grid sm:grid-cols-2 lg:grid-cols-4 gap-12">
             <div class="sm:col-span-2 lg:col-span-1">
                 <a href="{{ route('landing') }}" class="flex items-center gap-2 mb-6">
-                    <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-primary-500 to-teal-600 flex items-center justify-center">
+                    <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-primary-500 to-accent-600 flex items-center justify-center">
                         <img src="{{ $s->logoUrl ?? '' }}" alt="{{ $s->siteName ?? '' }}" class="w-8 h-8 object-contain">
                     </div>
                     <span class="text-xl font-bold text-white">

@@ -36,9 +36,10 @@ final readonly class ProcessExistingWalkInHandler
                 ]);
             }
 
+            $adminId = (int) auth()->id();
             foreach ($command->userIds as $userId) {
                 try {
-                    $this->bookingSessionService->oneTimeAttend((int) $userId, $command->sessionId);
+                    $this->bookingSessionService->oneTimeAttend((int) $userId, $command->sessionId, $adminId);
                     $added++;
                     $messages[] = "User #{$userId} added successfully.";
                 } catch (ValidationException $e) {

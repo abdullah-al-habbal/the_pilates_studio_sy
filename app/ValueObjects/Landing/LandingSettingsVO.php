@@ -78,7 +78,7 @@ class LandingSettingsVO
             socialFacebook: $service->get('social_facebook'),
             socialTwitter: $service->get('social_twitter'),
             socialYoutube: $service->get('social_youtube'),
-            heroImage: $service->get('hero_image') ?: asset('assets/images/landing/hero/hero_image.avif'),
+            heroImage: $service->get('hero_image') ?: null,
             brandPrimaryColor: $service->get('brand_primary_color', '#262D35'),
             brandSecondaryColor: $service->get('brand_secondary_color', '#F3EFE3'),
             brandAccentColor: $service->get('brand_accent_color', '#B8A18B'),

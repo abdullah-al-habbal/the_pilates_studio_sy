@@ -35,8 +35,8 @@ final readonly class UpdateAttendanceHandler
         }
 
         match ($command->status) {
-            AttendanceStatusEnum::ATTENDED => $this->repository->markAttended($command->bookingSessionId),
-            AttendanceStatusEnum::MISSED => $this->repository->markMissed($command->bookingSessionId),
+            AttendanceStatusEnum::ATTENDED => $this->repository->markAttended($command->bookingSessionId, $command->updatedByAdminId),
+            AttendanceStatusEnum::MISSED => $this->repository->markMissed($command->bookingSessionId, $command->updatedByAdminId),
         };
     }
 }

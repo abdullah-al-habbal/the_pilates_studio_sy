@@ -12,7 +12,7 @@
         $features = [
             ['icon' => 'calendar-check', 'title' => __('landing.feature_instant_booking_title'), 'description' => __('landing.feature_instant_booking_desc'), 'color' => 'primary'],
             ['icon' => 'credit-card', 'title' => __('landing.feature_credit_packages_title'), 'description' => __('landing.feature_credit_packages_desc'), 'color' => 'accent'],
-            ['icon' => 'bell', 'title' => __('landing.feature_smart_notifications_title'), 'description' => __('landing.feature_smart_notifications_desc'), 'color' => 'teal'],
+            ['icon' => 'bell', 'title' => __('landing.feature_smart_notifications_title'), 'description' => __('landing.feature_smart_notifications_desc'), 'color' => 'accent'],
             ['icon' => 'smartphone', 'title' => __('landing.feature_manage_on_go_title'), 'description' => __('landing.feature_manage_on_go_desc'), 'color' => 'primary'],
         ];
         @endphp
@@ -32,7 +32,7 @@
         </div>
 
         <div class="mt-16 reveal">
-            <div class="relative overflow-hidden rounded-3xl bg-gradient-to-r from-primary-600 to-teal-600 p-8 sm:p-12">
+            <div class="relative overflow-hidden rounded-3xl bg-gradient-to-r from-primary-600 to-accent-600 p-8 sm:p-12">
                 <div class="absolute top-0 right-0 w-96 h-96 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/4 blur-3xl"></div>
                 <div class="absolute bottom-0 left-0 w-72 h-72 bg-white/10 rounded-full translate-y-1/2 -translate-x-1/4 blur-3xl"></div>
 

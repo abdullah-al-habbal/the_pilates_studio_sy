@@ -1,3 +1,4 @@
+{{-- resources/views/landing/index.blade.php --}}
 @extends('layouts.landing')
 
 @section('content')

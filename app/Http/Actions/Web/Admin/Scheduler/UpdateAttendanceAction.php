@@ -31,6 +31,7 @@ final class UpdateAttendanceAction
                     classSessionId: $sessionId,
                     bookingSessionId: $bookingSessionId,
                     status: AttendanceStatusEnum::from($request->validated('status')),
+                    updatedByAdminId: (int) auth()->id(),
                 )
             );
 

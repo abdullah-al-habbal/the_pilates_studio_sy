@@ -22,7 +22,7 @@ final readonly class AssignPackageHandler
     ) {
     }
 
-    public function handle(int $userId, int $packageId, ?int $currencyId = null, ?int $clientSentAmount = null): Booking
+    public function handle(int $userId, int $packageId, ?int $currencyId = null, ?int $clientSentAmount = null, ?int $createdBy = null): Booking
     {
         $user = User::findOrFail($userId);
 
@@ -59,7 +59,8 @@ final readonly class AssignPackageHandler
             $expiresAt,
             $resolvedCurrencyId,
             $paidAmount,
-            $exchangeRateSnapshot
+            $exchangeRateSnapshot,
+            $createdBy
         );
     }
 }

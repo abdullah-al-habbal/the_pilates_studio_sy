@@ -25,7 +25,8 @@ final readonly class AssignPackageAction
                 (int) $request->user_id,
                 $packageId,
                 $request->has('currency_id') ? (int) $request->currency_id : null,
-                $request->has('paid_amount') ? (int) $request->paid_amount : null
+                $request->has('paid_amount') ? (int) $request->paid_amount : null,
+                createdBy: (int) auth()->id()
             );
 
             return $this->created(

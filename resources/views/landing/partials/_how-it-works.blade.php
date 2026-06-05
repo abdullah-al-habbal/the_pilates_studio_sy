@@ -15,7 +15,7 @@
                 $steps = [
                     ['number' => '01', 'icon' => 'download', 'title' => __('landing.download_app'), 'description' => __('landing.step_1_desc'), 'color' => 'primary'],
                     ['number' => '02', 'icon' => 'credit-card', 'title' => __('landing.nav_pricing'), 'description' => __('landing.step_2_desc'), 'color' => 'accent'],
-                    ['number' => '03', 'icon' => 'calendar-check', 'title' => __('landing.book_class'), 'description' => __('landing.step_3_desc'), 'color' => 'teal'],
+                    ['number' => '03', 'icon' => 'calendar-check', 'title' => __('landing.book_class'), 'description' => __('landing.step_3_desc'), 'color' => 'accent'],
                 ];
                 @endphp
 

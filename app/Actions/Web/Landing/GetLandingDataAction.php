@@ -17,6 +17,11 @@ class GetLandingDataAction extends Controller
     public function execute(): View
     {
         $landingData = $this->landingDataService->getLandingData();
+
+        if (empty($landingData->settings->heroImage) || empty($landingData->settings->siteName)) {
+            abort(503, 'Landing page is not configured yet.');
+        }
+
         return view('landing.index', compact('landingData'));
     }
 }
