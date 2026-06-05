@@ -97,10 +97,17 @@ class Classes extends Model
         return $this->hasManyThrough(
             BookingSession::class,
             ClassSession::class,
-            'class_id', // Foreign key on ClassSession table...
-            'class_session_id', // Foreign key on BookingSession table...
-            'id', // Local key on Classes table...
-            'id' // Local key on ClassSession table...
+            'class_id',
+            'class_session_id',
+            'id',
+            'id'
         );
+    }
+
+    public function hasBookedSessions(): bool
+    {
+        return $this->sessions()
+            ->whereHas('bookingSessions')
+            ->exists();
     }
 }

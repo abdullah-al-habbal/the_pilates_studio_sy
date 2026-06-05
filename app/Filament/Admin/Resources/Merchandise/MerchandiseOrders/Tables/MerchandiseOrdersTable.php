@@ -16,15 +16,22 @@ class MerchandiseOrdersTable
     {
         return $table
             ->columns([
-                TextColumn::make('merchandise.name')
+                TextColumn::make('merchandise_name_snapshot')
                     ->label(__('dashboard.resources.merchandise_orders.fields.merchandise'))
-                    ->searchable()->sortable(),
+                    ->formatStateUsing(function ($state, $record) {
+                        if (is_array($state)) {
+                            return $state[app()->getLocale()] ?? $state['en'] ?? '—';
+                        }
+                        return $record->merchandise?->getTranslation('name', app()->getLocale()) ?? '—';
+                    })
+                    ->searchable()
+                    ->sortable(),
                 TextColumn::make('quantity')
                     ->label(__('dashboard.resources.merchandise_orders.fields.quantity'))
                     ->badge()->color('info')->sortable(),
                 TextColumn::make('total_price')
                     ->label(__('dashboard.resources.merchandise_orders.fields.total_price'))
-                    ->state(fn ($record) => $record->quantity * ($record->merchandise?->price ?? 0))
+                    ->state(fn ($record) => $record->total_price)
                     ->money($currencyCode)
                     ->sortable(),
                 TextColumn::make('customer.fullname')

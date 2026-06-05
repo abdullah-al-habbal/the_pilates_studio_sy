@@ -44,7 +44,13 @@ class MerchandiseCategoriesTable
             ->actions([
                 ViewAction::make(),
                 EditAction::make(),
-                DeleteAction::make(),
+                DeleteAction::make()
+                    ->disabled(fn ($record) => $record->merchandises()->exists())
+                    ->tooltip(
+                        fn ($record) => $record->merchandises()->exists()
+                            ? __('Cannot delete: category contains merchandise')
+                            : null
+                    ),
             ])
             ->emptyStateHeading(__('dashboard.resources.merchandise_categories.empty_state.heading'))
             ->emptyStateIcon('heroicon-o-tag');

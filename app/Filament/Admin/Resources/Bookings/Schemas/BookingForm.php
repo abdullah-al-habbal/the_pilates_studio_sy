@@ -56,6 +56,7 @@ class BookingForm
                             TextInput::make('password')
                                 ->label(__('dashboard.resources.users.fields.password'))
                                 ->password()
+                                ->revealable()
                                 ->nullable()
                                 ->maxLength(255)
                                 ->helperText(__('dashboard.resources.users.helpers.password_default')),

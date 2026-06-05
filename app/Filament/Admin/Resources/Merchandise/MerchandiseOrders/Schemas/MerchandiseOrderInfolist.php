@@ -26,8 +26,14 @@ class MerchandiseOrderInfolist
                     ->columnSpan(['default' => 1, 'lg' => 2])
                     ->columns(2)
                     ->schema([
-                        TextEntry::make('merchandise.name')
+                        TextEntry::make('merchandise_name_snapshot')
                             ->label(__('dashboard.resources.merchandise_orders.fields.merchandise'))
+                            ->formatStateUsing(function ($state, MerchandiseOrder $record) {
+                                if (is_array($state)) {
+                                    return $state[app()->getLocale()] ?? $state['en'] ?? '—';
+                                }
+                                return $record->merchandise?->getTranslation('name', app()->getLocale()) ?? '—';
+                            })
                             ->weight(FontWeight::Bold),
 
                         TextEntry::make('quantity')
@@ -35,12 +41,21 @@ class MerchandiseOrderInfolist
                             ->badge()
                             ->color('info'),
 
+                        TextEntry::make('merchandise_unit_price_snapshot')
+                            ->label('Unit Price (at Order)')
+                            ->money($currencyCode)
+                            ->placeholder('—'),
+
                         TextEntry::make('total_price')
                             ->label(__('dashboard.resources.merchandise_orders.fields.total_price'))
-                            ->state(fn (MerchandiseOrder $record) => $record->total_price)
                             ->money($currencyCode)
                             ->weight(FontWeight::Bold)
                             ->color('success'),
+
+                        TextEntry::make('paid_amount')
+                            ->label('Amount Paid')
+                            ->money($currencyCode)
+                            ->placeholder('—'),
 
                         TextEntry::make('ordered_at')
                             ->label(__('dashboard.resources.merchandise_orders.fields.ordered_at'))

@@ -24,6 +24,8 @@ class MerchandiseOrder extends Model
         'currency_id',
         'paid_amount',
         'exchange_rate_snapshot',
+        'merchandise_name_snapshot',
+        'merchandise_unit_price_snapshot',
     ];
 
     protected function casts(): array
@@ -33,6 +35,8 @@ class MerchandiseOrder extends Model
             'ordered_at' => 'datetime',
             'paid_amount' => 'integer',
             'exchange_rate_snapshot' => 'float',
+            'merchandise_name_snapshot' => 'array',
+            'merchandise_unit_price_snapshot' => 'integer',
         ];
     }
 
@@ -40,6 +44,10 @@ class MerchandiseOrder extends Model
     {
         if ($this->paid_amount !== null) {
             return $this->paid_amount;
+        }
+
+        if ($this->merchandise_unit_price_snapshot !== null) {
+            return $this->merchandise_unit_price_snapshot * $this->quantity;
         }
 
         if ($this->merchandise) {

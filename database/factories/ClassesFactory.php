@@ -26,7 +26,8 @@ class ClassesFactory extends Factory
         return [
             'instructor_id'         => Instructor::inRandomOrder()->first()?->id ?? Instructor::factory(),
             'class_category_id'     => ClassCategory::inRandomOrder()->first()?->id ?? ClassCategory::factory(),
-            'recurrence_pattern_id' => RecurrencePattern::inRandomOrder()->first()?->id,
+            'recurrence_pattern_id' => RecurrencePattern::inRandomOrder()->value('id')
+                ?? RecurrencePattern::factory()->create()->id,
             'title'                 => ['en' => $titleEn, 'ar' => $titleEn],
             'about'                 => ['en' => $this->faker->sentences(2, true), 'ar' => ''],
             'start_time'            => sprintf('%02d:00:00', $startHour),

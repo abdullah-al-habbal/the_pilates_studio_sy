@@ -6,10 +6,12 @@ namespace App\Filament\Admin\Resources\Classes\Schemas;
 
 use App\Enums\ClassStatusEnum;
 use App\Models\ClassCategory;
+use App\Models\Classes;
 use App\Models\Instructor;
 use App\Models\RecurrencePattern;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\Select;
@@ -85,7 +87,8 @@ class ClassesForm
                                         ]);
                                 })
                                 ->searchable()
-                                ->nullable()
+                                ->required()
+                                ->disabled(fn (?Classes $record) => $record?->exists && $record->hasBookedSessions())
                                 ->helperText(__('dashboard.resources.classes.helpers.recurrence_pattern'))
                                 ->columnSpan(1),
                         ]),
@@ -96,6 +99,12 @@ class ClassesForm
                             ->columnSpanFull()
                             ->helperText(__('dashboard.resources.classes.helpers.about')),
                     ]),
+
+                Placeholder::make('money_lock_warning')
+                    ->label('')
+                    ->content(fn (?Classes $record) => 'This class has customer bookings. Changing dates or recurrence would violate paid reservations. To offer different dates, create a new class.')
+                    ->visible(fn (?Classes $record) => $record?->exists && $record->hasBookedSessions())
+                    ->columnSpanFull(),
 
                 Section::make(__('dashboard.resources.classes.sections.schedule'))
                     ->description(__('dashboard.resources.classes.sections.schedule_desc'))
@@ -108,6 +117,7 @@ class ClassesForm
                                 ->displayFormat('M d, Y')
                                 ->native(false)
                                 ->closeOnDateSelection()
+                                ->disabled(fn (?Classes $record) => $record?->exists && $record->hasBookedSessions())
                                 ->helperText(__('dashboard.resources.classes.helpers.start_date'))
                                 ->columnSpan(1),
 
@@ -118,6 +128,7 @@ class ClassesForm
                                 ->native(false)
                                 ->closeOnDateSelection()
                                 ->afterOrEqual('start_date')
+                                ->disabled(fn (?Classes $record) => $record?->exists && $record->hasBookedSessions())
                                 ->helperText(__('dashboard.resources.classes.helpers.end_date'))
                                 ->columnSpan(1),
 
@@ -156,7 +167,10 @@ class ClassesForm
                                 ->minValue(1)
                                 ->maxValue(999)
                                 ->default(20)
-                                ->helperText(__('dashboard.resources.classes.helpers.total_spots'))
+                                ->helperText(fn (?Classes $record) => $record?->exists && $record->hasBookedSessions()
+                                    ? __('Reducing capacity below current reservations is blocked by the system.')
+                                    : __(key: 'dashboard.resources.classes.helpers.total_spots')
+                                )
                                 ->suffix('spots')
                                 ->columnSpan(1),
 

@@ -24,23 +24,13 @@ class CenterMerchandiseForm
                 ->icon('heroicon-o-shopping-bag')
                 ->columns(2)
                 ->schema([
-                    TextInput::make('name.en')
-                        ->label(__('dashboard.resources.center_merchandises.fields.name') . ' (EN)')
+                    TextInput::make('name')
+                        ->label(__('dashboard.resources.center_merchandises.fields.name'))
                         ->required()
                         ->maxLength(255),
 
-                    TextInput::make('name.ar')
-                        ->label(__('dashboard.resources.center_merchandises.fields.name') . ' (AR)')
-                        ->maxLength(255),
-
-                    Textarea::make('description.en')
-                        ->label(__('dashboard.resources.center_merchandises.fields.description') . ' (EN)')
-                        ->rows(3)
-                        ->maxLength(65535)
-                        ->columnSpanFull(),
-
-                    Textarea::make('description.ar')
-                        ->label(__('dashboard.resources.center_merchandises.fields.description') . ' (AR)')
+                    Textarea::make('description')
+                        ->label(__('dashboard.resources.center_merchandises.fields.description'))
                         ->rows(3)
                         ->maxLength(65535)
                         ->columnSpanFull(),
@@ -54,7 +44,7 @@ class CenterMerchandiseForm
                         ->relationship()
                         ->schema([
                             Select::make('currency_id')
-                                ->label(__('dashboard.resources.center_merchandises.fields.currency') ?? 'Currency')
+                                ->label('Currency')
                                 ->relationship('currency', 'name')
                                 ->required(),
                             TextInput::make('amount')

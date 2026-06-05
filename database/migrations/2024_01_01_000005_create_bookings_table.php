@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('bookings', function (Blueprint $table) {
             $table->id();
-            
+
             $table->foreignId('user_id')
                 ->constrained('users')
                 ->restrictOnDelete()
@@ -46,27 +46,27 @@ return new class extends Migration
                 ->comment('Expiration timestamp based on package validity');
 
             $table->unsignedInteger('paid_amount')->nullable();
-            
+
             $table->foreignId('currency_id')
                 ->nullable()
                 ->constrained('currencies')
                 ->nullOnDelete();
-            
+
             $table->decimal('exchange_rate_snapshot', 12, 6)
                 ->nullable()
                 ->comment('Rate at purchase time relative to base currency');
-            
+
             $table->string('source_type')
                 ->default('standard')
                 ->comment('standard | freeze_origin | freeze_resume');
-            
+
             $table->unsignedBigInteger('parent_booking_id')
                 ->nullable()
                 ->comment('Points to the original booking when source_type=freeze_resume');
-            
+
             $table->timestamp('frozen_at')->nullable();
             $table->timestamp('unfrozen_at')->nullable();
-            
+
             $table->timestamps();
             $table->softDeletes();
 
@@ -75,7 +75,7 @@ return new class extends Migration
             $table->index(['status', 'expires_at'], 'idx_bookings_status_expires');
             $table->index('currency_id');
             $table->index('parent_booking_id');
-            
+
             $table->foreign('parent_booking_id')
                 ->references('id')
                 ->on('bookings')
@@ -84,12 +84,16 @@ return new class extends Migration
             $table->unsignedBigInteger('active_user_id')
                 ->nullable()
                 ->storedAs(
-                    "CASE WHEN status = '" . BookingStatusEnum::ACTIVE->value . 
-                    "' AND remaining_credits > 0 THEN user_id ELSE NULL END"
+                    "CASE WHEN status = '" . BookingStatusEnum::ACTIVE->value .
+                        "' AND remaining_credits > 0 THEN user_id ELSE NULL END"
                 )
                 ->comment('Used to enforce unique active booking per user');
 
             $table->unique(['active_user_id'], 'unique_active_booking_per_user');
+
+            $table->unsignedSmallInteger('validity_days_snapshot')
+                ->nullable()
+                ->comment('Snapshot of package validity_days at time of booking creation');
         });
     }
 

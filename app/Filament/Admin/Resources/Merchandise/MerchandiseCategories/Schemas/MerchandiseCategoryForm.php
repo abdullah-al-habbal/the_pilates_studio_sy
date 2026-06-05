@@ -17,13 +17,9 @@ class MerchandiseCategoryForm
                 ->icon('heroicon-o-tag')
                 ->columns(2)
                 ->schema([
-                    TextInput::make('name.en')
-                        ->label(__('dashboard.resources.merchandise_categories.fields.name').' (EN)')
+                    TextInput::make('name')
+                        ->label(__('dashboard.resources.merchandise_categories.fields.name'))
                         ->required()
-                        ->maxLength(255),
-
-                    TextInput::make('name.ar')
-                        ->label(__('dashboard.resources.merchandise_categories.fields.name').' (AR)')
                         ->maxLength(255),
                 ]),
         ]);

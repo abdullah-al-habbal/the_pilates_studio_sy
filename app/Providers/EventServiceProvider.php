@@ -10,6 +10,14 @@ use App\Events\User\UserRegisteredEvent;
 use App\Events\UserSuccessfullyRegisteredEvent;
 use App\Listeners\CreateInitialBookingForUserSuccessfullyRegisteredListener;
 use App\Listeners\User\CreateDefaultUserSettingListener;
+use App\Models\CenterMerchandiseCategory;
+use App\Models\Classes;
+use App\Models\ClassSession;
+use App\Models\MerchandiseOrder;
+use App\Observers\CenterMerchandiseCategoryObserver;
+use App\Observers\ClassesObserver;
+use App\Observers\ClassSessionObserver;
+use App\Observers\MerchandiseOrderObserver;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
 
 class EventServiceProvider extends ServiceProvider
@@ -21,6 +29,13 @@ class EventServiceProvider extends ServiceProvider
         UserSuccessfullyRegisteredEvent::class => [
             CreateInitialBookingForUserSuccessfullyRegisteredListener::class,
         ],
+    ];
+
+    protected $observers = [
+        Classes::class => ClassesObserver::class,
+        ClassSession::class => ClassSessionObserver::class,
+        MerchandiseOrder::class => MerchandiseOrderObserver::class,
+        CenterMerchandiseCategory::class => CenterMerchandiseCategoryObserver::class,
     ];
 
     public function boot(): void

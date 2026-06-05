@@ -100,17 +100,19 @@ class ClassesSeeder extends Seeder
             ],
         ];
 
-        foreach ($fixed as $class) {
-            Classes::firstOrCreate(
-                [
-                    'title->en' => $class['title']['en'],
-                    'start_date' => $class['start_date']
-                ],
-                $class
-            );
-        }
+        Classes::withoutEvents(function () use ($fixed) {
+            foreach ($fixed as $class) {
+                Classes::firstOrCreate(
+                    [
+                        'title->en' => $class['title']['en'],
+                        'start_date' => $class['start_date']
+                    ],
+                    $class
+                );
+            }
 
-        Classes::factory(10)->create();
-        Classes::factory(3)->inactive()->create();
+            Classes::factory(10)->create();
+            Classes::factory(3)->inactive()->create();
+        });
     }
 }

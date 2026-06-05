@@ -7,6 +7,8 @@ namespace App\Filament\Admin\Resources\Merchandise\MerchandiseOrders\Schemas;
 use App\Models\CenterMerchandise;
 use App\Models\Currency;
 use App\Models\User;
+use Filament\Forms\Components\DateTimePicker;
+use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Components\Section;
@@ -31,9 +33,15 @@ class MerchandiseOrderForm
                         ->searchable()
                         ->preload()
                         ->live()
-                        ->afterStateUpdated(
-                            fn ($state, callable $set) => $set('quantity', 1)
-                        ),
+                        ->disabled(fn ($livewire) => $livewire->record !== null)
+                        ->afterStateUpdated(function ($state, callable $set, $get) {
+                            $set('quantity', 1);
+                            $merchandise = CenterMerchandise::find($state);
+                            if ($merchandise && $get('currency_id')) {
+                                $price = $merchandise->getPriceForCurrency($get('currency_id')) ?? 0;
+                                $set('paid_amount', $price);
+                            }
+                        }),
 
                     TextInput::make('quantity')
                         ->label(__('dashboard.resources.merchandise_orders.fields.quantity'))
@@ -53,15 +61,64 @@ class MerchandiseOrderForm
                             ])
                             : null
                         )
-                        ->live(),
+                        ->live()
+                        ->disabled(fn ($livewire) => $livewire->record !== null)
+                        ->afterStateUpdated(function ($state, callable $set, $get) {
+                            $merchandise = CenterMerchandise::find($get('merchandise_id'));
+                            if ($merchandise && $get('currency_id')) {
+                                $unitPrice = $merchandise->getPriceForCurrency($get('currency_id')) ?? 0;
+                                $set('paid_amount', $unitPrice * (int) $state);
+                            }
+                        }),
 
                     Select::make('currency_id')
-                        ->label(__('dashboard.resources.merchandise_orders.fields.currency'))
+                        ->label('currency')
                         ->options(fn () => Currency::where('is_active', true)->pluck('code', 'id'))
                         ->default(fn () => Currency::where('is_active', true)->value('id'))
                         ->required()
-                        ->searchable(),
+                        ->searchable()
+                        ->live()
+                        ->afterStateUpdated(function ($state, callable $set, $get) {
+                            $merchandise = CenterMerchandise::find($get('merchandise_id'));
+                            if ($merchandise && $state) {
+                                $unitPrice = $merchandise->getPriceForCurrency($state) ?? 0;
+                                $set('paid_amount', $unitPrice * (int) $get('quantity'));
+                            }
+                        }),
 
+                    TextInput::make('paid_amount')
+                        ->label('Paid Amount')
+                        ->numeric()
+                        ->minValue(0)
+                        ->helperText('Auto-calculated from price × quantity. Override if the customer paid a different amount.'),
+
+                    DateTimePicker::make('ordered_at')
+                        ->label(__('dashboard.resources.merchandise_orders.fields.ordered_at') ?? 'Order Date')
+                        ->default(now())
+                        ->required(),
+
+                    Placeholder::make('snapshot_name')
+                        ->label('Item Name (at Order)')
+                        ->content(function ($livewire) {
+                            $record = $livewire->record;
+                            if (!$record) return '—';
+                            $snapshot = $record->merchandise_name_snapshot;
+                            if (is_array($snapshot)) {
+                                return $snapshot[app()->getLocale()] ?? $snapshot['en'] ?? '—';
+                            }
+                            return $record->merchandise?->getTranslation('name', app()->getLocale()) ?? '—';
+                        })
+                        ->visible(fn ($livewire) => $livewire->record !== null),
+
+                    Placeholder::make('snapshot_price')
+                        ->label('Unit Price (at Order)')
+                        ->content(function ($livewire) {
+                            $record = $livewire->record;
+                            if (!$record) return '—';
+                            $code = app(\App\Services\Currency\CurrencyService::class)->getCode($record->currency_id);
+                            return number_format($record->merchandise_unit_price_snapshot ?? 0, 2) . ' ' . $code;
+                        })
+                        ->visible(fn ($livewire) => $livewire->record !== null),
                 ]),
 
             Section::make(__('dashboard.resources.merchandise_orders.sections.customer'))
@@ -94,6 +151,7 @@ class MerchandiseOrderForm
                             TextInput::make('password')
                                 ->label(__('dashboard.resources.users.fields.password'))
                                 ->password()
+                                ->revealable()
                                 ->nullable()
                                 ->maxLength(255)
                                 ->helperText(__('dashboard.resources.users.helpers.password_default')),

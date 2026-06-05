@@ -94,6 +94,16 @@ class ClassesTable
                     ->alignment('center')
                     ->toggleable(),
 
+                IconColumn::make('has_booked_sessions')
+                    ->label("locked")
+                    ->boolean()
+                    ->state(fn($record) => $record->hasBookedSessions())
+                    ->trueIcon('heroicon-o-lock-closed')
+                    ->falseIcon('heroicon-o-lock-open')
+                    ->trueColor('danger')
+                    ->falseColor('success')
+                    ->toggleable(),
+
                 IconColumn::make('is_active')
                     ->label(__('dashboard.resources.classes.fields.is_active'))
                     ->boolean()

@@ -28,6 +28,7 @@ class UserForm
                     ->unique(ignoreRecord: true, modifyRuleUsing: fn (Unique $rule) => $rule->where('is_active', 1)),
                 TextInput::make('password')
                     ->password()
+                    ->revealable()
                     ->required(),
                 DatePicker::make('date_of_birth'),
                 Toggle::make('allow_notifications')

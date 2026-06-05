@@ -23,9 +23,8 @@ return new class extends Migration {
                 ->restrictOnDelete();
 
             $table->foreignId('recurrence_pattern_id')
-                ->nullable()
                 ->constrained('recurrence_patterns')
-                ->nullOnDelete();
+                ->restrictOnDelete();
 
             $table->json('title');
             $table->json('about')->nullable();

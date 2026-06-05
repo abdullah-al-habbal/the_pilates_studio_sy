@@ -1,6 +1,7 @@
 <?php
 
 declare(strict_types=1);
+
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -33,6 +34,14 @@ return new class extends Migration {
             $table->decimal('exchange_rate_snapshot', 12, 6)
                 ->nullable()
                 ->comment('Rate at purchase time relative to base currency');
+
+            $table->json('merchandise_name_snapshot')
+                ->nullable()
+                ->comment('Snapshot of merchandise name at order time');
+
+            $table->unsignedInteger('merchandise_unit_price_snapshot')
+                ->nullable()
+                ->comment('Snapshot of unit price in order currency at order time');
 
             $table->index('merchandise_id', 'idx_order_merchandise');
             $table->index('customer_id', 'idx_order_customer');
