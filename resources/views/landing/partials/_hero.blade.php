@@ -7,12 +7,11 @@
     <div class="absolute inset-0 z-0">
         <img src="{{ $heroImageUrl }}"
              alt="Hero background"
-             class="w-full h-full object-cover opacity-90 dark:opacity-40"
-             loading="eager">
+             class="w-full h-full object-cover opacity-60 dark:opacity-40">
     </div>
     @endif
-    <div class="absolute inset-0 bg-gradient-to-r from-white/95 via-white/80 to-white/40 dark:from-dark-900/95 dark:via-dark-900/80 dark:to-dark-900/40"></div>
-    <div class="absolute inset-0 bg-gradient-to-t from-white dark:from-dark-900 via-transparent to-transparent"></div>
+    <div class="absolute inset-0 bg-gradient-to-r from-white/40 via-white/20 to-transparent dark:from-dark-900/95 dark:via-dark-900/80 dark:to-dark-900/40"></div>
+    <div class="absolute inset-0 bg-gradient-to-t from-[var(--brand-secondary)] dark:from-dark-900 via-transparent to-transparent"></div>
 
     <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 lg:py-32">
         <div class="grid lg:grid-cols-2 gap-12 items-center">
