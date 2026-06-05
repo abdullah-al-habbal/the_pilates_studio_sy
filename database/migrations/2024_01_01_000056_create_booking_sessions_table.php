@@ -46,6 +46,13 @@ return new class extends Migration
                 ->constrained('users')
                 ->nullOnDelete();
 
+            $table->foreignId('cancelled_by_admin_id')
+                ->nullable()
+                ->constrained('users')
+                ->nullOnDelete()
+                ->after('cancelled_by_user_id')
+                ->comment('Admin who overrode/cancelled this session');
+
             $table->string('attendance_status')
                 ->default(AttendanceStatusEnum::MISSED->value)
                 ->comment('Receptionist-set attendance: attended or missed');
@@ -53,6 +60,13 @@ return new class extends Migration
             $table->timestamp('attended_at')
                 ->nullable()
                 ->comment('Timestamp when receptionist confirmed attendance');
+
+            $table->foreignId('attendance_updated_by')
+                ->nullable()
+                ->constrained('users')
+                ->nullOnDelete()
+                ->after('attended_at')
+                ->comment('Admin who marked attendance');
 
             $table->timestamp('reminder_sent_at')
                 ->nullable()
