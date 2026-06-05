@@ -23,12 +23,8 @@ final readonly class GetClientsAction
     public function __invoke(GetClientsRequest $request): JsonResponse
     {
         try {
-            // fix: we must use a command class instead of passing the parameters directly to the handler
             $paginator = $this->handler->handle(
-                $request->query('search'),
-                (int) $request->query('page', 1),
-                $request->query('filter'),
-                (int) $request->query('per_page', 15)
+                $request->toCommand()
             );
 
             return $this->paginated(
@@ -39,7 +35,7 @@ final readonly class GetClientsAction
         } catch (\Throwable $e) {
             Log::error('Operations - GetClients failed: ' . $e->getMessage(), [
                 'exception' => $e,
-                'search' => $request->query('search'),
+                'search'    => $request->query('search'),
             ]);
 
             return $this->error(message: 'Failed to retrieve clients.');
