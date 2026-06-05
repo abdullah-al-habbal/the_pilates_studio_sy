@@ -107,7 +107,7 @@ class BookingSessionsRelationManager extends RelationManager
                     DeleteBulkAction::make(),
                 ]),
             ])
-            ->emptyStateHeading(__('No sessions yet'))
+            ->emptyStateHeading(__('dashboard.resources.booking_sessions.empty_state.heading'))
             ->emptyStateIcon('heroicon-o-calendar');
     }
 

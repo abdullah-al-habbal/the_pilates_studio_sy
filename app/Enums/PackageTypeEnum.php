@@ -1,6 +1,9 @@
 <?php
+
 declare(strict_types=1);
+
 namespace App\Enums;
+
 enum PackageTypeEnum: string
 {
     case STANDARD = 'standard';
@@ -8,7 +11,7 @@ enum PackageTypeEnum: string
     case FOR_FREEZE_CLIENT = 'for_freeze_client';
     public function label(): string
     {
-        return match($this) {
+        return match ($this) {
             self::STANDARD => 'Standard',
             self::BY_SYSTEM => 'System Generated',
             self::FOR_FREEZE_CLIENT => 'Unfreeze Residual',
@@ -16,7 +19,7 @@ enum PackageTypeEnum: string
     }
     public function color(): string
     {
-        return match($this) {
+        return match ($this) {
             self::STANDARD => 'gray',
             self::BY_SYSTEM => 'info',
             self::FOR_FREEZE_CLIENT => 'warning',

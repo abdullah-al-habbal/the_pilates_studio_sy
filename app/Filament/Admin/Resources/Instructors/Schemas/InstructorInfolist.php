@@ -3,6 +3,8 @@
 namespace App\Filament\Admin\Resources\Instructors\Schemas;
 
 use App\Models\Instructor;
+use Filament\Infolists\Components\Actions;
+use Filament\Infolists\Components\Actions\Action;
 use Filament\Infolists\Components\ImageEntry;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Components\Grid;
@@ -65,13 +67,32 @@ class InstructorInfolist
                 Section::make('Social Links')
                     ->icon('heroicon-o-globe-alt')
                     ->collapsible()
-                    ->schema([
-                        TextEntry::make('social_links')
-                            ->state(fn($record): array => $record->social_links ?? [])
-                            ->listWithLineBreaks()
-                            ->bulleted()
-                            ->placeholder('No social links configured'),
-                    ]),
+                    ->schema(function (Instructor $record) {
+                        $links = $record->social_links ?? [];
+
+                        if (empty($links)) {
+                            return [
+                                TextEntry::make('social_links_empty')
+                                    ->label('Social Links')
+                                    ->state('No social links configured'),
+                            ];
+                        }
+
+                        return array_map(function (array $link, int $index) {
+                            $platform = $link['platform'] ?? 'link';
+                            $url = $link['url'] ?? '#';
+
+                            return Actions::make([
+                                Action::make("open_link_{$index}")
+                                    ->label(ucfirst($platform))
+                                    ->icon('heroicon-o-link')
+                                    ->url($url)
+                                    ->openUrlInNewTab()
+                                    ->color('gray')
+                                    ->size('sm'),
+                            ]);
+                        }, $links, array_keys($links));
+                    }),
                 Section::make('Statistics')
                     ->icon('heroicon-o-chart-bar')
                     ->columns(2)

@@ -6,6 +6,8 @@ namespace App\Models;
 
 use App\Enums\BookingSourceTypeEnum;
 use App\Enums\BookingStatusEnum;
+use App\Services\Currency\CurrencyService;
+use App\Services\Currency\PricingService;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -16,6 +18,7 @@ use InvalidArgumentException;
 
 /**
  * @property-read float|null $exchange_rate_snapshot Immutable rate at transaction time for audit accuracy
+ * @property int|null $validity_days_snapshot Snapshot of package validity_days at purchase time
  */
 class Booking extends Model
 {
@@ -36,6 +39,7 @@ class Booking extends Model
         'frozen_at',
         'unfrozen_at',
         'exchange_rate_snapshot',
+        'validity_days_snapshot',
     ];
 
     protected function casts(): array
@@ -50,7 +54,34 @@ class Booking extends Model
             'status' => BookingStatusEnum::class,
             'source_type' => BookingSourceTypeEnum::class,
             'exchange_rate_snapshot' => 'float',
+            'validity_days_snapshot' => 'integer',
         ];
+    }
+
+    protected static function booted(): void
+    {
+        static::creating(function (Booking $booking) {
+            if ($booking->package_id && !$booking->validity_days_snapshot) {
+                $package = Package::find($booking->package_id);
+                if ($package) {
+                    $booking->validity_days_snapshot = $package->validity_days;
+
+                    if ($package->validity_days > 0 && !$booking->expires_at) {
+                        $baseDate = $booking->created_at ?? now();
+                        $booking->expires_at = $baseDate->copy()->addDays($package->validity_days);
+                    }
+                }
+            }
+        });
+
+        static::saving(function (Booking $booking) {
+            if (!$booking->exchange_rate_snapshot) {
+                $currencyId = $booking->currency_id
+                    ?? app(CurrencyService::class)->getBaseCurrency()->id;
+                $booking->exchange_rate_snapshot = app(PricingService::class)
+                    ->getExchangeRateForSnapshot($currencyId);
+            }
+        });
     }
 
     public function deductCredit(): void

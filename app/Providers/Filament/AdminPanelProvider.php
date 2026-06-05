@@ -55,12 +55,8 @@ class AdminPanelProvider extends PanelProvider
                 Dashboard::class,
             ])
             ->plugins([
-                SpatieTranslatablePlugin::make()
-                    ->persist()
-                    ->defaultLocales([
-                        'en',
-                        'ar',
-                    ]),
+                   SpatieTranslatablePlugin::make()
+                ->persist()
             ])
             ->widgets([
                 StatsOverview::class,
@@ -76,6 +72,10 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->middleware($this->getMiddleware())
             ->authMiddleware($this->getAuthMiddleware())
+            ->renderHook(
+                'panels::global-search.before',
+                fn(): string => view('filament.components.locale-switcher')->render(),
+            )
             ->renderHook(
                 'panels::user-menu.before',
                 fn(): string => Auth::user()?->isAdmin()

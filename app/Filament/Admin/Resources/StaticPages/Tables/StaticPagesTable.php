@@ -19,8 +19,7 @@ class StaticPagesTable
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('title')
-                    ->searchable()
-                    ->translatable(),
+                    ->searchable(),
                 IconColumn::make('is_active')
                     ->label('Active')
                     ->boolean(),

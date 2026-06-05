@@ -8,6 +8,7 @@ use Filament\Actions\EditAction;
 use Filament\Actions\ForceDeleteBulkAction;
 use Filament\Actions\RestoreBulkAction;
 use Filament\Actions\ViewAction;
+use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Table;
@@ -22,6 +23,11 @@ class InstructorsTable
 
         return $table
             ->columns([
+                ImageColumn::make('image')
+                    ->circular()
+                    ->size(40)
+                    ->defaultImageUrl(url('/images/placeholder-person.jpg')),
+
                 TextColumn::make('name')
                     ->searchable(query: fn (Builder $query, string $search) => $query->where('name->' . app()->getLocale(), 'like', "%{$search}%"))
                     ->formatStateUsing(fn ($state, $record) => $record->getTranslation('name', $locale)),
@@ -32,6 +38,18 @@ class InstructorsTable
                 TextColumn::make('specialty')
                     ->toggleable(isToggledHiddenByDefault: true)
                     ->formatStateUsing(fn ($state, $record) => $record->getTranslation('specialty', $locale)),
+                TextColumn::make('bio')
+                    ->label('Bio')
+                    ->formatStateUsing(fn ($state, $record) => $record->getTranslation('bio', $locale))
+                    ->limit(50)
+                    ->tooltip(fn ($record) => $record->getTranslation('bio', app()->getLocale()))
+                    ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('social_links')
+                    ->label('Social')
+                    ->formatStateUsing(fn ($state) => is_array($state) ? count($state) : 0)
+                    ->badge()
+                    ->color(fn ($state) => is_array($state) && count($state) > 0 ? 'success' : 'gray')
+                    ->sortable(query: fn (Builder $query, string $direction) => $query->orderByRaw('JSON_LENGTH(social_links) ' . $direction)),
                 TextColumn::make('classes_count')
                     ->label('Classes')
                     ->counts('classes')

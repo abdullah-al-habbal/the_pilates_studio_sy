@@ -18,6 +18,7 @@ final readonly class SwitchLocaleAction
     {
         if ($this->languageService->isValidLocale($code)) {
             session(['locale' => $code]);
+            session(['spatie_translatable_active_locale' => $code]);
         }
 
         return redirect()->back();

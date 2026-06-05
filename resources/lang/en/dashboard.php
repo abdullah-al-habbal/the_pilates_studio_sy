@@ -244,6 +244,13 @@ return [
                 'exhausted' => 'Exhausted',
                 'expired' => 'Expired',
                 'cancelled' => 'Cancelled',
+                'frozen' => 'Frozen',
+            ],
+            'validation' => [
+                'user_has_active_or_frozen_booking' => 'This user already has an active or frozen booking within the validity period. They must use or unfreeze it first.',
+            ],
+            'helpers' => [
+                'expiration_hint' => 'Automatically calculated from the package validity period.',
             ],
             'empty_state' => [
                 'heading' => 'No bookings yet',
@@ -292,6 +299,9 @@ return [
                 'delete' => 'Delete Session',
                 'attach' => 'Attach Session',
                 'detach' => 'Detach Session',
+            ],
+            'empty_state' => [
+                'heading' => 'No sessions yet',
             ],
             'messages' => [
                 'no_sessions' => 'No sessions found',

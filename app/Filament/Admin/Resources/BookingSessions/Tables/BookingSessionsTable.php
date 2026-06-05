@@ -4,7 +4,6 @@
 namespace App\Filament\Admin\Resources\BookingSessions\Tables;
 
 use App\Enums\BookingSessionStatusEnum;
-use App\Models\Classes;
 use App\Models\ClassSession;
 use App\Models\User;
 use Filament\Actions\BulkActionGroup;

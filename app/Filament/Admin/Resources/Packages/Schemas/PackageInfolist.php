@@ -8,7 +8,6 @@ use Filament\Schemas\Components\Section;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Schema;
 use Filament\Support\Enums\FontWeight;
-use Filament\Support\Enums\IconPosition;
 
 class PackageInfolist
 {
@@ -24,7 +23,6 @@ class PackageInfolist
                         ->schema([
                             TextEntry::make('name')
                                 ->weight(FontWeight::Bold)
-                                ->size(TextEntry\TextEntrySize::Large)
                                 ->formatStateUsing(fn($state, $record) =>
                                     $record->getTranslation('name', $locale)),
                             TextEntry::make('type')
@@ -49,7 +47,6 @@ class PackageInfolist
                                 ->label('Total Sessions')
                                 ->numeric()
                                 ->weight(FontWeight::Bold)
-                                ->size(TextEntry\TextEntrySize::Large)
                                 ->color('primary')
                                 ->icon('heroicon-o-numbered-list'),
                             TextEntry::make('validity_days')

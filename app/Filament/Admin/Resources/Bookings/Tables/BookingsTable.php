@@ -75,6 +75,21 @@ class BookingsTable
                     ->sortable()
                     ->color(fn ($state): string => $state > 0 ? 'success' : 'danger'),
 
+                TextColumn::make('validity_days_snapshot')
+                    ->label('Validity')
+                    ->formatStateUsing(fn ($state) => $state ? "{$state} days" : '∞')
+                    ->toggleable(isToggledHiddenByDefault: true),
+
+                TextColumn::make('paid_amount')
+                    ->label('Paid')
+                    ->formatStateUsing(function ($record) {
+                        if ($record->paid_amount === null) return '—';
+                        $currency = $record->currency;
+                        return number_format($record->paid_amount, $currency?->decimal_places ?? 2) . ' ' . ($currency?->symbol ?? '');
+                    })
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+
                 TextColumn::make('expires_at')
                     ->label(__('dashboard.resources.bookings.fields.expires_at'))
                     ->dateTime()

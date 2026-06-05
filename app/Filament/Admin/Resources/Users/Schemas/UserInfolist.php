@@ -24,7 +24,7 @@ class UserInfolist
                         ->schema([
                             TextEntry::make('fullname')
                                 ->weight(FontWeight::Bold)
-                                ->size(TextEntry\TextEntrySize::Large)
+                                
                                 ->icon('heroicon-o-user'),
                             TextEntry::make('email')
                                 ->icon('heroicon-o-envelope')

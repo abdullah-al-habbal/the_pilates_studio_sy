@@ -33,7 +33,7 @@ class TestimonialInfolist
                         ->schema([
                             TextEntry::make('name')
                                 ->weight(FontWeight::Bold)
-                                ->size(TextEntry\TextEntrySize::Large)
+                                
                                 ->formatStateUsing(fn($state, $record) =>
                                     $record->getTranslation('name', app()->getLocale())),
                             TextEntry::make('role')

@@ -219,6 +219,13 @@ return [
                 'exhausted' => 'مستنزف',
                 'expired' => 'منتهي الصلاحية',
                 'cancelled' => 'ملغى',
+                'frozen' => 'مجمّد',
+            ],
+            'validation' => [
+                'user_has_active_or_frozen_booking' => 'هذا المستخدم لديه بالفعل حجز نشط أو مجمّد ضمن فترة الصلاحية. يجب عليه استخدام الحجز أو إلغاء التجميد أولاً.',
+            ],
+            'helpers' => [
+                'expiration_hint' => 'يُحتسب تلقائياً من فترة صلاحية الباقة.',
             ],
             'empty_state' => [
                 'heading' => 'لا توجد حجوزات حتى الآن',
@@ -267,6 +274,9 @@ return [
                 'delete' => 'حذف الجلسة',
                 'attach' => 'إرفاق جلسة',
                 'detach' => 'فصل جلسة',
+            ],
+            'empty_state' => [
+                'heading' => 'لا توجد جلسات بعد',
             ],
             'messages' => [
                 'no_sessions' => 'لم توجد جلسات',

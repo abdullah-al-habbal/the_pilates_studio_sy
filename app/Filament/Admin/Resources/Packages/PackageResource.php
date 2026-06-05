@@ -2,6 +2,7 @@
 
 namespace App\Filament\Admin\Resources\Packages;
 
+use App\Enums\BookingStatusEnum;
 use App\Filament\Admin\Resources\Packages\Pages\CreatePackage;
 use App\Filament\Admin\Resources\Packages\Pages\EditPackage;
 use App\Filament\Admin\Resources\Packages\Pages\ListPackages;
@@ -47,6 +48,20 @@ class PackageResource extends Resource
         }
 
         return $record->getTranslation('name', app()->getLocale()) ?? 'Package #' . $record->id;
+    }
+
+    public static function getEloquentQuery(): Builder
+    {
+        return parent::getEloquentQuery()
+            ->withoutGlobalScopes([
+                SoftDeletingScope::class,
+            ])
+            ->withCount('bookings')
+            ->withCount([
+                'bookings as active_bookings_count' => fn ($query) =>
+                    $query->where('status', BookingStatusEnum::ACTIVE),
+            ])
+            ->withSum('bookings', 'total_credits');
     }
 
     public static function getNavigationBadge(): ?string

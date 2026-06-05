@@ -43,7 +43,7 @@ class AppNotificationInfolist
                             ->state(fn($record): bool => !is_null($record->read_at)),
                         TextEntry::make('title')
                             ->weight(FontWeight::Bold)
-                            ->size(TextEntry\TextEntrySize::Large)
+                            
                             ->columnSpanFull()
                             ->formatStateUsing(fn ($state, $record) => $record->getTranslation('title', app()->getLocale())),
                         TextEntry::make('message')

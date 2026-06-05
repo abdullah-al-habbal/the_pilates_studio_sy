@@ -4,7 +4,6 @@
 namespace App\Filament\Admin\Resources\Classes\RelationManagers;
 
 use App\Enums\ClassSessionStatusEnum;
-use App\Filament\Admin\Resources\Classes\ClassesResource;
 use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;

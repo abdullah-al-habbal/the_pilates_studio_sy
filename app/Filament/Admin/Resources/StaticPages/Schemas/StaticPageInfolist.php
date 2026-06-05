@@ -40,7 +40,7 @@ class StaticPageInfolist
                     ->schema([
                         TextEntry::make('title')
                             ->weight(FontWeight::Bold)
-                            ->size(TextEntry\TextEntrySize::Large)
+                            
                             ->formatStateUsing(fn($state, $record) =>
                                 $record->getTranslation('title', app()->getLocale())),
                         TextEntry::make('content')
