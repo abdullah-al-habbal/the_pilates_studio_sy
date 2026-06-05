@@ -19,6 +19,14 @@ return new class extends Migration
                 ->restrictOnDelete()
                 ->comment('User who purchased the package');
 
+            $table->foreignId('created_by')
+                ->nullable()
+                ->constrained('users')
+                ->nullOnDelete()
+                ->after('user_id')
+                ->comment('Admin who created this booking');
+            $table->index('created_by');
+
             $table->foreignId('package_id')
                 ->constrained('packages')
                 ->restrictOnDelete()

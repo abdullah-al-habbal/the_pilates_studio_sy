@@ -1,3 +1,4 @@
+{{-- /home/lenovo/work/projects/pilates/resources/views/landing/partials/_hero.blade.php --}}
 @php $s = $landingData->settings; @endphp
 <section id="hero" class="relative min-h-screen flex items-center overflow-hidden pt-20">
     <div class="absolute inset-0 z-0">

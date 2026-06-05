@@ -23,6 +23,9 @@ return new class extends Migration {
             $table->timestamp('otp_expires_at')->nullable();
             $table->string('status')->default(UserStatusEnum::ACTIVE->value)
                 ->comment('active | frozen | deactivated');
+            $table->string('role')->default('customer')->after('status')
+                ->comment('main_admin | admin | customer');
+            $table->index('role');
             $table->timestamp('frozen_at')->nullable()
                 ->comment('When the user was frozen');
             $table->string('freeze_reason')->nullable()

@@ -2,8 +2,8 @@
 
 namespace App\Filament\Admin\Resources\AppSettings\Schemas;
 
-use Filament\Infolists\Components\Section;
 use Filament\Infolists\Components\TextEntry;
+use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Filament\Support\Enums\FontWeight;
 
@@ -19,7 +19,6 @@ class AppSettingInfolist
                     ->schema([
                         TextEntry::make('key')
                             ->weight(FontWeight::Bold)
-                            ->size(TextEntry\TextEntrySize::Large)
                             ->badge()
                             ->color('gray')
                             ->copyable()

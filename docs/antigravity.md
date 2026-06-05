@@ -6,7 +6,7 @@ Implement **Option B: Base Price + Exchange Rate** architecture for a Laravel 11
 
 ## 🏗️ Tech Stack
 
-- **Backend**: PHP 8.2+, Laravel 12, Strict Types (`declare(strict_types=1);`)
+- **Backend**: PHP 8.4+, Laravel 12, Strict Types (`declare(strict_types=1);`)
 - **Pattern**: `Action → Handler → Service → Repository → Model`
 - **Validation**: Pure `FormRequest` rules only (no business logic)
 - **Data**: Commands/DTOs for handler inputs; Eloquent for persistence

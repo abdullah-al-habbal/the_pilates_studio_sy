@@ -1,3 +1,4 @@
+{{-- /home/lenovo/work/projects/pilates/resources/views/landing/partials/_classes.blade.php --}}
 @php $s = $landingData->settings; @endphp
 <section id="classes" class="py-24 bg-white dark:bg-dark-900">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

@@ -1,3 +1,4 @@
+{{-- /home/lenovo/work/projects/pilates/resources/views/landing/partials/_schedule.blade.php --}}
 @php $s = $landingData->settings; $deepScheme = $s->deepLinkScheme ?? 'thepilatesstudio'; @endphp
 <section id="schedule" class="py-24 bg-slate-50 dark:bg-dark-800/50">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

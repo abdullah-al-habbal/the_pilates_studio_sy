@@ -1,3 +1,4 @@
+{{-- /home/lenovo/work/projects/pilates/resources/views/landing/partials/_footer.blade.php --}}
 @php $s = $landingData->settings; @endphp
 <footer class="bg-slate-900 dark:bg-black text-slate-300">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

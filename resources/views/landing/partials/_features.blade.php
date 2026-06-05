@@ -1,3 +1,4 @@
+{{-- /home/lenovo/work/projects/pilates/resources/views/landing/partials/_features.blade.php --}}
 @php $s = $landingData->settings; @endphp
 <section id="features" class="py-24 bg-slate-50 dark:bg-dark-800/50">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

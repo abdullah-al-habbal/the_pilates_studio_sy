@@ -17,6 +17,14 @@ return new class extends Migration
                 
             $table->unsignedInteger('amount');
             $table->text('notes')->nullable();
+            $table->string('status')->default('pending')->after('notes')
+                ->comment('pending | approved | rejected');
+            $table->foreignId('approved_by')->nullable()->constrained('users')->nullOnDelete()->after('status');
+            $table->timestamp('approved_at')->nullable()->after('approved_by');
+            $table->foreignId('rejected_by')->nullable()->constrained('users')->nullOnDelete()->after('approved_at');
+            $table->timestamp('rejected_at')->nullable()->after('rejected_by');
+            $table->text('rejection_reason')->nullable()->after('rejected_at');
+            $table->index('status');
             $table->foreignId('recorded_by')->constrained('users')->restrictOnDelete();
             $table->date('expense_date');
             $table->timestamps();

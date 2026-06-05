@@ -4,7 +4,7 @@ A Laravel 12 monolithic web application for managing a fitness center's subscrip
 
 ## Tech Stack
 
-- **Backend:** PHP 8.2+, Laravel 12, MySQL
+- **Backend:** PHP 8.4+, Laravel 12, MySQL
 - **Admin Panel:** Filament v5
 - **API:** Laravel Sanctum (mobile), Session-based (admin web)
 - **Push Notifications:** Firebase Cloud Messaging (FCM)

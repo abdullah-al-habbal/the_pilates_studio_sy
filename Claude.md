@@ -4,7 +4,7 @@
 This is a **Laravel 12 monolithic web application** for managing a fitness center's subscriptions, clients, merchandise store, and financial operations. It includes an admin panel with real-time operations (freeze/unfreeze bookings, assign packages, handle walk-in orders, process refunds, record expenses).
 
 ## Tech Stack
-- **Backend:** PHP 8.2+, Laravel 12, MySQL.
+- **Backend:** PHP 8.4+, Laravel 12, MySQL.
 - **Frontend:** Vanilla JavaScript (with some Blade-rendered partials), Tailwind CSS v4, Filament v5.
 - **Key packages:** Laravel's Eloquent, FormRequest validation, Sanctum API auth, Firebase FCM, Spatie Translatable, Scramble API docs.
 

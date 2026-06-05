@@ -140,7 +140,7 @@ jobs:
             set -euo pipefail
             TARGET="${{ env.TARGET }}"
             ENVIRONMENT="${{ env.ENVIRONMENT }}"
-            PHP_BIN="$(command -v php8.4 || command -v php8.3 || command -v php8.2 || command -v php || echo /usr/bin/php)"
+            PHP_BIN="$(command -v php8.4 || command -v php8.3 || command -v php8.4 || command -v php || echo /usr/bin/php)"
             MIGRATE_LOCK="/tmp/laravel_migrate_$(echo "$TARGET" | tr '/' '_').lock"
 
             cd "$TARGET"

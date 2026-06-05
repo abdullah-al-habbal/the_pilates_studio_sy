@@ -11,8 +11,8 @@ All documentation files referenced outdated or conflicting versions:
 
 | File | Before | After |
 |------|--------|-------|
-| `antigravity.md` | Laravel 11, Filament v3, PHP 8.2+ | Laravel 12, Filament v5, PHP 8.2+ |
-| `Claude.md` | Laravel 10+, PHP 8.1+ | Laravel 12, PHP 8.2+ |
+| `antigravity.md` | Laravel 11, Filament v3, PHP 8.4+ | Laravel 12, Filament v5, PHP 8.4+ |
+| `Claude.md` | Laravel 10+, PHP 8.1+ | Laravel 12, PHP 8.4+ |
 
 Also added missing `README.md` at project root.
 

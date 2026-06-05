@@ -1,3 +1,4 @@
+{{-- /home/lenovo/work/projects/pilates/resources/views/layouts/landing.blade.php --}}
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}" dir="{{ app()->getLocale() === 'ar' ? 'rtl' : 'ltr' }}" class="scroll-smooth">
 <head>
