@@ -39,4 +39,7 @@
     <template id="tpl-notifications">
         @include('admin.operations.partials.tab-notifications')
     </template>
+    <template id="tpl-approvals">
+        @include('admin.operations.partials.tab-approvals')
+    </template>
 @endsection

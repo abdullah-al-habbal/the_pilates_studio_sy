@@ -31,6 +31,15 @@
                 </svg>
                 <span>Push Notifications</span>
             </button>
+            @if(auth()->user()?->isMainAdmin())
+                <button data-tab="approvals"
+                    class="w-full text-left px-4 py-3 rounded-xl transition-all flex items-center gap-3 hover:bg-slate-100 dark:hover:bg-slate-800">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <span>Expense Approvals</span>
+                </button>
+            @endif
         </nav>
     </div>
 </aside>

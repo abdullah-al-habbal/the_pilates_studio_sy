@@ -19,6 +19,7 @@ class MerchandiseOrder extends Model
         'merchandise_id',
         'quantity',
         'customer_id',
+        'created_by',
         'ordered_at',
         'currency_id',
         'paid_amount',
@@ -62,4 +63,8 @@ class MerchandiseOrder extends Model
         return $this->belongsTo(User::class, 'customer_id');
     }
 
+    public function createdBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'created_by');
+    }
 }

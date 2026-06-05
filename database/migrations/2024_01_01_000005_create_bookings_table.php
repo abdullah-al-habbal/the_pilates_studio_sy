@@ -23,7 +23,6 @@ return new class extends Migration
                 ->nullable()
                 ->constrained('users')
                 ->nullOnDelete()
-                ->after('user_id')
                 ->comment('Admin who created this booking');
             $table->index('created_by');
 

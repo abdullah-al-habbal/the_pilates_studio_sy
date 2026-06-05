@@ -48,6 +48,16 @@ class Reports extends Page implements HasInfolists
     private ?Collection $_classes = null;
     private ?Collection $_merch = null;
 
+    public static function canAccess(): bool
+    {
+        return auth()->user()?->isMainAdmin() ?? false;
+    }
+
+    public static function shouldRegisterNavigation(): bool
+    {
+        return auth()->user()?->isMainAdmin() ?? false;
+    }
+
     public function mount(): void
     {
         $this->dailyDate = now()->toDateString();
@@ -77,14 +87,14 @@ class Reports extends Page implements HasInfolists
         $service = app(DailyBalanceService::class);
         $currency = app(CurrencyService::class)->getDefaultCurrency();
         $summary = $service->getSummary(now()->toDateString(), [$currency->code]);
-        $item = $summary->firstWhere('currency_code', $currency->code);
+        $item = $summary->firstWhere('currencyCode', $currency->code);
 
         if (!$item) {
             return '—';
         }
-        $amount = $item['base_conversion_applied'] && $item['total_revenue_in_base'] !== null
-            ? $item['total_revenue_in_base']
-            : $item['total_revenue'];
+        $amount = $item->baseConversionApplied && $item->totalRevenueInBase !== null
+            ? $item->totalRevenueInBase
+            : $item->totalRevenue;
 
         return number_format($amount, $currency->decimal_places) . ' ' . $currency->symbol;
     }
@@ -159,18 +169,12 @@ class Reports extends Page implements HasInfolists
             $end = Carbon::today()->endOfDay();
         }
 
-        $summary = app(DailyBalanceService::class)->getSummaryForRange(
+        return app(DailyBalanceService::class)->getSummaryForRange(
             start: $start,
             end: $end,
             currencies: $this->selectedCurrencies ?: null,
             convertToBase: $this->convertToBase,
         );
-
-        return collect($summary)
-            ->map(
-                fn(array $item): CurrencySummaryData =>
-                CurrencySummaryData::fromArray($item)
-            );
     }
 
     private function formatCurrency(

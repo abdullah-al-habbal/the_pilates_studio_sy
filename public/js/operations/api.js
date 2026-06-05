@@ -171,4 +171,18 @@ const OperationsAPI = {
             amount: parseInt(data.amount, 10),
         });
     },
+
+    getPendingExpenses() {
+        return this.request("/admin/operations/approvals/pending");
+    },
+
+    approveExpense(expenseId) {
+        return this.request(`/admin/operations/approvals/${expenseId}/approve`, "POST");
+    },
+
+    rejectExpense(expenseId, reason) {
+        return this.request(`/admin/operations/approvals/${expenseId}/reject`, "POST", {
+            rejection_reason: reason,
+        });
+    },
 };

@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace App\Http\Actions\Web\Admin\Operations;
 
+use App\Enums\ClubExpenseStatusEnum;
 use App\Models\ClubExpense;
 use App\Traits\ApiResponseTrait;
 use Illuminate\Http\JsonResponse;
@@ -16,6 +17,7 @@ final class GetExpenseBreakdownAction
     {
         $date = $request->get('date', now()->toDateString());
         $expenses = ClubExpense::where('expense_date', $date)
+            ->whereIn('status', [ClubExpenseStatusEnum::PENDING, ClubExpenseStatusEnum::APPROVED])
             ->with('category')
             ->get()
             ->groupBy('category_id')

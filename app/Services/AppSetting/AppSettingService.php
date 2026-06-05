@@ -26,6 +26,7 @@ class AppSettingService
             'number', 'integer' => (int) $value,
             'image' => $value ?: $default,
             'json' => json_decode($value, true),
+            'hex_color' => $value ?: $default,
             default => $value,
         };
     }

@@ -7,6 +7,8 @@ use App\Commands\Admin\Operations\RecordExpenseCommand;
 use App\Models\ClubExpense;
 use App\Repositories\Eloquent\ClubExpense\ClubExpenseEloquentRepository;
 use App\Repositories\Eloquent\ClubExpenseCategory\ClubExpenseCategoryEloquentRepository;
+use App\Enums\ClubExpenseStatusEnum;
+use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 
@@ -23,14 +25,24 @@ final readonly class RecordExpenseHandler
         return DB::transaction(function () use ($command) {
             $category = $this->categoryRepository->firstOrCreateByName($command->categoryName);
 
-            return $this->repository->create([
+            $data = [
                 'category_id' => $category->id,
                 'currency_id' => $command->currencyId,
                 'amount' => $command->amount,
                 'notes' => $command->notes,
                 'recorded_by' => $command->recordedBy,
                 'expense_date' => ($command->expenseDate ?? Carbon::today())->toDateString(),
-            ]);
+            ];
+
+            $recorder = User::find($command->recordedBy);
+
+            if ($recorder?->isMainAdmin()) {
+                $data['status'] = ClubExpenseStatusEnum::APPROVED;
+                $data['approved_by'] = $command->recordedBy;
+                $data['approved_at'] = Carbon::now();
+            }
+
+            return $this->repository->create($data);
         });
     }
 }

@@ -21,6 +21,14 @@ class UsersTable
             ->columns([
                 TextColumn::make('fullname')
                     ->searchable(),
+                TextColumn::make('role')
+                    ->badge()
+                    ->color(fn(string $state): string => match ($state) {
+                        'main_admin' => 'danger',
+                        'admin' => 'warning',
+                        default => 'gray',
+                    })
+                    ->formatStateUsing(fn(string $state): string => str($state)->replace('_', ' ')->title()),
                 TextColumn::make('phone_number')
                     ->searchable(),
                 TextColumn::make('email')

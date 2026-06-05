@@ -60,6 +60,7 @@ $app = Application::configure(basePath: dirname(__DIR__))
             'ensure.active.booking' => EnsureActiveBookingMiddleware::class,
             'ensure.active.package' => EnsureActivePackageMiddleware::class,
             'freeze.user' => FreezeUserMiddleware::class,
+            'role.admin' => \App\Http\Middleware\EnsureUserIsAdmin::class,
             'guest' => RedirectIfAuthenticated::class,
             'password.confirm' => RequirePassword::class,
             'precognitive' => HandlePrecognitiveRequests::class,

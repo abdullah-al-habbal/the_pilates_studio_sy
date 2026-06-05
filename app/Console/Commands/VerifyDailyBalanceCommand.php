@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Console\Commands;
 
+use App\Data\Reports\CurrencySummaryData;
 use App\Services\Finance\DailyBalanceService;
 use Illuminate\Console\Command;
 use Illuminate\Support\Carbon;
@@ -27,12 +28,12 @@ final class VerifyDailyBalanceCommand extends Command
 
         $this->table(
             ['Code', 'Revenue', 'Expenses', 'Refunds', 'True Balance'],
-            $summary->map(fn (array $row): array => [
-                $row['currency_code'],
-                $row['total_revenue'],
-                $row['total_expenses'],
-                $row['total_refunds'],
-                $row['true_balance'],
+            $summary->map(fn (CurrencySummaryData $row): array => [
+                $row->currencyCode,
+                $row->totalRevenue,
+                $row->totalExpenses,
+                $row->totalRefunds,
+                $row->trueBalance,
             ])->all()
         );
 

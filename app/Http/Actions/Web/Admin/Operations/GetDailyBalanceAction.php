@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Actions\Web\Admin\Operations;
 
 use App\Commands\Admin\Operations\GetDailyBalanceCommand;
+use App\Data\Reports\CurrencySummaryData;
 use App\Http\Requests\Admin\Operations\GetDailyBalanceRequest;
 use App\Services\Finance\DailyBalanceService;
 use App\Traits\ApiResponseTrait;
@@ -35,7 +36,9 @@ final readonly class GetDailyBalanceAction
             );
 
             return $this->success(
-                data: $summary->values()->all(),
+                data: $summary->map(
+                    fn(CurrencySummaryData $item): array => $item->toArray()
+                )->values()->all(),
                 message: 'Daily balance retrieved successfully.'
             );
         } catch (\Throwable $e) {

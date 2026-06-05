@@ -18,6 +18,7 @@ class BookingFactory extends Factory
 
         return [
             'user_id'           => User::inRandomOrder()->first()?->id ?? User::factory(),
+            'created_by'        => null,
             'package_id'        => $package->id,
             'total_credits'     => $total,
             'remaining_credits' => $remaining,

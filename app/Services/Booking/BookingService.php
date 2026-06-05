@@ -65,13 +65,14 @@ class BookingService
         }
     }
 
-    public function createFromPackage(User $user, Package $package, ?Carbon $expiresAt = null, ?int $currencyId = null, ?int $paidAmount = null, ?float $exchangeRateSnapshot = null): Booking
+    public function createFromPackage(User $user, Package $package, ?Carbon $expiresAt = null, ?int $currencyId = null, ?int $paidAmount = null, ?float $exchangeRateSnapshot = null, ?int $createdBy = null): Booking
     {
         $this->assertNoActiveBooking($user);
 
-        return DB::transaction(function () use ($user, $package, $expiresAt, $currencyId, $paidAmount, $exchangeRateSnapshot): Booking {
+        return DB::transaction(function () use ($user, $package, $expiresAt, $currencyId, $paidAmount, $exchangeRateSnapshot, $createdBy): Booking {
             return $this->repository->create([
                 'user_id' => $user->id,
+                'created_by' => $createdBy,
                 'package_id' => $package->id,
                 'total_credits' => $package->total_credits,
                 'remaining_credits' => $package->total_credits,
@@ -156,14 +157,15 @@ class BookingService
         return $this->repository->sumUsedCredits();
     }
 
-    public function createWalkInBooking(int $userId): Booking
+    public function createWalkInBooking(int $userId, ?int $createdBy = null): Booking
     {
-        return DB::transaction(function () use ($userId): Booking {
+        return DB::transaction(function () use ($userId, $createdBy): Booking {
             $package = $this->packageService->findActiveWalkInPackage()
                 ?? $this->packageService->createWalkInPackage();
 
             return $this->repository->create([
                 'user_id' => $userId,
+                'created_by' => $createdBy,
                 'package_id' => $package->id,
                 'total_credits' => 1,
                 'remaining_credits' => 1,

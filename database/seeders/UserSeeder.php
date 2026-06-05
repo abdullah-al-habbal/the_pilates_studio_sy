@@ -11,16 +11,6 @@ class UserSeeder extends Seeder
     public function run(): void
     {
         User::firstOrCreate(
-            ['email' => 'adam.kim@gmail.com'],
-            [
-                'fullname' => 'Adam Kim',
-                'phone_number' => '+97100000001',
-                'password' => Hash::make('password'),
-                'date_of_birth' => '1990-01-01',
-                'email_verified_at' => now(),
-            ]
-        );
-        User::firstOrCreate(
             ['email' => 'admin@studio.com'],
             [
                 'fullname' => 'Studio Admin',
@@ -28,6 +18,18 @@ class UserSeeder extends Seeder
                 'password' => Hash::make('password'),
                 'date_of_birth' => '1990-01-01',
                 'email_verified_at' => now(),
+                'role' => 'main_admin',
+            ]
+        );
+        User::firstOrCreate(
+            ['email' => 'adam.kim@gmail.com'],
+            [
+                'fullname' => 'Adam Kim',
+                'phone_number' => '+97100000001',
+                'password' => Hash::make('password'),
+                'date_of_birth' => '1990-01-01',
+                'email_verified_at' => now(),
+                'role' => 'admin',
             ]
         );
 

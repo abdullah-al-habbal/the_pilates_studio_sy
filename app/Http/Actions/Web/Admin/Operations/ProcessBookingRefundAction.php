@@ -21,6 +21,10 @@ final readonly class ProcessBookingRefundAction
 
     public function __invoke(ProcessBookingRefundRequest $request, int $bookingId): JsonResponse
     {
+        if (!auth()->user()?->isMainAdmin()) {
+            return $this->forbidden('Only main admin can process refunds.');
+        }
+
         try {
             $amount = $request->has('amount') ? (int) $request->amount : null;
 

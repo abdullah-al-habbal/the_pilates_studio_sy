@@ -2,6 +2,7 @@
 
 namespace App\Filament\Admin\Resources\AppSettings\Schemas;
 
+use Filament\Forms\Components\ColorPicker;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
@@ -20,11 +21,12 @@ class AppSettingForm
                     ->unique(ignoreRecord: true),
                 Select::make('type')
                     ->options([
-                        'string'  => 'String',
-                        'boolean' => 'Boolean',
-                        'number'  => 'Number',
-                        'image'   => 'Image',
-                        'json'    => 'JSON',
+                        'string'    => 'String',
+                        'boolean'   => 'Boolean',
+                        'number'    => 'Number',
+                        'image'     => 'Image',
+                        'json'      => 'JSON',
+                        'hex_color' => 'Hex Color',
                     ])
                     ->disabled()
                     ->required(),
@@ -67,6 +69,10 @@ class AppSettingForm
                             $set('uploaded_image', $record->value);
                         }
                     }),
+                ColorPicker::make('value')
+                    ->label('Color')
+                    ->visible(fn($get) => $get('type') === 'hex_color')
+                    ->required(fn($get) => $get('type') === 'hex_color'),
                 TextInput::make('description')
                     ->label('Description (optional)'),
             ]);

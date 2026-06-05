@@ -23,8 +23,10 @@ class BookingSession extends Model
         'cancelled_at',
         'cancellation_reason',
         'cancelled_by_user_id',
+        'cancelled_by_admin_id',
         'attendance_status',
         'attended_at',
+        'attendance_updated_by',
         'cancellation_type',
     ];
 
@@ -176,5 +178,15 @@ class BookingSession extends Model
     public function cancelledBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'cancelled_by_user_id');
+    }
+
+    public function cancelledByAdmin(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'cancelled_by_admin_id');
+    }
+
+    public function attendanceUpdatedBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'attendance_updated_by');
     }
 }

@@ -26,14 +26,18 @@ final class GetDailySessionsAction
     public function __invoke(GetDailySessionsRequest $request): JsonResponse
     {
         try {
+            $instructorId = $request->getInstructorId();
+
             $this->logger->info('[Scheduler:GetDailySessions] Fetching sessions', [
                 'date' => $request->getDate(),
+                'instructor_id' => $instructorId,
             ]);
 
             $query = new GetDailySessionsQuery(
                 date: $request->getDate(),
                 perPage: $request->getPerPage(),
                 page: (int) $request->input('page', 1),
+                instructorId: $instructorId,
             );
 
             $paginator = $this->handler->handle($query);

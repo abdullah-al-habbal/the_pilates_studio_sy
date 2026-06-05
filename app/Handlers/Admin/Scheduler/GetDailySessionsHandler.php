@@ -19,7 +19,8 @@ final readonly class GetDailySessionsHandler
         return $this->repository->paginateDailySessions(
             $query->date,
             $query->perPage,
-            $query->page
+            $query->page,
+            $query->instructorId
         );
     }
 }

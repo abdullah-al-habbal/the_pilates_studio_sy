@@ -25,8 +25,12 @@ use App\Http\Actions\Web\Admin\Operations\{
 use App\Http\Actions\Web\Admin\Client\ClientDetailsAction;
 use Illuminate\Support\Facades\Route;
 
+use App\Http\Actions\Web\Admin\Operations\ApproveExpenseAction;
+use App\Http\Actions\Web\Admin\Operations\GetPendingExpensesAction;
+use App\Http\Actions\Web\Admin\Operations\RejectExpenseAction;
+
 Route::prefix('admin/operations')
-    ->middleware(['web', 'auth', 'freeze.user'])
+    ->middleware(['web', 'auth', 'freeze.user', 'role.admin'])
     ->name('admin.operations.')
     ->group(function (): void {
         Route::get('/', OperationsIndexAction::class)->name('index');
@@ -54,4 +58,10 @@ Route::prefix('admin/operations')
         Route::post('/bookings/{bookingId}/freeze', FreezeBookingAction::class)->name('bookings.freeze');
         Route::post('/bookings/{bookingId}/unfreeze', UnfreezeBookingAction::class)->name('bookings.unfreeze');
         Route::post('/bookings/{bookingId}/refund', ProcessBookingRefundAction::class)->name('bookings.refund');
+
+        Route::prefix('approvals')->group(function (): void {
+            Route::get('/pending', GetPendingExpensesAction::class)->name('approvals.pending');
+            Route::post('/{expense}/approve', ApproveExpenseAction::class)->name('approvals.approve');
+            Route::post('/{expense}/reject', RejectExpenseAction::class)->name('approvals.reject');
+        });
     });

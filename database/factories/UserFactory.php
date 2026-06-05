@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Enums\UserRoleEnum;
 use App\Enums\UserStatusEnum;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Facades\Hash;
@@ -22,6 +23,7 @@ class UserFactory extends Factory
             'deactivated_at'    => null,
             'deleted_by'        => null,
             'status'            => UserStatusEnum::ACTIVE,
+            'role'              => UserRoleEnum::CUSTOMER,
         ];
     }
 
@@ -33,5 +35,15 @@ class UserFactory extends Factory
     public function deactivated(): static
     {
         return $this->state(fn() => ['deactivated_at' => now()]);
+    }
+
+    public function admin(): static
+    {
+        return $this->state(fn() => ['role' => UserRoleEnum::ADMIN]);
+    }
+
+    public function mainAdmin(): static
+    {
+        return $this->state(fn() => ['role' => UserRoleEnum::MAIN_ADMIN]);
     }
 }

@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace App\Services\Finance;
 
+use App\Data\Reports\CurrencySummaryData;
 use App\Models\Currency;
 use App\Repositories\Eloquent\Booking\BookingEloquentRepository;
 use App\Repositories\Eloquent\ClubExpense\ClubExpenseEloquentRepository;
@@ -11,7 +12,7 @@ use App\Repositories\Eloquent\Refund\RefundEloquentRepository;
 use Carbon\Carbon;
 use Carbon\CarbonInterface;
 use Illuminate\Support\Collection;
-use App\Services\Finance\ExchangeRateSnapshotService;
+
 final class DailyBalanceService
 {
     public function __construct(
@@ -23,6 +24,9 @@ final class DailyBalanceService
     ) {
     }
 
+    /**
+     * @return Collection<int, CurrencySummaryData>
+     */
     public function getSummary(?string $date = null, ?array $currencies = null, bool $convertToBase = false): Collection
     {
         [$start, $end] = $this->resolveDateRange($date);
@@ -30,6 +34,9 @@ final class DailyBalanceService
         return $this->getSummaryForRange($start, $end, $currencies, $convertToBase);
     }
 
+    /**
+     * @return Collection<int, CurrencySummaryData>
+     */
     public function getSummaryForRange(
         CarbonInterface $start,
         CarbonInterface $end,
@@ -40,7 +47,9 @@ final class DailyBalanceService
         $end = Carbon::parse($end)->endOfDay();
         $baseCurrency = $this->snapshotService->currencyService->getBaseCurrency();
 
-        $expenseTotals = $this->expenseRepo->getTotalsByCurrency($start, $end);
+        $creatorId = $this->resolveCreatorScope();
+
+        $expenseTotals = $this->expenseRepo->getTotalsByCurrency($start, $end, $creatorId);
         $refundTotals = $this->refundRepo->getTotalsByCurrency($start, $end);
 
         $query = Currency::where('is_active', true)->orderBy('id');
@@ -48,10 +57,18 @@ final class DailyBalanceService
             $query->whereIn('code', $currencies);
         }
 
-        return $query->get()->map(function (Currency $currency) use ($start, $end, $expenseTotals, $refundTotals, $convertToBase, $baseCurrency): array {
-            $pkgRevenueRaw = $this->bookingRepo->getRevenueByCurrency($start, $end)
+        return $query->get()->map(function (Currency $currency) use (
+            $start,
+            $end,
+            $expenseTotals,
+            $refundTotals,
+            $convertToBase,
+            $baseCurrency,
+            $creatorId,
+        ): CurrencySummaryData {
+            $pkgRevenueRaw = $this->bookingRepo->getRevenueByCurrency($start, $end, $creatorId)
                 ->firstWhere('currency_id', $currency->id)?->total_revenue ?? 0;
-            $merchRevenueRaw = $this->orderRepo->getRevenueByCurrency($start, $end)
+            $merchRevenueRaw = $this->orderRepo->getRevenueByCurrency($start, $end, $creatorId)
                 ->firstWhere('currency_id', $currency->id)?->total_revenue ?? 0;
 
             $expensesRaw = (int) ($expenseTotals->get($currency->id)?->total ?? 0);
@@ -60,50 +77,62 @@ final class DailyBalanceService
             $totalRevenueRaw = $pkgRevenueRaw + $merchRevenueRaw;
             $trueBalanceRaw = $totalRevenueRaw - $expensesRaw - $refundsRaw;
 
-            $result = [
-                'currency_id' => $currency->id,
-                'currency_code' => $currency->code,
-                'currency_symbol' => $currency->symbol,
-                'currency_decimals' => $currency->decimal_places,
-                'package_revenue' => $pkgRevenueRaw,
-                'merchandise_revenue' => $merchRevenueRaw,
-                'total_revenue' => $totalRevenueRaw,
-                'total_expenses' => $expensesRaw,
-                'total_refunds' => $refundsRaw,
-                'true_balance' => $trueBalanceRaw,
-                'base_conversion_applied' => false,
-                'base_currency_code' => null,
-                'total_revenue_in_base' => null,
-                'true_balance_in_base' => null,
-            ];
+            $baseConversionApplied = false;
+            $baseCurrencyCode = null;
+            $totalRevenueInBase = null;
+            $trueBalanceInBase = null;
 
             if ($convertToBase && $currency->id !== $baseCurrency->id) {
                 $snapshotRate = $this->snapshotService->getHistoricalRate($currency->id, $start);
 
                 if ($snapshotRate !== null && $snapshotRate > 0) {
-                    $result['base_conversion_applied'] = true;
-                    $result['base_currency_code'] = $baseCurrency->code;
+                    $baseConversionApplied = true;
+                    $baseCurrencyCode = $baseCurrency->code;
 
-                    $result['total_revenue_in_base'] = $this->snapshotService->convertToBase(
+                    $totalRevenueInBase = $this->snapshotService->convertToBase(
                         $totalRevenueRaw,
                         $currency->id,
                         $snapshotRate
                     );
-                    $result['true_balance_in_base'] = $this->snapshotService->convertToBase(
+                    $trueBalanceInBase = $this->snapshotService->convertToBase(
                         $trueBalanceRaw,
                         $currency->id,
                         $snapshotRate
                     );
                 }
             } elseif ($convertToBase && $currency->id === $baseCurrency->id) {
-                $result['base_conversion_applied'] = true;
-                $result['base_currency_code'] = $baseCurrency->code;
-                $result['total_revenue_in_base'] = $totalRevenueRaw;
-                $result['true_balance_in_base'] = $trueBalanceRaw;
+                $baseConversionApplied = true;
+                $baseCurrencyCode = $baseCurrency->code;
+                $totalRevenueInBase = $totalRevenueRaw;
+                $trueBalanceInBase = $trueBalanceRaw;
             }
 
-            return $result;
+            return new CurrencySummaryData(
+                currencyId: $currency->id,
+                currencyCode: $currency->code,
+                currencySymbol: $currency->symbol,
+                currencyDecimals: $currency->decimal_places,
+                packageRevenue: $pkgRevenueRaw,
+                merchandiseRevenue: $merchRevenueRaw,
+                totalRevenue: $totalRevenueRaw,
+                totalExpenses: $expensesRaw,
+                totalRefunds: $refundsRaw,
+                trueBalance: $trueBalanceRaw,
+                baseConversionApplied: $baseConversionApplied,
+                baseCurrencyCode: $baseCurrencyCode,
+                totalRevenueInBase: $totalRevenueInBase,
+                trueBalanceInBase: $trueBalanceInBase,
+            );
         });
+    }
+
+    private function resolveCreatorScope(): ?int
+    {
+        $user = auth()->user();
+        if (!$user || $user->isMainAdmin()) {
+            return null;
+        }
+        return $user->id;
     }
 
     private function resolveDateRange(?string $date): array

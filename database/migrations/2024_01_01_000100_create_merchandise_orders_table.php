@@ -22,7 +22,6 @@ return new class extends Migration {
                 ->nullable()
                 ->constrained('users')
                 ->nullOnDelete()
-                ->after('customer_id')
                 ->comment('Admin who created this order');
             $table->index('created_by');
             $table->timestamp('ordered_at')->useCurrent();

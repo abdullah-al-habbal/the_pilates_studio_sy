@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Models;
 
 use App\Enums\BookingStatusEnum;
+use App\Enums\UserRoleEnum;
 use App\Enums\UserStatusEnum;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -37,6 +38,7 @@ class User extends Authenticatable
         'deactivated_at',
         'deleted_by',
         'status',
+        'role',
         'frozen_at',
         'freeze_reason',
     ];
@@ -58,8 +60,36 @@ class User extends Authenticatable
             'deactivated_at' => 'datetime',
             'password' => 'hashed',
             'status' => UserStatusEnum::class,
+            'role' => UserRoleEnum::class,
             'is_active' => 'boolean',
         ];
+    }
+
+    // ─── Role helpers ─────────────────────────────────────────────────────────
+
+    public function isMainAdmin(): bool
+    {
+        return $this->role === UserRoleEnum::MAIN_ADMIN;
+    }
+
+    public function isAdmin(): bool
+    {
+        return in_array($this->role, [UserRoleEnum::MAIN_ADMIN, UserRoleEnum::ADMIN], true);
+    }
+
+    public function isCustomer(): bool
+    {
+        return $this->role === UserRoleEnum::CUSTOMER;
+    }
+
+    public function scopeCustomers($query)
+    {
+        return $query->where('role', UserRoleEnum::CUSTOMER->value);
+    }
+
+    public function scopeAdmins($query)
+    {
+        return $query->whereIn('role', [UserRoleEnum::MAIN_ADMIN->value, UserRoleEnum::ADMIN->value]);
     }
 
     // ─── Status helpers ──────────────────────────────────────────────────────

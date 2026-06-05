@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services\Finance;
 
+use App\Enums\ClubExpenseStatusEnum;
 use App\Models\ClubExpense;
 use App\Models\ClubExpenseCategory;
 use Illuminate\Support\Facades\DB;
@@ -32,6 +33,8 @@ class ClubExpenseService
     
     public function getDailyTotal(\DateTimeInterface $date): int
     {
-        return (int) ClubExpense::whereDate('expense_date', $date)->sum('amount');
+        return (int) ClubExpense::whereDate('expense_date', $date)
+            ->where('status', ClubExpenseStatusEnum::APPROVED->value)
+            ->sum('amount');
     }
 }

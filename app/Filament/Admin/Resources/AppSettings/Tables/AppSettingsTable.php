@@ -2,6 +2,7 @@
 
 namespace App\Filament\Admin\Resources\AppSettings\Tables;
 
+use App\Enums\AppSettings\AppSettingTypeEnum;
 use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
@@ -20,13 +21,7 @@ class AppSettingsTable
                     ->limit(50),
                 TextColumn::make('type')
                     ->badge()
-                    ->color(fn($state) => match ($state) {
-                        'boolean' => 'warning',
-                        'number' => 'info',
-                        'image' => 'success',
-                        'json' => 'gray',
-                        default => 'primary',
-                    }),
+                    ->color(fn(AppSettingTypeEnum $state) => $state->color()),
                 TextColumn::make('description')
                     ->limit(40)
                     ->toggleable(isToggledHiddenByDefault: true),

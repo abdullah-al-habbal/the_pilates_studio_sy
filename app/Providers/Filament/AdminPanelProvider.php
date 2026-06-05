@@ -77,28 +77,30 @@ class AdminPanelProvider extends PanelProvider
             ->authMiddleware($this->getAuthMiddleware())
             ->renderHook(
                 'panels::user-menu.before',
-                fn(): string => Blade::render('
-                    <div class="flex items-center gap-x-3 mr-4">
-                        <x-filament::button
-                            href="/admin/scheduler"
-                            tag="a"
-                            size="sm"
-                            icon="heroicon-m-calendar-days"
-                            color="gray"
-                        >
-                            ' . __('dashboard.navigation.scheduler') . '
-                        </x-filament::button>
-                        <x-filament::button
-                            href="/admin/operations"
-                            tag="a"
-                            size="sm"
-                            icon="heroicon-m-cog-6-tooth"
-                            color="primary"
-                        >
-                            ' . __('dashboard.navigation.groups.operations') . '
-                        </x-filament::button>
-                    </div>
-                '),
+                fn(): string => auth()->user()?->isAdmin()
+                    ? Blade::render('
+                        <div class="flex items-center gap-x-3 mr-4">
+                            <x-filament::button
+                                href="/admin/scheduler"
+                                tag="a"
+                                size="sm"
+                                icon="heroicon-m-calendar-days"
+                                color="gray"
+                            >
+                                ' . __('dashboard.navigation.scheduler') . '
+                            </x-filament::button>
+                            <x-filament::button
+                                href="/admin/operations"
+                                tag="a"
+                                size="sm"
+                                icon="heroicon-m-cog-6-tooth"
+                                color="primary"
+                            >
+                                ' . __('dashboard.navigation.groups.operations') . '
+                            </x-filament::button>
+                        </div>
+                    ')
+                    : '',
             )
             ->navigationItems([
                 NavigationItem::make(__('dashboard.navigation.scheduler'))
@@ -120,6 +122,7 @@ class AdminPanelProvider extends PanelProvider
                             return $count > 0 ? 'primary' : 'gray';
                         }
                     )
+                    ->visible(fn(): bool => auth()->user()?->isAdmin() ?? false)
                     ->isActiveWhen(fn(): bool => request()->is('admin/scheduler*')),
 
                 NavigationItem::make(__('dashboard.navigation.groups.operations'))
@@ -127,6 +130,7 @@ class AdminPanelProvider extends PanelProvider
                     ->icon('heroicon-o-cog-6-tooth')
                     ->sort(2)
                     ->group(__('dashboard.navigation.groups.operations'))
+                    ->visible(fn(): bool => auth()->user()?->isAdmin() ?? false)
                     ->isActiveWhen(fn(): bool => request()->is('admin/operations*')),
             ]);
     }

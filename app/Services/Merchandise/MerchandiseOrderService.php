@@ -23,9 +23,9 @@ class MerchandiseOrderService
     ) {
     }
 
-    public function placeOrder(int $customerId, int $merchandiseId, int $quantity, int $currencyId): MerchandiseOrder
+    public function placeOrder(int $customerId, int $merchandiseId, int $quantity, int $currencyId, ?int $createdBy = null): MerchandiseOrder
     {
-        return DB::transaction(function () use ($customerId, $merchandiseId, $quantity, $currencyId): MerchandiseOrder {
+        return DB::transaction(function () use ($customerId, $merchandiseId, $quantity, $currencyId, $createdBy): MerchandiseOrder {
             /** @var CenterMerchandise $item */
             $item = CenterMerchandise::lockForUpdate()->findOrFail($merchandiseId);
 
@@ -52,6 +52,7 @@ class MerchandiseOrderService
             return MerchandiseOrder::create([
                 'merchandise_id' => $merchandiseId,
                 'customer_id' => $customerId,
+                'created_by' => $createdBy,
                 'quantity' => $quantity,
                 'ordered_at' => now(),
                 'currency_id' => $currencyId,

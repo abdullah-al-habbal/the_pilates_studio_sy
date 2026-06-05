@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Filament\Admin\Resources\Merchandise\MerchandiseOrders\Schemas;
 
 use App\Models\CenterMerchandise;
+use App\Models\Currency;
 use App\Models\User;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
@@ -53,6 +54,13 @@ class MerchandiseOrderForm
                             : null
                         )
                         ->live(),
+
+                    Select::make('currency_id')
+                        ->label(__('dashboard.resources.merchandise_orders.fields.currency'))
+                        ->options(fn () => Currency::where('is_active', true)->pluck('code', 'id'))
+                        ->default(fn () => Currency::where('is_active', true)->value('id'))
+                        ->required()
+                        ->searchable(),
 
                     TextInput::make('exchange_rate_snapshot')
                         ->label('Exchange Rate Snapshot')

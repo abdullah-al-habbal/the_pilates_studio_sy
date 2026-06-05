@@ -53,9 +53,9 @@ final class DailyBalanceServiceRangeTest extends TestCase
             ['USD'],
         );
 
-        $usd = $summary->firstWhere('currency_code', 'USD');
+        $usd = $summary->firstWhere('currencyCode', 'USD');
         $this->assertNotNull($usd);
-        $this->assertSame(15000, $usd['package_revenue']);
-        $this->assertSame(15000, $usd['total_revenue']);
+        $this->assertSame(15000, $usd->packageRevenue);
+        $this->assertSame(15000, $usd->totalRevenue);
     }
 }

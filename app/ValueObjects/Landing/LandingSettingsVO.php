@@ -39,6 +39,10 @@ class LandingSettingsVO
         public readonly ?string $socialFacebook,
         public readonly ?string $socialTwitter,
         public readonly ?string $socialYoutube,
+        public readonly ?string $heroImage,
+        public readonly string $brandPrimaryColor,
+        public readonly string $brandSecondaryColor,
+        public readonly string $brandAccentColor,
     ) {}
 
     public static function fromAppSettings(AppSettingService $service, string $locale): self
@@ -74,6 +78,10 @@ class LandingSettingsVO
             socialFacebook: $service->get('social_facebook'),
             socialTwitter: $service->get('social_twitter'),
             socialYoutube: $service->get('social_youtube'),
+            heroImage: $service->get('hero_image') ?: asset('assets/images/landing/hero/hero_image.avif'),
+            brandPrimaryColor: $service->get('brand_primary_color', '#262D35'),
+            brandSecondaryColor: $service->get('brand_secondary_color', '#F3EFE3'),
+            brandAccentColor: $service->get('brand_accent_color', '#B8A18B'),
         );
     }
 
@@ -110,6 +118,10 @@ class LandingSettingsVO
             socialFacebook: null,
             socialTwitter: null,
             socialYoutube: null,
+            heroImage: null,
+            brandPrimaryColor: '#262D35',
+            brandSecondaryColor: '#F3EFE3',
+            brandAccentColor: '#B8A18B',
         );
     }
 }

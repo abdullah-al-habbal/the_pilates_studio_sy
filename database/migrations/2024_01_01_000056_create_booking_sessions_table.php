@@ -50,7 +50,6 @@ return new class extends Migration
                 ->nullable()
                 ->constrained('users')
                 ->nullOnDelete()
-                ->after('cancelled_by_user_id')
                 ->comment('Admin who overrode/cancelled this session');
 
             $table->string('attendance_status')
@@ -65,7 +64,6 @@ return new class extends Migration
                 ->nullable()
                 ->constrained('users')
                 ->nullOnDelete()
-                ->after('attended_at')
                 ->comment('Admin who marked attendance');
 
             $table->timestamp('reminder_sent_at')

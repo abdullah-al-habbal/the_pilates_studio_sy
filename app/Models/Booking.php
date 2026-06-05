@@ -23,6 +23,7 @@ class Booking extends Model
 
     protected $fillable = [
         'user_id',
+        'created_by',
         'package_id',
         'total_credits',
         'remaining_credits',
@@ -161,6 +162,11 @@ class Booking extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function createdBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'created_by');
     }
 
     public function package(): BelongsTo

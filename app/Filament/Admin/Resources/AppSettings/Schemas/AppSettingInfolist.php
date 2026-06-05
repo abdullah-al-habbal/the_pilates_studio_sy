@@ -2,6 +2,7 @@
 
 namespace App\Filament\Admin\Resources\AppSettings\Schemas;
 
+use App\Enums\AppSettings\AppSettingTypeEnum;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
@@ -26,13 +27,7 @@ class AppSettingInfolist
                             ->icon('heroicon-o-key'),
                         TextEntry::make('type')
                             ->badge()
-                            ->color(fn($state) => match ($state) {
-                                'boolean' => 'warning',
-                                'number' => 'info',
-                                'image' => 'success',
-                                'json' => 'gray',
-                                default => 'primary',
-                            })
+                            ->color(fn(AppSettingTypeEnum $state) => $state->color())
                             ->icon('heroicon-o-tag'),
                         TextEntry::make('value')
                             ->columnSpanFull()

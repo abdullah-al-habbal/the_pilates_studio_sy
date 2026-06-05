@@ -188,5 +188,29 @@ return [
             'type' => 'string',
             'description' => 'Youtube link & icon (JSON with url and icon)'
         ],
+        [
+            'key' => 'brand_primary_color',
+            'value' => '#262D35',
+            'type' => 'hex_color',
+            'description' => 'Primary brand color (dark charcoal)'
+        ],
+        [
+            'key' => 'brand_secondary_color',
+            'value' => '#F3EFE3',
+            'type' => 'hex_color',
+            'description' => 'Secondary brand color (cream/linen)'
+        ],
+        [
+            'key' => 'brand_accent_color',
+            'value' => '#B8A18B',
+            'type' => 'hex_color',
+            'description' => 'Accent brand color (taupe/sand)'
+        ],
+        [
+            'key' => 'hero_image',
+            'value' => '',
+            'type' => 'image',
+            'description' => 'Hero section background image'
+        ],
     ],
 ];

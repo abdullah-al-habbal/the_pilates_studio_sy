@@ -35,10 +35,12 @@ class MerchandiseOrderEloquentRepository
     public function getRevenueByCurrency(
         ?CarbonInterface $startDate = null,
         ?CarbonInterface $endDate = null,
+        ?int $creatorId = null,
     ): Collection {
         return MerchandiseOrder::query()
             ->selectRaw('currency_id, SUM(paid_amount) as total, COUNT(*) as count')
             ->whereNotNull('paid_amount')
+            ->when($creatorId, fn($q) => $q->where('created_by', $creatorId))
             ->when($startDate, fn($q) => $q->where('ordered_at', '>=', $startDate))
             ->when($endDate, fn($q) => $q->where('ordered_at', '<=', $endDate))
             ->groupBy('currency_id')
@@ -52,6 +54,7 @@ class MerchandiseOrderEloquentRepository
     public function getRevenueWithExchangeSnapshot(
         ?CarbonInterface $startDate = null,
         ?CarbonInterface $endDate = null,
+        ?int $creatorId = null,
     ): Collection {
         return MerchandiseOrder::query()
             ->selectRaw('
@@ -62,6 +65,7 @@ class MerchandiseOrderEloquentRepository
             ')
             ->whereNotNull('paid_amount')
             ->whereNotNull('exchange_rate_snapshot')
+            ->when($creatorId, fn($q) => $q->where('created_by', $creatorId))
             ->when($startDate, fn($q) => $q->where('ordered_at', '>=', $startDate))
             ->when($endDate, fn($q) => $q->where('ordered_at', '<=', $endDate))
             ->groupBy('currency_id')
@@ -74,9 +78,10 @@ class MerchandiseOrderEloquentRepository
             ]);
     }
 
-    public function getTotalCount(?CarbonInterface $startDate = null, ?CarbonInterface $endDate = null): int
+    public function getTotalCount(?CarbonInterface $startDate = null, ?CarbonInterface $endDate = null, ?int $creatorId = null): int
     {
         return MerchandiseOrder::query()
+            ->when($creatorId, fn($q) => $q->where('created_by', $creatorId))
             ->when($startDate, fn($q) => $q->where('ordered_at', '>=', $startDate))
             ->when($endDate, fn($q) => $q->where('ordered_at', '<=', $endDate))
             ->count();

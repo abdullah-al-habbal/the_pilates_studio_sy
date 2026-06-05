@@ -16,10 +16,12 @@ class BookingEloquentRepository
     public function getRevenueByCurrency(
         ?CarbonInterface $startDate = null,
         ?CarbonInterface $endDate = null,
+        ?int $creatorId = null,
     ): Collection {
         return Booking::query()
             ->selectRaw('currency_id, SUM(paid_amount) as total, COUNT(*) as count')
             ->whereNotNull('paid_amount')
+            ->when($creatorId, fn($q) => $q->where('created_by', $creatorId))
             ->when($startDate, fn($q) => $q->where('created_at', '>=', $startDate))
             ->when($endDate, fn($q) => $q->where('created_at', '<=', $endDate))
             ->groupBy('currency_id')
@@ -34,6 +36,7 @@ class BookingEloquentRepository
     public function getRevenueWithExchangeSnapshot(
         ?CarbonInterface $startDate = null,
         ?CarbonInterface $endDate = null,
+        ?int $creatorId = null,
     ): Collection {
         return Booking::query()
             ->selectRaw('
@@ -44,6 +47,7 @@ class BookingEloquentRepository
             ')
             ->whereNotNull('paid_amount')
             ->whereNotNull('exchange_rate_snapshot')
+            ->when($creatorId, fn($q) => $q->where('created_by', $creatorId))
             ->when($startDate, fn($q) => $q->where('created_at', '>=', $startDate))
             ->when($endDate, fn($q) => $q->where('created_at', '<=', $endDate))
             ->groupBy('currency_id')
@@ -56,9 +60,10 @@ class BookingEloquentRepository
             ]);
     }
 
-    public function getTotalCount(?CarbonInterface $startDate = null, ?CarbonInterface $endDate = null): int
+    public function getTotalCount(?CarbonInterface $startDate = null, ?CarbonInterface $endDate = null, ?int $creatorId = null): int
     {
         return (int) Booking::query()
+            ->when($creatorId, fn($q) => $q->where('created_by', $creatorId))
             ->when($startDate, fn($q) => $q->where('created_at', '>=', $startDate))
             ->when($endDate, fn($q) => $q->where('created_at', '<=', $endDate))
             ->count();
