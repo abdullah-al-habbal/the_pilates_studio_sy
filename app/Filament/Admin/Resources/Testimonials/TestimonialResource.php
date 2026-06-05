@@ -15,15 +15,22 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Model;
+use LaraZeus\SpatieTranslatable\Resources\Concerns\Translatable;
 use UnitEnum;
 
 class TestimonialResource extends Resource
 {
+    use Translatable;
     protected static ?string $model = Testimonial::class;
     protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-chat-bubble-left-right';
     protected static string|UnitEnum|null $navigationGroup = 'Configuration';
     protected static ?int $navigationSort = 7;
     protected static ?string $recordTitleAttribute = 'name';
+
+    public static function getTranslatableLocales(): array
+    {
+        return ['en', 'ar'];
+    }
 
     public static function getRecordTitle(?Model $record): string
     {

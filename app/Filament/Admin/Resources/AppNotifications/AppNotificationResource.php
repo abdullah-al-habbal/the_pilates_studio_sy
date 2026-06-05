@@ -13,10 +13,12 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Model;
+use LaraZeus\SpatieTranslatable\Resources\Concerns\Translatable;
 use UnitEnum;
 
 class AppNotificationResource extends Resource
 {
+    use Translatable;
     protected static ?string $model = AppNotification::class;
 
     protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-bell';
@@ -26,6 +28,11 @@ class AppNotificationResource extends Resource
     protected static ?int $navigationSort = 2;
 
     protected static ?string $recordTitleAttribute = 'title';
+
+    public static function getTranslatableLocales(): array
+    {
+        return ['en', 'ar'];
+    }
 
     public static function getRecordTitle(?Model $record): string
     {

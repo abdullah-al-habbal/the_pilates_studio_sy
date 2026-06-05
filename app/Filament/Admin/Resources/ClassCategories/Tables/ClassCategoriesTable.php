@@ -11,6 +11,8 @@ use Filament\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
+use LaraZeus\SpatieTranslatable\Actions\LocaleSwitcher;
 
 class ClassCategoriesTable
 {
@@ -21,12 +23,18 @@ class ClassCategoriesTable
         return $table
             ->columns([
                 TextColumn::make('name')
-                    ->searchable()
+                    ->searchable(query: fn (Builder $query, string $search) => $query->where('name->' . app()->getLocale(), 'like', "%{$search}%"))
                     ->formatStateUsing(fn ($state, $record) => $record->getTranslation('name', $locale)),
                 TextColumn::make('slug')
                     ->searchable(),
                 TextColumn::make('color')
                     ->searchable(),
+                TextColumn::make('classes_count')
+                    ->label('Classes')
+                    ->counts('classes')
+                    ->badge()
+                    ->color('info')
+                    ->sortable(),
                 TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
@@ -42,6 +50,9 @@ class ClassCategoriesTable
             ])
             ->filters([
                 TrashedFilter::make(),
+            ])
+            ->headerActions([
+                LocaleSwitcher::make(),
             ])
             ->recordActions([
                 ViewAction::make(),

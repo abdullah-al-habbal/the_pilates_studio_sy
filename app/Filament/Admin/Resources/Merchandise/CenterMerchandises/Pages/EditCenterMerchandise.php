@@ -8,9 +8,13 @@ use App\Filament\Admin\Resources\Merchandise\CenterMerchandises\CenterMerchandis
 use Filament\Actions\DeleteAction;
 use Filament\Actions\ViewAction;
 use Filament\Resources\Pages\EditRecord;
+use LaraZeus\SpatieTranslatable\Actions\LocaleSwitcher;
+use LaraZeus\SpatieTranslatable\Resources\Pages\EditRecord\Concerns\Translatable;
 
 class EditCenterMerchandise extends EditRecord
 {
+    use Translatable;
+
     protected static string $resource = CenterMerchandiseResource::class;
 
     protected function mutateFormDataBeforeSave(array $data): array
@@ -31,6 +35,10 @@ class EditCenterMerchandise extends EditRecord
 
     protected function getHeaderActions(): array
     {
-        return [ViewAction::make(), DeleteAction::make()];
+        return [
+            LocaleSwitcher::make(),
+            ViewAction::make(),
+            DeleteAction::make(),
+        ];
     }
 }

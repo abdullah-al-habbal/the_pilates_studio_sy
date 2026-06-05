@@ -18,10 +18,12 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use LaraZeus\SpatieTranslatable\Resources\Concerns\Translatable;
 use UnitEnum;
 
 class InstructorResource extends Resource
 {
+    use Translatable;
     protected static ?string $model = Instructor::class;
 
     protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-user-circle';
@@ -31,6 +33,11 @@ class InstructorResource extends Resource
     protected static ?int $navigationSort = 3;
 
     protected static ?string $recordTitleAttribute = 'name';
+
+    public static function getTranslatableLocales(): array
+    {
+        return ['en', 'ar'];
+    }
 
     public static function getRecordTitle(?Model $record): string
     {
@@ -79,11 +86,21 @@ class InstructorResource extends Resource
         ];
     }
 
+    public static function getEloquentQuery(): Builder
+    {
+        return parent::getEloquentQuery()
+            ->withoutGlobalScopes([
+                SoftDeletingScope::class,
+            ])
+            ->withCount('classes');
+    }
+
     public static function getRecordRouteBindingEloquentQuery(): Builder
     {
         return parent::getRecordRouteBindingEloquentQuery()
             ->withoutGlobalScopes([
                 SoftDeletingScope::class,
-            ]);
+            ])
+            ->withCount('classes');
     }
 }

@@ -5,9 +5,12 @@ namespace App\Filament\Admin\Resources\Merchandise\CenterMerchandises\Pages;
 use App\Filament\Admin\Resources\Merchandise\CenterMerchandises\CenterMerchandiseResource;
 use Filament\Actions\CreateAction;
 use Filament\Resources\Pages\ListRecords;
+use LaraZeus\SpatieTranslatable\Resources\Pages\ListRecords\Concerns\Translatable;
 
 class ListCenterMerchandises extends ListRecords
 {
+    use Translatable;
+
     protected static string $resource = CenterMerchandiseResource::class;
 
     protected function getHeaderActions(): array

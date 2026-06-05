@@ -11,6 +11,8 @@ use Filament\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
+use LaraZeus\SpatieTranslatable\Actions\LocaleSwitcher;
 
 class InstructorsTable
 {
@@ -21,15 +23,21 @@ class InstructorsTable
         return $table
             ->columns([
                 TextColumn::make('name')
-                    ->searchable()
+                    ->searchable(query: fn (Builder $query, string $search) => $query->where('name->' . app()->getLocale(), 'like', "%{$search}%"))
                     ->formatStateUsing(fn ($state, $record) => $record->getTranslation('name', $locale)),
                 TextColumn::make('title')
-                    ->searchable()
+                    ->searchable(query: fn (Builder $query, string $search) => $query->where('title->' . app()->getLocale(), 'like', "%{$search}%"))
                     ->toggleable(isToggledHiddenByDefault: true)
                     ->formatStateUsing(fn ($state, $record) => $record->getTranslation('title', $locale)),
                 TextColumn::make('specialty')
                     ->toggleable(isToggledHiddenByDefault: true)
                     ->formatStateUsing(fn ($state, $record) => $record->getTranslation('specialty', $locale)),
+                TextColumn::make('classes_count')
+                    ->label('Classes')
+                    ->counts('classes')
+                    ->badge()
+                    ->color('info')
+                    ->sortable(),
                 TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
@@ -49,6 +57,9 @@ class InstructorsTable
             ->recordActions([
                 ViewAction::make(),
                 EditAction::make(),
+            ])
+            ->headerActions([
+                LocaleSwitcher::make(),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([

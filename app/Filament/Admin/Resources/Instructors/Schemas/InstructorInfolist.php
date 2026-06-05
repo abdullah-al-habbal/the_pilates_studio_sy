@@ -78,7 +78,6 @@ class InstructorInfolist
                     ->schema([
                         TextEntry::make('classes_count')
                             ->label('Classes')
-                            ->state(fn($record): int => $record->classes()->count())
                             ->badge()
                             ->color('info')
                             ->icon('heroicon-o-building-library'),

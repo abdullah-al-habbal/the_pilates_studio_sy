@@ -7,6 +7,7 @@ use Filament\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Table;
+use LaraZeus\SpatieTranslatable\Actions\LocaleSwitcher;
 
 class StaticPagesTable
 {
@@ -32,6 +33,9 @@ class StaticPagesTable
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->defaultSort('sort_order')
+            ->headerActions([
+                LocaleSwitcher::make(),
+            ])
             ->actions([
                 EditAction::make(),
                 ViewAction::make(),

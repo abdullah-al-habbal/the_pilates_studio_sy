@@ -19,14 +19,21 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Model;
+use LaraZeus\SpatieTranslatable\Resources\Concerns\Translatable;
 
 class CenterMerchandiseResource extends Resource
 {
+    use Translatable;
     protected static ?string $model = CenterMerchandise::class;
 
     protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-shopping-bag';
 
     protected static ?int $navigationSort = 2;
+
+    public static function getTranslatableLocales(): array
+    {
+        return ['en', 'ar'];
+    }
 
     public static function getNavigationGroup(): ?string
     {

@@ -10,6 +10,7 @@ use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Table;
+use LaraZeus\SpatieTranslatable\Actions\LocaleSwitcher;
 
 class TestimonialsTable
 {
@@ -38,6 +39,9 @@ class TestimonialsTable
             ])
             ->filters([])
             ->defaultSort('sort_order')
+            ->headerActions([
+                LocaleSwitcher::make(),
+            ])
             ->recordActions([
                 ViewAction::make(),
                 EditAction::make(),

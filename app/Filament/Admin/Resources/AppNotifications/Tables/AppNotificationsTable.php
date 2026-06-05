@@ -10,6 +10,7 @@ use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use LaraZeus\SpatieTranslatable\Actions\LocaleSwitcher;
 
 class AppNotificationsTable
 {
@@ -57,6 +58,9 @@ class AppNotificationsTable
                     ->toggleable(),
             ])
             ->filters([])
+            ->headerActions([
+                LocaleSwitcher::make(),
+            ])
             ->recordActions([
                 ViewAction::make(),
                 EditAction::make(),

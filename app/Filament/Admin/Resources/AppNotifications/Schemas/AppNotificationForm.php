@@ -32,13 +32,11 @@ class AppNotificationForm
                     ->live(),
                 TextInput::make('title')
                     ->required()
-                    ->maxLength(255)
-                    ->translatable(),
+                    ->maxLength(255),
                 Textarea::make('message')
                     ->required()
                     ->columnSpanFull()
-                    ->rows(4)
-                    ->translatable(),
+                    ->rows(4),
                 FileUpload::make('image')
                     ->image()
                     ->directory('notifications')

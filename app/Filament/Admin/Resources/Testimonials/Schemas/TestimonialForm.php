@@ -16,14 +16,11 @@ class TestimonialForm
         return $schema
             ->components([
                 TextInput::make('name')
-                    ->required()
-                    ->translatable(),
-                TextInput::make('role')
-                    ->translatable(),
+                    ->required(),
+                TextInput::make('role'),
                 Textarea::make('quote')
                     ->required()
-                    ->columnSpanFull()
-                    ->translatable(),
+                    ->columnSpanFull(),
                 FileUpload::make('avatar')
                     ->image(),
                 Select::make('rating')

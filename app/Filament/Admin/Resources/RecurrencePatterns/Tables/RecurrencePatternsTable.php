@@ -8,6 +8,8 @@ use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
+use LaraZeus\SpatieTranslatable\Actions\LocaleSwitcher;
 
 class RecurrencePatternsTable
 {
@@ -20,10 +22,16 @@ class RecurrencePatternsTable
                 TextColumn::make('name')
                     ->searchable(),
                 TextColumn::make('label')
-                    ->searchable()
+                    ->searchable(query: fn (Builder $query, string $search) => $query->where('label->' . app()->getLocale(), 'like', "%{$search}%"))
                     ->formatStateUsing(fn ($state, $record) => $record->getTranslation('label', $locale)),
                 TextColumn::make('interval_days')
                     ->numeric()
+                    ->sortable(),
+                TextColumn::make('classes_count')
+                    ->label('Classes')
+                    ->counts('classes')
+                    ->badge()
+                    ->color('info')
                     ->sortable(),
                 TextColumn::make('created_at')
                     ->dateTime()
@@ -35,6 +43,9 @@ class RecurrencePatternsTable
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([])
+            ->headerActions([
+                LocaleSwitcher::make(),
+            ])
             ->recordActions([
                 ViewAction::make(),
                 EditAction::make(),

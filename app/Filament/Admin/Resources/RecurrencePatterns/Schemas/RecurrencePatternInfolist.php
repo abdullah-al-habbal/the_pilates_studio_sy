@@ -36,7 +36,6 @@ class RecurrencePatternInfolist
                             ->weight(FontWeight::Bold),
                         TextEntry::make('classes_count')
                             ->label('Linked Classes')
-                            ->state(fn($record): int => $record->classes()->count())
                             ->badge()
                             ->color('info')
                             ->icon('heroicon-o-building-library'),

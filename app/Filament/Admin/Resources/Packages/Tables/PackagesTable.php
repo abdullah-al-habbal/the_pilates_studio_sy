@@ -11,6 +11,7 @@ use Filament\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Table;
+use LaraZeus\SpatieTranslatable\Actions\LocaleSwitcher;
 
 class PackagesTable
 {
@@ -48,6 +49,9 @@ class PackagesTable
             ])
             ->filters([
                 TrashedFilter::make(),
+            ])
+            ->headerActions([
+                LocaleSwitcher::make(),
             ])
             ->recordActions([
                 ViewAction::make(),

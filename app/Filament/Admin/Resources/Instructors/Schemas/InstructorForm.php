@@ -15,14 +15,10 @@ class InstructorForm
         return $schema
             ->components([
                 TextInput::make('name')
-                    ->required()
-                    ->translatable(),
-                TextInput::make('title')
-                    ->translatable(),
-                TextInput::make('specialty')
-                    ->translatable(),
+                    ->required(),
+                TextInput::make('title'),
+                TextInput::make('specialty'),
                 Textarea::make('bio')
-                    ->translatable()
                     ->rows(4),
                 Repeater::make('social_links')
                     ->label('Social Links')

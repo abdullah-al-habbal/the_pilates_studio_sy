@@ -31,11 +31,9 @@ class StaticPageForm
                             ->default(0),
                     ]),
                 TextInput::make('title')
-                    ->required()
-                    ->translatable(),
+                    ->required(),
                 RichEditor::make('content')
                     ->required()
-                    ->translatable()
                     ->columnSpanFull(),
                 FileUpload::make('image')
                     ->image()

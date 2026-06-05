@@ -116,12 +116,6 @@ class ClassesTable
 
                 TextColumn::make('upcoming_sessions_count')
                     ->label(__('dashboard.resources.classes.fields.upcoming_sessions'))
-                    ->getStateUsing(
-                        fn($record) => $record->sessions()
-                            ->where('date', '>=', now())
-                            ->where('status', 'scheduled')
-                            ->count()
-                    )
                     ->badge()
                     ->color('success')
                     ->toggleable(isToggledHiddenByDefault: true),
