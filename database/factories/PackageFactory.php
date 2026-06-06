@@ -26,32 +26,28 @@ class PackageFactory extends Factory
     public function configure(): static
     {
         return $this->afterCreating(function (Package $package) {
-            $sypCurrency = Currency::firstOrCreate(
-                ['code' => 'SYP'],
-                [
-                    'name' => ['en' => 'Syrian Pound', 'ar' => 'ليرة سورية'],
-                    'symbol' => '£S',
-                    'decimal_places' => 0,
-                    'exchange_rate' => 1,
-                    'is_active' => true,
-                ]
-            );
+            $sypCurrency = Currency::factory()->create([
+                'code' => 'SYP',
+                'name' => ['en' => 'Syrian Pound', 'ar' => 'ليرة سورية'],
+                'symbol' => '£S',
+                'decimal_places' => 0,
+                'exchange_rate' => 1,
+                'is_active' => true,
+            ]);
 
             $package->prices()->create([
                 'currency_id' => $sypCurrency->id,
                 'amount' => $package->total_credits * 5000,
             ]);
 
-            $usdCurrency = Currency::firstOrCreate(
-                ['code' => 'USD'],
-                [
-                    'name' => ['en' => 'US Dollar', 'ar' => 'دولار أمريكي'],
-                    'symbol' => '$',
-                    'decimal_places' => 2,
-                    'exchange_rate' => 13000,
-                    'is_active' => true,
-                ]
-            );
+            $usdCurrency = Currency::factory()->create([
+                'code' => 'USD',
+                'name' => ['en' => 'US Dollar', 'ar' => 'دولار أمريكي'],
+                'symbol' => '$',
+                'decimal_places' => 2,
+                'exchange_rate' => 13000,
+                'is_active' => true,
+            ]);
 
             $package->prices()->create([
                 'currency_id' => $usdCurrency->id,

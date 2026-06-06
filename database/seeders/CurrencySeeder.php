@@ -27,15 +27,7 @@ class CurrencySeeder extends Seeder
                 'decimal_places' => 0,
                 'exchange_rate' => 13000.0,
                 'is_active' => true,
-            ],
-            [
-                'code' => 'EUR',
-                'name' => ['en' => 'Euro', 'ar' => 'يورو'],
-                'symbol' => '€',
-                'decimal_places' => 2,
-                'exchange_rate' => 0.92,
-                'is_active' => true,
-            ],
+            ]
         ];
 
         foreach ($currencies as $currency) {
