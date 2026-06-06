@@ -69,7 +69,7 @@ class BookingInfolist
                                     ->formatStateUsing(function ($state, Booking $record) {
                                         if ($state === null) return '—';
                                         $currency = $record->currency;
-                                        return number_format($state, $currency?->decimal_places ?? 2) . ' ' . ($currency?->symbol ?? '');
+                                        return number_format($state, $currency->decimal_places) . ' ' . $currency->symbol;
                                     })
                                     ->icon('heroicon-o-currency-dollar'),
                             ]),
@@ -133,7 +133,7 @@ class BookingInfolist
                                     return '—';
                                 }
                                 $currency = $record->currency;
-                                $code = $currency?->code ?? '';
+                                $code = $currency?->code;
                                 $decimals = $currency?->decimal_places ?? 6;
                                 return number_format($state, $decimals) . ($code ? " {$code}" : '');
                             })

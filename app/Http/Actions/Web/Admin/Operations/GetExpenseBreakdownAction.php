@@ -24,7 +24,7 @@ final class GetExpenseBreakdownAction
             ->map(function ($group) {
                 $first = $group->first();
                 return [
-                    'category_name' => $first->category?->name ?? 'Uncategorized',
+                    'category_name' => $first->category?->name,
                     'total_amount'  => $group->sum('amount'),
                 ];
             })

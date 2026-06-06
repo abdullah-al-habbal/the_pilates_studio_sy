@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 return [
     'base_currency' => env('CURRENCY_BASE', 'USD'),
+    'default_currency' => env('CURRENCY_DEFAULT', 'USD'),
     'snapshot_precision' => 6,
     'cache_ttl_production' => 600,
     'cache_ttl_dev' => 3600,

@@ -57,7 +57,7 @@
             <div class="mt-12 text-center reveal">
                 <div class="inline-flex items-center gap-2 px-4 py-2 bg-white dark:bg-dark-800 rounded-full border border-slate-200 dark:border-dark-700 text-sm text-slate-500 dark:text-slate-400">
                     <i data-lucide="globe" class="w-4 h-4"></i>
-                    {{ __('landing.multi_currency', ['currency' => $landingData->packages->first()->currency ?? 'USD']) }}
+                    {{ __('landing.multi_currency', ['currency' => $landingData->packages->first()->currency]) }}
                 </div>
             </div>
         @endif

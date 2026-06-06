@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Requests\Admin\Operations;
 
 use App\Enums\ClubExpenseStatusEnum;
+use App\Models\ClubExpense;
 use Illuminate\Foundation\Http\FormRequest;
 
 class ApproveExpenseRequest extends FormRequest
@@ -22,7 +23,7 @@ class ApproveExpenseRequest extends FormRequest
                 'integer',
                 'exists:club_expenses,id',
                 function ($attribute, $value, $fail) {
-                    $expense = \App\Models\ClubExpense::find($value);
+                    $expense = ClubExpense::find($value);
                     if ($expense && $expense->status !== ClubExpenseStatusEnum::PENDING) {
                         $fail('This expense has already been ' . $expense->status->value . '.');
                     }

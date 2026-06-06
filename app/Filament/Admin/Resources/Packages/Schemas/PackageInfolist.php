@@ -3,6 +3,7 @@
 namespace App\Filament\Admin\Resources\Packages\Schemas;
 
 use App\Models\Package;
+use App\Services\Currency\CurrencyService;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
 use Filament\Infolists\Components\TextEntry;
@@ -63,7 +64,7 @@ class PackageInfolist
                         TextEntry::make('base_price')
                             ->label('Base Price')
                             ->state(fn($record): ?int => $record->getBasePrice())
-                            ->money(config('currency.base_currency', 'USD'))
+                            ->money(app(CurrencyService::class)->getBaseCurrency()->code)
                             ->weight(FontWeight::Bold)
                             ->color('success'),
                         TextEntry::make('total_bookings')

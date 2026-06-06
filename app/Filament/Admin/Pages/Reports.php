@@ -379,15 +379,15 @@ class Reports extends Page implements HasInfolists
                             $name = is_array($item->name)
                                 ? ($item->name[$locale] ?? $item->name['en'] ?? '')
                                 : ($item->name ?? '');
-                            $itemCurrency = Currency::find($item->currency_id ?? 0);
-                            $decimals = $itemCurrency?->decimal_places ?? 2;
-                            $symbol = $itemCurrency?->symbol ?? '';
-                            $code = $itemCurrency?->code ?? '';
+
+                            $itemCurrency = Currency::findOrFail($item->currency_id);
+
                             return TextEntry::make('merch_' . $i)
                                 ->label($name)
                                 ->state(
-                                    number_format($item->revenue, $decimals) . ' ' . $symbol
-                                    . " ({$code})"
+                                    number_format($item->revenue, $itemCurrency->decimal_places)
+                                    . ' ' . $itemCurrency->symbol
+                                    . " ({$itemCurrency->code})"
                                     . ' · '
                                     . __('dashboard.pages.reports.top_merchandise.sold', ['count' => $item->quantity])
                                 )

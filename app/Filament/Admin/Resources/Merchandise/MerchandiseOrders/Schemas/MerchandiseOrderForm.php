@@ -7,6 +7,7 @@ namespace App\Filament\Admin\Resources\Merchandise\MerchandiseOrders\Schemas;
 use App\Models\CenterMerchandise;
 use App\Models\Currency;
 use App\Models\User;
+use App\Services\Currency\CurrencyService;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\Select;
@@ -115,7 +116,7 @@ class MerchandiseOrderForm
                         ->content(function ($livewire) {
                             $record = $livewire->record;
                             if (!$record) return '—';
-                            $code = app(\App\Services\Currency\CurrencyService::class)->getCode($record->currency_id);
+                            $code = app(CurrencyService::class)->getCode($record->currency_id);
                             return number_format($record->merchandise_unit_price_snapshot ?? 0, 2) . ' ' . $code;
                         })
                         ->visible(fn ($livewire) => $livewire->record !== null),

@@ -1,5 +1,5 @@
 <?php
-// app/Enums/UserRoleEnum.php
+
 declare(strict_types=1);
 
 namespace App\Enums;
@@ -9,6 +9,7 @@ enum UserRoleEnum: string
     case MAIN_ADMIN = 'main_admin';
     case ADMIN = 'admin';
     case CUSTOMER = 'customer';
+
     public function label(): string
     {
         return match ($this) {
@@ -17,6 +18,7 @@ enum UserRoleEnum: string
             self::CUSTOMER => 'Customer',
         };
     }
+
     public function color(): string
     {
         return match ($this) {
@@ -24,5 +26,10 @@ enum UserRoleEnum: string
             self::ADMIN => 'warning',
             self::CUSTOMER => 'success',
         };
+    }
+
+    public static function options(): array
+    {
+        return collect(self::cases())->mapWithKeys(fn($c) => [$c->value => $c->label()])->toArray();
     }
 }

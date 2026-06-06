@@ -71,14 +71,17 @@ const OperationsUI = {
         if (currencyId != null) {
             const currency = this.getCurrencyById(currencyId);
             if (currency) {
-                decimals = Number(currency.decimal_places || 2);
-                code = currency.code || "USD";
+                decimals = Number(currency.decimal_places);
+                code = currency.code;
             }
         }
 
         if (decimals === undefined || code === undefined) {
-            decimals = parseInt(document.body.dataset.currencyDecimals || "2");
-            code = document.body.dataset.currencyCode || "USD";
+            const fallbackCurrency = window.OperationsCurrencies?.[0];
+            if (fallbackCurrency) {
+                decimals = Number(fallbackCurrency.decimal_places);
+                code = fallbackCurrency.code;
+            }
         }
 
         return this.formatCurrencyBlock(amount, decimals, code);

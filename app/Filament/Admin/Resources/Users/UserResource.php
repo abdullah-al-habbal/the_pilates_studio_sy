@@ -7,8 +7,11 @@ use App\Filament\Admin\Resources\Users\Pages\EditUser;
 use App\Filament\Admin\Resources\Users\Pages\ListUsers;
 use App\Filament\Admin\Resources\Users\Pages\ViewUser;
 use App\Filament\Admin\Resources\Users\RelationManagers\BookingsRelationManager;
+use App\Filament\Admin\Resources\Users\RelationManagers\BookingSessionsRelationManager;
+use App\Filament\Admin\Resources\Users\RelationManagers\ExpensesRelationManager;
 use App\Filament\Admin\Resources\Users\RelationManagers\MerchandiseOrdersRelationManager;
 use App\Filament\Admin\Resources\Users\RelationManagers\NotificationsRelationManager;
+use App\Filament\Admin\Resources\Users\RelationManagers\RefundsRelationManager;
 use App\Filament\Admin\Resources\Users\Schemas\UserForm;
 use App\Filament\Admin\Resources\Users\Schemas\UserInfolist;
 use App\Filament\Admin\Resources\Users\Tables\UsersTable;
@@ -68,8 +71,11 @@ class UserResource extends Resource
     {
         return [
             BookingsRelationManager::class,
-            NotificationsRelationManager::class,
+            BookingSessionsRelationManager::class,
             MerchandiseOrdersRelationManager::class,
+            RefundsRelationManager::class,
+            NotificationsRelationManager::class,
+            ExpensesRelationManager::class,
         ];
     }
 

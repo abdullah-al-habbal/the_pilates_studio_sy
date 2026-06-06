@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Spatie\Translatable\HasTranslations;
 
+// add php doc helpers for properties and methods
 class CenterMerchandise extends Model
 {
     use HasFactory, SoftDeletes, HasTranslations;

@@ -203,7 +203,11 @@ async function renderExpenseBreakdown(date = '') {
         }
         const maxAmount = Math.max(...expenses.map(e => e.total_amount));
         const currency = window.OperationsCurrencies?.[0];
-        const code = currency?.code ?? 'USD';
+        const code = currency?.code;
+        if (!code) {
+            container.innerHTML = '<p class="text-sm text-rose-500">Currency not configured. Please contact admin.</p>';
+            return;
+        }
         const fmt = (amount) => new Intl.NumberFormat('en-US', { style: 'currency', currency: code, minimumFractionDigits: 0 }).format(amount);
 
         let html = '<ul class="space-y-3">';

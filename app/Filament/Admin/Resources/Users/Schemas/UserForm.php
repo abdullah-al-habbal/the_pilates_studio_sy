@@ -2,8 +2,10 @@
 
 namespace App\Filament\Admin\Resources\Users\Schemas;
 
+use App\Enums\UserRoleEnum;
+use App\Enums\UserStatusEnum;
 use Filament\Forms\Components\DatePicker;
-use Filament\Forms\Components\DateTimePicker;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Schema;
@@ -29,16 +31,21 @@ class UserForm
                 TextInput::make('password')
                     ->password()
                     ->revealable()
-                    ->required(),
+                    ->required(fn (string $context) => $context === 'create')
+                    ->nullable(fn (string $context) => $context === 'edit')
+                    ->dehydrated(fn ($state) => filled($state))
+                    ->helperText(fn (string $context) => $context === 'edit' ? 'Leave blank to keep current password.' : null),
                 DatePicker::make('date_of_birth'),
+                Select::make('role')
+                    ->options(UserRoleEnum::options())
+                    ->required()
+                    ->native(false),
+                Select::make('status')
+                    ->options(UserStatusEnum::options())
+                    ->required()
+                    ->native(false),
                 Toggle::make('allow_notifications')
                     ->required(),
-                DateTimePicker::make('email_verified_at'),
-                TextInput::make('otp_code'),
-                DateTimePicker::make('otp_expires_at'),
-                DateTimePicker::make('deactivated_at'),
-                TextInput::make('deleted_by')
-                    ->numeric(),
             ]);
     }
 }

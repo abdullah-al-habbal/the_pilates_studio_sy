@@ -55,7 +55,7 @@ class BookingSessionForm
                                         ->with('class')
                                         ->get()
                                         ->mapWithKeys(function (ClassSession $session) use ($locale) {
-                                            $classTitle = $session->class?->getTranslation('title', $locale) ?? __('dashboard.resources.booking_sessions.placeholders.unknown_class');
+                                            $classTitle = $session->class?->getTranslation('title', $locale);
                                             return [
                                                 $session->id => $classTitle . ' - ' .
                                                     $session->date->format('M d, Y') . ' ' .

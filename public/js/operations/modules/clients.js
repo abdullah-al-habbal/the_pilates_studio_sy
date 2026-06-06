@@ -143,7 +143,7 @@ function buildStatusBadge(status) {
         deactivated: "bg-slate-100 text-slate-500",
     };
     const cls = map[status] ?? "bg-slate-100 text-slate-500";
-    const label = status?.toUpperCase() ?? "UNKNOWN";
+    const label = status?.toUpperCase();
     return `<span class="px-2 py-1 rounded-full text-xs font-bold ${cls}">${label}</span>`;
 }
 
@@ -420,8 +420,12 @@ export function showRefundModal(bookingId, maxAmount, currencyId, userId) {
     const currency = window.OperationsCurrencies?.find(
         (c) => c.id == currencyId,
     );
-    const code = currency?.code || "USD";
-    const decimals = currency?.decimal_places || 2;
+    if (!currency) {
+        OperationsUI.toast("Currency not found for this payment", "error");
+        return;
+    }
+    const code = currency.code;
+    const decimals = currency.decimal_places;
     const amountStr = OperationsUI.formatCurrencyBlock(
         maxAmount,
         decimals,

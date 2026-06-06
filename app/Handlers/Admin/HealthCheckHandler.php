@@ -74,7 +74,7 @@ final readonly class HealthCheckHandler
 
     private function checkBaseCurrency(): array
     {
-        $baseCode = config('currency.base_currency', 'USD');
+        $baseCode = config('currency.base_currency');
         $baseCurrency = Currency::where('code', strtoupper($baseCode))
             ->where('is_active', true)
             ->first();

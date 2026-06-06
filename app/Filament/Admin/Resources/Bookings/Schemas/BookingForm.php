@@ -257,7 +257,7 @@ class BookingForm
                     Hidden::make('remaining_credits')->default(0),
                     Hidden::make('validity_days_snapshot'),
                     Hidden::make('currency_id')
-                        ->default(fn () => app(\App\Services\Currency\CurrencyService::class)->getBaseCurrency()->id),
+                        ->default(fn () => app(CurrencyService::class)->getBaseCurrency()->id),
                     Hidden::make('status')->default(BookingStatusEnum::ACTIVE->value),
                 ]),
 

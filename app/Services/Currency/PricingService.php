@@ -43,7 +43,7 @@ final readonly class PricingService
 
     private function getExchangeRate(Currency $currency): float
     {
-        $baseCode = strtoupper(config('currency.base_currency', 'USD'));
+        $baseCode = strtoupper(config('currency.base_currency'));
 
         if (strtoupper($currency->code) === $baseCode) {
             return 1.0;
@@ -60,7 +60,7 @@ final readonly class PricingService
     public function getExchangeRateForSnapshot(int $targetCurrencyId): float
     {
         $targetCurrency = Currency::findOrFail($targetCurrencyId);
-        $baseCode = strtoupper(config('currency.base_currency', 'USD'));
+        $baseCode = strtoupper(config('currency.base_currency'));
 
         if (strtoupper($targetCurrency->code) === $baseCode) {
             return 1.0;

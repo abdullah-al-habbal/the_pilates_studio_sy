@@ -10,6 +10,7 @@ use Filament\Actions\RestoreBulkAction;
 use Filament\Actions\ViewAction;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
+use App\Enums\UserRoleEnum;
 use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Table;
 
@@ -23,12 +24,8 @@ class UsersTable
                     ->searchable(),
                 TextColumn::make('role')
                     ->badge()
-                    ->color(fn(string $state): string => match ($state) {
-                        'main_admin' => 'danger',
-                        'admin' => 'warning',
-                        default => 'gray',
-                    })
-                    ->formatStateUsing(fn(string $state): string => str($state)->replace('_', ' ')->title()),
+                    ->color(fn (UserRoleEnum $state) => $state->color())
+                    ->formatStateUsing(fn (UserRoleEnum $state): string => $state->label()),
                 TextColumn::make('phone_number')
                     ->searchable(),
                 TextColumn::make('email')
@@ -44,18 +41,23 @@ class UsersTable
                     ->boolean(),
                 TextColumn::make('email_verified_at')
                     ->dateTime()
-                    ->sortable(),
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('otp_code')
-                    ->searchable(),
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('otp_expires_at')
                     ->dateTime()
-                    ->sortable(),
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('deactivated_at')
                     ->dateTime()
-                    ->sortable(),
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('deleted_by')
                     ->numeric()
-                    ->sortable(),
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()

@@ -6,6 +6,7 @@ declare(strict_types=1);
 
 use App\Http\Middleware\EnsureActiveBookingMiddleware;
 use App\Http\Middleware\EnsureActivePackageMiddleware;
+use App\Http\Middleware\EnsureUserIsAdmin;
 use App\Http\Middleware\FreezeUserMiddleware;
 use App\Http\Middleware\MobileAppVersion\CheckAppVersionMiddleware;
 use App\Http\Middleware\SetLocaleMiddleware;
@@ -60,7 +61,7 @@ $app = Application::configure(basePath: dirname(__DIR__))
             'ensure.active.booking' => EnsureActiveBookingMiddleware::class,
             'ensure.active.package' => EnsureActivePackageMiddleware::class,
             'freeze.user' => FreezeUserMiddleware::class,
-            'role.admin' => \App\Http\Middleware\EnsureUserIsAdmin::class,
+            'role.admin' => EnsureUserIsAdmin::class,
             'guest' => RedirectIfAuthenticated::class,
             'password.confirm' => RequirePassword::class,
             'precognitive' => HandlePrecognitiveRequests::class,

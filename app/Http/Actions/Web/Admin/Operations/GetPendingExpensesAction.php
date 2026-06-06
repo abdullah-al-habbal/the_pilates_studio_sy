@@ -25,17 +25,17 @@ final readonly class GetPendingExpensesAction
             ->orderByDesc('created_at')
             ->get()
             ->map(fn(ClubExpense $e): array => [
-                'id' => $e->id,
-                'category_name' => $e->category?->name ?? 'Uncategorized',
-                'amount' => $e->amount,
-                'currency_code' => $e->currency?->code ?? 'USD',
-                'currency_symbol' => $e->currency?->symbol ?? '$',
-                'currency_decimals' => $e->currency?->decimal_places ?? 2,
-                'recorded_by_name' => $e->recordedBy?->fullname ?? 'Unknown',
-                'recorded_by_id' => $e->recorded_by,
-                'expense_date' => $e->expense_date?->toDateString(),
-                'notes' => $e->notes,
-                'created_at' => $e->created_at?->toDateTimeString(),
+                'id'               => $e->id,
+                'category_name'    => $e->category?->name,
+                'amount'           => $e->amount,
+                'currency_code'    => $e->currency->code,
+                'currency_symbol'  => $e->currency->symbol,
+                'currency_decimals'=> $e->currency->decimal_places,
+                'recorded_by_name' => $e->recordedBy?->fullname,
+                'recorded_by_id'   => $e->recorded_by,
+                'expense_date'     => $e->expense_date?->toDateString(),
+                'notes'            => $e->notes,
+                'created_at'       => $e->created_at?->toDateTimeString(),
             ]);
 
         return $this->success(data: $expenses->values()->all());
