@@ -42,10 +42,15 @@ class AdminPanelProvider extends PanelProvider
 {
     public function panel(Panel $panel): Panel
     {
+        $user = Auth::user();
+
         Log::info('FILAMENT USER', [
-            'id' => Auth::id(),
-            'class' => get_class(Auth::user()),
-            'role' => Auth::user()?->role,
+            'running_in_console' => app()->runningInConsole(),
+            'authenticated' => Auth::check(),
+            'id' => $user?->id,
+            'class' => $user ? get_class($user) : null,
+            'email' => $user?->email,
+            'role' => $user?->role?->value ?? $user?->role,
         ]);
 
         return $panel
