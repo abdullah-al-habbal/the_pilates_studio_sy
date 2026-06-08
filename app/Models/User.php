@@ -7,6 +7,7 @@ namespace App\Models;
 use App\Enums\BookingStatusEnum;
 use App\Enums\UserRoleEnum;
 use App\Enums\UserStatusEnum;
+use Filament\Models\Contracts\FilamentUser;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -18,11 +19,12 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use Laravel\Sanctum\PersonalAccessToken;
+use Filament\Panel;
 
 /**
  * @method PersonalAccessToken|null currentAccessToken()
  */
-class User extends Authenticatable
+class User extends Authenticatable implements FilamentUser
 {
     use HasApiTokens, HasFactory, Notifiable, SoftDeletes;
 
@@ -66,6 +68,17 @@ class User extends Authenticatable
     }
 
     // ─── Role helpers ─────────────────────────────────────────────────────────
+
+    public function canAccessPanel(Panel $panel): bool
+    {
+        if ($panel->getId() !== 'admin') {
+            return false;
+        }
+
+        return $this->isAdmin()
+            && $this->isActive()
+            && ! $this->trashed();
+    }
 
     public function isMainAdmin(): bool
     {

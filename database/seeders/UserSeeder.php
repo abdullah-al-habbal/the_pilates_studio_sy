@@ -22,7 +22,7 @@ class UserSeeder extends Seeder
             ]
         );
         User::firstOrCreate(
-            ['email' => 'adam.kim@gmail.com'],
+            ['email' => 'adam.kim@studio.com'],
             [
                 'fullname' => 'Adam Kim',
                 'phone_number' => '+97100000001',
@@ -33,7 +33,7 @@ class UserSeeder extends Seeder
             ]
         );
 
-        User::factory(5)->create();
+    User::factory(5)->create();
         User::factory(3)->deactivated()->create();
     }
 }
