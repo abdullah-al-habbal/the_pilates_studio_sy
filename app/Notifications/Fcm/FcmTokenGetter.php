@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace App\Notifications\Fcm;
 
-use Throwable;
-
 final class FcmTokenGetter
 {
     public function getTokens(mixed $notifiable): array

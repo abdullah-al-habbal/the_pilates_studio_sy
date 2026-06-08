@@ -12,11 +12,9 @@ class StatsOverview extends BaseWidget
 
     protected static bool $isLazy = false;
 
-    // No constructor needed – Livewire creates the widget directly
 
     protected function getStats(): array
     {
-        // Resolve the service from the container
         $statsService = app(StatsService::class);
         $statsData = $statsService->getOverviewStats();
 
