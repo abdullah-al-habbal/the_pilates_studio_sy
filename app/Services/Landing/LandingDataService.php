@@ -33,37 +33,56 @@ class LandingDataService
         private readonly TestimonialService $testimonialService,
         private readonly StaticPageService $staticPageService
     ) {}
-
+    
     public function getLandingData(): LandingDataVO
     {
         $hasError = false;
         $isEmpty = true;
 
         $settings = $this->getSettings();
-        if ($settings === null) $hasError = true;
+        if ($settings === null) {
+            $hasError = true;
+        }
 
         $classes = $this->getClasses($settings?->brandPrimaryColor);
-        if ($classes === null) $hasError = true;
-        elseif ($classes->isNotEmpty()) $isEmpty = false;
+        if ($classes === null) {
+            $hasError = true;
+        } elseif ($classes->isNotEmpty()) {
+            $isEmpty = false;
+        }
 
         $schedule = $this->getSchedule();
-        if ($schedule === null) $hasError = true;
-        elseif ($schedule->isNotEmpty()) $isEmpty = false;
+        if ($schedule === null) {
+            $hasError = true;
+        } elseif ($schedule->isNotEmpty()) {
+            $isEmpty = false;
+        }
 
         $instructors = $this->getInstructors();
-        if ($instructors === null) $hasError = true;
-        elseif ($instructors->isNotEmpty()) $isEmpty = false;
+        if ($instructors === null) {
+            $hasError = true;
+        } elseif ($instructors->isNotEmpty()) {
+            $isEmpty = false;
+        }
 
         $packages = $this->getPackages();
-        if ($packages === null) $hasError = true;
-        elseif ($packages->isNotEmptyn()) $isEmpty = false;
+        if ($packages === null) {
+            $hasError = true;
+        } elseif ($packages->isNotEmpty()) {
+            $isEmpty = false;
+        }
 
         $testimonials = $this->getTestimonials();
-        if ($testimonials === null) $hasError = true;
-        elseif ($testimonials->isNotEmpty()) $isEmpty = false;
+        if ($testimonials === null) {
+            $hasError = true;
+        } elseif ($testimonials->isNotEmpty()) {
+            $isEmpty = false;
+        }
 
         $staticPages = $this->getStaticPages();
-        if ($staticPages === null) $hasError = true;
+        if ($staticPages === null) {
+            $hasError = true;
+        }
 
         return new LandingDataVO(
             settings: $settings ?? LandingSettingsVO::empty(),
@@ -81,8 +100,7 @@ class LandingDataService
     private function getSettings(): ?LandingSettingsVO
     {
         try {
-            $locale = app()->getLocale();
-            return LandingSettingsVO::fromAppSettings($this->appSettingService, $locale);
+            return LandingSettingsVO::fromAppSettings($this->appSettingService);
         } catch (\Throwable $e) {
             report($e);
             return null;

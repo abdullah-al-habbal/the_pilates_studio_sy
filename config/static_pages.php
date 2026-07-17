@@ -5,7 +5,6 @@ return [
         [
             'slug'       => 'about-us',
             'title'      => ['en' => 'About Us', 'ar' => 'من نحن'],
-            'image'      => null,
             'content'    => [
                 'en' => '<p>We are a premium Pilates studio dedicated to movement, strength, and mindful living.</p>',
                 'ar' => '<p>نحن استوديو بيلاتيس راقٍ مخصص للحركة والقوة والعيش الواعي.</p>',
@@ -16,7 +15,6 @@ return [
         [
             'slug'       => 'privacy-policy',
             'title'      => ['en' => 'Privacy Policy', 'ar' => 'سياسة الخصوصية'],
-            'image'      => null,
             'content'    => [
                 'en' => '<h2>Privacy Policy</h2>
 <p>We built the Pilates Studio app to make booking your classes as easy as possible. This policy explains what information we collect, why we collect it, and how we use it — in plain language.</p>
@@ -113,7 +111,6 @@ return [
         [
             'slug'       => 'terms-of-service',
             'title'      => ['en' => 'Terms of Service', 'ar' => 'شروط الخدمة'],
-            'image'      => null,
             'content'    => [
                 'en' => '<p>Our terms of service outline the rules and guidelines for using our studio and app.</p>',
                 'ar' => '<p>توضح شروط الخدمة لدينا القواعد والإرشادات لاستخدام استوديو وتطبيقنا.</p>',
@@ -124,7 +121,6 @@ return [
         [
             'slug'       => 'cancellation-policy',
             'title'      => ['en' => 'Cancellation Policy', 'ar' => 'سياسة الإلغاء'],
-            'image'      => null,
             'content'    => [
                 'en' => '<p>You can cancel your booking up to 24 hours before the class starts and get your credits back.</p>',
                 'ar' => '<p>يمكنك إلغاء حجزك قبل 24 ساعة من بدء الحصة واستعادة اعتماداتك.</p>',
@@ -135,7 +131,6 @@ return [
         [
             'slug'       => 'contact-us',
             'title'      => ['en' => 'Contact Us', 'ar' => 'اتصل بنا'],
-            'image'      => null,
             'content'    => [
                 'en' => '<p>Reach us at <strong>hello@thepilatesstudiocy.com</strong>.</p>',
                 'ar' => '<p>تواصل معنا عبر <strong>hello@thepilatesstudiocy.com</strong>.</p>',

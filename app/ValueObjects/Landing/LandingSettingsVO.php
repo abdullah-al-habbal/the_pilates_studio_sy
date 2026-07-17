@@ -45,7 +45,7 @@ class LandingSettingsVO
         public readonly string $brandAccentColor,
     ) {}
 
-    public static function fromAppSettings(AppSettingService $service, string $locale): self
+    public static function fromAppSettings(AppSettingService $service): self
     {
         return new self(
             siteName: $service->getTranslated('site_name'),

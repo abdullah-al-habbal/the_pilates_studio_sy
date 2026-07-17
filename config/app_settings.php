@@ -1,4 +1,5 @@
 <?php
+// config/app_settings.php
 
 return [
     'defaults' => [
@@ -208,7 +209,7 @@ return [
         ],
         [
             'key' => 'hero_image',
-            'value' => 'assets/images/website/landing_page/hero_section/hero_image.avif',
+            'value' => 'assets/images/website/landing_page/hero_section/hero_image.webp',
             'type' => 'image',
             'description' => 'Hero section background image'
         ],
