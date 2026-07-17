@@ -31,4 +31,9 @@ class Testimonial extends Model
             'sort_order' => 'integer',
         ];
     }
+
+    public function getAvatarUrlAttribute(): ?string
+    {
+        return $this->avatar ? url($this->avatar) : null;
+    }
 }

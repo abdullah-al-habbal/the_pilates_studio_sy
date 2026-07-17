@@ -1,8 +1,9 @@
-name: Build and Deploy (Laravel)
+name: Build and Deploy (Laravel via Git)
 
 on:
   push:
     branches: [dev, production]
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -12,98 +13,21 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
-    outputs:
-      artifact-name: release.tar.gz
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Set up PHP 8.4
-        uses: shivammathur/setup-php@v2
-        with:
-          php-version: "8.4"
-          extensions: mbstring, openssl, pdo_mysql, fileinfo, sodium, curl
-
-      - name: Create CI environment file
-        run: |
-          cp .env.example .env
-          echo "APP_KEY=base64:$(openssl rand -base64 32)" >> .env
-          echo "DB_PORT=3306" >> .env
-          echo "BCRYPT_ROUNDS=12" >> .env
-          echo "AUTH_PASSWORD_TIMEOUT=10800" >> .env
-          echo "SESSION_LIFETIME=120" >> .env
-
-      - name: Install Composer dependencies
-        run: |
-          if [ "${GITHUB_REF_NAME}" = "production" ]; then
-            composer install --no-interaction --prefer-dist --optimize-autoloader --no-dev
-          else
-            composer install --no-interaction --prefer-dist --optimize-autoloader
-          fi
-
-      - name: Build frontend
-        run: |
-          corepack enable
-          npm ci
-          npm run build
-
-      - name: Prepare artifact
-        run: |
-          rm -rf artifact release.tar.gz || true
-          mkdir -p artifact
-          rsync -a \
-            --exclude='.git' \
-            --exclude='.github' \
-            --exclude='.env' \
-            --exclude='node_modules' \
-            --exclude='tests' \
-            --exclude='storage/logs' \
-            --exclude='storage/framework' \
-            --exclude='storage/app' \
-            ./ artifact/
-          rsync -a vendor artifact/vendor
-          rsync -a public/build artifact/public/build || true
-          tar -czf release.tar.gz -C artifact .
-
-      - name: Upload artifact to workflow
-        uses: actions/upload-artifact@v4
-        with:
-          name: release
-          path: release.tar.gz
-
   deploy:
-    needs: build
+    name: 🚀 Deploy to Hostinger via Git
     runs-on: ubuntu-latest
     steps:
-      - name: Debug connection variables
-        run: |
-          echo "IP=${{ secrets.HOSTINGER_SERVER_IP }}"
-          echo "PORT=${{ secrets.HOSTINGER_SSH_PORT }}"
-          echo "USER=${{ secrets.HOSTINGER_SSH_USERNAME }}"
-
-      - name: Test SSH connectivity
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y netcat-openbsd
-          nc -zv ${{ secrets.HOSTINGER_SERVER_IP }} ${{ secrets.HOSTINGER_SSH_PORT }} || echo "Port test failed but continuing..."
-
-      - name: Download artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: release
-          path: .
-
-      - name: Determine target path (dev or production)
+      - name: Determine target path and environment
         id: target
         run: |
           if [ "${GITHUB_REF_NAME}" = "production" ]; then
             echo "TARGET=/home/${{ secrets.HOSTINGER_SSH_USERNAME }}/domains/pilatesstudiosy.com/public_html/production" >> $GITHUB_ENV
             echo "ENVIRONMENT=production" >> $GITHUB_ENV
+            echo "COMPOSER_FLAGS=--no-dev --optimize-autoloader --no-interaction" >> $GITHUB_ENV
           else
             echo "TARGET=/home/${{ secrets.HOSTINGER_SSH_USERNAME }}/domains/dev.pilatesstudiosy.com/public_html/dev" >> $GITHUB_ENV
             echo "ENVIRONMENT=dev" >> $GITHUB_ENV
+            echo "COMPOSER_FLAGS=--optimize-autoloader --no-interaction" >> $GITHUB_ENV
           fi
 
       - name: Check for fresh-migration flag
@@ -116,44 +40,33 @@ jobs:
             echo "FRESH=false" >> $GITHUB_ENV
           fi
 
-      - name: Upload artifact to server
-        uses: appleboy/scp-action@v0.1.5
-        with:
-          host: ${{ secrets.HOSTINGER_SERVER_IP }}
-          username: ${{ secrets.HOSTINGER_SSH_USERNAME }}
-          key: ${{ secrets.HOSTINGER_SSH_PRIVATE_KEY }}
-          port: ${{ secrets.HOSTINGER_SSH_PORT }}
-          source: release.tar.gz
-          target: ${{ env.TARGET }}
-          timeout: 30s
-          command_timeout: 10m
-
-      - name: Remote deploy
-        uses: appleboy/ssh-action@v1.0.3
+      - name: 🚀 Deploy via SSH (Git Pull & Build)
+        uses: appleboy/ssh-action@v1
         with:
           host: ${{ secrets.HOSTINGER_SERVER_IP }}
           username: ${{ secrets.HOSTINGER_SSH_USERNAME }}
           key: ${{ secrets.HOSTINGER_SSH_PRIVATE_KEY }}
           port: ${{ secrets.HOSTINGER_SSH_PORT }}
           envs: FRESH
+          timeout: 60s
+          command_timeout: 30m
+          script_stop: true
           script: |
-            set -euo pipefail
+            set -Eeuo pipefail
+
             TARGET="${{ env.TARGET }}"
             ENVIRONMENT="${{ env.ENVIRONMENT }}"
-            PHP_BIN="$(command -v php8.4 || command -v php8.3 || command -v php8.4 || command -v php || echo /usr/bin/php)"
+            COMPOSER_FLAGS="${{ env.COMPOSER_FLAGS }}"
+            DEPLOY_KEY="/home/${{ secrets.HOSTINGER_SSH_USERNAME }}/.ssh/pilates_deploy_key"
+            
+            export GIT_SSH_COMMAND="ssh -i $DEPLOY_KEY -o IdentitiesOnly=yes -o StrictHostKeyChecking=no"
+            PHP_BIN="$(command -v php8.4 || command -v php8.3 || command -v php || echo /usr/bin/php)"
             MIGRATE_LOCK="/tmp/laravel_migrate_$(echo "$TARGET" | tr '/' '_').lock"
 
+            echo "🎯 Deploying to: $TARGET ($ENVIRONMENT)"
             cd "$TARGET"
 
-            # ── PHASE 1: Environment validation ─────────────────────────────
-            if [ ! -f .env ]; then
-              echo "❌ FATAL: .env is missing at $TARGET"
-              exit 1
-            fi
-            echo "Environment check:"
-            grep -E '^(APP_ENV|APP_NAME|APP_DEBUG|LOG_LEVEL|DB_CONNECTION)=' .env
-
-            # ── PHASE 2: Storage preparation ────────────────────────────────
+            # ── PHASE 1: Storage preparation (Protect user uploads) ─────────
             mkdir -p storage/logs
             mkdir -p storage/framework/{cache,sessions,views}
             mkdir -p storage/app/public
@@ -162,10 +75,15 @@ jobs:
               mv storage/app "storage/app.bak.$(date +%s)"
             fi
 
-            # ── PHASE 3: Code extraction ────────────────────────────────────
-            tar -xzf release.tar.gz -C .
-            rm -f release.tar.gz
+            # ── PHASE 2: Git Sync ───────────────────────────────────────────
+            echo "📥 Fetching latest changes from Git..."
+            git fetch origin ${{ github.ref_name }}
+            git reset --hard origin/${{ github.ref_name }}
+            
+            echo "🧹 Cleaning untracked files (respects .gitignore)..."
+            git clean -fd
 
+            # Restore storage/app
             if ls storage/app.bak.* 1> /dev/null 2>&1; then
               for d in storage/app.bak.*; do
                 rsync -a "$d"/ storage/app/
@@ -175,19 +93,20 @@ jobs:
 
             chmod -R 775 storage bootstrap/cache
 
-            # ── PHASE 4: Schema pre-check ───────────────────────────────────
-            echo "Verifying database connectivity..."
-            $PHP_BIN artisan db:show --no-interaction
+            # ── PHASE 3: Dependencies ───────────────────────────────────────
+            echo "📦 Installing PHP dependencies..."
+            composer install $COMPOSER_FLAGS
 
-            echo "Checking migration status..."
-            PENDING=$($PHP_BIN artisan migrate:status --no-interaction 2>&1 | grep -c "Pending" || true)
-            if [ "$PENDING" -gt 0 ]; then
-              echo "⚠ $PENDING pending migration(s) detected — will execute now."
+            echo "🏗️ Building frontend assets..."
+            if command -v npm &> /dev/null; then
+              npm ci
+              npm run build
             else
-              echo "✓ No pending migrations."
+              echo "⚠️ npm not found, skipping frontend build."
             fi
 
-            # ── PHASE 5: Migrations (with lock) ─────────────────────────────
+            # ── PHASE 4: Migrations ─────────────────────────────────────────
+            echo "🗄️ Running migrations..."
             if [ "${FRESH}" = "true" ] && [ "${ENVIRONMENT}" != "production" ]; then
               echo "🔄 Fresh migration requested — dropping all tables and reseeding..."
               flock -n "$MIGRATE_LOCK" $PHP_BIN artisan migrate:fresh --seed --force
@@ -195,15 +114,18 @@ jobs:
               if [ "${FRESH}" = "true" ]; then
                 echo "⚠ Skipping fresh migration because environment is PRODUCTION."
               fi
-              echo "Running migrations (locked)..."
+              echo "Running standard migrations (locked)..."
               flock -n "$MIGRATE_LOCK" $PHP_BIN artisan migrate --force
             fi
 
-            # ── PHASE 6: Cache & optimization ───────────────────────────────
+            # ── PHASE 5: Cache & optimization ───────────────────────────────
+            echo "🧹 Clearing and caching..."
+            $PHP_BIN artisan optimize:clear
             $PHP_BIN artisan config:cache
             $PHP_BIN artisan route:cache
-            $PHP_BIN artisan view:clear
             $PHP_BIN artisan view:cache
-            $PHP_BIN artisan optimize
 
-            echo "✅ Deployment to $ENVIRONMENT complete."
+            echo "✅ Verifying application..."
+            $PHP_BIN artisan about
+
+            echo "🎉 Deployment to $ENVIRONMENT completed successfully"

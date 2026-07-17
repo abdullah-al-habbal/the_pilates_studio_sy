@@ -13,9 +13,15 @@ class AppSettingResource extends JsonResource
 {
     public function toArray(Request $request): array
     {
+        $value = $this->value;
+
+        if (($this->type ?? null) === 'image' && is_string($value) && filled($value)) {
+            $value = url($value);
+        }
+
         return [
             'key'         => $this->key,
-            'value'       => $this->value,
+            'value'       => $value,
             'description' => $this->description,
         ];
     }

@@ -16,6 +16,7 @@ class InstructorResource extends JsonResource
         return [
             'id' => $this->id,
             'name' => $this->name,
+            'image_url' => $this->image_url,
             'classes' => ClassesResource::collection($this->whenLoaded('classes')),
         ];
     }
