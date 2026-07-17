@@ -21,7 +21,10 @@ trait CopiesSourceImage
         $ext = pathinfo($sourcePath, PATHINFO_EXTENSION);
 
         $filename = $fileSuffix ? "{$timestamp}-{$fileSuffix}" : (string) $timestamp;
-        $folder = $identifier ? "{$basePath}/{$identifier}" : $basePath;
+        
+        $rootFolder = 'data-images';
+        $folder = $identifier ? "{$rootFolder}/{$basePath}/{$identifier}" : "{$rootFolder}/{$basePath}";
+        
         $relativePath = "{$folder}/{$year}/{$month}/{$day}/{$filename}.{$ext}";
         $destinationPath = public_path($relativePath);
 

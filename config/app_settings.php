@@ -209,7 +209,7 @@ return [
         ],
         [
             'key' => 'hero_image',
-            'value' => 'assets/images/website/landing_page/hero_section/hero_image.webp',
+            'value' => '',
             'type' => 'image',
             'description' => 'Hero section background image'
         ],

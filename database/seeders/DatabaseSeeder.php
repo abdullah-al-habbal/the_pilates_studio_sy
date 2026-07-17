@@ -3,11 +3,14 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\File;
 
 class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
+        $this->cleanupGeneratedAssets();
+
         $this->call([
             CurrencySeeder::class,
             LanguageSeeder::class,
@@ -31,5 +34,14 @@ class DatabaseSeeder extends Seeder
             MobileAppVersionSeeder::class,
             TestimonialSeeder::class,
         ]);
+    }
+
+    private function cleanupGeneratedAssets(): void
+    {
+        $directory = public_path('data-images');
+
+        if (File::exists($directory)) {
+            File::deleteDirectory($directory);
+        }
     }
 }
