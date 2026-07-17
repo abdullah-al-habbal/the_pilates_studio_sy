@@ -35,4 +35,9 @@ class Instructor extends Model
     {
         return $this->hasMany(Classes::class);
     }
+
+    public function getImageUrlAttribute(): ?string
+    {
+        return $this->image ? url($this->image) : null;
+    }
 }

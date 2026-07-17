@@ -24,7 +24,7 @@ class LandingTestimonialVO
             name: $testimonial->getTranslation('name', app()->getLocale()),
             role: $testimonial->getTranslation('role', app()->getLocale()),
             quote: $testimonial->getTranslation('quote', app()->getLocale()),
-            avatar: $testimonial->avatar,
+            avatar: $testimonial->avatar_url ?: $testimonial->avatar,
             rating: $testimonial->rating,
         );
     }

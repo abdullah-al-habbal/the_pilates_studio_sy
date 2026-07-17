@@ -3,12 +3,12 @@
 namespace Database\Seeders;
 
 use App\Enums\BookingStatusEnum;
+use App\Exceptions\SeederDependencyMissingException;
 use App\Models\Booking;
 use App\Models\Currency;
 use App\Models\Package;
 use App\Models\User;
 use Illuminate\Database\Seeder;
-use RuntimeException;
 
 class BookingSeeder extends Seeder
 {
@@ -18,7 +18,7 @@ class BookingSeeder extends Seeder
         $package = Package::where('name->en', '12 Sessions Pack')->first();
 
         if (!$adam || !$package) {
-            throw new RuntimeException('BookingSeeder dependency missing: User or Package.');
+            throw new SeederDependencyMissingException('BookingSeeder needs user or package. Not found!');
         }
 
         $adamHasActive = $adam->bookings()
@@ -43,7 +43,7 @@ class BookingSeeder extends Seeder
 
         $otherUsers = User::where('id', '!=', $adam->id)->get();
         if ($otherUsers->isNotEmpty()) {
-            $usersForActive = $otherUsers->filter(fn($user) => rand(1, 100) <= 30);
+            $usersForActive = $otherUsers->filter(fn($user) => random_int(1, 100) <= 30);
 
             foreach ($usersForActive as $user) {
                 $alreadyActive = $user->bookings()
@@ -61,10 +61,10 @@ class BookingSeeder extends Seeder
                         'user_id' => $user->id,
                         'package_id' => $randomPackage->id,
                         'total_credits' => $randomPackage->total_credits,
-                        'remaining_credits' => rand(1, $randomPackage->total_credits),
+                        'remaining_credits' => random_int(1, $randomPackage->total_credits),
                         'status' => BookingStatusEnum::ACTIVE,
-                        'expires_at' => now()->addMonths(rand(1, 12)),
-                        'paid_amount' => rand(20000, 100000),
+                        'expires_at' => now()->addMonths(random_int(1, 12)),
+                        'paid_amount' => random_int(20000, 100000),
                         'currency_id' => $sypCurrency?->id,
                     ]);
                 }

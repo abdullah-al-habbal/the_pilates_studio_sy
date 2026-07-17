@@ -1,16 +1,17 @@
 <?php
 
-// filePath: app/Providers/InitialDataServiceProvider.php
-
 namespace App\Providers;
 
 use App\Models\AppSetting;
 use App\Models\StaticPage;
+use Database\Factories\Concerns\CopiesSourceImage;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\ServiceProvider;
 
 class InitialDataServiceProvider extends ServiceProvider
 {
+    use CopiesSourceImage;
+
     private const REQUIRED_SETTINGS = [
         ['key' => 'maintenance_mode', 'value' => 'false', 'type' => 'boolean', 'description' => 'Whether the app is in maintenance mode'],
         ['key' => 'site_name', 'value' => '{"en":"The Pilates Studio App","ar":"تطبيق بيلاتس ستوديو"}', 'type' => 'json', 'description' => 'Site name'],
@@ -43,6 +44,10 @@ class InitialDataServiceProvider extends ServiceProvider
         ['key' => 'social_facebook', 'value' => '{"url":"https://facebook.com/thepilatesstudio","icon":"facebook"}', 'type' => 'string', 'description' => 'Facebook link & icon (JSON with url and icon)'],
         ['key' => 'social_twitter', 'value' => '{"url":"https://twitter.com/thepilatesst","icon":"twitter"}', 'type' => 'string', 'description' => 'Twitter link & icon (JSON with url and icon)'],
         ['key' => 'social_youtube', 'value' => '{"url":"https://youtube.com/@thepilatesstudio","icon":"youtube"}', 'type' => 'string', 'description' => 'Youtube link & icon (JSON with url and icon)'],
+        ['key' => 'brand_primary_color', 'value' => '#262D35', 'type' => 'hex_color', 'description' => 'Primary brand color (dark charcoal)'],
+        ['key' => 'brand_secondary_color', 'value' => '#F3EFE3', 'type' => 'hex_color', 'description' => 'Secondary brand color (cream/linen)'],
+        ['key' => 'brand_accent_color', 'value' => '#B8A18B', 'type' => 'hex_color', 'description' => 'Accent brand color (taupe/sand)'],
+        ['key' => 'hero_image', 'value' => '', 'type' => 'image', 'description' => 'Hero section background image'],
     ];
 
     private const REQUIRED_PAGES = [
@@ -89,7 +94,7 @@ class InitialDataServiceProvider extends ServiceProvider
             return;
         }
 
-        if (!Schema::hasTable('app_settings') || !Schema::hasTable('static_pages')) {
+        if (! Schema::hasTable('app_settings') || ! Schema::hasTable('static_pages')) {
             return;
         }
 
@@ -103,22 +108,45 @@ class InitialDataServiceProvider extends ServiceProvider
 
     private function ensureAppSettings(): void
     {
-        $existingKeys = AppSetting::query()->pluck('key')->all();
+        $sourcePath = public_path('assets/images/website/landing_page/hero_section/hero_image.webp');
 
         foreach (self::REQUIRED_SETTINGS as $setting) {
-            if (!in_array($setting['key'], $existingKeys, true)) {
+            $existingSetting = AppSetting::where('key', $setting['key'])->first();
+
+            if (! $existingSetting) {
+                if (($setting['type'] ?? null) === 'image') {
+                    $identifier = str_replace('_', '-', $setting['key']);
+                    $setting['value'] = $this->copySourceImage($sourcePath, 'app-settings', $identifier, $setting['key']);
+                }
+
                 AppSetting::create($setting);
+                continue;
+            }
+
+            if (($setting['type'] ?? null) === 'image' && empty($existingSetting->value)) {
+                $identifier = str_replace('_', '-', $setting['key']);
+                $existingSetting->value = $this->copySourceImage($sourcePath, 'app-settings', $identifier, $setting['key']);
+                $existingSetting->save();
             }
         }
     }
 
     private function ensureStaticPages(): void
     {
-        $existingSlugs = StaticPage::query()->pluck('slug')->all();
+        $sourcePath = public_path('assets/images/website/landing_page/hero_section/hero_image.webp');
 
         foreach (self::REQUIRED_PAGES as $page) {
-            if (!in_array($page['slug'], $existingSlugs, true)) {
+            $existingPage = StaticPage::where('slug', $page['slug'])->first();
+
+            if (! $existingPage) {
+                $page['image'] = $this->copySourceImage($sourcePath, 'static-pages', $page['slug'], 'page');
                 StaticPage::create($page);
+                continue;
+            }
+
+            if (empty($existingPage->image)) {
+                $existingPage->image = $this->copySourceImage($sourcePath, 'static-pages', $page['slug'], 'page');
+                $existingPage->save();
             }
         }
     }
