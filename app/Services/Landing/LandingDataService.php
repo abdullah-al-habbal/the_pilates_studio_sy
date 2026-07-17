@@ -56,7 +56,7 @@ class LandingDataService
 
         $packages = $this->getPackages();
         if ($packages === null) $hasError = true;
-        elseif ($packages->isNotEmpty()) $isEmpty = false;
+        elseif ($packages->isNotEmptyn()) $isEmpty = false;
 
         $testimonials = $this->getTestimonials();
         if ($testimonials === null) $hasError = true;
