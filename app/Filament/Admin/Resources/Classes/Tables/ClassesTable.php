@@ -1,4 +1,5 @@
 <?php
+
 // filePath: app/Filament/Admin/Resources/Classes/Tables/ClassesTable.php
 
 namespace App\Filament\Admin\Resources\Classes\Tables;
@@ -39,10 +40,9 @@ class ClassesTable
                     ->sortable()
                     ->weight(FontWeight::Bold)
                     ->limit(30)
-                    ->tooltip(fn($record) => $record->title)
+                    ->tooltip(fn ($record) => $record->title)
                     ->formatStateUsing(
-                        fn($state, $record) =>
-                        $record->getTranslation('title', app()->getLocale())
+                        fn ($state, $record) => $record->getTranslation('title', app()->getLocale())
                     ),
 
                 TextColumn::make('instructor.name')
@@ -50,7 +50,7 @@ class ClassesTable
                     ->searchable(query: function (Builder $query, string $search): Builder {
                         return $query->whereHas(
                             'instructor',
-                            fn($q) => $q->where('name', 'like', "%{$search}%")
+                            fn ($q) => $q->where('name', 'like', "%{$search}%")
                         );
                     })
                     ->sortable(query: function (Builder $query, string $direction): Builder {
@@ -94,9 +94,9 @@ class ClassesTable
                     ->toggleable(),
 
                 IconColumn::make('has_booked_sessions')
-                    ->label("locked")
+                    ->label('locked')
                     ->boolean()
-                    ->state(fn($record) => $record->hasBookedSessions())
+                    ->state(fn ($record) => $record->hasBookedSessions())
                     ->trueIcon('heroicon-o-lock-closed')
                     ->falseIcon('heroicon-o-lock-open')
                     ->trueColor('danger')
@@ -106,7 +106,7 @@ class ClassesTable
                 IconColumn::make('is_active')
                     ->label(__('dashboard.resources.classes.fields.is_active'))
                     ->boolean()
-                    ->state(fn($record) => $record->status === ClassStatusEnum::ACTIVE)
+                    ->state(fn ($record) => $record->status === ClassStatusEnum::ACTIVE)
                     ->trueIcon('heroicon-o-check-circle')
                     ->falseIcon('heroicon-o-x-circle')
                     ->trueColor('success')
@@ -116,9 +116,9 @@ class ClassesTable
                 TextColumn::make('status')
                     ->label(__('dashboard.resources.classes.fields.status'))
                     ->badge()
-                    ->color(fn(ClassStatusEnum $state): string => $state->getColor())
-                    ->icon(fn(ClassStatusEnum $state): ?string => $state->getIcon())
-                    ->formatStateUsing(fn(ClassStatusEnum $state): string => $state->getLabel())
+                    ->color(fn (ClassStatusEnum $state): string => $state->getColor())
+                    ->icon(fn (ClassStatusEnum $state): ?string => $state->getIcon())
+                    ->formatStateUsing(fn (ClassStatusEnum $state): string => $state->getLabel())
                     ->sortable()
                     ->searchable()
                     ->toggleable(),
@@ -177,11 +177,11 @@ class ClassesTable
                 TernaryFilter::make('has_upcoming_sessions')
                     ->label(__('dashboard.resources.classes.filters.has_upcoming_sessions'))
                     ->queries(
-                        true: fn(Builder $query) => $query->whereHas('sessions', function ($q) {
+                        true: fn (Builder $query) => $query->whereHas('sessions', function ($q) {
                             $q->where('date', '>=', now())
                                 ->where('status', 'scheduled');
                         }),
-                        false: fn(Builder $query) => $query->whereDoesntHave('sessions', function ($q) {
+                        false: fn (Builder $query) => $query->whereDoesntHave('sessions', function ($q) {
                             $q->where('date', '>=', now())
                                 ->where('status', 'scheduled');
                         }),
