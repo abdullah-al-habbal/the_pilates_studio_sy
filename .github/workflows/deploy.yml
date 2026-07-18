@@ -93,6 +93,11 @@ jobs:
 
             chmod -R 775 storage bootstrap/cache
 
+            # ── Storage symlink (Hostinger disables exec(), artisan storage:link fails) ──
+            rm -f public/storage
+            ln -s ../storage/app/public public/storage
+            echo "🔗 Storage symlink created: public/storage -> ../storage/app/public"
+
             # ── PHASE 3: Dependencies ───────────────────────────────────────
             echo "📦 Installing PHP dependencies..."
             composer install $COMPOSER_FLAGS
@@ -107,13 +112,10 @@ jobs:
 
             # ── PHASE 4: Migrations ─────────────────────────────────────────
             echo "🗄️ Running migrations..."
-            if [ "${FRESH}" = "true" ] && [ "${ENVIRONMENT}" != "production" ]; then
+            if [ "${FRESH}" = "true" ]; then
               echo "🔄 Fresh migration requested — dropping all tables and reseeding..."
               flock -n "$MIGRATE_LOCK" $PHP_BIN artisan migrate:fresh --seed --force
             else
-              if [ "${FRESH}" = "true" ]; then
-                echo "⚠ Skipping fresh migration because environment is PRODUCTION."
-              fi
               echo "Running standard migrations (locked)..."
               flock -n "$MIGRATE_LOCK" $PHP_BIN artisan migrate --force
             fi
