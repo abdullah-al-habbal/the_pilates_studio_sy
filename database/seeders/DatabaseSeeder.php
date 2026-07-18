@@ -38,10 +38,14 @@ class DatabaseSeeder extends Seeder
 
     private function cleanupGeneratedAssets(): void
     {
-        $directory = storage_path('app/public/data-images');
+        $directories = ['class-images', 'instructors', 'static-pages', 'testimonials'];
 
-        if (File::exists($directory)) {
-            File::deleteDirectory($directory);
+        foreach ($directories as $dir) {
+            $path = storage_path("app/public/{$dir}");
+
+            if (File::exists($path)) {
+                File::deleteDirectory($path);
+            }
         }
     }
 }
