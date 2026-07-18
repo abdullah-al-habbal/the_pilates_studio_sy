@@ -24,8 +24,7 @@ class TestimonialInfolist
                             ImageEntry::make('avatar')
                                 ->height(150)
                                 ->width(150)
-                                ->extraImgAttributes(['class' => 'rounded-full object-cover'])
-                                ->defaultImageUrl(url('/images/placeholder-person.jpg')),
+                                ->extraImgAttributes(['class' => 'rounded-full object-cover']),
                         ]),
                     Section::make('Details')
                         ->icon('heroicon-o-user')

@@ -28,10 +28,9 @@ class ClassesTable
     {
         return $table
             ->columns([
-                ImageColumn::make('primaryImage.url')
+                ImageColumn::make('primaryImage.image_url')
                     ->label(__('dashboard.resources.classes.fields.image'))
                     ->circular()
-                    ->defaultImageUrl(url('/images/placeholder-class.jpg'))
                     ->size(40),
 
                 TextColumn::make('title')
