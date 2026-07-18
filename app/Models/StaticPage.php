@@ -1,10 +1,12 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Storage;
 use Spatie\Translatable\HasTranslations;
 
 class StaticPage extends Model
@@ -25,6 +27,6 @@ class StaticPage extends Model
 
     public function getImageUrlAttribute(): ?string
     {
-        return $this->image ? asset($this->image) : null;
+        return $this->image ? Storage::disk('public')->url($this->image) : null;
     }
 }

@@ -20,8 +20,7 @@
                             <img
                                 src="{{ $instructor->imageUrl }}"
                                 alt="{{ $instructor->name }}"
-                                class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                                loading="lazy"
+                                class="block w-full h-full object-cover aspect-[4/3] bg-slate-200 dark:bg-dark-700 group-hover:scale-105 transition-transform duration-500"
                             >
                             <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
                             @if(!empty($instructor->socialLinks))

@@ -8,6 +8,7 @@ namespace App\Http\Resources\Api\V1;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
+use Illuminate\Support\Facades\Storage;
 
 class AppSettingResource extends JsonResource
 {
@@ -16,12 +17,12 @@ class AppSettingResource extends JsonResource
         $value = $this->value;
 
         if (($this->type ?? null) === 'image' && is_string($value) && filled($value)) {
-            $value = url($value);
+            $value = Storage::disk('public')->url($value);
         }
 
         return [
-            'key'         => $this->key,
-            'value'       => $value,
+            'key' => $this->key,
+            'value' => $value,
             'description' => $this->description,
         ];
     }

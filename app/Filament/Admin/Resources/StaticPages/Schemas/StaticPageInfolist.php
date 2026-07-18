@@ -56,8 +56,7 @@ class StaticPageInfolist
                     ->schema([
                         ImageEntry::make('image')
                             ->height(200)
-                            ->extraImgAttributes(['class' => 'rounded-lg object-cover'])
-                            ->defaultImageUrl(url('/images/placeholder.jpg')),
+                            ->extraImgAttributes(['class' => 'rounded-lg object-cover']),
                     ]),
                 Section::make('Timestamps')
                     ->icon('heroicon-o-clock')

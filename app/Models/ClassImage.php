@@ -6,6 +6,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Facades\Storage;
 
 class ClassImage extends Model
 {
@@ -26,7 +27,15 @@ class ClassImage extends Model
 
     public function getImageUrlAttribute(): ?string
     {
-        return $this->url ? asset($this->url) : null;
+        if (blank($this->url)) {
+            return null;
+        }
+
+        if (str_starts_with($this->url, 'http://') || str_starts_with($this->url, 'https://')) {
+            return $this->url;
+        }
+
+        return Storage::disk('public')->url($this->url);
     }
 
     public function class(): BelongsTo

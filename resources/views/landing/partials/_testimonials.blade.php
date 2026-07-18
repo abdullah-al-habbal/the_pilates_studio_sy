@@ -34,8 +34,7 @@
                             <img
                                 src="{{ $testimonial->avatar }}"
                                 alt="{{ $testimonial->name }}"
-                                class="w-12 h-12 rounded-full object-cover"
-                                loading="lazy"
+                                class="block w-12 h-12 rounded-full object-cover aspect-square bg-slate-200 dark:bg-dark-700"
                             >
                             <div>
                                 <div class="font-bold text-slate-900 dark:text-white text-sm">{{ $testimonial->name }}</div>

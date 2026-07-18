@@ -1,4 +1,5 @@
 <?php
+
 // filePath: app/Filament/Admin/Resources/Classes/RelationManagers/ImagesRelationManager.php
 
 namespace App\Filament\Admin\Resources\Classes\RelationManagers;
@@ -57,11 +58,13 @@ class ImagesRelationManager extends RelationManager
         return $schema
             ->components([
                 Grid::make(2)->schema([
-                    ImageEntry::make('url')
+                    ImageEntry::make('image_url')
                         ->label(__('dashboard.resources.class_images.fields.image'))
+                        ->disk('public')
+                        ->state(fn ($record) => $record->url)
                         ->height(200)
                         ->width(300)
-                        ->visible(fn ($record) => !empty($record?->url))
+                        ->visible(fn ($record) => ! empty($record?->url))
                         ->columnSpanFull(),
 
                     TextEntry::make('url')
@@ -143,16 +146,17 @@ class ImagesRelationManager extends RelationManager
     {
         return TextColumn::make('url')
             ->label(__('dashboard.resources.class_images.fields.image'))
-            ->formatStateUsing(function ($state) {
+            ->formatStateUsing(function ($state, $record) {
                 if (empty($state)) {
                     return view('filament.components.no-image-placeholder', [
                         'text' => __('dashboard.messages.no_image'),
                         'size' => 50,
                     ])->render();
                 }
-                return '<img src="' . e($state) . '" alt="Image" style="width:50px;height:50px;object-fit:cover;border-radius:9999px;" />';
+                $imageUrl = $record->image_url;
+
+                return '<img src="'.e($imageUrl).'" alt="Image" style="width:50px;height:50px;object-fit:cover;border-radius:9999px;" />';
             })
             ->html();
     }
-
 }

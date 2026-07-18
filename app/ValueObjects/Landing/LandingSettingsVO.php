@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\ValueObjects\Landing;
 
 use App\Services\AppSetting\AppSettingService;
+use Illuminate\Support\Facades\Storage;
 
 class LandingSettingsVO
 {
@@ -51,7 +52,7 @@ class LandingSettingsVO
             siteName: $service->getTranslated('site_name'),
             siteTagline: $service->getTranslated('site_tagline'),
             siteDescription: $service->getTranslated('site_description'),
-            logoUrl: $service->get('site_logo') ? url($service->get('site_logo')) : null,
+            logoUrl: $service->get('site_logo') ? Storage::disk('public')->url($service->get('site_logo')) : null,
             contactEmail: $service->get('contact_email'),
             contactPhone: $service->get('contact_phone'),
             contactAddress: $service->getTranslated('contact_address'),
@@ -78,7 +79,7 @@ class LandingSettingsVO
             socialFacebook: $service->get('social_facebook'),
             socialTwitter: $service->get('social_twitter'),
             socialYoutube: $service->get('social_youtube'),
-            heroImage: $service->get('hero_image') ? url($service->get('hero_image')) : null,
+            heroImage: $service->get('hero_image') ? Storage::disk('public')->url($service->get('hero_image')) : null,
             brandPrimaryColor: $service->get('brand_primary_color', '#262D35'),
             brandSecondaryColor: $service->get('brand_secondary_color', '#F3EFE3'),
             brandAccentColor: $service->get('brand_accent_color', '#B8A18B'),

@@ -34,11 +34,11 @@
             <div>
                 <h4 class="text-white font-semibold mb-6">{{ __('landing.explore') }}</h4>
                 <ul class="space-y-3">
-                    <li><a href="#classes" class="text-sm text-primary-300 hover:text-primary-200 transition-colors">{{ __('landing.nav_classes') }}</a></li>
-                    <li><a href="#schedule" class="text-sm text-primary-300 hover:text-primary-200 transition-colors">{{ __('landing.nav_schedule') }}</a></li>
-                    <li><a href="#instructors" class="text-sm text-primary-300 hover:text-primary-200 transition-colors">{{ __('landing.nav_instructors') }}</a></li>
-                    <li><a href="#packages" class="text-sm text-primary-300 hover:text-primary-200 transition-colors">{{ __('landing.nav_pricing') }}</a></li>
-                    <li><a href="#download" class="text-sm text-primary-300 hover:text-primary-200 transition-colors">{{ __('landing.nav_download_app') }}</a></li>
+                    <li><a href="{{ route('landing') }}#classes" class="text-sm text-primary-300 hover:text-primary-200 transition-colors">{{ __('landing.nav_classes') }}</a></li>
+                    <li><a href="{{ route('landing') }}#schedule" class="text-sm text-primary-300 hover:text-primary-200 transition-colors">{{ __('landing.nav_schedule') }}</a></li>
+                    <li><a href="{{ route('landing') }}#instructors" class="text-sm text-primary-300 hover:text-primary-200 transition-colors">{{ __('landing.nav_instructors') }}</a></li>
+                    <li><a href="{{ route('landing') }}#packages" class="text-sm text-primary-300 hover:text-primary-200 transition-colors">{{ __('landing.nav_pricing') }}</a></li>
+                    <li><a href="{{ route('landing') }}#download" class="text-sm text-primary-300 hover:text-primary-200 transition-colors">{{ __('landing.nav_download_app') }}</a></li>
                 </ul>
             </div>
 

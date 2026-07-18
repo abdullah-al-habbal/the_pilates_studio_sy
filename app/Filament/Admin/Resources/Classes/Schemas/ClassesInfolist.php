@@ -179,11 +179,11 @@ class ClassesInfolist
                         ->label(false)
                         ->schema([
                             Grid::make(3)->schema([
-                                ImageEntry::make('url')
+                                ImageEntry::make('image_url')
                                     ->label(false)
+                                    ->state(fn($record) => $record->image_url)
                                     ->height(150)
-                                    ->width(200)
-                                    ->defaultImageUrl(url('/images/placeholder.jpg')),
+                                    ->width(200),
 
                                 IconEntry::make('is_primary')
                                     ->label(__('dashboard.resources.classes.fields.is_primary'))
