@@ -3,10 +3,10 @@
 namespace App\Filament\Admin\Resources\Instructors\Schemas;
 
 use App\Models\Instructor;
-use Filament\Infolists\Components\Actions;
-use Filament\Infolists\Components\Actions\Action;
+use Filament\Actions\Action;
 use Filament\Infolists\Components\ImageEntry;
 use Filament\Infolists\Components\TextEntry;
+use Filament\Schemas\Components\Actions;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
@@ -29,7 +29,6 @@ class InstructorInfolist
                                 ->height(200)
                                 ->width(200)
                                 ->extraImgAttributes(['class' => 'rounded-xl object-cover'])
-                                ->defaultImageUrl(url('/images/placeholder-person.jpg')),
                         ]),
                     Section::make('Personal Information')
                         ->icon('heroicon-o-user')

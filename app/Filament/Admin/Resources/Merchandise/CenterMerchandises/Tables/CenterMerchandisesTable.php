@@ -22,8 +22,7 @@ class CenterMerchandisesTable
             ->columns([
                 ImageColumn::make('primaryImage.url')
                     ->label('')
-                    ->circular()
-                    ->defaultImageUrl('https://ui-avatars.com/api/?name=P&color=7C3AED&background=EDE9FE'),
+                    ->circular(),
                 TextColumn::make('name')
                     ->label(__('dashboard.resources.center_merchandises.fields.name'))
                     ->searchable()

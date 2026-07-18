@@ -25,9 +25,7 @@ class InstructorsTable
             ->columns([
                 ImageColumn::make('image')
                     ->circular()
-                    ->size(40)
-                    ->defaultImageUrl(url('/images/placeholder-person.jpg')),
-
+                    ->size(40),
                 TextColumn::make('name')
                     ->searchable(query: fn (Builder $query, string $search) => $query->where('name->' . app()->getLocale(), 'like', "%{$search}%"))
                     ->formatStateUsing(fn ($state, $record) => $record->getTranslation('name', $locale)),
