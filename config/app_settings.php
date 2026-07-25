@@ -1,7 +1,5 @@
 <?php
 
-// config/app_settings.php
-
 return [
     'defaults' => [
         [
@@ -12,19 +10,19 @@ return [
         ],
         [
             'key' => 'site_name',
-            'value' => '{"en":"The Pilates Studio App","ar":"تطبيق بيلاتس ستوديو"}',
+            'value' => '{"en":"The Pilates Studio","ar":"بيلاتس ستوديو سوريا"}',
             'type' => 'json',
             'description' => 'Site name',
         ],
         [
             'key' => 'site_tagline',
-            'value' => '{"en":"Premium Yoga, Pilates & Dance Fitness","ar":"يوغا، بيلاتس ولياقة رقص"}',
+            'value' => '{"en":"Pioneering Reformer Pilates in Syria","ar":"بيلاتس ريفورمر رائد في سوريا"}',
             'type' => 'json',
             'description' => 'Site tagline',
         ],
         [
             'key' => 'site_description',
-            'value' => '{"en":"Book classes, manage reservations, and purchase flexible credit packages all from your phone.","ar":"احجز الحصص، أدر الحجوزات، واشترِ باقات ائتمانية مرنة كل ذلك من هاتفك."}',
+            'value' => '{"en":"Only women studio. Premium yoga, pilates, and dance fitness with expert instructors in Damascus, Syria.","ar":"استوديو نساء فقط. يوغا، بيلاتس، ولياقة رقص مع مدربين خبراء في دمشق، سوريا."}',
             'type' => 'json',
             'description' => 'Site description',
         ],
@@ -42,7 +40,7 @@ return [
         ],
         [
             'key' => 'contact_phone',
-            'value' => '+963 xxx xxx xxx',
+            'value' => '+963995991533',
             'type' => 'string',
             'description' => 'Contact phone',
         ],
@@ -168,7 +166,7 @@ return [
         ],
         [
             'key' => 'social_instagram',
-            'value' => '{"url":"https://instagram.com/thepilatesstudio","icon":"instagram"}',
+            'value' => '{"url":"https://instagram.com/thepilatesstudio.sy","icon":"instagram"}',
             'type' => 'string',
             'description' => 'Instagram link & icon (JSON with url and icon)',
         ],
