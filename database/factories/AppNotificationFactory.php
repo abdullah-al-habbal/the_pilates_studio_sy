@@ -18,7 +18,7 @@ class AppNotificationFactory extends Factory
 
         return [
             'user_id' => User::inRandomOrder()->first()?->id ?? User::factory(),
-            'title'   => ['en' => $title,                    'ar' => $title],
+            'title' => ['en' => $title,                    'ar' => $title],
             'message' => ['en' => $this->faker->sentence(),  'ar' => ''],
             'read_at' => $this->faker->optional(0.5)->dateTimeBetween('-7 days', 'now'),
         ];
@@ -26,11 +26,11 @@ class AppNotificationFactory extends Factory
 
     public function unread(): static
     {
-        return $this->state(fn() => ['read_at' => null]);
+        return $this->state(fn () => ['read_at' => null]);
     }
 
     public function read(): static
     {
-        return $this->state(fn() => ['read_at' => now()]);
+        return $this->state(fn () => ['read_at' => now()]);
     }
 }

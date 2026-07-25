@@ -26,7 +26,7 @@ final readonly class UpdatePackageHandler
         return DB::transaction(function () use ($packageId, $name, $totalCredits, $validityDays, $baseCurrencyId, $amount) {
             $package = Package::findOrFail($packageId);
             $package->update([
-                'name'          => ['en' => $name],
+                'name' => ['en' => $name],
                 'total_credits' => $totalCredits,
                 'validity_days' => $validityDays,
             ]);
@@ -34,6 +34,7 @@ final readonly class UpdatePackageHandler
                 ['currency_id' => $baseCurrencyId],
                 ['amount' => $amount]
             );
+
             return $package->load('prices');
         });
     }

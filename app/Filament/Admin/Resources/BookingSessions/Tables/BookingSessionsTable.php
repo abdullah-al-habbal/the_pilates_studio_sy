@@ -1,4 +1,5 @@
 <?php
+
 // filePath: app/Filament/Admin/Resources/BookingSessions/Tables/BookingSessionsTable.php
 
 namespace App\Filament\Admin\Resources\BookingSessions\Tables;
@@ -33,8 +34,7 @@ class BookingSessionsTable
                     ->searchable(query: function (Builder $query, string $search): Builder {
                         return $query->whereHas(
                             'booking',
-                            fn($q) =>
-                            $q->where('id', 'like', "%{$search}%")
+                            fn ($q) => $q->where('id', 'like', "%{$search}%")
                         );
                     })
                     ->toggleable(),
@@ -44,8 +44,7 @@ class BookingSessionsTable
                     ->searchable(query: function (Builder $query, string $search): Builder {
                         return $query->whereHas(
                             'booking.user',
-                            fn($q) =>
-                            $q->where('fullname', 'like', "%{$search}%")
+                            fn ($q) => $q->where('fullname', 'like', "%{$search}%")
                         );
                     })
                     ->sortable(query: function (Builder $query, string $direction): Builder {
@@ -62,13 +61,15 @@ class BookingSessionsTable
                 TextColumn::make('classSession.class.title')
                     ->label(__('dashboard.resources.booking_sessions.fields.class'))
                     ->state(function ($record) {
-                        if (!$record->classSession || !$record->classSession->class) {
+                        if (! $record->classSession || ! $record->classSession->class) {
                             return '—';
                         }
+
                         return $record->classSession->class->getTranslation('title', app()->getLocale());
                     })
                     ->searchable(query: function (Builder $query, string $search): Builder {
                         $locale = app()->getLocale();
+
                         return $query->whereHas('classSession.class', function ($q) use ($search, $locale) {
                             $q->whereRaw("JSON_EXTRACT(title, '$.{$locale}') LIKE ?", ["%{$search}%"]);
                         });
@@ -90,9 +91,9 @@ class BookingSessionsTable
                 TextColumn::make('status')
                     ->label(__('dashboard.resources.booking_sessions.fields.status'))
                     ->badge()
-                    ->color(fn(BookingSessionStatusEnum $state): string => $state->getColor())
-                    ->icon(fn(BookingSessionStatusEnum $state): ?string => $state->getIcon())
-                    ->formatStateUsing(fn(BookingSessionStatusEnum $state): string => $state->getLabel())
+                    ->color(fn (BookingSessionStatusEnum $state): string => $state->getColor())
+                    ->icon(fn (BookingSessionStatusEnum $state): ?string => $state->getIcon())
+                    ->formatStateUsing(fn (BookingSessionStatusEnum $state): string => $state->getLabel())
                     ->sortable()
                     ->searchable()
                     ->toggleable(),
@@ -102,7 +103,7 @@ class BookingSessionsTable
                     ->dateTime('M d, Y H:i')
                     ->sortable()
                     ->placeholder('—')
-                    ->color(fn($state): string => $state ? 'danger' : 'success')
+                    ->color(fn ($state): string => $state ? 'danger' : 'success')
                     ->toggleable(),
 
                 TextColumn::make('created_at')
@@ -137,16 +138,18 @@ class BookingSessionsTable
                     ->label(__('dashboard.resources.booking_sessions.fields.class_session'))
                     ->options(function () {
                         $locale = app()->getLocale();
+
                         return ClassSession::query()
                             ->with('class')
                             ->whereHas('class')
                             ->get()
                             ->mapWithKeys(function (ClassSession $session) use ($locale) {
                                 $classTitle = $session->class?->getTranslation('title', $locale);
+
                                 return [
-                                    $session->id => $classTitle . ' - ' .
-                                        $session->date->format('M d, Y') . ' ' .
-                                        substr($session->start_time, 0, 5)
+                                    $session->id => $classTitle.' - '.
+                                        $session->date->format('M d, Y').' '.
+                                        substr($session->start_time, 0, 5),
                                 ];
                             })
                             ->toArray();

@@ -20,7 +20,7 @@ final readonly class ApproveExpenseAction
 
     public function __invoke(int $expense): JsonResponse
     {
-        if (!Auth::user()?->isMainAdmin()) {
+        if (! Auth::user()?->isMainAdmin()) {
             return $this->forbidden('Only main admin can approve expenses.');
         }
 
@@ -32,7 +32,8 @@ final readonly class ApproveExpenseAction
                 message: 'Expense approved successfully.'
             );
         } catch (\Throwable $e) {
-            Log::error('Operations - ApproveExpense failed: ' . $e->getMessage(), ['exception' => $e]);
+            Log::error('Operations - ApproveExpense failed: '.$e->getMessage(), ['exception' => $e]);
+
             return $this->error(message: 'Failed to approve expense.');
         }
     }

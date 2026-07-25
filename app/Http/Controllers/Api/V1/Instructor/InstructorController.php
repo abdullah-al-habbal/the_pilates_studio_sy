@@ -1,4 +1,5 @@
 <?php
+
 // filePath: app/Http/Controllers/Api/V1/Instructor/InstructorController.php
 
 declare(strict_types=1);

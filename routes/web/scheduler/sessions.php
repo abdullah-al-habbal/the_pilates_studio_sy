@@ -1,13 +1,12 @@
 <?php
+
 // routes/web/scheduler/sessions.php
 declare(strict_types=1);
 
-use App\Http\Actions\Web\Admin\Scheduler\{
-    GetDailySessionsAction,
-    GetSessionDetailsAction,
-    GetSessionsDaysInMonthAction,
-    UpdateAttendanceAction,
-};
+use App\Http\Actions\Web\Admin\Scheduler\GetDailySessionsAction;
+use App\Http\Actions\Web\Admin\Scheduler\GetSessionDetailsAction;
+use App\Http\Actions\Web\Admin\Scheduler\GetSessionsDaysInMonthAction;
+use App\Http\Actions\Web\Admin\Scheduler\UpdateAttendanceAction;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('sessions')->name('sessions.')->group(function (): void {

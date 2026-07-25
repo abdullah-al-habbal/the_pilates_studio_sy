@@ -10,7 +10,6 @@ class AttendanceTrendChart extends ChartWidget
 {
     protected ?string $pollingInterval = '30s';
 
-
     public function getHeading(): ?string
     {
         return __('dashboard.widgets.attendance_trend.heading');
@@ -37,7 +36,7 @@ class AttendanceTrendChart extends ChartWidget
                     'tension' => 0.4,
                 ],
             ],
-            'labels' => $trend->keys()->map(fn($date) => Carbon::parse($date)->format('M d'))->toArray(),
+            'labels' => $trend->keys()->map(fn ($date) => Carbon::parse($date)->format('M d'))->toArray(),
         ];
     }
 }

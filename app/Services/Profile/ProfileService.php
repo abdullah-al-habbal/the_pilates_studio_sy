@@ -1,4 +1,5 @@
 <?php
+
 // filePath: app/Services/Profile/ProfileService.php
 
 declare(strict_types=1);

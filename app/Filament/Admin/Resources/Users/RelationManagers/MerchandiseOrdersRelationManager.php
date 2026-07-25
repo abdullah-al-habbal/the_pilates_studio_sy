@@ -16,24 +16,28 @@ use Illuminate\Database\Eloquent\Model;
 class MerchandiseOrdersRelationManager extends RelationManager
 {
     protected static string $relationship = 'merchandiseOrders';
+
     public static function getTitle(Model $ownerRecord, string $pageClass): string
     {
         return __('dashboard.resources.merchandise_orders.plural');
     }
+
     public function form(Schema $schema): Schema
     {
         return $schema->components([]);
     }
+
     public function table(Table $table): Table
     {
         $currencyService = app(CurrencyService::class);
+
         return $table
             ->recordTitleAttribute('id')
             ->columns([
                 TextColumn::make('merchandise.name')
                     ->label(__('dashboard.resources.merchandise_orders.fields.merchandise'))
                     ->formatStateUsing(
-                        fn($state) => is_array($state)
+                        fn ($state) => is_array($state)
                             ? ($state[app()->getLocale()] ?? $state['en'] ?? '')
                             : $state
                     )
@@ -44,7 +48,7 @@ class MerchandiseOrdersRelationManager extends RelationManager
                     ->color('info'),
                 TextColumn::make('total_price')
                     ->label(__('dashboard.resources.merchandise_orders.fields.total_price'))
-                    ->state(fn($record) => $record->quantity * ($record->merchandise?->price ?? 0))
+                    ->state(fn ($record) => $record->quantity * ($record->merchandise?->price ?? 0))
                     ->money($currencyService->getCode()),
                 TextColumn::make('ordered_at')
                     ->label(__('dashboard.resources.merchandise_orders.fields.ordered_at'))
@@ -53,7 +57,7 @@ class MerchandiseOrdersRelationManager extends RelationManager
             ])
             ->actions([
                 ViewAction::make()
-                    ->url(fn($record) => route('filament.admin.resources.merchandise.merchandise-orders.view', $record)),
+                    ->url(fn ($record) => route('filament.admin.resources.merchandise.merchandise-orders.view', $record)),
                 DeleteAction::make(),
             ]);
     }

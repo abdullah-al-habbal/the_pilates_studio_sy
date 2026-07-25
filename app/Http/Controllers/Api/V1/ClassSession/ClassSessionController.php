@@ -19,8 +19,7 @@ class ClassSessionController extends BaseApiController
 {
     public function __construct(
         private readonly ClassSessionService $classSessionService
-    ) {
-    }
+    ) {}
 
     #[Endpoint('List class sessions', description: 'Returns filtered upcoming class sessions.')]
     public function index(QueryClassSessionsRequest $request): JsonResponse

@@ -1,4 +1,5 @@
 <?php
+
 // routes/web/operations/notifications.php
 declare(strict_types=1);
 

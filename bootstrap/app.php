@@ -43,9 +43,9 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 $app = Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
-        web: __DIR__ . '/../routes/web/web.php',
-        api: __DIR__ . '/../routes/api/api.php',
-        commands: __DIR__ . '/../routes/console/console.php',
+        web: __DIR__.'/../routes/web/web.php',
+        api: __DIR__.'/../routes/api/api.php',
+        commands: __DIR__.'/../routes/console/console.php',
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
@@ -125,7 +125,7 @@ $app = Application::configure(basePath: dirname(__DIR__))
         });
 
         $exceptions->render(function (NotFoundHttpException $e, Request $request) {
-            if (!$request->expectsJson()) {
+            if (! $request->expectsJson()) {
                 return null;
             }
 
@@ -138,8 +138,8 @@ $app = Application::configure(basePath: dirname(__DIR__))
 
                 return response()->json([
                     'success' => false,
-                    'code' => $modelSlug . '_NOT_FOUND',
-                    'message' => $modelBase . ' not found',
+                    'code' => $modelSlug.'_NOT_FOUND',
+                    'message' => $modelBase.' not found',
                     'timestamp' => Carbon::now()->toISOString(),
                     'status_code' => 404,
                 ], 404);
@@ -154,8 +154,8 @@ $app = Application::configure(basePath: dirname(__DIR__))
             ], 404);
         });
 
-        $exceptions->render(function (\Throwable $e, Request $request) {
-            if (!$request->expectsJson()) {
+        $exceptions->render(function (Throwable $e, Request $request) {
+            if (! $request->expectsJson()) {
                 return null;
             }
 

@@ -1,14 +1,15 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Handlers\Admin\Operations;
 
 use App\Commands\Admin\Operations\RecordExpenseCommand;
+use App\Enums\ClubExpenseStatusEnum;
 use App\Models\ClubExpense;
+use App\Models\User;
 use App\Repositories\Eloquent\ClubExpense\ClubExpenseEloquentRepository;
 use App\Repositories\Eloquent\ClubExpenseCategory\ClubExpenseCategoryEloquentRepository;
-use App\Enums\ClubExpenseStatusEnum;
-use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 
@@ -17,8 +18,7 @@ final readonly class RecordExpenseHandler
     public function __construct(
         private ClubExpenseEloquentRepository $repository,
         private ClubExpenseCategoryEloquentRepository $categoryRepository,
-    ) {
-    }
+    ) {}
 
     public function handle(RecordExpenseCommand $command): ClubExpense
     {

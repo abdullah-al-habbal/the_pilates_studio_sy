@@ -1,4 +1,5 @@
 <?php
+
 // filePath: app/Services/MobileAppVersion/AppVersionService.php
 
 declare(strict_types=1);
@@ -30,7 +31,7 @@ readonly class AppVersionService
             Log::error('Missing mobile app version configuration', [
                 'app_name' => $appName->value,
                 'platform' => $platform->value,
-                'error' => 'No active configuration found for this app and platform'
+                'error' => 'No active configuration found for this app and platform',
             ]);
 
             throw new RuntimeException(
@@ -41,7 +42,7 @@ readonly class AppVersionService
 
         $updateRequired = $this->isBelowVersion($clientVersion, $config->min_version);
 
-        $updateAvailable = !$updateRequired && $this->isBelowVersion($clientVersion, $config->latest_version);
+        $updateAvailable = ! $updateRequired && $this->isBelowVersion($clientVersion, $config->latest_version);
 
         return [
             'update_required' => $updateRequired,
@@ -64,7 +65,7 @@ readonly class AppVersionService
     {
         $isValid = $this->repository->validateConfiguration();
 
-        if (!$isValid) {
+        if (! $isValid) {
             throw new RuntimeException(
                 'Invalid mobile app version configuration detected. Please check logs for details.',
                 500

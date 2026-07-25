@@ -7,7 +7,6 @@ namespace App\Console\Commands;
 use App\Data\Reports\CurrencySummaryData;
 use App\Services\Finance\DailyBalanceService;
 use Illuminate\Console\Command;
-use Illuminate\Support\Carbon;
 
 final class VerifyDailyBalanceCommand extends Command
 {

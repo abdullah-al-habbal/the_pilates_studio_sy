@@ -18,12 +18,12 @@ final class ClassSessionGenerationService
     {
         $pattern = $class->recurrencePattern;
 
-        if (!$pattern || $pattern->interval_days <= 0) {
+        if (! $pattern || $pattern->interval_days <= 0) {
             throw new InvalidArgumentException('Valid recurrence pattern with interval > 0 is required.');
         }
 
         $start = Carbon::parse($class->start_date)->startOfDay();
-        $end   = Carbon::parse($class->end_date)->endOfDay();
+        $end = Carbon::parse($class->end_date)->endOfDay();
         $interval = $pattern->interval_days;
 
         if ($start->greaterThan($end)) {
@@ -35,20 +35,20 @@ final class ClassSessionGenerationService
 
         while ($cursor <= $end) {
             $rows[] = [
-                'class_id'    => $class->id,
-                'date'        => $cursor->toDateString(),
-                'start_time'  => $class->start_time,
-                'end_time'    => $class->end_time,
+                'class_id' => $class->id,
+                'date' => $cursor->toDateString(),
+                'start_time' => $class->start_time,
+                'end_time' => $class->end_time,
                 'total_spots' => $class->total_spots,
-                'status'      => ClassSessionStatusEnum::SCHEDULED->value,
-                'created_at'  => now(),
-                'updated_at'  => now(),
+                'status' => ClassSessionStatusEnum::SCHEDULED->value,
+                'created_at' => now(),
+                'updated_at' => now(),
             ];
 
             $cursor->addDays($interval);
         }
 
-        if (!empty($rows)) {
+        if (! empty($rows)) {
             ClassSession::insertOrIgnore($rows);
         }
     }

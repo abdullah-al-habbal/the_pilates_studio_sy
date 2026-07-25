@@ -24,6 +24,7 @@ use UnitEnum;
 class InstructorResource extends Resource
 {
     use Translatable;
+
     protected static ?string $model = Instructor::class;
 
     protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-user-circle';

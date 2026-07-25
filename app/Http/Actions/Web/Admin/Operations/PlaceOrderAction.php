@@ -16,8 +16,7 @@ final readonly class PlaceOrderAction
 
     public function __construct(
         private PlaceOrderHandler $handler
-    ) {
-    }
+    ) {}
 
     public function __invoke(PlaceOrderRequest $request): JsonResponse
     {
@@ -36,11 +35,12 @@ final readonly class PlaceOrderAction
                 message: 'Order placed successfully.'
             );
         } catch (\Throwable $e) {
-            Log::error('Operations - PlaceOrder failed: ' . $e->getMessage(), [
+            Log::error('Operations - PlaceOrder failed: '.$e->getMessage(), [
                 'exception' => $e,
                 'customer_id' => $request->customer_id,
                 'merchandise_id' => $request->merchandise_id,
             ]);
+
             return $this->unprocessable($e->getMessage());
         }
     }

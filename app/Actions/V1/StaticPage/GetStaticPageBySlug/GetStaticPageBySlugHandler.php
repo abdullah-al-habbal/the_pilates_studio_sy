@@ -11,8 +11,7 @@ final readonly class GetStaticPageBySlugHandler
 {
     public function __construct(
         private StaticPageEloquentRepository $repository
-    ) {
-    }
+    ) {}
 
     public function handle(string $slug): StaticPage
     {

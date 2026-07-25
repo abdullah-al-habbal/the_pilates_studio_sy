@@ -1,4 +1,5 @@
 <?php
+
 // filePath: app/Http/Controllers/Api/V1/AppSetting/AppSettingController.php
 
 declare(strict_types=1);
@@ -24,9 +25,9 @@ class AppSettingController extends BaseApiController
     public function index(): JsonResponse
     {
         $settings = $this->appSettingService->getAll();
+
         return $this->success(AppSettingResource::collection($settings));
     }
-
 
     #[Endpoint('Get app setting by key', description: 'Returns an app setting by its key.')]
     #[PathParameter('key', description: 'The setting key (e.g., "app_name", "contact_email")', type: 'string')]

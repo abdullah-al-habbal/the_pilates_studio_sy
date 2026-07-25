@@ -1,6 +1,8 @@
 <?php
+
 // filePath:
 declare(strict_types=1);
+
 return [
     'postmark' => [
         'key' => env('POSTMARK_API_KEY'),

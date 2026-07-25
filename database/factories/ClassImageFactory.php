@@ -19,14 +19,14 @@ class ClassImageFactory extends Factory
         $relativePath = $this->copySourceImage($sourcePath, 'class-images', (string) $classId);
 
         return [
-            'class_id'   => $classId,
-            'url'        => $relativePath,
+            'class_id' => $classId,
+            'url' => $relativePath,
             'is_primary' => false,
         ];
     }
 
     public function primary(): static
     {
-        return $this->state(fn() => ['is_primary' => true]);
+        return $this->state(fn () => ['is_primary' => true]);
     }
 }

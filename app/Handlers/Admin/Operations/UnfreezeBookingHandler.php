@@ -19,6 +19,7 @@ final readonly class UnfreezeBookingHandler
     public function handle(int $bookingId): Booking
     {
         $booking = Booking::findOrFail($bookingId);
+
         return $this->freezeService->unfreeze($booking);
     }
 }

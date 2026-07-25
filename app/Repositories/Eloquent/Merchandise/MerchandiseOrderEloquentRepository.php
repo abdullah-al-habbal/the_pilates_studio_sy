@@ -25,8 +25,8 @@ class MerchandiseOrderEloquentRepository
             ->join('center_merchandises', 'merchandise_orders.merchandise_id', '=', 'center_merchandises.id')
             ->join('prices', function ($join) use ($currencyId) {
                 $join->on('center_merchandises.id', '=', 'prices.priceable_id')
-                     ->where('prices.priceable_type', 'App\Models\CenterMerchandise')
-                     ->where('prices.currency_id', $currencyId);
+                    ->where('prices.priceable_type', 'App\Models\CenterMerchandise')
+                    ->where('prices.currency_id', $currencyId);
             })
             ->when($startDate, fn ($q) => $q->where('merchandise_orders.created_at', '>=', $startDate))
             ->when($endDate, fn ($q) => $q->where('merchandise_orders.created_at', '<=', $endDate))

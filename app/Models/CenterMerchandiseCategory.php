@@ -1,5 +1,7 @@
 <?php
+
 declare(strict_types=1);
+
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -10,7 +12,7 @@ use Spatie\Translatable\HasTranslations;
 
 class CenterMerchandiseCategory extends Model
 {
-    use HasFactory, SoftDeletes, HasTranslations;
+    use HasFactory, HasTranslations, SoftDeletes;
 
     public array $translatable = ['name'];
 

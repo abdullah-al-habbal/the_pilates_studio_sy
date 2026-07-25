@@ -1,4 +1,5 @@
 <?php
+
 // filePath: app/Services/Log/LoggingService.php
 
 declare(strict_types=1);

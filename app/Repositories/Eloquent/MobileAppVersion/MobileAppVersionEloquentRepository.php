@@ -1,4 +1,5 @@
 <?php
+
 // filePath: app/Repositories/Eloquent/MobileAppVersion/MobileAppVersionEloquentRepository.php
 
 declare(strict_types=1);
@@ -14,8 +15,7 @@ class MobileAppVersionEloquentRepository
 {
     public function __construct(
         private MobileAppVersion $model
-    ) {
-    }
+    ) {}
 
     public function findActiveByAppAndPlatform(
         AppNameEnum $appName,
@@ -33,7 +33,7 @@ class MobileAppVersionEloquentRepository
                 'app_name' => $appName->value,
                 'platform' => $platform->value,
                 'count' => $count,
-                'warning' => 'There should be only one active version per app/platform'
+                'warning' => 'There should be only one active version per app/platform',
             ]);
         }
 
@@ -49,7 +49,7 @@ class MobileAppVersionEloquentRepository
             ->where('active', true)
             ->get()
             ->groupBy(function ($item) {
-                return $item->app_name->value . '_' . $item->platform->value;
+                return $item->app_name->value.'_'.$item->platform->value;
             })
             ->toArray();
     }
@@ -64,7 +64,7 @@ class MobileAppVersionEloquentRepository
             ->get();
 
         $grouped = $configs->groupBy(function ($item) {
-            return $item->app_name->value . '_' . $item->platform->value;
+            return $item->app_name->value.'_'.$item->platform->value;
         });
 
         $isValid = true;
@@ -74,7 +74,7 @@ class MobileAppVersionEloquentRepository
                 Log::error('Invalid mobile app version configuration', [
                     'group' => $key,
                     'count' => $group->count(),
-                    'error' => 'Multiple active versions found for the same app and platform'
+                    'error' => 'Multiple active versions found for the same app and platform',
                 ]);
                 $isValid = false;
             }

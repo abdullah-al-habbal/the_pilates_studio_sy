@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Http\Actions\Web\Admin\Operations;
@@ -14,8 +15,7 @@ final readonly class UnfreezeBookingAction
 
     public function __construct(
         private UnfreezeBookingHandler $handler
-    ) {
-    }
+    ) {}
 
     public function __invoke(int $bookingId): JsonResponse
     {
@@ -27,7 +27,7 @@ final readonly class UnfreezeBookingAction
                 message: 'Booking unfrozen successfully. A new booking has been created for the remaining validity.'
             );
         } catch (\Throwable $e) {
-            Log::error('Operations - UnfreezeBooking failed: ' . $e->getMessage(), [
+            Log::error('Operations - UnfreezeBooking failed: '.$e->getMessage(), [
                 'exception' => $e,
                 'booking_id' => $bookingId,
             ]);

@@ -3,8 +3,8 @@
 namespace App\Filament\Admin\Resources\StaticPages\Schemas;
 
 use Filament\Infolists\Components\ImageEntry;
-use Filament\Schemas\Components\Section;
 use Filament\Infolists\Components\TextEntry;
+use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Filament\Support\Enums\FontWeight;
 
@@ -27,8 +27,8 @@ class StaticPageInfolist
                         TextEntry::make('is_active')
                             ->label('Status')
                             ->badge()
-                            ->color(fn(bool $state): string => $state ? 'success' : 'danger')
-                            ->icon(fn(bool $state): string => $state ? 'heroicon-o-eye' : 'heroicon-o-eye-slash'),
+                            ->color(fn (bool $state): string => $state ? 'success' : 'danger')
+                            ->icon(fn (bool $state): string => $state ? 'heroicon-o-eye' : 'heroicon-o-eye-slash'),
                         TextEntry::make('sort_order')
                             ->label('Sort Order')
                             ->numeric()
@@ -40,14 +40,12 @@ class StaticPageInfolist
                     ->schema([
                         TextEntry::make('title')
                             ->weight(FontWeight::Bold)
-                            
-                            ->formatStateUsing(fn($state, $record) =>
-                                $record->getTranslation('title', app()->getLocale())),
+
+                            ->formatStateUsing(fn ($state, $record) => $record->getTranslation('title', app()->getLocale())),
                         TextEntry::make('content')
                             ->html()
                             ->prose()
-                            ->formatStateUsing(fn($state, $record) =>
-                                $record->getTranslation('content', app()->getLocale()))
+                            ->formatStateUsing(fn ($state, $record) => $record->getTranslation('content', app()->getLocale()))
                             ->columnSpanFull()
                             ->placeholder('No content'),
                     ]),

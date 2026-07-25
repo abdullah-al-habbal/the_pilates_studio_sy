@@ -62,7 +62,7 @@ class BookingForm
                                 ->helperText(__('dashboard.resources.users.helpers.password_default')),
                         ])
                         ->createOptionAction(
-                            fn($action) => $action
+                            fn ($action) => $action
                                 ->modalHeading(__('dashboard.resources.bookings.actions.create_customer'))
                                 ->modalWidth('md')
                         )
@@ -117,10 +117,10 @@ class BookingForm
                             $locale = app()->getLocale();
 
                             return Package::query()->where('is_active', true)->get()
-                                ->mapWithKeys(fn(Package $package) => [
+                                ->mapWithKeys(fn (Package $package) => [
                                     $package->id => $package->getTranslation('name', $locale)
-                                        . ' (' . $package->total_credits . ' credits, '
-                                        . ($package->validity_days ? $package->validity_days . ' days' : 'unlimited') . ')',
+                                        .' ('.$package->total_credits.' credits, '
+                                        .($package->validity_days ? $package->validity_days.' days' : 'unlimited').')',
                                 ]);
                         })
                         ->searchable()
@@ -131,6 +131,7 @@ class BookingForm
                             if ($livewire->record ?? null) {
                                 return 'Changing the package recalculates expiry from the original purchase date and may require a price adjustment.';
                             }
+
                             return null;
                         })
                         ->createOptionForm([
@@ -172,7 +173,7 @@ class BookingForm
                                 ->minItems(1),
                         ])
                         ->createOptionAction(
-                            fn($action) => $action
+                            fn ($action) => $action
                                 ->modalHeading(__('dashboard.resources.bookings.actions.create_package'))
                                 ->modalWidth('md')
                         )
@@ -197,11 +198,12 @@ class BookingForm
                                 $set('remaining_credits', 0);
                                 $set('validity_days_snapshot', null);
                                 $set('expires_at', null);
+
                                 return;
                             }
 
                             $package = Package::select(['id', 'total_credits', 'validity_days'])->find($state);
-                            if (!$package) {
+                            if (! $package) {
                                 return;
                             }
 
@@ -229,14 +231,14 @@ class BookingForm
                                 if ($diff > 0) {
                                     Notification::make()
                                         ->title('Additional Payment Required')
-                                        ->body("Customer must pay an additional " . number_format($diff, 2) . " {$currencyCode}. Do NOT edit Paid Amount directly—record this as a new transaction to preserve daily balance history.")
+                                        ->body('Customer must pay an additional '.number_format($diff, 2)." {$currencyCode}. Do NOT edit Paid Amount directly—record this as a new transaction to preserve daily balance history.")
                                         ->warning()
                                         ->persistent()
                                         ->send();
                                 } elseif ($diff < 0) {
                                     Notification::make()
                                         ->title('Refund Required')
-                                        ->body("Customer is owed a refund of " . number_format(abs($diff), 2) . " {$currencyCode}. Create a Refund record to keep daily balance accurate.")
+                                        ->body('Customer is owed a refund of '.number_format(abs($diff), 2)." {$currencyCode}. Create a Refund record to keep daily balance accurate.")
                                         ->warning()
                                         ->persistent()
                                         ->send();
@@ -271,9 +273,12 @@ class BookingForm
                         ->label('Currently Paid')
                         ->content(function ($livewire) {
                             $record = $livewire->record;
-                            if (!$record) return '—';
+                            if (! $record) {
+                                return '—';
+                            }
                             $code = app(CurrencyService::class)->getCode($record->currency_id);
-                            return number_format($record->paid_amount ?? 0, 2) . ' ' . $code;
+
+                            return number_format($record->paid_amount ?? 0, 2).' '.$code;
                         }),
 
                     Placeholder::make('_new_price')
@@ -281,12 +286,17 @@ class BookingForm
                         ->content(function ($get, $livewire) {
                             $packageId = $get('package_id');
                             $record = $livewire->record;
-                            if (!$record || !$packageId) return '—';
+                            if (! $record || ! $packageId) {
+                                return '—';
+                            }
                             $package = Package::find($packageId);
-                            if (!$package) return '—';
+                            if (! $package) {
+                                return '—';
+                            }
                             $price = $package->getPriceForCurrency($record->currency_id) ?? 0;
                             $code = app(CurrencyService::class)->getCode($record->currency_id);
-                            return number_format($price, 2) . ' ' . $code;
+
+                            return number_format($price, 2).' '.$code;
                         }),
 
                     Placeholder::make('_price_diff')
@@ -294,21 +304,24 @@ class BookingForm
                         ->content(function ($get, $livewire) {
                             $packageId = $get('package_id');
                             $record = $livewire->record;
-                            if (!$record || !$packageId || $record->package_id == $packageId) {
+                            if (! $record || ! $packageId || $record->package_id == $packageId) {
                                 return '—';
                             }
                             $package = Package::find($packageId);
-                            if (!$package) return '—';
+                            if (! $package) {
+                                return '—';
+                            }
                             $oldPrice = $record->paid_amount ?? 0;
                             $newPrice = $package->getPriceForCurrency($record->currency_id) ?? 0;
                             $diff = $newPrice - $oldPrice;
                             $code = app(CurrencyService::class)->getCode($record->currency_id);
 
                             if ($diff > 0) {
-                                return "Customer owes: " . number_format($diff, 2) . " {$code}";
+                                return 'Customer owes: '.number_format($diff, 2)." {$code}";
                             } elseif ($diff < 0) {
-                                return "Refund customer: " . number_format(abs($diff), 2) . " {$code}";
+                                return 'Refund customer: '.number_format(abs($diff), 2)." {$code}";
                             }
+
                             return 'No price difference';
                         }),
                 ]),
@@ -320,15 +333,15 @@ class BookingForm
                 ->schema([
                     Placeholder::make('_credits_total')
                         ->label(__('dashboard.resources.bookings.fields.total_credits'))
-                        ->content(fn ($get) => $get('total_credits') . ' credits'),
+                        ->content(fn ($get) => $get('total_credits').' credits'),
 
                     Placeholder::make('_credits_remaining')
                         ->label(__('dashboard.resources.bookings.fields.remaining_credits'))
-                        ->content(fn ($get) => $get('remaining_credits') . ' credits'),
+                        ->content(fn ($get) => $get('remaining_credits').' credits'),
 
                     Placeholder::make('_credits_used')
                         ->label(__('dashboard.resources.bookings.fields.credits_used'))
-                        ->content(fn ($get) => ($get('total_credits') - $get('remaining_credits')) . ' credits'),
+                        ->content(fn ($get) => ($get('total_credits') - $get('remaining_credits')).' credits'),
 
                     Placeholder::make('_credits_usage')
                         ->label(__('dashboard.resources.bookings.fields.credits_usage'))

@@ -10,6 +10,7 @@ use LaraZeus\SpatieTranslatable\Resources\Pages\ListRecords\Concerns\Translatabl
 class ListClasses extends ListRecords
 {
     use Translatable;
+
     protected static string $resource = ClassesResource::class;
 
     protected function getHeaderActions(): array

@@ -36,8 +36,8 @@ class BookingFreezeService
             }
 
             $booking->update([
-                'status'      => BookingStatusEnum::FROZEN,
-                'frozen_at'   => now(),
+                'status' => BookingStatusEnum::FROZEN,
+                'frozen_at' => now(),
                 'source_type' => BookingSourceTypeEnum::FREEZE_ORIGIN,
             ]);
         });
@@ -57,9 +57,9 @@ class BookingFreezeService
                 ]);
             }
 
-            $originalExpiry  = $booking->expires_at;
-            $frozenAt        = $booking->frozen_at ?? now();
-            
+            $originalExpiry = $booking->expires_at;
+            $frozenAt = $booking->frozen_at ?? now();
+
             if ($originalExpiry === null) {
                 $newExpiry = null;
             } else {
@@ -70,20 +70,20 @@ class BookingFreezeService
                         'booking_id' => 'The original package validity has fully elapsed. No resumption is possible.',
                     ]);
                 }
-                
+
                 $newExpiry = now()->addDays($remainingDays);
             }
 
             $booking->update(['unfrozen_at' => now()]);
 
             return Booking::create([
-                'user_id'           => $booking->user_id,
-                'package_id'        => $booking->package_id,
-                'total_credits'     => $booking->remaining_credits,
+                'user_id' => $booking->user_id,
+                'package_id' => $booking->package_id,
+                'total_credits' => $booking->remaining_credits,
                 'remaining_credits' => $booking->remaining_credits,
-                'status'            => BookingStatusEnum::ACTIVE,
-                'expires_at'        => $newExpiry,
-                'source_type'       => BookingSourceTypeEnum::FREEZE_RESUME,
+                'status' => BookingStatusEnum::ACTIVE,
+                'expires_at' => $newExpiry,
+                'source_type' => BookingSourceTypeEnum::FREEZE_RESUME,
                 'parent_booking_id' => $booking->id,
             ]);
         });

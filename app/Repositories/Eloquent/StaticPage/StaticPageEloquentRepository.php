@@ -1,4 +1,5 @@
 <?php
+
 // filePath: app/Repositories/Eloquent/StaticPage/StaticPageEloquentRepository.php
 
 declare(strict_types=1);

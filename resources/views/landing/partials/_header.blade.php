@@ -1,3 +1,4 @@
+{{-- resources/views/landing/partials/_header.blade.php --}}
 @php $settings = $landingData->settings; @endphp
 <header id="main-header" class="fixed top-0 left-0 right-0 z-50 transition-all duration-300 bg-transparent">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -12,11 +13,11 @@
             </a>
 
             <nav class="hidden md:flex items-center gap-8">
-                <a href="#classes" class="text-sm font-medium text-slate-600 dark:text-slate-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors">{{ __('landing.nav_classes') }}</a>
-                <a href="#schedule" class="text-sm font-medium text-slate-600 dark:text-slate-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors">{{ __('landing.nav_schedule') }}</a>
-                <a href="#instructors" class="text-sm font-medium text-slate-600 dark:text-slate-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors">{{ __('landing.nav_instructors') }}</a>
-                <a href="#packages" class="text-sm font-medium text-slate-600 dark:text-slate-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors">{{ __('landing.nav_pricing') }}</a>
-                <a href="#download" class="text-sm font-medium text-slate-600 dark:text-slate-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors">{{ __('landing.nav_download_app') }}</a>
+                <a href="{{ route('landing') }}#classes" class="text-sm font-medium text-slate-600 dark:text-slate-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors">{{ __('landing.nav_classes') }}</a>
+                <a href="{{ route('landing') }}#schedule" class="text-sm font-medium text-slate-600 dark:text-slate-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors">{{ __('landing.nav_schedule') }}</a>
+                <a href="{{ route('landing') }}#instructors" class="text-sm font-medium text-slate-600 dark:text-slate-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors">{{ __('landing.nav_instructors') }}</a>
+                <a href="{{ route('landing') }}#packages" class="text-sm font-medium text-slate-600 dark:text-slate-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors">{{ __('landing.nav_pricing') }}</a>
+                <a href="{{ route('landing') }}#download" class="text-sm font-medium text-slate-600 dark:text-slate-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors">{{ __('landing.nav_download_app') }}</a>
             </nav>
 
             <div class="hidden md:flex items-center gap-4">
@@ -35,7 +36,7 @@
                     <i data-lucide="moon" class="w-5 h-5 text-slate-600 dark:text-slate-300 hidden dark:block"></i>
                     <i data-lucide="sun" class="w-5 h-5 text-slate-600 dark:text-slate-300 block dark:hidden"></i>
                 </button>
-                <a href="#download" class="inline-flex items-center gap-2 px-5 py-2.5 bg-primary-600 hover:bg-primary-700 text-white text-sm font-semibold rounded-xl transition-all hover:shadow-lg hover:shadow-primary-500/25">
+                <a href="{{ route('landing') }}#download" class="inline-flex items-center gap-2 px-5 py-2.5 bg-primary-600 hover:bg-primary-700 text-white text-sm font-semibold rounded-xl transition-all hover:shadow-lg hover:shadow-primary-500/25">
                     <i data-lucide="calendar" class="w-4 h-4"></i>
                     {{ __('landing.book_class') }}
                 </a>
@@ -55,17 +56,17 @@
 
     <div id="mobile-menu" class="hidden md:hidden glass border-t border-slate-200/50 dark:border-slate-700/50">
         <div class="px-4 py-6 space-y-4">
-            <a href="#classes" class="block text-base font-medium text-slate-700 dark:text-slate-200 hover:text-primary-600 dark:hover:text-primary-400 transition-colors">{{ __('landing.nav_classes') }}</a>
-            <a href="#schedule" class="block text-base font-medium text-slate-700 dark:text-slate-200 hover:text-primary-600 dark:hover:text-primary-400 transition-colors">{{ __('landing.nav_schedule') }}</a>
-            <a href="#instructors" class="block text-base font-medium text-slate-700 dark:text-slate-200 hover:text-primary-600 dark:hover:text-primary-400 transition-colors">{{ __('landing.nav_instructors') }}</a>
-            <a href="#packages" class="block text-base font-medium text-slate-700 dark:text-slate-200 hover:text-primary-600 dark:hover:text-primary-400 transition-colors">{{ __('landing.nav_pricing') }}</a>
-            <a href="#download" class="block text-base font-medium text-slate-700 dark:text-slate-200 hover:text-primary-600 dark:hover:text-primary-400 transition-colors">{{ __('landing.nav_download_app') }}</a>
+            <a href="{{ route('landing') }}#classes" class="block text-base font-medium text-slate-700 dark:text-slate-200 hover:text-primary-600 dark:hover:text-primary-400 transition-colors">{{ __('landing.nav_classes') }}</a>
+            <a href="{{ route('landing') }}#schedule" class="block text-base font-medium text-slate-700 dark:text-slate-200 hover:text-primary-600 dark:hover:text-primary-400 transition-colors">{{ __('landing.nav_schedule') }}</a>
+            <a href="{{ route('landing') }}#instructors" class="block text-base font-medium text-slate-700 dark:text-slate-200 hover:text-primary-600 dark:hover:text-primary-400 transition-colors">{{ __('landing.nav_instructors') }}</a>
+            <a href="{{ route('landing') }}#packages" class="block text-base font-medium text-slate-700 dark:text-slate-200 hover:text-primary-600 dark:hover:text-primary-400 transition-colors">{{ __('landing.nav_pricing') }}</a>
+            <a href="{{ route('landing') }}#download" class="block text-base font-medium text-slate-700 dark:text-slate-200 hover:text-primary-600 dark:hover:text-primary-400 transition-colors">{{ __('landing.nav_download_app') }}</a>
             <div class="pt-4 border-t border-slate-200/50 dark:border-slate-700/50">
                 <div class="flex gap-4 mb-4">
                     <a href="{{ url('locale/en') }}" class="text-sm font-medium {{ app()->getLocale() === 'en' ? 'text-primary-600' : 'text-slate-600 dark:text-slate-300' }}">English</a>
                     <a href="{{ url('locale/ar') }}" class="text-sm font-medium {{ app()->getLocale() === 'ar' ? 'text-primary-600' : 'text-slate-600 dark:text-slate-300' }}">العربية</a>
                 </div>
-                <a href="#download" class="flex items-center justify-center gap-2 w-full px-5 py-3 bg-primary-600 hover:bg-primary-700 text-white text-sm font-semibold rounded-xl transition-all">
+                <a href="{{ route('landing') }}#download" class="flex items-center justify-center gap-2 w-full px-5 py-3 bg-primary-600 hover:bg-primary-700 text-white text-sm font-semibold rounded-xl transition-all">
                     <i data-lucide="calendar" class="w-4 h-4"></i>
                     {{ __('landing.book_class') }}
                 </a>

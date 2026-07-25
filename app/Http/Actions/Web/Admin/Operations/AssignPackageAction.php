@@ -34,11 +34,12 @@ final readonly class AssignPackageAction
                 message: 'Package assigned successfully.'
             );
         } catch (\Throwable $e) {
-            Log::error('Operations - AssignPackage failed: ' . $e->getMessage(), [
+            Log::error('Operations - AssignPackage failed: '.$e->getMessage(), [
                 'exception' => $e,
                 'package_id' => $packageId,
                 'user_id' => $request->user_id,
             ]);
+
             return $this->unprocessable($e->getMessage());
         }
     }

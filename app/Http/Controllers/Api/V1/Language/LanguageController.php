@@ -18,8 +18,7 @@ class LanguageController extends BaseApiController
 {
     public function __construct(
         private readonly LanguageService $languageService
-    ) {
-    }
+    ) {}
 
     #[Endpoint('List languages', description: 'Returns a list of active languages.')]
     public function index(): JsonResponse

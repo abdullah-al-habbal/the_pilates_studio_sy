@@ -12,8 +12,7 @@ class SetLocaleMiddleware
 {
     public function __construct(
         private readonly LanguageEloquentRepository $languageRepository
-    ) {
-    }
+    ) {}
 
     public function handle(Request $request, Closure $next)
     {
@@ -33,7 +32,7 @@ class SetLocaleMiddleware
             }
         }
 
-        if (!$locale) {
+        if (! $locale) {
             $defaultLanguage = $this->languageRepository->getDefault();
             $locale = $defaultLanguage?->code ?? config('app.fallback_locale', 'en');
         }

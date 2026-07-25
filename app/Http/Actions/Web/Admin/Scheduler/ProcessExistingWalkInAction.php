@@ -19,8 +19,7 @@ final class ProcessExistingWalkInAction
 
     public function __construct(
         private readonly ProcessExistingWalkInHandler $handler
-    ) {
-    }
+    ) {}
 
     public function __invoke(ProcessExistingWalkInRequest $request, int $sessionId): JsonResponse
     {
@@ -50,6 +49,7 @@ final class ProcessExistingWalkInAction
             );
         } catch (Throwable $e) {
             report($e);
+
             return $this->error(
                 code: ErrorCodeEnum::INTERNAL_SERVER_ERROR,
                 message: 'Failed to process existing walk‑in.'

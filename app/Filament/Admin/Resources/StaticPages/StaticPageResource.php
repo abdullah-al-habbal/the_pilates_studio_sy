@@ -20,10 +20,15 @@ use UnitEnum;
 class StaticPageResource extends Resource
 {
     use Translatable;
+
     protected static ?string $model = StaticPage::class;
+
     protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-document-text';
+
     protected static string|UnitEnum|null $navigationGroup = 'Configuration';
+
     protected static ?int $navigationSort = 8;
+
     protected static ?string $recordTitleAttribute = 'slug';
 
     public static function getTranslatableLocales(): array

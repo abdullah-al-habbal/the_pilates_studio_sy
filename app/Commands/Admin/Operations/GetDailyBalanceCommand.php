@@ -11,6 +11,5 @@ final readonly class GetDailyBalanceCommand
         /** @var list<string>|null */
         public ?array $currencyCodes,
         public bool $convertToBase,
-    ) {
-    }
+    ) {}
 }

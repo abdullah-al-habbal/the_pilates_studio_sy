@@ -27,7 +27,7 @@ class AppSettingInfolist
                             ->icon('heroicon-o-key'),
                         TextEntry::make('type')
                             ->badge()
-                            ->color(fn(AppSettingTypeEnum $state) => $state->color())
+                            ->color(fn (AppSettingTypeEnum $state) => $state->color())
                             ->icon('heroicon-o-tag'),
                         TextEntry::make('value')
                             ->columnSpanFull()

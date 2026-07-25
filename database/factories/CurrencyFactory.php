@@ -25,6 +25,6 @@ class CurrencyFactory extends Factory
 
     public function active(): static
     {
-        return $this->state(fn() => ['is_active' => true]);
+        return $this->state(fn () => ['is_active' => true]);
     }
 }

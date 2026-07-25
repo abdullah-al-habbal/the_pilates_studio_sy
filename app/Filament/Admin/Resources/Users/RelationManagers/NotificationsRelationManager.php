@@ -34,7 +34,7 @@ class NotificationsRelationManager extends RelationManager
                 IconColumn::make('read_at')
                     ->label('Read')
                     ->boolean()
-                    ->state(fn ($record) => !is_null($record->read_at)),
+                    ->state(fn ($record) => ! is_null($record->read_at)),
                 TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable(),

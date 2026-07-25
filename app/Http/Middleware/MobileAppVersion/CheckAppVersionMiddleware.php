@@ -1,4 +1,5 @@
 <?php
+
 // filePath: app/Http/Middleware/MobileAppVersion/CheckAppVersionMiddleware.php
 
 declare(strict_types=1);
@@ -12,9 +13,9 @@ use App\Services\MobileAppVersion\AppVersionService;
 use App\Traits\ApiResponseTrait;
 use Closure;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use RuntimeException;
 use Symfony\Component\HttpFoundation\Response;
-use Illuminate\Support\Facades\Log;
 
 readonly class CheckAppVersionMiddleware
 {
@@ -22,8 +23,7 @@ readonly class CheckAppVersionMiddleware
 
     public function __construct(
         private AppVersionService $service,
-    ) {
-    }
+    ) {}
 
     public function handle(Request $request, Closure $next): Response
     {
@@ -32,7 +32,7 @@ readonly class CheckAppVersionMiddleware
                 return $next($request);
             }
 
-            if (!$this->hasRequiredHeaders($request)) {
+            if (! $this->hasRequiredHeaders($request)) {
                 return $this->error(
                     ErrorCodeEnum::MISSING_REQUIRED_HEADERS,
                     'Missing required headers: X-App-Platform and X-App-Version are mandatory.',
@@ -75,7 +75,7 @@ readonly class CheckAppVersionMiddleware
                 'headers' => [
                     'platform' => $request->header('X-App-Platform'),
                     'version' => $request->header('X-App-Version'),
-                ]
+                ],
             ]);
 
             return $this->error(
@@ -86,7 +86,7 @@ readonly class CheckAppVersionMiddleware
         } catch (\Exception $e) {
             Log::error('Unexpected error in version check middleware', [
                 'message' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
+                'trace' => $e->getTraceAsString(),
             ]);
 
             return $this->error(

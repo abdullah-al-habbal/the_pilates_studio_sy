@@ -1,4 +1,5 @@
 <?php
+
 // /home/lenovo/work/projects/the_pilates_studio_sy/database/migrations/2026_05_23_221701_create_notifications_table.php
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;

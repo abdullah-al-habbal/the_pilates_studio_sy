@@ -11,8 +11,7 @@ final readonly class PlaceOrderHandler
 {
     public function __construct(
         private MerchandiseOrderService $orderService
-    ) {
-    }
+    ) {}
 
     public function handle(int $customerId, int $merchandiseId, int $quantity, int $currencyId, ?int $createdBy = null): MerchandiseOrder
     {

@@ -1,4 +1,5 @@
 <?php
+
 // filePath: app/Http/Controllers/Api/V1/Package/PackageController.php
 
 declare(strict_types=1);
@@ -6,7 +7,6 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Api\V1\Package;
 
 use App\Http\Controllers\Api\BaseApiController;
-use App\Http\Controllers\Controller;
 use App\Http\Resources\Api\V1\PackageResource;
 use App\Services\Package\PackageService;
 use Dedoc\Scramble\Attributes\Endpoint;

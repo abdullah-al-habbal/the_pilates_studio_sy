@@ -27,7 +27,7 @@ final class ProcessExistingWalkInRequest extends FormRequest
                 'min:1',
                 function (string $attr, mixed $value, \Closure $fail) use ($available): void {
                     if ($available !== PHP_INT_MAX && count($value) > $available) {
-                        $fail("Only {$available} spot(s) remaining — cannot add " . count($value) . ' walk-in(s).');
+                        $fail("Only {$available} spot(s) remaining — cannot add ".count($value).' walk-in(s).');
                     }
                 },
             ],

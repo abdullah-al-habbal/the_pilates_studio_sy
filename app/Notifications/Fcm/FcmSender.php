@@ -17,6 +17,7 @@ final class FcmSender
     {
         $messaging = Firebase::messaging();
         $result = $messaging->send($message);
+
         return $result['name'] ?? '';
     }
 }

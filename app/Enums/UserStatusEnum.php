@@ -12,7 +12,7 @@ enum UserStatusEnum: string
 
     public function label(): string
     {
-        return match($this) {
+        return match ($this) {
             self::ACTIVE => 'Active',
             self::FROZEN => 'Frozen',
             self::DEACTIVATED => 'Deactivated',
@@ -21,7 +21,7 @@ enum UserStatusEnum: string
 
     public function color(): string
     {
-        return match($this) {
+        return match ($this) {
             self::ACTIVE => 'success',
             self::FROZEN => 'info',
             self::DEACTIVATED => 'danger',
@@ -30,14 +30,14 @@ enum UserStatusEnum: string
 
     public static function options(): array
     {
-        return collect(self::cases())->mapWithKeys(fn($c) => [$c->value => $c->label()])->toArray();
+        return collect(self::cases())->mapWithKeys(fn ($c) => [$c->value => $c->label()])->toArray();
     }
 
     public function getIcon(): ?string
     {
-        return match($this) {
-            self::ACTIVE      => 'heroicon-o-check-circle',
-            self::FROZEN      => 'heroicon-o-lock-closed',
+        return match ($this) {
+            self::ACTIVE => 'heroicon-o-check-circle',
+            self::FROZEN => 'heroicon-o-lock-closed',
             self::DEACTIVATED => 'heroicon-o-x-circle',
         };
     }

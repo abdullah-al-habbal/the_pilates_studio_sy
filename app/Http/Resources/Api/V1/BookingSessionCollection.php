@@ -1,4 +1,5 @@
 <?php
+
 // filePath: app/Http/Resources/Api/V1/BookingSessionCollection.php
 
 declare(strict_types=1);

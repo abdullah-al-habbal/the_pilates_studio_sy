@@ -13,17 +13,19 @@ class CurrencyService
     public function getBaseCurrency(): Currency
     {
         $code = config('currency.base_currency');
+
         return Currency::where('code', strtoupper($code))
             ->where('is_active', true)
-            ->firstOr(fn() => throw CurrencyNotFoundException::forCode($code));
+            ->firstOr(fn () => throw CurrencyNotFoundException::forCode($code));
     }
 
     public function getDefaultCurrency(): Currency
     {
         $code = config('currency.default_currency');
+
         return Currency::where('code', strtoupper($code))
             ->where('is_active', true)
-            ->firstOr(fn() => throw CurrencyNotFoundException::forCode($code));
+            ->firstOr(fn () => throw CurrencyNotFoundException::forCode($code));
     }
 
     public function getCurrencyIdByCode(string $code): ?int
@@ -83,7 +85,8 @@ class CurrencyService
         }
 
         $formattedNumber = number_format($amount, $currency->decimal_places);
-        return $formattedNumber . ' ' . $currency->symbol;
+
+        return $formattedNumber.' '.$currency->symbol;
     }
 
     public function getAllActiveCurrencies(): Collection

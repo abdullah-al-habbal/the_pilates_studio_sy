@@ -13,15 +13,15 @@ use App\Services\Log\LoggingService;
 use Carbon\Carbon;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
+
 class BookingSessionEloquentRepository
 {
     public function __construct(
         private readonly BookingSession $model,
         private readonly LoggingService $logger
-    ) {
-    }
+    ) {}
 
     public function listUserSessions(int $userId, array $filters = []): LengthAwarePaginator
     {
@@ -30,7 +30,7 @@ class BookingSessionEloquentRepository
 
             $query = $this->baseUserSessionsQuery($userId)
                 ->with(['classSession.class'])
-                ->when($filters['status'] ?? null, fn($q, $status) => $q->where('status', $status))
+                ->when($filters['status'] ?? null, fn ($q, $status) => $q->where('status', $status))
                 ->latest();
 
             return $query->paginate($filters['per_page'] ?? 20);
@@ -79,14 +79,14 @@ class BookingSessionEloquentRepository
         return $this->model->query()
             ->where('status', BookingSessionStatusEnum::RESERVED->value)
             ->where('class_session_id', $classSessionId)
-            ->whereHas('booking', fn($q) => $q->where('user_id', $userId))
+            ->whereHas('booking', fn ($q) => $q->where('user_id', $userId))
             ->exists();
     }
 
     public function setCancelledAt(int $id, ?int $cancelledByAdminId = null): bool
     {
         return (bool) $this->model->where('id', $id)->update([
-            'cancelled_at'         => now(),
+            'cancelled_at' => now(),
             'cancelled_by_admin_id' => $cancelledByAdminId,
         ]);
     }
@@ -106,7 +106,7 @@ class BookingSessionEloquentRepository
         $now = Carbon::now();
 
         $query = $this->baseUserSessionsQuery($userId)
-            ->whereHas('classSession', fn($q) => $this->upcomingCondition($q, $now))
+            ->whereHas('classSession', fn ($q) => $this->upcomingCondition($q, $now))
             ->whereIn('status', ['reserved']);
 
         return $this->paginateWithEager($query, $perPage);
@@ -117,7 +117,7 @@ class BookingSessionEloquentRepository
         $now = Carbon::now();
 
         $query = $this->baseUserSessionsQuery($userId)
-            ->whereHas('classSession', fn($q) => $this->pastCondition($q, $now));
+            ->whereHas('classSession', fn ($q) => $this->pastCondition($q, $now));
 
         return $this->paginateWithEager($query, $perPage);
     }
@@ -133,7 +133,7 @@ class BookingSessionEloquentRepository
     private function baseUserSessionsQuery(int $userId): Builder
     {
         return $this->model->query()
-            ->whereHas('booking', fn($q) => $q->where('user_id', $userId));
+            ->whereHas('booking', fn ($q) => $q->where('user_id', $userId));
     }
 
     private function upcomingCondition(Builder $query, Carbon $now): void
@@ -165,11 +165,12 @@ class BookingSessionEloquentRepository
             ->latest()
             ->paginate($perPage);
     }
+
     public function markAttended(int $id, ?int $updatedByAdminId = null): bool
     {
         return (bool) $this->model->where('id', $id)->update([
-            'attendance_status'     => AttendanceStatusEnum::ATTENDED,
-            'attended_at'           => now(),
+            'attendance_status' => AttendanceStatusEnum::ATTENDED,
+            'attended_at' => now(),
             'attendance_updated_by' => $updatedByAdminId,
         ]);
     }
@@ -177,8 +178,8 @@ class BookingSessionEloquentRepository
     public function markMissed(int $id, ?int $updatedByAdminId = null): bool
     {
         return (bool) $this->model->where('id', $id)->update([
-            'attendance_status'     => AttendanceStatusEnum::MISSED,
-            'attended_at'           => null,
+            'attendance_status' => AttendanceStatusEnum::MISSED,
+            'attended_at' => null,
             'attendance_updated_by' => $updatedByAdminId,
         ]);
     }
@@ -209,6 +210,7 @@ class BookingSessionEloquentRepository
     public function getAttendanceTrend(int $days = 30): Collection
     {
         $startDate = now()->subDays($days)->startOfDay();
+
         return $this->model->where('attendance_status', AttendanceStatusEnum::ATTENDED)
             ->where('created_at', '>=', $startDate)
             ->selectRaw('DATE(created_at) as date, COUNT(*) as count')

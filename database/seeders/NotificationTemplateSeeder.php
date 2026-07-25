@@ -11,13 +11,13 @@ class NotificationTemplateSeeder extends Seeder
     {
         NotificationTemplate::upsert([
             [
-                'key'       => 'session_reminder',
-                'title'     => json_encode(['en' => 'Class Reminder', 'ar' => 'تذكير بالحصة']),
-                'body'      => json_encode([
+                'key' => 'session_reminder',
+                'title' => json_encode(['en' => 'Class Reminder', 'ar' => 'تذكير بالحصة']),
+                'body' => json_encode([
                     'en' => 'Your class :class with :instructor starts at :time on :date',
                     'ar' => 'حصتك :class مع :instructor تبدأ في :time بتاريخ :date',
                 ]),
-                'data'      => null,
+                'data' => null,
                 'is_active' => true,
             ],
         ], ['key'], ['title', 'body', 'data', 'is_active']);

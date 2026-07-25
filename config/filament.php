@@ -1,4 +1,5 @@
 <?php
+
 // filePath: config/filament.php
 return [
     'broadcasting' => [],

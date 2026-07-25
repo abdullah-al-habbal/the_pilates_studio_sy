@@ -1,19 +1,20 @@
 <?php
+
 // filePath: app/Http/Controllers/Api/V1/Booking/BookingController.php
 
 declare(strict_types=1);
 
 namespace App\Http\Controllers\Api\V1\Booking;
 
+use App\Enums\Api\SuccessCodeEnum;
 use App\Http\Controllers\Api\BaseApiController;
+use App\Http\Requests\Api\V1\Booking\CreateBookingRequest;
 use App\Http\Resources\Api\V1\BookingCollection;
 use App\Http\Resources\Api\V1\BookingResource;
 use App\Services\Booking\BookingService;
 use App\Services\Package\PackageService;
 use Dedoc\Scramble\Attributes\Endpoint;
 use Dedoc\Scramble\Attributes\Group;
-use App\Http\Requests\Api\V1\Booking\CreateBookingRequest;
-use App\Enums\Api\SuccessCodeEnum;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -42,6 +43,7 @@ class BookingController extends BaseApiController
 
         try {
             $booking = $this->bookingService->findByUser($request->user()->id, $id);
+
             return $this->success(new BookingResource($booking));
         } catch (\Throwable $e) {
             Log::error('BookingController@show exception', [

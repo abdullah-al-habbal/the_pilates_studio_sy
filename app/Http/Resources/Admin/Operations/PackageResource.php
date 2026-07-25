@@ -21,7 +21,7 @@ class PackageResource extends JsonResource
             'total_credits' => $this->resource->total_credits,
             'validity_days' => $this->resource->validity_days,
             'base_price' => $this->resource->getBasePrice(),
-            'prices' => $this->resource->prices->map(fn($price) => [
+            'prices' => $this->resource->prices->map(fn ($price) => [
                 'currency_id' => $price->currency_id,
                 'amount' => $price->amount,
             ])->all(),

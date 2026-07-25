@@ -35,7 +35,6 @@ class LanguageService
         ];
     }
 
-
     public function isValidLocale(string $code): bool
     {
         return $this->languageRepository->existsActiveByCode($code);

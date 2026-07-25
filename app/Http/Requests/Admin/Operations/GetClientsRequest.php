@@ -17,10 +17,10 @@ class GetClientsRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'search'   => ['nullable', 'string', 'max:255'],
-            'page'     => ['nullable', 'integer', 'min:1'],
+            'search' => ['nullable', 'string', 'max:255'],
+            'page' => ['nullable', 'integer', 'min:1'],
             'per_page' => ['nullable', 'integer', 'min:1', 'max:100'],
-            'filter'   => ['nullable', 'string', 'in:best_user,most_active_booking,best_seller,most_attended'],
+            'filter' => ['nullable', 'string', 'in:best_user,most_active_booking,best_seller,most_attended'],
             'only_clients' => ['nullable', 'boolean'],
             'with_valid_fcm' => ['nullable', 'boolean'],
         ];

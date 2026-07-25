@@ -17,3 +17,36 @@
     @include('landing.partials._testimonials')
     @include('landing.partials._cta')
 @endsection
+
+@push('scripts')
+<script>
+    // Smooth scroll to hash if present on page load
+    if (window.location.hash) {
+        window.addEventListener('DOMContentLoaded', function () {
+            const target = document.querySelector(window.location.hash);
+            if (target) {
+                setTimeout(() => {
+                    target.scrollIntoView({ behavior: 'smooth' });
+                }, 100);
+            }
+        });
+    }
+
+    // Smooth scroll for same-page hash clicks when already on landing
+    document.querySelectorAll('a[href^="{{ route('landing') }}#"]').forEach(link => {
+        link.addEventListener('click', function(e) {
+            if (window.location.pathname === '{{ parse_url(route('landing'), PHP_URL_PATH) }}' || window.location.pathname === new URL(link.href).pathname) {
+                const hash = new URL(link.href).hash;
+                if (hash) {
+                    e.preventDefault();
+                    const target = document.querySelector(hash);
+                    if (target) {
+                        target.scrollIntoView({ behavior: 'smooth' });
+                        history.pushState(null, null, hash);
+                    }
+                }
+            }
+        });
+    });
+</script>
+@endpush

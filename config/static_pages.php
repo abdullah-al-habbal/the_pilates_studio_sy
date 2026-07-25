@@ -3,19 +3,19 @@
 return [
     'defaults' => [
         [
-            'slug'       => 'about-us',
-            'title'      => ['en' => 'About Us', 'ar' => 'من نحن'],
-            'content'    => [
+            'slug' => 'about-us',
+            'title' => ['en' => 'About Us', 'ar' => 'من نحن'],
+            'content' => [
                 'en' => '<p>We are a premium Pilates studio dedicated to movement, strength, and mindful living.</p>',
                 'ar' => '<p>نحن استوديو بيلاتيس راقٍ مخصص للحركة والقوة والعيش الواعي.</p>',
             ],
-            'is_active'  => true,
+            'is_active' => true,
             'sort_order' => 1,
         ],
         [
-            'slug'       => 'privacy-policy',
-            'title'      => ['en' => 'Privacy Policy', 'ar' => 'سياسة الخصوصية'],
-            'content'    => [
+            'slug' => 'privacy-policy',
+            'title' => ['en' => 'Privacy Policy', 'ar' => 'سياسة الخصوصية'],
+            'content' => [
                 'en' => '<h2>Privacy Policy</h2>
 <p>We built the Pilates Studio app to make booking your classes as easy as possible. This policy explains what information we collect, why we collect it, and how we use it — in plain language.</p>
 
@@ -105,37 +105,37 @@ return [
 <p>إذا كان لديك أي أسئلة حول سياسة الخصوصية هذه أو بياناتك، يرجى التواصل معنا عبر:</p>
 <p>hello@thepilatesstudiocy.com</p>',
             ],
-            'is_active'  => true,
+            'is_active' => true,
             'sort_order' => 2,
         ],
         [
-            'slug'       => 'terms-of-service',
-            'title'      => ['en' => 'Terms of Service', 'ar' => 'شروط الخدمة'],
-            'content'    => [
+            'slug' => 'terms-of-service',
+            'title' => ['en' => 'Terms of Service', 'ar' => 'شروط الخدمة'],
+            'content' => [
                 'en' => '<p>Our terms of service outline the rules and guidelines for using our studio and app.</p>',
                 'ar' => '<p>توضح شروط الخدمة لدينا القواعد والإرشادات لاستخدام استوديو وتطبيقنا.</p>',
             ],
-            'is_active'  => true,
+            'is_active' => true,
             'sort_order' => 3,
         ],
         [
-            'slug'       => 'cancellation-policy',
-            'title'      => ['en' => 'Cancellation Policy', 'ar' => 'سياسة الإلغاء'],
-            'content'    => [
+            'slug' => 'cancellation-policy',
+            'title' => ['en' => 'Cancellation Policy', 'ar' => 'سياسة الإلغاء'],
+            'content' => [
                 'en' => '<p>You can cancel your booking up to 24 hours before the class starts and get your credits back.</p>',
                 'ar' => '<p>يمكنك إلغاء حجزك قبل 24 ساعة من بدء الحصة واستعادة اعتماداتك.</p>',
             ],
-            'is_active'  => true,
+            'is_active' => true,
             'sort_order' => 4,
         ],
         [
-            'slug'       => 'contact-us',
-            'title'      => ['en' => 'Contact Us', 'ar' => 'اتصل بنا'],
-            'content'    => [
+            'slug' => 'contact-us',
+            'title' => ['en' => 'Contact Us', 'ar' => 'اتصل بنا'],
+            'content' => [
                 'en' => '<p>Reach us at <strong>hello@thepilatesstudiocy.com</strong>.</p>',
                 'ar' => '<p>تواصل معنا عبر <strong>hello@thepilatesstudiocy.com</strong>.</p>',
             ],
-            'is_active'  => true,
+            'is_active' => true,
             'sort_order' => 5,
         ],
     ],

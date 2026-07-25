@@ -1,4 +1,5 @@
 <?php
+
 // filePath: app/Enums/Api/ErrorCodeEnum.php
 
 declare(strict_types=1);
@@ -71,7 +72,7 @@ enum ErrorCodeEnum: string
 
     public function getMessage(): string
     {
-        return match($this) {
+        return match ($this) {
             // General errors
             self::BAD_REQUEST => 'Invalid request',
             self::UNAUTHORIZED => 'Authentication required',
@@ -137,7 +138,7 @@ enum ErrorCodeEnum: string
 
     public function getStatusCode(): int
     {
-        return match($this) {
+        return match ($this) {
             self::BAD_REQUEST => 400,
             self::UNAUTHORIZED => 401,
             self::FORBIDDEN => 403,

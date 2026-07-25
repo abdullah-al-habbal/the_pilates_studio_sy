@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Http\Actions\Web\Admin\Operations;
@@ -16,8 +17,7 @@ final readonly class RecordExpenseAction
     public function __construct(
         private RecordExpenseHandler $handler,
         private LoggingService $logger,
-    ) {
-    }
+    ) {}
 
     public function __invoke(RecordExpenseRequest $request): JsonResponse
     {
@@ -29,7 +29,7 @@ final readonly class RecordExpenseAction
                 message: 'Expense recorded successfully.'
             );
         } catch (\Throwable $e) {
-            $this->logger->error('Operations - RecordExpense failed: ' . $e->getMessage(), [
+            $this->logger->error('Operations - RecordExpense failed: '.$e->getMessage(), [
                 'exception' => $e,
                 'category_name' => $request->category_name,
                 'currency_id' => $request->currency_id,

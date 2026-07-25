@@ -18,8 +18,7 @@ class ClassSessionService
 {
     public function __construct(
         private readonly ClassSessionEloquentRepository $repository
-    ) {
-    }
+    ) {}
 
     public function getSessionsForWeek(string $startDate, string $endDate): Collection
     {
@@ -67,7 +66,7 @@ class ClassSessionService
             ? $this->repository->findForUpdate($id)
             : $this->repository->findById($id);
 
-        if (!$session) {
+        if (! $session) {
             throw new ModelNotFoundException("Class session with ID {$id} not found.");
         }
 

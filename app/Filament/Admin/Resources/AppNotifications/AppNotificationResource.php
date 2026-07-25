@@ -19,6 +19,7 @@ use UnitEnum;
 class AppNotificationResource extends Resource
 {
     use Translatable;
+
     protected static ?string $model = AppNotification::class;
 
     protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-bell';
@@ -36,7 +37,7 @@ class AppNotificationResource extends Resource
 
     public static function getRecordTitle(?Model $record): string
     {
-        return $record?->getTranslation('title', app()->getLocale()) ?? '#' . $record->id;
+        return $record?->getTranslation('title', app()->getLocale()) ?? '#'.$record->id;
     }
 
     public static function getNavigationBadge(): ?string

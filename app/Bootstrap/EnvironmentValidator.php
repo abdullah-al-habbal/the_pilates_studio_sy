@@ -17,8 +17,8 @@ final readonly class EnvironmentValidator
 
         $envPath = base_path('.env');
 
-        if (!file_exists($envPath)) {
-            self::fail(['.env file not found at ' . $envPath]);
+        if (! file_exists($envPath)) {
+            self::fail(['.env file not found at '.$envPath]);
         }
 
         $envContent = file_get_contents($envPath);
@@ -37,7 +37,7 @@ final readonly class EnvironmentValidator
         $missing = [];
 
         foreach (EnvironmentVariables::REQUIRED_BOOTSTRAP as $key) {
-            if (!array_key_exists($key, $env) || $env[$key] === '' || $env[$key] === null) {
+            if (! array_key_exists($key, $env) || $env[$key] === '' || $env[$key] === null) {
                 $missing[] = "Missing required environment variable: {$key}";
             }
         }
@@ -52,8 +52,8 @@ final readonly class EnvironmentValidator
         $environment = $env['APP_ENV'] ?? '';
 
         if (
-            !is_string($environment)
-            || !in_array($environment, EnvironmentVariables::ALLOWED_ENVIRONMENTS, true)
+            ! is_string($environment)
+            || ! in_array($environment, EnvironmentVariables::ALLOWED_ENVIRONMENTS, true)
         ) {
             self::fail([
                 sprintf(
@@ -69,7 +69,7 @@ final readonly class EnvironmentValidator
     {
         $appKey = $env['APP_KEY'] ?? '';
 
-        if (!is_string($appKey) || !preg_match('/^base64:[A-Za-z0-9+\/=]+$/', $appKey)) {
+        if (! is_string($appKey) || ! preg_match('/^base64:[A-Za-z0-9+\/=]+$/', $appKey)) {
             self::fail([
                 'Invalid APP_KEY format. Run: php artisan key:generate',
             ]);
@@ -93,7 +93,7 @@ final readonly class EnvironmentValidator
 
         $normalized = strtolower((string) $value);
 
-        if (!in_array($normalized, EnvironmentVariables::BOOLEAN_VALUES, true)) {
+        if (! in_array($normalized, EnvironmentVariables::BOOLEAN_VALUES, true)) {
             self::fail([
                 sprintf('%s must be a boolean value [true|false]', $key),
             ]);
@@ -115,7 +115,7 @@ final readonly class EnvironmentValidator
             return;
         }
 
-        if (!is_numeric($value)) {
+        if (! is_numeric($value)) {
             self::fail([
                 sprintf('%s must be numeric', $key),
             ]);
@@ -138,7 +138,7 @@ final readonly class EnvironmentValidator
             return;
         }
 
-        if (!is_string($value) || filter_var($value, FILTER_VALIDATE_URL) === false) {
+        if (! is_string($value) || filter_var($value, FILTER_VALIDATE_URL) === false) {
             self::fail([
                 sprintf('%s must be a valid URL', $key),
             ]);
@@ -150,7 +150,7 @@ final readonly class EnvironmentValidator
         $message = implode(
             PHP_EOL,
             array_map(
-                static fn(string $error): string => "  - {$error}",
+                static fn (string $error): string => "  - {$error}",
                 $errors
             )
         );
@@ -159,13 +159,13 @@ final readonly class EnvironmentValidator
             fwrite(
                 STDERR,
                 PHP_EOL
-                . '❌ Environment validation failed:'
-                . PHP_EOL
-                . $message
-                . PHP_EOL
-                . PHP_EOL
-                . 'Please fix your .env file and try again.'
-                . PHP_EOL
+                .'❌ Environment validation failed:'
+                .PHP_EOL
+                .$message
+                .PHP_EOL
+                .PHP_EOL
+                .'Please fix your .env file and try again.'
+                .PHP_EOL
             );
             exit(1);
         }

@@ -1,11 +1,13 @@
 <?php
+
 declare(strict_types=1);
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration {
+return new class extends Migration
+{
     public function up(): void
     {
         Schema::create('refunds', function (Blueprint $table) {
@@ -35,6 +37,7 @@ return new class extends Migration {
             DB::statement("ALTER TABLE refunds MODIFY refundable_type VARCHAR(255) COMMENT 'bookings or merchandise_orders'");
         }
     }
+
     public function down(): void
     {
         Schema::dropIfExists('refunds');

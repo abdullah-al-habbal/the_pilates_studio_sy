@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Http\Resources\Admin\Scheduler;
@@ -17,7 +18,7 @@ final class DailySessionResource extends JsonResource
             is_array($session->class?->title) => $session->class->title[$locale]
                 ?? $session->class->title['en']
                 ?? '[MISSING:class.title.translation]',
-            !is_null($session->class?->title) => $session->class->title,
+            ! is_null($session->class?->title) => $session->class->title,
             is_null($session->class) => '[MISSING:class_session.class_relation]',
             default => '[MISSING:class.title]',
         };
@@ -28,7 +29,7 @@ final class DailySessionResource extends JsonResource
         $reserved = $session->bookingSessions->count();
         $capacity = (int) ($session->total_spots ?? 0);
         $attended = $session->bookingSessions
-            ->filter(fn($bs) => $bs->attendance_status?->value === 'attended')
+            ->filter(fn ($bs) => $bs->attendance_status?->value === 'attended')
             ->count();
 
         return [

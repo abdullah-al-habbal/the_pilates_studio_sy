@@ -1,4 +1,5 @@
 <?php
+
 // filePath: app/Filament/Admin/Resources/BookingSessions/Schemas/BookingSessionForm.php
 
 namespace App\Filament\Admin\Resources\BookingSessions\Schemas;
@@ -27,14 +28,14 @@ class BookingSessionForm
                         Grid::make(2)->schema([
                             Select::make('booking_id')
                                 ->label(__('dashboard.resources.booking_sessions.fields.booking'))
-                                ->options(function () use ($locale) {
+                                ->options(function () {
                                     return Booking::query()
                                         ->whereIn('status', ['active', 'exhausted'])
                                         ->with('user:id,fullname')
                                         ->get()
-                                        ->mapWithKeys(function (Booking $booking) use ($locale) {
+                                        ->mapWithKeys(function (Booking $booking) {
                                             return [
-                                                $booking->id => "#{$booking->id} - {$booking->user?->fullname} ({$booking->remaining_credits}/{$booking->total_credits} credits)"
+                                                $booking->id => "#{$booking->id} - {$booking->user?->fullname} ({$booking->remaining_credits}/{$booking->total_credits} credits)",
                                             ];
                                         });
                                 })
@@ -56,12 +57,13 @@ class BookingSessionForm
                                         ->get()
                                         ->mapWithKeys(function (ClassSession $session) use ($locale) {
                                             $classTitle = $session->class?->getTranslation('title', $locale);
+
                                             return [
-                                                $session->id => $classTitle . ' - ' .
-                                                    $session->date->format('M d, Y') . ' ' .
-                                                    substr($session->start_time, 0, 5) . '-' .
-                                                    substr($session->end_time, 0, 5) .
-                                                    " ({$session->available_spots} " . __('dashboard.resources.booking_sessions.units.spots_left') . ")"
+                                                $session->id => $classTitle.' - '.
+                                                    $session->date->format('M d, Y').' '.
+                                                    substr($session->start_time, 0, 5).'-'.
+                                                    substr($session->end_time, 0, 5).
+                                                    " ({$session->available_spots} ".__('dashboard.resources.booking_sessions.units.spots_left').')',
                                             ];
                                         });
                                 })

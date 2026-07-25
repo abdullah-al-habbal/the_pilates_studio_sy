@@ -4,8 +4,8 @@ namespace App\Filament\Admin\Resources\AppNotifications\Schemas;
 
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Select;
-use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Schema;
 
 class AppNotificationForm
@@ -41,7 +41,7 @@ class AppNotificationForm
                     ->image()
                     ->directory('notifications')
                     ->maxSize(2048)
-                    ->visible(fn($get): bool => $get('type') === 'image')
+                    ->visible(fn ($get): bool => $get('type') === 'image')
                     ->columnSpanFull(),
             ]);
     }

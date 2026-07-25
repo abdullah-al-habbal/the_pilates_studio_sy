@@ -19,7 +19,7 @@ class TestimonialSeeder extends Seeder
 
         foreach ($testimonials as $data) {
             $slug = Str::slug($data['name']['en']);
-            
+
             $data['avatar'] = $this->copySourceImage($sourcePath, 'testimonials', $slug, 'avatar');
 
             Testimonial::firstOrCreate(

@@ -10,7 +10,6 @@ use App\Http\Requests\Api\BaseApiFormRequest;
 
 class ResendOtpRequest extends BaseApiFormRequest
 {
-
     public function rules(): array
     {
         return [

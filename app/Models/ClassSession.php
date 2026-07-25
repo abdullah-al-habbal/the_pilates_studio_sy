@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Models;
@@ -43,7 +44,7 @@ class ClassSession extends Model
     protected function durationMinutes(): Attribute
     {
         return Attribute::make(
-            get: fn() => (int) Carbon::parse($this->start_time)
+            get: fn () => (int) Carbon::parse($this->start_time)
                 ->diffInMinutes(Carbon::parse($this->end_time))
         );
     }
@@ -93,7 +94,7 @@ class ClassSession extends Model
     protected function isAvailable(): Attribute
     {
         return Attribute::make(
-            get: fn() => $this->isScheduled() && !$this->isFull() && !$this->is_past
+            get: fn () => $this->isScheduled() && ! $this->isFull() && ! $this->is_past
         );
     }
 
@@ -148,8 +149,8 @@ class ClassSession extends Model
     public function isCancelableByUser(BookingSession $bookingSession): bool
     {
         return $bookingSession->isReserved()
-            && !$this->is_within_cancellation_window
-            && !$this->is_past;
+            && ! $this->is_within_cancellation_window
+            && ! $this->is_past;
     }
 
     public function getAvailableSpotsAttribute(): int

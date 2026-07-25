@@ -33,49 +33,53 @@ final class FcmChannel
     public function send(mixed $notifiable, Notification $notification): void
     {
         $notificationClass = get_class($notification);
-        $notificationId    = (string) Str::uuid();
+        $notificationId = (string) Str::uuid();
 
         try {
             $tokens = $this->tokenGetter->getTokens($notifiable);
 
             $this->loggingService->info('FCM dispatch started', [
-                'notification'    => $notificationClass,
+                'notification' => $notificationClass,
                 'notification_id' => $notificationId,
                 'notifiable_type' => get_class($notifiable),
-                'notifiable_id'   => $notifiable->getKey(),
-                'tokens_count'    => count($tokens),
+                'notifiable_id' => $notifiable->getKey(),
+                'tokens_count' => count($tokens),
             ]);
 
             if (empty($tokens)) {
                 $this->loggingService->warning('FCM skipped: no tokens', [
-                    'notification'    => $notificationClass,
+                    'notification' => $notificationClass,
                     'notification_id' => $notificationId,
                 ]);
+
                 return;
             }
 
             if (! method_exists($notification, 'toFcm')) {
                 $this->loggingService->error('FCM missing toFcm method', [
-                    'notification'    => $notificationClass,
+                    'notification' => $notificationClass,
                     'notification_id' => $notificationId,
                 ]);
+
                 return;
             }
 
             $payload = $notification->toFcm($notifiable);
             if (! is_array($payload)) {
                 $this->loggingService->error('FCM invalid payload type', [
-                    'notification'    => $notificationClass,
+                    'notification' => $notificationClass,
                     'notification_id' => $notificationId,
                 ]);
+
                 return;
             }
 
             if (! $this->validator->isConfigured()) {
                 $this->loggingService->error('FCM Firebase not configured', [
-                    'notification'    => $notificationClass,
+                    'notification' => $notificationClass,
                     'notification_id' => $notificationId,
                 ]);
+
                 return;
             }
 
@@ -83,14 +87,14 @@ final class FcmChannel
 
             foreach ($tokens as $token) {
                 try {
-                    $message   = $this->builder->build($payload, $token);
+                    $message = $this->builder->build($payload, $token);
                     $messageId = $this->sender->send($message);
 
                     $this->loggingService->info('FCM sent', [
-                        'notification'    => $notificationClass,
+                        'notification' => $notificationClass,
                         'notification_id' => $notificationId,
-                        'token'           => $token,
-                        'message_id'      => $messageId,
+                        'token' => $token,
+                        'message_id' => $messageId,
                     ]);
 
                     try {
@@ -108,8 +112,8 @@ final class FcmChannel
                 } catch (MessagingException $e) {
                     $this->loggingService->error('FCM MessagingException', [
                         'notification' => $notificationClass,
-                        'token'        => $token,
-                        'error'        => $e->getMessage(),
+                        'token' => $token,
+                        'error' => $e->getMessage(),
                     ]);
 
                     if ($this->invalidDetector->isInvalidTokenException($e)) {
@@ -121,19 +125,19 @@ final class FcmChannel
                     }
                 } catch (Throwable $e) {
                     $this->loggingService->error('FCM unexpected token send failure', [
-                        'notification'    => $notificationClass,
+                        'notification' => $notificationClass,
                         'notification_id' => $notificationId,
-                        'notifiable_id'   => $notifiable->getKey(),
-                        'token'           => $token,
-                        'error'           => $e->getMessage(),
-                        'trace'           => $e->getTraceAsString(),
+                        'notifiable_id' => $notifiable->getKey(),
+                        'token' => $token,
+                        'error' => $e->getMessage(),
+                        'trace' => $e->getTraceAsString(),
                     ]);
                 }
             }
         } catch (Throwable $e) {
             $this->loggingService->critical('FCM channel fatal error', [
                 'notification' => $notificationClass,
-                'error'        => $e->getMessage(),
+                'error' => $e->getMessage(),
             ]);
         }
     }

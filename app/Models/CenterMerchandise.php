@@ -1,6 +1,9 @@
 <?php
+
 declare(strict_types=1);
+
 namespace App\Models;
+
 use App\Services\Currency\PricingService;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -14,7 +17,7 @@ use Spatie\Translatable\HasTranslations;
 // add php doc helpers for properties and methods
 class CenterMerchandise extends Model
 {
-    use HasFactory, SoftDeletes, HasTranslations;
+    use HasFactory, HasTranslations, SoftDeletes;
 
     public array $translatable = ['name', 'description'];
 
@@ -85,5 +88,4 @@ class CenterMerchandise extends Model
     {
         return app(PricingService::class)->getBasePrice($this);
     }
-
 }

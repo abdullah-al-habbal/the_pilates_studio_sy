@@ -22,15 +22,15 @@ class ClubExpenseService
             $category = ClubExpenseCategory::firstOrCreate(['name' => $categoryName]);
 
             return ClubExpense::create([
-                'category_id'    => $category->id,
-                'amount'         => $amount,
-                'notes'          => $notes,
-                'recorded_by'    => $recordedBy,
-                'expense_date'   => $date ?? today(),
+                'category_id' => $category->id,
+                'amount' => $amount,
+                'notes' => $notes,
+                'recorded_by' => $recordedBy,
+                'expense_date' => $date ?? today(),
             ]);
         });
     }
-    
+
     public function getDailyTotal(\DateTimeInterface $date): int
     {
         return (int) ClubExpense::whereDate('expense_date', $date)

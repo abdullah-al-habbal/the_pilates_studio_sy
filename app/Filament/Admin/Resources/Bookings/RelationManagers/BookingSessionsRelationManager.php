@@ -5,13 +5,11 @@ namespace App\Filament\Admin\Resources\Bookings\RelationManagers;
 use App\Enums\BookingSessionStatusEnum;
 use App\Enums\ClassSessionStatusEnum;
 use App\Models\ClassSession;
-use Filament\Actions\{
-    BulkActionGroup,
-    CreateAction,
-    DeleteAction,
-    DeleteBulkAction,
-    EditAction,
-};
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\CreateAction;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
 use Filament\Forms\Components\Select;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Schemas\Schema;
@@ -75,9 +73,9 @@ class BookingSessionsRelationManager extends RelationManager
                 TextColumn::make('status')
                     ->label(__('dashboard.resources.booking_sessions.fields.status'))
                     ->badge()
-                    ->color(fn(BookingSessionStatusEnum $state): string => $state->getColor())
-                    ->icon(fn(BookingSessionStatusEnum $state): ?string => $state->getIcon())
-                    ->formatStateUsing(fn(BookingSessionStatusEnum $state): string => $state->getLabel()),
+                    ->color(fn (BookingSessionStatusEnum $state): string => $state->getColor())
+                    ->icon(fn (BookingSessionStatusEnum $state): ?string => $state->getIcon())
+                    ->formatStateUsing(fn (BookingSessionStatusEnum $state): string => $state->getLabel()),
 
                 TextColumn::make('cancelled_at')
                     ->label(__('dashboard.resources.booking_sessions.fields.cancelled_at'))

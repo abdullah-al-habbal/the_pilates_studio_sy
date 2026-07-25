@@ -2,6 +2,7 @@
 
 namespace App\Filament\Admin\Resources\Users\Tables;
 
+use App\Enums\UserRoleEnum;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
@@ -10,7 +11,6 @@ use Filament\Actions\RestoreBulkAction;
 use Filament\Actions\ViewAction;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
-use App\Enums\UserRoleEnum;
 use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Table;
 

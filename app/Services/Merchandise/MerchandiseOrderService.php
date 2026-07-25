@@ -16,8 +16,7 @@ class MerchandiseOrderService
     public function __construct(
         private readonly MerchandiseOrderEloquentRepository $orderRepo,
         private readonly PricingService $pricingService,
-    ) {
-    }
+    ) {}
 
     public function placeOrder(int $customerId, int $merchandiseId, int $quantity, int $currencyId, ?int $createdBy = null): MerchandiseOrder
     {

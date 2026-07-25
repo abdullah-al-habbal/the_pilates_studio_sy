@@ -16,8 +16,7 @@ class ClassesEloquentRepository
 {
     public function __construct(
         private readonly Classes $model
-    ) {
-    }
+    ) {}
 
     public function getActiveClassesForLanding(): Collection
     {
@@ -38,14 +37,14 @@ class ClassesEloquentRepository
         $query = $this->model->newQuery()
             ->with(['category', 'instructor', 'primaryImage'])
             ->where('status', ClassStatusEnum::ACTIVE)
-            ->when($categoryId, fn($q, $id) => $q->where('class_category_id', $id))
-            ->when($instructorId, fn($q, $id) => $q->where('instructor_id', $id));
+            ->when($categoryId, fn ($q, $id) => $q->where('class_category_id', $id))
+            ->when($instructorId, fn ($q, $id) => $q->where('instructor_id', $id));
 
         if ($date) {
             $query->whereHas('sessions', function ($q) use ($date, $startAfter, $startBefore) {
                 $q->whereDate('date', $date)
-                    ->when($startAfter, fn($sq, $time) => $sq->where('start_time', '>=', $time))
-                    ->when($startBefore, fn($sq, $time) => $sq->where('start_time', '<=', $time));
+                    ->when($startAfter, fn ($sq, $time) => $sq->where('start_time', '>=', $time))
+                    ->when($startBefore, fn ($sq, $time) => $sq->where('start_time', '<=', $time));
             });
         }
 
@@ -57,10 +56,10 @@ class ClassesEloquentRepository
         return $this->model->newQuery()
             ->with([
                 'sessions' => function ($query) use ($startDate, $endDate) {
-                    $query->when($startDate, fn($q) => $q->where('date', '>=', $startDate))
-                        ->when($endDate, fn($q) => $q->where('date', '<=', $endDate))
+                    $query->when($startDate, fn ($q) => $q->where('date', '>=', $startDate))
+                        ->when($endDate, fn ($q) => $q->where('date', '<=', $endDate))
                         ->with('bookingSessions');
-                }
+                },
             ])
             ->get()
             ->map(function ($class) {
@@ -77,7 +76,7 @@ class ClassesEloquentRepository
                     'avg_attendance' => $totalSessions > 0 ? round($totalAttendance / $totalSessions, 1) : 0,
                 ];
             })
-            ->filter(fn($item) => $item->total_attendance > 0)
+            ->filter(fn ($item) => $item->total_attendance > 0)
             ->sortByDesc('total_attendance')
             ->take($limit);
     }

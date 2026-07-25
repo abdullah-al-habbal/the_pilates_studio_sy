@@ -40,8 +40,8 @@ class ClassStatsOverview extends BaseWidget
     private function classData(): array
     {
         return [
-            'total'                          => Classes::withTrashed()->count(),
-            ClassStatusEnum::ACTIVE->value   => Classes::where('status', ClassStatusEnum::ACTIVE->value)->count(),
+            'total' => Classes::withTrashed()->count(),
+            ClassStatusEnum::ACTIVE->value => Classes::where('status', ClassStatusEnum::ACTIVE->value)->count(),
             ClassStatusEnum::INACTIVE->value => Classes::where('status', ClassStatusEnum::INACTIVE->value)->count(),
         ];
     }
@@ -52,7 +52,7 @@ class ClassStatsOverview extends BaseWidget
             ClassSessionStatusEnum::SCHEDULED->value => ClassSession::where('status', ClassSessionStatusEnum::SCHEDULED->value)->count(),
             ClassSessionStatusEnum::COMPLETED->value => ClassSession::where('status', ClassSessionStatusEnum::COMPLETED->value)->count(),
             ClassSessionStatusEnum::CANCELLED->value => ClassSession::where('status', ClassSessionStatusEnum::CANCELLED->value)->count(),
-            'today'                                   => ClassSession::where('status', ClassSessionStatusEnum::SCHEDULED->value)->whereDate('date', today())->count(),
+            'today' => ClassSession::where('status', ClassSessionStatusEnum::SCHEDULED->value)->whereDate('date', today())->count(),
         ];
     }
 
@@ -60,7 +60,7 @@ class ClassStatsOverview extends BaseWidget
     {
         return [
             'instructors' => Instructor::count(),
-            'categories'  => ClassCategory::count(),
+            'categories' => ClassCategory::count(),
         ];
     }
 

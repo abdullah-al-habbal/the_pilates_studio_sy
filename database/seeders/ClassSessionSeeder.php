@@ -10,7 +10,6 @@ use App\Models\ClassSession;
 use Carbon\Carbon;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Collection;
-use DomainException;
 
 class ClassSessionSeeder extends Seeder
 {
@@ -42,7 +41,7 @@ class ClassSessionSeeder extends Seeder
                 'status' => ClassSessionStatusEnum::SCHEDULED->value,
                 'created_at' => now(),
                 'updated_at' => now(),
-            ]
+            ],
         ]);
     }
 
@@ -50,7 +49,7 @@ class ClassSessionSeeder extends Seeder
     {
         $pattern = $class->recurrencePattern;
 
-        if (!$pattern || $pattern->interval_days <= 0) {
+        if (! $pattern || $pattern->interval_days <= 0) {
             return;
         }
 

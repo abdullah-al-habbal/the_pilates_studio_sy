@@ -18,8 +18,7 @@ final class ProcessNewWalkInAction
 
     public function __construct(
         private readonly ProcessNewWalkInHandler $handler
-    ) {
-    }
+    ) {}
 
     public function __invoke(ProcessNewWalkInRequest $request, int $sessionId): JsonResponse
     {
@@ -32,6 +31,7 @@ final class ProcessNewWalkInAction
             );
         } catch (Throwable $e) {
             report($e);
+
             return $this->error(
                 code: ErrorCodeEnum::INTERNAL_SERVER_ERROR,
                 message: 'Failed to process new walk‑in.'

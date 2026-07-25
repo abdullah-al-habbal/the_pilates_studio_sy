@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Http\Actions\Web\Admin\Scheduler;
@@ -15,6 +16,7 @@ final class GetInstructorsAction
     public function __invoke(): JsonResponse
     {
         $instructors = Instructor::select('id', 'name')->orderBy('name')->get();
+
         return $this->success(InstructorResource::collection($instructors));
     }
 }

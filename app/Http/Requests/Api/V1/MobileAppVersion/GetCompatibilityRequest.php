@@ -1,4 +1,5 @@
 <?php
+
 // filePath: app/Http/Requests/Api/V1/MobileAppVersion/GetCompatibilityRequest.php
 
 declare(strict_types=1);

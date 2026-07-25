@@ -1,4 +1,5 @@
 <?php
+
 // filePath: database\migrations\0001_01_01_000002_create_jobs_table.php
 declare(strict_types=1);
 

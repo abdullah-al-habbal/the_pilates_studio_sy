@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Http\Actions\Web\Admin\Scheduler;
@@ -20,8 +21,7 @@ final class GetDailySessionsAction
     public function __construct(
         private readonly GetDailySessionsHandler $handler,
         private readonly LoggingService $logger
-    ) {
-    }
+    ) {}
 
     public function __invoke(GetDailySessionsRequest $request): JsonResponse
     {
@@ -63,6 +63,7 @@ final class GetDailySessionsAction
                 'date' => $request->getDate(),
             ]);
             report($e);
+
             return $this->error(
                 code: ErrorCodeEnum::INTERNAL_SERVER_ERROR,
                 message: 'Failed to retrieve daily sessions.'

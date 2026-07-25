@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Http\Actions\Web\Admin\Operations;
@@ -23,9 +24,10 @@ final class GetExpenseBreakdownAction
             ->groupBy('category_id')
             ->map(function ($group) {
                 $first = $group->first();
+
                 return [
                     'category_name' => $first->category?->name,
-                    'total_amount'  => $group->sum('amount'),
+                    'total_amount' => $group->sum('amount'),
                 ];
             })
             ->values();

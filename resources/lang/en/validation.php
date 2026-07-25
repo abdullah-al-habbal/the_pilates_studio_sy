@@ -1,4 +1,5 @@
 <?php
+
 // filePath: lang/en/validation.php
 return [
     'accepted' => 'The :attribute field must be accepted.',

@@ -13,8 +13,7 @@ final readonly class AssignPackageValidatorService
 {
     public function __construct(
         private PricingService $pricingService
-    ) {
-    }
+    ) {}
 
     public function validateAndComputeAmount(
         int $packageId,
@@ -23,7 +22,7 @@ final readonly class AssignPackageValidatorService
     ): int {
         $package = Package::find($packageId);
 
-        if (!$package) {
+        if (! $package) {
             throw ValidationException::withMessages([
                 'package_id' => 'Package not found.',
             ]);
@@ -42,7 +41,7 @@ final readonly class AssignPackageValidatorService
         if ($clientSentAmount !== null && $clientSentAmount !== $computedAmount) {
             $currency = Currency::findOrFail($currencyId);
             $symbol = $currency->symbol;
-            $formatted = number_format($computedAmount, $currency->decimal_places) . ' ' . $symbol;
+            $formatted = number_format($computedAmount, $currency->decimal_places).' '.$symbol;
 
             throw ValidationException::withMessages([
                 'paid_amount' => "The paid amount must equal the package price ({$formatted}).",

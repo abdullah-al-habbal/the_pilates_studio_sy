@@ -6,14 +6,12 @@ namespace App\Providers\Filament;
 
 use App\Filament\Admin\Widgets\AttendanceTrendChart;
 use App\Filament\Admin\Widgets\CategoryPerformanceWidget;
-use App\Filament\Admin\Widgets\Stats\{
-    BookingStatsOverview,
-    ClassStatsOverview,
-    InsightsStatsOverview,
-    NotificationStatsOverview,
-    TopPerformersStatsOverview,
-    UserStatsOverview,
-};
+use App\Filament\Admin\Widgets\Stats\BookingStatsOverview;
+use App\Filament\Admin\Widgets\Stats\ClassStatsOverview;
+use App\Filament\Admin\Widgets\Stats\InsightsStatsOverview;
+use App\Filament\Admin\Widgets\Stats\NotificationStatsOverview;
+use App\Filament\Admin\Widgets\Stats\TopPerformersStatsOverview;
+use App\Filament\Admin\Widgets\Stats\UserStatsOverview;
 use App\Filament\Admin\Widgets\StatsOverview;
 use App\Filament\Admin\Widgets\TopInstructorsWidget;
 use App\Models\ClassSession;
@@ -68,7 +66,7 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->plugins([
                 SpatieTranslatablePlugin::make()
-                    ->persist()
+                    ->persist(),
             ])
             ->widgets([
                 StatsOverview::class,
@@ -86,11 +84,11 @@ class AdminPanelProvider extends PanelProvider
             ->authMiddleware($this->getAuthMiddleware())
             ->renderHook(
                 'panels::global-search.before',
-                fn(): string => view('filament.components.locale-switcher')->render(),
+                fn (): string => view('filament.components.locale-switcher')->render(),
             )
             ->renderHook(
                 'panels::user-menu.before',
-                fn(): string => Auth::user()?->isAdmin()
+                fn (): string => Auth::user()?->isAdmin()
                     ? Blade::render('
                         <div class="flex items-center gap-x-3 mr-4">
                             <x-filament::button
@@ -100,7 +98,7 @@ class AdminPanelProvider extends PanelProvider
                                 icon="heroicon-m-calendar-days"
                                 color="gray"
                             >
-                                ' . __('dashboard.navigation.scheduler') . '
+                                '.__('dashboard.navigation.scheduler').'
                             </x-filament::button>
                             <x-filament::button
                                 href="/admin/operations"
@@ -109,7 +107,7 @@ class AdminPanelProvider extends PanelProvider
                                 icon="heroicon-m-cog-6-tooth"
                                 color="primary"
                             >
-                                ' . __('dashboard.navigation.groups.operations') . '
+                                '.__('dashboard.navigation.groups.operations').'
                             </x-filament::button>
                         </div>
                     ')
@@ -126,25 +124,27 @@ class AdminPanelProvider extends PanelProvider
                             $count = ClassSession::where('status', 'scheduled')
                                 ->whereDate('date', today())
                                 ->count();
+
                             return (string) $count;
                         },
                         function (): string {
                             $count = ClassSession::where('status', 'scheduled')
                                 ->whereDate('date', today())
                                 ->count();
+
                             return $count > 0 ? 'primary' : 'gray';
                         }
                     )
-                    ->visible(fn(): bool => Auth::user()?->isAdmin() ?? false)
-                    ->isActiveWhen(fn(): bool => request()->is('admin/scheduler*')),
+                    ->visible(fn (): bool => Auth::user()?->isAdmin() ?? false)
+                    ->isActiveWhen(fn (): bool => request()->is('admin/scheduler*')),
 
                 NavigationItem::make(__('dashboard.navigation.groups.operations'))
                     ->url('/admin/operations')
                     ->icon('heroicon-o-cog-6-tooth')
                     ->sort(2)
                     ->group(__('dashboard.navigation.groups.operations'))
-                    ->visible(fn(): bool => Auth::user()?->isAdmin() ?? false)
-                    ->isActiveWhen(fn(): bool => request()->is('admin/operations*')),
+                    ->visible(fn (): bool => Auth::user()?->isAdmin() ?? false)
+                    ->isActiveWhen(fn (): bool => request()->is('admin/operations*')),
             ]);
     }
 

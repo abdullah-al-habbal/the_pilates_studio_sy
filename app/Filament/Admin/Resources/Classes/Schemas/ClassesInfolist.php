@@ -1,4 +1,5 @@
 <?php
+
 // filePath: app/Filament/Admin/Resources/Classes/Schemas/ClassesInfolist.php
 
 namespace App\Filament\Admin\Resources\Classes\Schemas;
@@ -36,16 +37,16 @@ class ClassesInfolist
                                 ->copyMessageDuration(1500)
                                 ->icon('heroicon-o-clipboard')
                                 ->iconPosition(IconPosition::After)
-                                ->formatStateUsing(fn($state, $record) => $record->getTranslation('title', $locale))
+                                ->formatStateUsing(fn ($state, $record) => $record->getTranslation('title', $locale))
                                 ->columnSpanFull(),
 
                             Grid::make(2)->schema([
                                 TextEntry::make('status')
                                     ->label(__('dashboard.resources.classes.fields.status'))
                                     ->badge()
-                                    ->color(fn(ClassStatusEnum $state): string => $state->getColor())
-                                    ->icon(fn(ClassStatusEnum $state): ?string => $state->getIcon())
-                                    ->formatStateUsing(fn(ClassStatusEnum $state): string => $state->getLabel()),
+                                    ->color(fn (ClassStatusEnum $state): string => $state->getColor())
+                                    ->icon(fn (ClassStatusEnum $state): ?string => $state->getIcon())
+                                    ->formatStateUsing(fn (ClassStatusEnum $state): string => $state->getLabel()),
 
                                 TextEntry::make('category.name')
                                     ->label(__('dashboard.resources.classes.fields.category'))
@@ -55,13 +56,12 @@ class ClassesInfolist
 
                                 TextEntry::make('instructor.name')
                                     ->label(__('dashboard.resources.classes.fields.instructor'))
-                                    ->url(fn($record) => $record->instructor ? route('filament.admin.resources.instructors.view', $record->instructor) : null)
+                                    ->url(fn ($record) => $record->instructor ? route('filament.admin.resources.instructors.view', $record->instructor) : null)
                                     ->color('primary')
                                     ->icon('heroicon-o-user-circle')
                                     ->iconPosition(IconPosition::Before)
                                     ->formatStateUsing(
-                                        fn($state, $record) =>
-                                        $record->instructor?->getTranslation('name', $locale) ?? '—'
+                                        fn ($state, $record) => $record->instructor?->getTranslation('name', $locale) ?? '—'
                                     ),
 
                                 TextEntry::make('instructor.email')
@@ -69,7 +69,7 @@ class ClassesInfolist
                                     ->icon('heroicon-o-envelope')
                                     ->copyable()
                                     ->copyMessage(__('dashboard.messages.copied'))
-                                    ->visible(fn($record) => $record->instructor && isset($record->instructor->email)),
+                                    ->visible(fn ($record) => $record->instructor && isset($record->instructor->email)),
                             ]),
                         ]),
                 ]),
@@ -105,7 +105,7 @@ class ClassesInfolist
 
                     TextEntry::make('duration_minutes')
                         ->label(__('dashboard.resources.classes.fields.duration'))
-                        ->suffix(' ' . __('dashboard.resources.classes.units.minutes'))
+                        ->suffix(' '.__('dashboard.resources.classes.units.minutes'))
                         ->icon('heroicon-o-arrow-path')
                         ->iconPosition(IconPosition::Before)
                         ->color('info')
@@ -119,11 +119,10 @@ class ClassesInfolist
 
                     IconEntry::make('recurrence_pattern_id')
                         ->label(__('dashboard.resources.classes.fields.recurrence_pattern'))
-                        ->icon(fn($state) => $state ? 'heroicon-o-arrow-path' : 'heroicon-o-x-mark')
-                        ->color(fn($state) => $state ? 'success' : 'gray')
+                        ->icon(fn ($state) => $state ? 'heroicon-o-arrow-path' : 'heroicon-o-x-mark')
+                        ->color(fn ($state) => $state ? 'success' : 'gray')
                         ->state(
-                            fn($record) =>
-                            $record->recurrencePattern?->getTranslation('label', $locale) ??
+                            fn ($record) => $record->recurrencePattern?->getTranslation('label', $locale) ??
                             $record->recurrencePattern?->name ??
                             __('dashboard.resources.classes.placeholders.no_recurrence')
                         ),
@@ -137,7 +136,7 @@ class ClassesInfolist
                         ->label(false)
                         ->html()
                         ->prose()
-                        ->formatStateUsing(fn($state, $record) => $record->getTranslation('about', $locale))
+                        ->formatStateUsing(fn ($state, $record) => $record->getTranslation('about', $locale))
                         ->columnSpanFull()
                         ->placeholder(__('dashboard.resources.classes.placeholders.no_description')),
                 ]),
@@ -163,7 +162,7 @@ class ClassesInfolist
 
                     TextEntry::make('sessions_count')
                         ->label(__('dashboard.resources.classes.fields.completed_sessions'))
-                        ->state(fn($record) => ($record->total_sessions_count ?? 0) - ($record->upcoming_sessions_count ?? 0))
+                        ->state(fn ($record) => ($record->total_sessions_count ?? 0) - ($record->upcoming_sessions_count ?? 0))
                         ->numeric()
                         ->badge()
                         ->color('warning')
@@ -181,7 +180,7 @@ class ClassesInfolist
                             Grid::make(3)->schema([
                                 ImageEntry::make('image_url')
                                     ->label(false)
-                                    ->state(fn($record) => $record->image_url)
+                                    ->state(fn ($record) => $record->image_url)
                                     ->height(150)
                                     ->width(200),
 
@@ -223,8 +222,8 @@ class ClassesInfolist
                         ->label(__('dashboard.resources.classes.fields.deleted_at'))
                         ->dateTime('M d, Y H:i')
                         ->placeholder(__('dashboard.resources.classes.placeholders.not_deleted'))
-                        ->color(fn($state) => $state ? 'danger' : 'success')
-                        ->icon(fn($state) => $state ? 'heroicon-o-x-circle' : 'heroicon-o-check-circle'),
+                        ->color(fn ($state) => $state ? 'danger' : 'success')
+                        ->icon(fn ($state) => $state ? 'heroicon-o-x-circle' : 'heroicon-o-check-circle'),
                 ]),
         ]);
     }

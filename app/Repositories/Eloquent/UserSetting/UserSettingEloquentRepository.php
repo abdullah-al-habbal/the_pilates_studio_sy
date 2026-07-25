@@ -1,4 +1,5 @@
 <?php
+
 // filePath: app/Repositories/Eloquent/UserSetting/UserSettingEloquentRepository.php
 
 declare(strict_types=1);

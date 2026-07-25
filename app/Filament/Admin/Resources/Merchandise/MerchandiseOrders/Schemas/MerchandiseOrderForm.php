@@ -102,11 +102,14 @@ class MerchandiseOrderForm
                         ->label('Item Name (at Order)')
                         ->content(function ($livewire) {
                             $record = $livewire->record;
-                            if (!$record) return '—';
+                            if (! $record) {
+                                return '—';
+                            }
                             $snapshot = $record->merchandise_name_snapshot;
                             if (is_array($snapshot)) {
                                 return $snapshot[app()->getLocale()] ?? $snapshot['en'] ?? '—';
                             }
+
                             return $record->merchandise?->getTranslation('name', app()->getLocale()) ?? '—';
                         })
                         ->visible(fn ($livewire) => $livewire->record !== null),
@@ -115,9 +118,12 @@ class MerchandiseOrderForm
                         ->label('Unit Price (at Order)')
                         ->content(function ($livewire) {
                             $record = $livewire->record;
-                            if (!$record) return '—';
+                            if (! $record) {
+                                return '—';
+                            }
                             $code = app(CurrencyService::class)->getCode($record->currency_id);
-                            return number_format($record->merchandise_unit_price_snapshot ?? 0, 2) . ' ' . $code;
+
+                            return number_format($record->merchandise_unit_price_snapshot ?? 0, 2).' '.$code;
                         })
                         ->visible(fn ($livewire) => $livewire->record !== null),
                 ]),

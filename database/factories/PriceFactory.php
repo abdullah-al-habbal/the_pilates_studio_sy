@@ -9,7 +9,6 @@ use Illuminate\Database\Eloquent\Factories\Factory;
 
 class PriceFactory extends Factory
 {
-
     public function definition(): array
     {
         $pricing = app(PricingService::class);
@@ -23,7 +22,7 @@ class PriceFactory extends Factory
 
     public function forCurrency(int $currencyId): static
     {
-        return $this->state(fn(array $attributes) => [
+        return $this->state(fn (array $attributes) => [
             'currency_id' => $currencyId,
         ]);
     }

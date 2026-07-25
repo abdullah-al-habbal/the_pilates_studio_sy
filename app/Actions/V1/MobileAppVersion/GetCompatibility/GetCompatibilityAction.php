@@ -1,4 +1,5 @@
 <?php
+
 // filePath: app/Actions/V1/MobileAppVersion/GetCompatibility/GetCompatibilityAction.php
 
 declare(strict_types=1);
@@ -9,12 +10,12 @@ use App\Enums\Api\ErrorCodeEnum;
 use App\Http\Requests\Api\V1\MobileAppVersion\GetCompatibilityRequest;
 use App\Services\MobileAppVersion\AppVersionService;
 use App\Traits\ApiResponseTrait;
-use Illuminate\Support\Str;
-use Illuminate\Support\Facades\Log;
-use RuntimeException;
 use Dedoc\Scramble\Attributes\Endpoint;
 use Dedoc\Scramble\Attributes\Group;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
+use RuntimeException;
 
 #[Group('Mobile App Version')]
 final readonly class GetCompatibilityAction
@@ -23,8 +24,7 @@ final readonly class GetCompatibilityAction
 
     public function __construct(
         private AppVersionService $service,
-    ) {
-    }
+    ) {}
 
     #[Endpoint('Get mobile app version compatibility', description: 'Returns the compatibility status of a given mobile app version.')]
     public function __invoke(GetCompatibilityRequest $request): JsonResponse
@@ -75,7 +75,7 @@ final readonly class GetCompatibilityAction
         } catch (\Exception $e) {
             Log::error('Unexpected error in compatibility check', [
                 'message' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
+                'trace' => $e->getTraceAsString(),
             ]);
 
             return $this->error(

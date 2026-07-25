@@ -2,11 +2,11 @@
 
 namespace App\Filament\Admin\Resources\Testimonials\Schemas;
 
-use Filament\Schemas\Components\Grid;
 use Filament\Infolists\Components\IconEntry;
 use Filament\Infolists\Components\ImageEntry;
-use Filament\Schemas\Components\Section;
 use Filament\Infolists\Components\TextEntry;
+use Filament\Schemas\Components\Grid;
+use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Filament\Support\Enums\FontWeight;
 
@@ -32,23 +32,21 @@ class TestimonialInfolist
                         ->schema([
                             TextEntry::make('name')
                                 ->weight(FontWeight::Bold)
-                                
-                                ->formatStateUsing(fn($state, $record) =>
-                                    $record->getTranslation('name', app()->getLocale())),
+
+                                ->formatStateUsing(fn ($state, $record) => $record->getTranslation('name', app()->getLocale())),
                             TextEntry::make('role')
                                 ->icon('heroicon-o-briefcase')
-                                ->formatStateUsing(fn($state, $record) =>
-                                    $record->getTranslation('role', app()->getLocale()))
+                                ->formatStateUsing(fn ($state, $record) => $record->getTranslation('role', app()->getLocale()))
                                 ->placeholder('No role specified'),
                             Grid::make(3)->schema([
                                 IconEntry::make('rating')
                                     ->label('Rating')
-                                    ->icon(fn(int $state): string => match (true) {
+                                    ->icon(fn (int $state): string => match (true) {
                                         $state >= 4 => 'heroicon-o-star',
                                         $state >= 2 => 'heroicon-o-star-half',
                                         default => 'heroicon-o-star',
                                     })
-                                    ->color(fn(int $state): string => match (true) {
+                                    ->color(fn (int $state): string => match (true) {
                                         $state >= 4 => 'warning',
                                         $state >= 2 => 'gray',
                                         default => 'danger',
@@ -56,8 +54,8 @@ class TestimonialInfolist
                                 TextEntry::make('is_active')
                                     ->label('Status')
                                     ->badge()
-                                    ->color(fn(bool $state): string => $state ? 'success' : 'danger')
-                                    ->icon(fn(bool $state): string => $state ? 'heroicon-o-check-circle' : 'heroicon-o-x-circle'),
+                                    ->color(fn (bool $state): string => $state ? 'success' : 'danger')
+                                    ->icon(fn (bool $state): string => $state ? 'heroicon-o-check-circle' : 'heroicon-o-x-circle'),
                                 TextEntry::make('sort_order')
                                     ->label('Sort Order')
                                     ->numeric()
@@ -71,8 +69,7 @@ class TestimonialInfolist
                         TextEntry::make('quote')
                             ->markdown()
                             ->italic()
-                            ->formatStateUsing(fn($state, $record) =>
-                                '&ldquo;' . $record->getTranslation('quote', app()->getLocale()) . '&rdquo;')
+                            ->formatStateUsing(fn ($state, $record) => '&ldquo;'.$record->getTranslation('quote', app()->getLocale()).'&rdquo;')
                             ->columnSpanFull()
                             ->placeholder('No quote'),
                     ]),

@@ -30,7 +30,6 @@ use Spatie\Translatable\HasTranslations;
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  * @property Carbon|null $deleted_at
- *
  * @property-read Collection<int, Booking> $bookings
  * @property-read Collection<int, Price> $prices
  * @property-read int|null $base_price
@@ -83,6 +82,7 @@ class Package extends Model
     {
         return $this->hasMany(Booking::class);
     }
+
     public function prices(): MorphMany
     {
         return $this->morphMany(Price::class, 'priceable');
@@ -122,11 +122,11 @@ class Package extends Model
             get: function (): bool {
                 $user = Auth::user();
 
-                if (!$user || !$this->is_active) {
+                if (! $user || ! $this->is_active) {
                     return false;
                 }
 
-                return !$user->bookings()
+                return ! $user->bookings()
                     ->where('status', BookingStatusEnum::ACTIVE)
                     ->where('remaining_credits', '>', 0)
                     ->exists();

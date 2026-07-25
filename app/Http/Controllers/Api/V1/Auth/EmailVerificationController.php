@@ -1,17 +1,18 @@
 <?php
+
 // filePath: app/Http/Controllers/Api/V1/Auth/EmailVerificationController.php
 declare(strict_types=1);
 
 namespace App\Http\Controllers\Api\V1\Auth;
 
+use App\Enums\Api\ErrorCodeEnum;
+use App\Enums\Api\SuccessCodeEnum;
 use App\Http\Controllers\Api\BaseApiController;
 use App\Http\Requests\Api\V1\Auth\ResendOtpRequest;
 use App\Http\Requests\Api\V1\Auth\VerifyOtpRequest;
 use App\Http\Resources\Api\V1\UserResource;
 use App\Services\Auth\AuthService;
 use App\Services\User\UserService;
-use App\Enums\Api\ErrorCodeEnum;
-use App\Enums\Api\SuccessCodeEnum;
 use Dedoc\Scramble\Attributes\Endpoint;
 use Dedoc\Scramble\Attributes\Group;
 use Illuminate\Http\JsonResponse;
@@ -67,7 +68,7 @@ class EmailVerificationController extends BaseApiController
 
         return $this->success([
             'token' => $token,
-            'user'  => new UserResource($user),
+            'user' => new UserResource($user),
         ], SuccessCodeEnum::EMAIL_VERIFIED, SuccessCodeEnum::EMAIL_VERIFIED->getMessage());
     }
 

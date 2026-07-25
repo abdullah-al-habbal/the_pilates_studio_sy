@@ -15,8 +15,7 @@ final readonly class ProcessNewWalkInHandler
     public function __construct(
         private BookingSessionService $bookingSessionService,
         private ClassSessionEloquentRepository $classSessionRepo,
-    ) {
-    }
+    ) {}
 
     public function handle(ProcessNewWalkInCommand $command): void
     {

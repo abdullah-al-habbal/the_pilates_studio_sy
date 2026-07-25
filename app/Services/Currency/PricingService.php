@@ -10,9 +10,7 @@ final readonly class PricingService
 {
     public function __construct(
         private CurrencyService $currencyService
-    ) {
-    }
-
+    ) {}
 
     public function getBasePrice(object $priceable): ?int
     {
@@ -38,6 +36,7 @@ final readonly class PricingService
             );
         }
         $convertedInTargetUnits = $baseAmount * $exchangeRate;
+
         return (int) round($convertedInTargetUnits);
     }
 

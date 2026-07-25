@@ -21,7 +21,7 @@ class AppSettingsTable
                     ->limit(50),
                 TextColumn::make('type')
                     ->badge()
-                    ->color(fn(AppSettingTypeEnum $state) => $state->color()),
+                    ->color(fn (AppSettingTypeEnum $state) => $state->color()),
                 TextColumn::make('description')
                     ->limit(40)
                     ->toggleable(isToggledHiddenByDefault: true),

@@ -1,4 +1,5 @@
 <?php
+
 // filePath: app/Http/Resources/V1/MobileAppVersion/CompatibilityResource.php
 
 declare(strict_types=1);

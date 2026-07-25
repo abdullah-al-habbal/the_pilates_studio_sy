@@ -30,6 +30,6 @@ enum UserRoleEnum: string
 
     public static function options(): array
     {
-        return collect(self::cases())->mapWithKeys(fn($c) => [$c->value => $c->label()])->toArray();
+        return collect(self::cases())->mapWithKeys(fn ($c) => [$c->value => $c->label()])->toArray();
     }
 }

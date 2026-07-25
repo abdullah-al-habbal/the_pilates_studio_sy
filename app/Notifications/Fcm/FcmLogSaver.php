@@ -19,14 +19,14 @@ final class FcmLogSaver
         ?string $messageId = null
     ): void {
         $this->resolver->resolve([
-            'notifiable_type'    => $notifiable->getMorphClass(),
-            'notifiable_id'      => $notifiable->getKey(),
+            'notifiable_type' => $notifiable->getMorphClass(),
+            'notifiable_id' => $notifiable->getKey(),
             'notification_class' => $notificationClass,
-            'data'               => [
-                'payload'         => $payload,
-                'token'           => $token,
+            'data' => [
+                'payload' => $payload,
+                'token' => $token,
                 'notification_id' => $notificationId,
-                'message_id'      => $messageId,
+                'message_id' => $messageId,
             ],
             'channel' => 'fcm',
             'sent_at' => now(),

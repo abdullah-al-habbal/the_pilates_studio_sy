@@ -61,12 +61,12 @@ class Booking extends Model
     protected static function booted(): void
     {
         static::creating(function (Booking $booking) {
-            if ($booking->package_id && !$booking->validity_days_snapshot) {
+            if ($booking->package_id && ! $booking->validity_days_snapshot) {
                 $package = Package::find($booking->package_id);
                 if ($package) {
                     $booking->validity_days_snapshot = $package->validity_days;
 
-                    if ($package->validity_days > 0 && !$booking->expires_at) {
+                    if ($package->validity_days > 0 && ! $booking->expires_at) {
                         $baseDate = $booking->created_at ?? now();
                         $booking->expires_at = $baseDate->copy()->addDays($package->validity_days);
                     }
@@ -75,7 +75,7 @@ class Booking extends Model
         });
 
         static::saving(function (Booking $booking) {
-            if (!$booking->exchange_rate_snapshot) {
+            if (! $booking->exchange_rate_snapshot) {
                 $currencyId = $booking->currency_id
                     ?? app(CurrencyService::class)->getBaseCurrency()->id;
                 $booking->exchange_rate_snapshot = app(PricingService::class)
@@ -114,7 +114,7 @@ class Booking extends Model
 
     public function isActive(): bool
     {
-        return $this->status === BookingStatusEnum::ACTIVE && !$this->isExpired();
+        return $this->status === BookingStatusEnum::ACTIVE && ! $this->isExpired();
     }
 
     public function isFrozen(): bool
@@ -171,21 +171,21 @@ class Booking extends Model
     protected function hasCreditsRemaining(): Attribute
     {
         return Attribute::make(
-            get: fn() => $this->remaining_credits > 0
+            get: fn () => $this->remaining_credits > 0
         );
     }
 
     protected function canDeductCredit(): Attribute
     {
         return Attribute::make(
-            get: fn() => $this->isActive() && $this->remaining_credits > 0
+            get: fn () => $this->isActive() && $this->remaining_credits > 0
         );
     }
 
     protected function canBeCancelled(): Attribute
     {
         return Attribute::make(
-            get: fn() => $this->status === BookingStatusEnum::ACTIVE
+            get: fn () => $this->status === BookingStatusEnum::ACTIVE
             && $this->remaining_credits === $this->total_credits
         );
     }
@@ -233,21 +233,21 @@ class Booking extends Model
     protected function isExhausted(): Attribute
     {
         return Attribute::make(
-            get: fn() => $this->status === BookingStatusEnum::EXHAUSTED
+            get: fn () => $this->status === BookingStatusEnum::EXHAUSTED
         );
     }
 
     protected function isWithinValidity(): Attribute
     {
         return Attribute::make(
-            get: fn() => !$this->isExpired()
+            get: fn () => ! $this->isExpired()
         );
     }
 
     protected function creditsNearEmpty(): Attribute
     {
         return Attribute::make(
-            get: fn() => $this->remaining_credits > 0 && $this->remaining_credits <= 2
+            get: fn () => $this->remaining_credits > 0 && $this->remaining_credits <= 2
         );
     }
 }

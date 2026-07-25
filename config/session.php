@@ -1,7 +1,9 @@
 <?php
+
 // filePath: config\session.php
 declare(strict_types=1);
 use Illuminate\Support\Str;
+
 return [
     'driver' => env('SESSION_DRIVER', 'database'),
     'lifetime' => (int) env('SESSION_LIFETIME', 120),
@@ -14,7 +16,7 @@ return [
     'lottery' => [2, 100],
     'cookie' => env(
         'SESSION_COOKIE',
-        Str::slug((string) env('APP_NAME', 'laravel')) . '-session'
+        Str::slug((string) env('APP_NAME', 'laravel')).'-session'
     ),
     'path' => env('SESSION_PATH', '/'),
     'domain' => env('SESSION_DOMAIN'),

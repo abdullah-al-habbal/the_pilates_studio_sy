@@ -31,13 +31,13 @@ class NotificationStatsOverview extends BaseWidget
     private function data(): array
     {
         $total = AppNotification::count();
-        $read  = AppNotification::whereNotNull('read_at')->count();
+        $read = AppNotification::whereNotNull('read_at')->count();
 
         return [
-            'total'      => $total,
-            'read'       => $read,
-            'unread'     => AppNotification::whereNull('read_at')->count(),
-            'read_rate'  => $total > 0 ? round(($read / $total) * 100) : 0,
+            'total' => $total,
+            'read' => $read,
+            'unread' => AppNotification::whereNull('read_at')->count(),
+            'read_rate' => $total > 0 ? round(($read / $total) * 100) : 0,
             'sent_today' => AppNotification::whereDate('created_at', today())->count(),
         ];
     }
@@ -69,7 +69,7 @@ class NotificationStatsOverview extends BaseWidget
     {
         $rate = $this->data()['read_rate'];
 
-        return Stat::make(__('widgets.notifications.read_rate'), $rate . '%')
+        return Stat::make(__('widgets.notifications.read_rate'), $rate.'%')
             ->description(__('widgets.notifications.read_rate_desc'))
             ->descriptionIcon('heroicon-m-chart-bar')
             ->color($rate >= 70 ? 'success' : 'warning');

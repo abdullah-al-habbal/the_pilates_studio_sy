@@ -1,4 +1,5 @@
 <?php
+
 // filePath: app/Mail/Auth/OtpMail.php
 declare(strict_types=1);
 

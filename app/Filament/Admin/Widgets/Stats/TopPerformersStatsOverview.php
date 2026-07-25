@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\DB;
 class TopPerformersStatsOverview extends BaseWidget
 {
     protected ?string $pollingInterval = null;
+
     protected static ?int $sort = 7;
 
     protected function getHeading(): ?string
@@ -40,13 +41,13 @@ class TopPerformersStatsOverview extends BaseWidget
 
         $attendance = $instructor
             ? BookingSession::where('attendance_status', AttendanceStatusEnum::ATTENDED->value)
-            ->whereHas('classSession.class', fn($q) => $q->where('instructor_id', $instructor->id))
-            ->count()
+                ->whereHas('classSession.class', fn ($q) => $q->where('instructor_id', $instructor->id))
+                ->count()
             : 0;
 
         return [
-            'name'       => $instructor?->getTranslation('name', app()->getLocale()) ?? __('widgets.top_performers.na'),
-            'classes'    => $instructor?->classes_count ?? 0,
+            'name' => $instructor?->getTranslation('name', app()->getLocale()) ?? __('widgets.top_performers.na'),
+            'classes' => $instructor?->classes_count ?? 0,
             'attendance' => $attendance,
         ];
     }
@@ -84,8 +85,8 @@ class TopPerformersStatsOverview extends BaseWidget
             ->orderByDesc('classes_count')
             ->limit(3)
             ->get()
-            ->map(fn($c) => [
-                'name'  => $c->getTranslation('name', app()->getLocale()),
+            ->map(fn ($c) => [
+                'name' => $c->getTranslation('name', app()->getLocale()),
                 'count' => $c->classes_count,
             ])
             ->toArray();
@@ -96,7 +97,7 @@ class TopPerformersStatsOverview extends BaseWidget
         $user = User::withCount('bookings')->orderByDesc('bookings_count')->first();
 
         return [
-            'name'  => $user?->fullname ?? __('widgets.top_performers.na'),
+            'name' => $user?->fullname ?? __('widgets.top_performers.na'),
             'count' => $user?->bookings_count ?? 0,
         ];
     }
@@ -113,7 +114,7 @@ class TopPerformersStatsOverview extends BaseWidget
         $user = $result ? User::find($result->user_id) : null;
 
         return [
-            'name'  => $user?->fullname ?? __('widgets.top_performers.na'),
+            'name' => $user?->fullname ?? __('widgets.top_performers.na'),
             'count' => $result?->attended_count ?? 0,
         ];
     }
@@ -124,7 +125,7 @@ class TopPerformersStatsOverview extends BaseWidget
 
         return Stat::make(
             __('widgets.top_performers.top_instructor'),
-            $d['name'] . ' (' . __('widgets.top_performers.classes_suffix', ['count' => $d['classes']]) . ')'
+            $d['name'].' ('.__('widgets.top_performers.classes_suffix', ['count' => $d['classes']]).')'
         )
             ->description(__('widgets.top_performers.top_instructor_desc', ['count' => $d['attendance']]))
             ->descriptionIcon('heroicon-m-user-circle')
@@ -137,7 +138,7 @@ class TopPerformersStatsOverview extends BaseWidget
 
         return Stat::make(
             __('widgets.top_performers.most_sessions'),
-            $d['title'] . ' (' . __('widgets.top_performers.sessions_suffix', ['count' => $d['count']]) . ')'
+            $d['title'].' ('.__('widgets.top_performers.sessions_suffix', ['count' => $d['count']]).')'
         )
             ->description(__('widgets.top_performers.most_sessions_desc'))
             ->descriptionIcon('heroicon-m-calendar-days')
@@ -150,7 +151,7 @@ class TopPerformersStatsOverview extends BaseWidget
 
         return Stat::make(
             __('widgets.top_performers.top_attendance'),
-            $d['title'] . ' (' . __('widgets.top_performers.attended_suffix', ['count' => $d['count']]) . ')'
+            $d['title'].' ('.__('widgets.top_performers.attended_suffix', ['count' => $d['count']]).')'
         )
             ->description(__('widgets.top_performers.top_attendance_desc'))
             ->descriptionIcon('heroicon-m-check-badge')
@@ -160,14 +161,14 @@ class TopPerformersStatsOverview extends BaseWidget
     private function topCategoriesStat(): Stat
     {
         $categories = $this->topCategoriesData();
-        $top        = $categories[0] ?? null;
+        $top = $categories[0] ?? null;
 
         $description = collect($categories)
-            ->map(fn($c) => $c['name'] . ': ' . $c['count'])
+            ->map(fn ($c) => $c['name'].': '.$c['count'])
             ->implode(' · ');
 
         $label = $top
-            ? $top['name'] . ' (' . __('widgets.top_performers.classes_suffix', ['count' => $top['count']]) . ')'
+            ? $top['name'].' ('.__('widgets.top_performers.classes_suffix', ['count' => $top['count']]).')'
             : __('widgets.top_performers.na');
 
         return Stat::make(__('widgets.top_performers.top_categories'), $label)
@@ -182,7 +183,7 @@ class TopPerformersStatsOverview extends BaseWidget
 
         return Stat::make(
             __('widgets.top_performers.most_packages'),
-            $d['name'] . ' (' . __('widgets.top_performers.packages_suffix', ['count' => $d['count']]) . ')'
+            $d['name'].' ('.__('widgets.top_performers.packages_suffix', ['count' => $d['count']]).')'
         )
             ->description(__('widgets.top_performers.most_packages_desc'))
             ->descriptionIcon('heroicon-m-credit-card')
@@ -195,7 +196,7 @@ class TopPerformersStatsOverview extends BaseWidget
 
         return Stat::make(
             __('widgets.top_performers.most_active'),
-            $d['name'] . ' (' . __('widgets.top_performers.attended_suffix', ['count' => $d['count']]) . ')'
+            $d['name'].' ('.__('widgets.top_performers.attended_suffix', ['count' => $d['count']]).')'
         )
             ->description(__('widgets.top_performers.most_active_desc'))
             ->descriptionIcon('heroicon-m-star')

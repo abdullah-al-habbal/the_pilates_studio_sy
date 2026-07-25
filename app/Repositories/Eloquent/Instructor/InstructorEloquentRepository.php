@@ -16,8 +16,8 @@ class InstructorEloquentRepository
     public function getActiveWithProfile(): Collection
     {
         return Instructor::query()
-            ->whereHas('classes', fn($q) => $q->where('status', ClassStatusEnum::ACTIVE))
-            ->with(['classes' => fn($q) => $q->where('status', ClassStatusEnum::ACTIVE)])
+            ->whereHas('classes', fn ($q) => $q->where('status', ClassStatusEnum::ACTIVE))
+            ->with(['classes' => fn ($q) => $q->where('status', ClassStatusEnum::ACTIVE)])
             ->get();
     }
 
@@ -27,7 +27,7 @@ class InstructorEloquentRepository
             'classes' => function ($query) {
                 $query->withCount([
                     'sessions as attended_sessions_count' => function ($q) {
-                        $q->whereHas('bookingSessions', fn($bsq) => $bsq->where('attendance_status', AttendanceStatusEnum::ATTENDED));
+                        $q->whereHas('bookingSessions', fn ($bsq) => $bsq->where('attendance_status', AttendanceStatusEnum::ATTENDED));
                     },
                 ]);
             },
@@ -92,11 +92,11 @@ class InstructorEloquentRepository
         }
 
         if (in_array('classes.category', $includes)) {
-            $relations['classes.category'] = fn($q) => $q;
+            $relations['classes.category'] = fn ($q) => $q;
         }
 
         if (in_array('classes.primaryImage', $includes)) {
-            $relations['classes.primaryImage'] = fn($q) => $q;
+            $relations['classes.primaryImage'] = fn ($q) => $q;
         }
 
         return $relations;

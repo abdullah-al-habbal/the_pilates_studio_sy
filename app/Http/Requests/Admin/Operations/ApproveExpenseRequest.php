@@ -25,7 +25,7 @@ class ApproveExpenseRequest extends FormRequest
                 function ($attribute, $value, $fail) {
                     $expense = ClubExpense::find($value);
                     if ($expense && $expense->status !== ClubExpenseStatusEnum::PENDING) {
-                        $fail('This expense has already been ' . $expense->status->value . '.');
+                        $fail('This expense has already been '.$expense->status->value.'.');
                     }
                 },
             ],

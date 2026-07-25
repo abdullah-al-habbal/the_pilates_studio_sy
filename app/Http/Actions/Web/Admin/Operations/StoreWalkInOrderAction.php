@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Http\Actions\Web\Admin\Operations;
@@ -15,8 +16,7 @@ final readonly class StoreWalkInOrderAction
 
     public function __construct(
         private StoreWalkInOrderHandler $handler
-    ) {
-    }
+    ) {}
 
     public function __invoke(StoreWalkInOrderRequest $request): JsonResponse
     {
@@ -37,7 +37,7 @@ final readonly class StoreWalkInOrderAction
                 message: 'Walk-in sale recorded successfully.'
             );
         } catch (\Throwable $e) {
-            Log::error('Operations - StoreWalkInOrder failed: ' . $e->getMessage(), [
+            Log::error('Operations - StoreWalkInOrder failed: '.$e->getMessage(), [
                 'exception' => $e,
                 'merchandise_id' => $request->merchandise_id,
                 'phone_number' => $request->phone_number,

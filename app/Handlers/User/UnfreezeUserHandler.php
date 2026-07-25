@@ -22,20 +22,20 @@ class UnfreezeUserHandler
 
     public function handle(User $user): void
     {
-        if (!$user->isFrozen()) {
+        if (! $user->isFrozen()) {
             throw new InvalidArgumentException('User is not frozen.');
         }
         $frozenBooking = $user->bookings()
             ->where('status', BookingStatusEnum::FROZEN)
             ->latest('id')
             ->first();
-        if (!$frozenBooking) {
+        if (! $frozenBooking) {
             throw new InvalidArgumentException('Cannot unfreeze: no frozen booking found.');
         }
         DB::transaction(function () use ($user, $frozenBooking) {
             $originalExpires = $frozenBooking->expires_at;
             $frozenAt = $user->frozen_at;
-            if (!$originalExpires || !$frozenAt) {
+            if (! $originalExpires || ! $frozenAt) {
                 throw new InvalidArgumentException('Missing snapshot data for unfreeze.');
             }
             $residualDays = max(1, (int) floor($originalExpires->diffInHours($frozenAt) / 24));

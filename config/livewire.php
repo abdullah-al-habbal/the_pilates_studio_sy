@@ -1,4 +1,5 @@
 <?php
+
 // filePath: config/livewire.php
 return [
     'component_locations' => [

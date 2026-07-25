@@ -1,4 +1,5 @@
 <?php
+
 // filePath: app/Repositories/Eloquent/BaseEloquentRepository.php
 declare(strict_types=1);
 
@@ -10,6 +11,7 @@ use Illuminate\Database\Eloquent\Model;
 abstract class BaseEloquentRepository
 {
     abstract protected function model(): string;
+
     abstract protected function allowedIncludes(): array;
 
     /**
@@ -29,8 +31,7 @@ abstract class BaseEloquentRepository
     /**
      * Find a model by primary key, eager loading only allowed includes.
      *
-     * @param  int|string   $id
-     * @param  string[]     $includes  Raw include segments from request
+     * @param  string[]  $includes  Raw include segments from request
      * @return TModel|null
      */
     public function find(int|string $id, array $includes = []): ?Model
@@ -53,7 +54,7 @@ abstract class BaseEloquentRepository
      *
      * e.g. ['classes.category'] → ['classes.category', 'classes']
      *
-     * @param  string[] $includes
+     * @param  string[]  $includes
      * @return string[]
      */
     private function normalize(array $includes): array
@@ -75,7 +76,7 @@ abstract class BaseEloquentRepository
     /**
      * Filter normalized includes against the declared whitelist.
      *
-     * @param  string[] $includes
+     * @param  string[]  $includes
      * @return string[]
      */
     private function allowed(array $includes): array
@@ -89,13 +90,13 @@ abstract class BaseEloquentRepository
      * Build the with() map: relation path → constraint closure.
      * Falls back to a no-op closure for relations with no constraint declared.
      *
-     * @param  string[] $includes
+     * @param  string[]  $includes
      * @return array<string, \Closure>
      */
     private function resolveRelations(array $includes): array
     {
         $constrained = $this->constrainedRelations();
-        $relations   = [];
+        $relations = [];
 
         foreach ($includes as $path) {
             $relations[$path] = $constrained[$path] ?? static fn ($q) => $q;

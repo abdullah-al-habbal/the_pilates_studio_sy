@@ -26,6 +26,7 @@ use UnitEnum;
 class PackageResource extends Resource
 {
     use Translatable;
+
     protected static ?string $model = Package::class;
 
     protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-gift';
@@ -43,11 +44,11 @@ class PackageResource extends Resource
 
     public static function getRecordTitle(?Model $record): string
     {
-        if (!$record) {
+        if (! $record) {
             return static::getModelLabel();
         }
 
-        return $record->getTranslation('name', app()->getLocale()) ?? 'Package #' . $record->id;
+        return $record->getTranslation('name', app()->getLocale()) ?? 'Package #'.$record->id;
     }
 
     public static function getEloquentQuery(): Builder
@@ -58,8 +59,7 @@ class PackageResource extends Resource
             ])
             ->withCount('bookings')
             ->withCount([
-                'bookings as active_bookings_count' => fn ($query) =>
-                    $query->where('status', BookingStatusEnum::ACTIVE),
+                'bookings as active_bookings_count' => fn ($query) => $query->where('status', BookingStatusEnum::ACTIVE),
             ])
             ->withSum('bookings', 'total_credits');
     }

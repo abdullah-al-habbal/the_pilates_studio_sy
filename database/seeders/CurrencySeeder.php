@@ -27,7 +27,7 @@ class CurrencySeeder extends Seeder
                 'decimal_places' => 0,
                 'exchange_rate' => 13000.0,
                 'is_active' => true,
-            ]
+            ],
         ];
 
         foreach ($currencies as $currency) {

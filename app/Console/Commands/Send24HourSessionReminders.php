@@ -14,6 +14,7 @@ use Throwable;
 final class Send24HourSessionReminders extends Command
 {
     protected $signature = 'sessions:remind-24h';
+
     protected $description = 'Send push notifications 24 hours before class sessions start';
 
     public function handle(): int
@@ -38,6 +39,7 @@ final class Send24HourSessionReminders extends Command
                             'session_id' => $session->id,
                             'booking_id' => $booking->id,
                         ]);
+
                         continue;
                     }
 
@@ -45,6 +47,7 @@ final class Send24HourSessionReminders extends Command
                         Log::info('Notifications disabled for user', [
                             'user_id' => $user->id,
                         ]);
+
                         continue;
                     }
 
@@ -52,6 +55,7 @@ final class Send24HourSessionReminders extends Command
                         Log::warning('User missing FCM token', [
                             'user_id' => $user->id,
                         ]);
+
                         continue;
                     }
 
@@ -73,6 +77,7 @@ final class Send24HourSessionReminders extends Command
         }
 
         $this->info("Reminders sent for {$sessions->count()} sessions.");
+
         return self::SUCCESS;
     }
 }

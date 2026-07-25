@@ -37,12 +37,13 @@ final readonly class GetDailyBalanceAction
 
             return $this->success(
                 data: $summary->map(
-                    fn(CurrencySummaryData $item): array => $item->toArray()
+                    fn (CurrencySummaryData $item): array => $item->toArray()
                 )->values()->all(),
                 message: 'Daily balance retrieved successfully.'
             );
         } catch (\Throwable $e) {
-            Log::error('Operations - GetDailyBalance failed: ' . $e->getMessage(), ['exception' => $e]);
+            Log::error('Operations - GetDailyBalance failed: '.$e->getMessage(), ['exception' => $e]);
+
             return $this->error(message: 'Failed to retrieve daily balance.');
         }
     }

@@ -24,6 +24,7 @@ use UnitEnum;
 class ClassCategoryResource extends Resource
 {
     use Translatable;
+
     protected static ?string $model = ClassCategory::class;
 
     protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-tag';

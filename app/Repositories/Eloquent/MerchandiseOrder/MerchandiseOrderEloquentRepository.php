@@ -14,8 +14,7 @@ class MerchandiseOrderEloquentRepository
 {
     public function __construct(
         private readonly MerchandiseOrder $model,
-    ) {
-    }
+    ) {}
 
     public function create(array $data): MerchandiseOrder
     {
@@ -31,7 +30,7 @@ class MerchandiseOrderEloquentRepository
     {
         return (bool) $this->model->where('id', $id)->delete();
     }
-    
+
     public function getRevenueByCurrency(
         ?CarbonInterface $startDate = null,
         ?CarbonInterface $endDate = null,
@@ -40,17 +39,18 @@ class MerchandiseOrderEloquentRepository
         return MerchandiseOrder::query()
             ->selectRaw('currency_id, SUM(paid_amount) as total, COUNT(*) as count')
             ->whereNotNull('paid_amount')
-            ->when($creatorId, fn($q) => $q->where('created_by', $creatorId))
-            ->when($startDate, fn($q) => $q->where('ordered_at', '>=', $startDate))
-            ->when($endDate, fn($q) => $q->where('ordered_at', '<=', $endDate))
+            ->when($creatorId, fn ($q) => $q->where('created_by', $creatorId))
+            ->when($startDate, fn ($q) => $q->where('ordered_at', '>=', $startDate))
+            ->when($endDate, fn ($q) => $q->where('ordered_at', '<=', $endDate))
             ->groupBy('currency_id')
             ->get()
-            ->map(fn($item) => (object) [
+            ->map(fn ($item) => (object) [
                 'currency_id' => (int) $item->currency_id,
                 'total_revenue' => (int) $item->total,
                 'order_count' => (int) $item->count,
             ]);
     }
+
     public function getRevenueWithExchangeSnapshot(
         ?CarbonInterface $startDate = null,
         ?CarbonInterface $endDate = null,
@@ -65,12 +65,12 @@ class MerchandiseOrderEloquentRepository
             ')
             ->whereNotNull('paid_amount')
             ->whereNotNull('exchange_rate_snapshot')
-            ->when($creatorId, fn($q) => $q->where('created_by', $creatorId))
-            ->when($startDate, fn($q) => $q->where('ordered_at', '>=', $startDate))
-            ->when($endDate, fn($q) => $q->where('ordered_at', '<=', $endDate))
+            ->when($creatorId, fn ($q) => $q->where('created_by', $creatorId))
+            ->when($startDate, fn ($q) => $q->where('ordered_at', '>=', $startDate))
+            ->when($endDate, fn ($q) => $q->where('ordered_at', '<=', $endDate))
             ->groupBy('currency_id')
             ->get()
-            ->map(fn($item) => (object) [
+            ->map(fn ($item) => (object) [
                 'currency_id' => (int) $item->currency_id,
                 'total_revenue' => (int) $item->total,
                 'order_count' => (int) $item->count,
@@ -81,9 +81,9 @@ class MerchandiseOrderEloquentRepository
     public function getTotalCount(?CarbonInterface $startDate = null, ?CarbonInterface $endDate = null, ?int $creatorId = null): int
     {
         return MerchandiseOrder::query()
-            ->when($creatorId, fn($q) => $q->where('created_by', $creatorId))
-            ->when($startDate, fn($q) => $q->where('ordered_at', '>=', $startDate))
-            ->when($endDate, fn($q) => $q->where('ordered_at', '<=', $endDate))
+            ->when($creatorId, fn ($q) => $q->where('created_by', $creatorId))
+            ->when($startDate, fn ($q) => $q->where('ordered_at', '>=', $startDate))
+            ->when($endDate, fn ($q) => $q->where('ordered_at', '<=', $endDate))
             ->count();
     }
 
@@ -99,8 +99,8 @@ class MerchandiseOrderEloquentRepository
                 DB::raw('SUM(merchandise_orders.quantity) as quantity'),
                 DB::raw('SUM(merchandise_orders.paid_amount) as revenue'),
             ])
-            ->when($startDate, fn($q) => $q->where('merchandise_orders.ordered_at', '>=', $startDate))
-            ->when($endDate, fn($q) => $q->where('merchandise_orders.ordered_at', '<=', $endDate))
+            ->when($startDate, fn ($q) => $q->where('merchandise_orders.ordered_at', '>=', $startDate))
+            ->when($endDate, fn ($q) => $q->where('merchandise_orders.ordered_at', '<=', $endDate))
             ->groupBy('merchandise_orders.merchandise_id', 'merchandise_orders.currency_id')
             ->orderByDesc('revenue')
             ->limit($limit)
@@ -108,6 +108,7 @@ class MerchandiseOrderEloquentRepository
             ->map(function ($item) {
                 $merch = CenterMerchandise::find($item->merchandise_id);
                 $item->name = $merch?->name ?? [];
+
                 return $item;
             });
     }

@@ -11,8 +11,7 @@ final readonly class FreezeBookingHandler
 {
     public function __construct(
         private BookingFreezeService $freezeService
-    ) {
-    }
+    ) {}
 
     public function handle(int $bookingId): void
     {

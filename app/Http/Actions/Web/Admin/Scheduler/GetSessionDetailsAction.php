@@ -18,13 +18,12 @@ final class GetSessionDetailsAction
 
     public function __construct(
         private readonly GetSessionDetailsHandler $handler
-    ) {
-    }
+    ) {}
 
     public function __invoke(int $sessionId): JsonResponse
     {
         try {
-            
+
             $result = $this->handler->handle(
                 new GetSessionDetailsQuery(sessionId: $sessionId)
             );
@@ -32,6 +31,7 @@ final class GetSessionDetailsAction
             return $this->success(data: $result, code: SuccessCodeEnum::SUCCESS);
         } catch (Throwable $e) {
             report($e);
+
             return $this->error(
                 code: ErrorCodeEnum::INTERNAL_SERVER_ERROR,
                 message: 'Failed to retrieve session details.'

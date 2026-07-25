@@ -1,13 +1,13 @@
 <?php
+
 declare(strict_types=1);
-use App\Http\Actions\Web\Admin\Operations\{
-    GetPackagesAction,
-    CreatePackageAction,
-    UpdatePackageAction,
-    DeletePackageAction,
-    AssignPackageAction,
-};
+use App\Http\Actions\Web\Admin\Operations\AssignPackageAction;
+use App\Http\Actions\Web\Admin\Operations\CreatePackageAction;
+use App\Http\Actions\Web\Admin\Operations\DeletePackageAction;
+use App\Http\Actions\Web\Admin\Operations\GetPackagesAction;
+use App\Http\Actions\Web\Admin\Operations\UpdatePackageAction;
 use Illuminate\Support\Facades\Route;
+
 Route::prefix('packages')->name('packages.')->group(function (): void {
     Route::get('/', GetPackagesAction::class)->name('index');
     Route::post('/', CreatePackageAction::class)->name('store');

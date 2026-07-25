@@ -10,7 +10,6 @@ use Illuminate\Http\JsonResponse;
 
 final readonly class UpdatePackageAction
 {
-    
     public function __construct(
         private UpdatePackageHandler $handler
     ) {}
@@ -24,6 +23,7 @@ final readonly class UpdatePackageAction
             validityDays: $request->input('validity_days'),
             amount: (int) $request->input('amount'),
         );
+
         // fix: use the Api Response Trait, not the response()->json()
         return response()->json([
             'success' => true,

@@ -3,7 +3,6 @@
 namespace App\Filament\Admin\Resources\RecurrencePatterns;
 
 use App\Filament\Admin\Resources\RecurrencePatterns\Pages\CreateRecurrencePattern;
-use Filament\Resources\Pages\Page;
 use App\Filament\Admin\Resources\RecurrencePatterns\Pages\EditRecurrencePattern;
 use App\Filament\Admin\Resources\RecurrencePatterns\Pages\ListRecurrencePatterns;
 use App\Filament\Admin\Resources\RecurrencePatterns\Pages\ViewRecurrencePattern;
@@ -12,6 +11,7 @@ use App\Filament\Admin\Resources\RecurrencePatterns\Schemas\RecurrencePatternInf
 use App\Filament\Admin\Resources\RecurrencePatterns\Tables\RecurrencePatternsTable;
 use App\Models\RecurrencePattern;
 use BackedEnum;
+use Filament\Resources\Pages\Page;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
@@ -23,6 +23,7 @@ use UnitEnum;
 class RecurrencePatternResource extends Resource
 {
     use Translatable;
+
     protected static ?string $model = RecurrencePattern::class;
 
     protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-arrow-path';
@@ -40,12 +41,12 @@ class RecurrencePatternResource extends Resource
 
     public static function getRecordTitle(?Model $record): string
     {
-        return $record?->name ?? $record?->title ?? ('Pattern #' . $record->id);
+        return $record?->name ?? $record?->title ?? ('Pattern #'.$record->id);
     }
 
     public static function getNavigationBadge(): ?string
     {
-        return  (string) static::getModel()::query()->count();
+        return (string) static::getModel()::query()->count();
     }
 
     public static function getNavigationBadgeColor(): string|array|null

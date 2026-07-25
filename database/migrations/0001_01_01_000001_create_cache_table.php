@@ -1,4 +1,5 @@
 <?php
+
 // filePath: database\migrations\0001_01_01_000001_create_cache_table.php
 declare(strict_types=1);
 

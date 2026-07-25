@@ -12,8 +12,7 @@ class LanguageSwitcher extends Component
 {
     public function __construct(
         private readonly LanguageService $languageService
-    ) {
-    }
+    ) {}
 
     public function render(): View
     {

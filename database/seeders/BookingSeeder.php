@@ -17,7 +17,7 @@ class BookingSeeder extends Seeder
         $adam = User::where('email', 'adam.kim@gmail.com')->first();
         $package = Package::where('name->en', '12 Sessions Pack')->first();
 
-        if (!$adam || !$package) {
+        if (! $adam || ! $package) {
             throw new SeederDependencyMissingException('BookingSeeder needs user or package. Not found!');
         }
 
@@ -28,7 +28,7 @@ class BookingSeeder extends Seeder
 
         $sypCurrency = Currency::where('code', 'SYP')->first();
 
-        if (!$adamHasActive) {
+        if (! $adamHasActive) {
             Booking::create([
                 'user_id' => $adam->id,
                 'package_id' => $package->id,
@@ -43,7 +43,7 @@ class BookingSeeder extends Seeder
 
         $otherUsers = User::where('id', '!=', $adam->id)->get();
         if ($otherUsers->isNotEmpty()) {
-            $usersForActive = $otherUsers->filter(fn($user) => random_int(1, 100) <= 30);
+            $usersForActive = $otherUsers->filter(fn ($user) => random_int(1, 100) <= 30);
 
             foreach ($usersForActive as $user) {
                 $alreadyActive = $user->bookings()

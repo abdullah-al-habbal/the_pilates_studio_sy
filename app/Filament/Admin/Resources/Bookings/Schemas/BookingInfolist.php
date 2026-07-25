@@ -30,46 +30,49 @@ class BookingInfolist
                                     ->weight(FontWeight::Bold)
                                     ->icon('heroicon-o-user')
                                     ->iconPosition(IconPosition::Before)
-                                    ->state(fn(Booking $record) => $record->user?->fullname ?? '—'),
+                                    ->state(fn (Booking $record) => $record->user?->fullname ?? '—'),
 
                                 TextEntry::make('package.name')
                                     ->label(__('dashboard.resources.bookings.fields.package'))
                                     ->badge()
                                     ->color('info')
                                     ->icon('heroicon-o-cube')
-                                    ->formatStateUsing(fn($state, Booking $record) => $record->package?->getTranslation('name', app()->getLocale()) ?? '—'),
+                                    ->formatStateUsing(fn ($state, Booking $record) => $record->package?->getTranslation('name', app()->getLocale()) ?? '—'),
 
                                 TextEntry::make('validity_days_snapshot')
                                     ->label('Package Validity (at Purchase)')
-                                    ->formatStateUsing(fn($state) => $state ? "{$state} days" : 'Unlimited')
+                                    ->formatStateUsing(fn ($state) => $state ? "{$state} days" : 'Unlimited')
                                     ->icon('heroicon-o-clock')
                                     ->placeholder('—'),
 
                                 TextEntry::make('status')
                                     ->label(__('dashboard.resources.bookings.fields.status'))
                                     ->badge()
-                                    ->color(fn(Booking $record) => $record->status->getColor())
-                                    ->icon(fn(Booking $record) => $record->status->getIcon())
-                                    ->formatStateUsing(fn(Booking $record) => $record->status->getLabel()),
+                                    ->color(fn (Booking $record) => $record->status->getColor())
+                                    ->icon(fn (Booking $record) => $record->status->getIcon())
+                                    ->formatStateUsing(fn (Booking $record) => $record->status->getLabel()),
 
                                 TextEntry::make('expires_at')
                                     ->label(__('dashboard.resources.bookings.fields.expires_at'))
                                     ->placeholder(__('dashboard.placeholders.not_set'))
                                     ->dateTime()
-                                    ->color(fn($state) => match (true) {
+                                    ->color(fn ($state) => match (true) {
                                         $state === null => 'gray',
                                         $state->isPast() => 'danger',
                                         default => 'success',
                                     })
-                                    ->suffix(fn($state) => $state && $state->isPast() ? ' (Expired)' : '')
-                                    ->icon(fn($state) => $state && $state->isPast() ? 'heroicon-o-clock' : 'heroicon-o-calendar'),
+                                    ->suffix(fn ($state) => $state && $state->isPast() ? ' (Expired)' : '')
+                                    ->icon(fn ($state) => $state && $state->isPast() ? 'heroicon-o-clock' : 'heroicon-o-calendar'),
 
                                 TextEntry::make('paid_amount')
                                     ->label('Paid Amount')
                                     ->formatStateUsing(function ($state, Booking $record) {
-                                        if ($state === null) return '—';
+                                        if ($state === null) {
+                                            return '—';
+                                        }
                                         $currency = $record->currency;
-                                        return number_format($state, $currency->decimal_places) . ' ' . $currency->symbol;
+
+                                        return number_format($state, $currency->decimal_places).' '.$currency->symbol;
                                     })
                                     ->icon('heroicon-o-currency-dollar'),
                             ]),
@@ -78,9 +81,9 @@ class BookingInfolist
                             ->schema([
                                 TextEntry::make('credits_usage_percentage')
                                     ->label('Usage Progress')
-                                    ->state(fn(Booking $record) => $record->credits_usage_percentage . '% used')
+                                    ->state(fn (Booking $record) => $record->credits_usage_percentage.'% used')
                                     ->badge()
-                                    ->color(fn(Booking $record) => $record->credits_progress_color),
+                                    ->color(fn (Booking $record) => $record->credits_progress_color),
 
                                 Grid::make(3)->schema([
                                     TextEntry::make('total_credits')
@@ -91,7 +94,7 @@ class BookingInfolist
 
                                     TextEntry::make('used_credits')
                                         ->label(__('dashboard.resources.bookings.fields.credits_used'))
-                                        ->state(fn(Booking $record) => $record->total_credits - $record->remaining_credits)
+                                        ->state(fn (Booking $record) => $record->total_credits - $record->remaining_credits)
                                         ->numeric()
                                         ->weight(FontWeight::Bold)
                                         ->color('warning'),
@@ -100,7 +103,7 @@ class BookingInfolist
                                         ->label(__('dashboard.resources.bookings.fields.remaining_credits'))
                                         ->numeric()
                                         ->weight(FontWeight::ExtraBold)
-                                        ->color(fn($state) => $state > 0 ? 'success' : 'danger'),
+                                        ->color(fn ($state) => $state > 0 ? 'success' : 'danger'),
                                 ]),
                             ]),
                     ]),
@@ -111,7 +114,7 @@ class BookingInfolist
                     ->schema([
                         TextEntry::make('booking_sessions_count')
                             ->label(__('dashboard.resources.booking_sessions.plural'))
-                            ->state(fn(Booking $record) => $record->booking_sessions_count ?? 0)
+                            ->state(fn (Booking $record) => $record->booking_sessions_count ?? 0)
                             ->badge()
                             ->color('info'),
                     ]),
@@ -135,7 +138,8 @@ class BookingInfolist
                                 $currency = $record->currency;
                                 $code = $currency?->code;
                                 $decimals = $currency?->decimal_places ?? 6;
-                                return number_format($state, $decimals) . ($code ? " {$code}" : '');
+
+                                return number_format($state, $decimals).($code ? " {$code}" : '');
                             })
                             ->icon('heroicon-o-currency-dollar'),
 

@@ -28,16 +28,16 @@ class LanguageStatsOverview extends BaseWidget
         $total = UserSetting::count();
 
         return [
-            'total'     => $total,
+            'total' => $total,
             'languages' => Language::where('is_active', true)
                 ->withCount('userSettings')
                 ->orderByDesc('user_settings_count')
                 ->get()
-                ->map(fn(Language $lang) => [
-                    'name'       => $lang->name,
-                    'count'      => $lang->user_settings_count,
-                    'rate'       => $total > 0 ? round(($lang->user_settings_count / $total) * 100) : 0,
-                    'direction'  => $lang->direction,
+                ->map(fn (Language $lang) => [
+                    'name' => $lang->name,
+                    'count' => $lang->user_settings_count,
+                    'rate' => $total > 0 ? round(($lang->user_settings_count / $total) * 100) : 0,
+                    'direction' => $lang->direction,
                     'is_default' => $lang->is_default,
                 ])
                 ->toArray(),
@@ -52,8 +52,8 @@ class LanguageStatsOverview extends BaseWidget
                     ? __('widgets.language.rtl')
                     : __('widgets.language.ltr');
 
-                return Stat::make($lang['name'], $lang['rate'] . '%')
-                    ->description(__('widgets.language.users_count', ['count' => $lang['count']]) . ' · ' . $dirLabel)
+                return Stat::make($lang['name'], $lang['rate'].'%')
+                    ->description(__('widgets.language.users_count', ['count' => $lang['count']]).' · '.$dirLabel)
                     ->descriptionIcon('heroicon-m-language')
                     ->color($lang['is_default'] ? 'success' : 'info');
             })

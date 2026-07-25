@@ -1,4 +1,5 @@
 <?php
+
 // filePath: lang/en/passwords.php
 return [
     'reset' => 'Your password has been reset.',

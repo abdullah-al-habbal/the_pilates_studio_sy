@@ -1,14 +1,15 @@
 <?php
+
 // filePath: app/Http/Controllers/Api/V1/StaticPage/StaticPageController.php
 
 declare(strict_types=1);
 
 namespace App\Http\Controllers\Api\V1\StaticPage;
 
+use App\Enums\Api\SuccessCodeEnum;
 use App\Http\Controllers\Api\BaseApiController;
 use App\Http\Resources\Api\V1\StaticPageResource;
 use App\Services\StaticPage\StaticPageService;
-use App\Enums\Api\SuccessCodeEnum;
 use Dedoc\Scramble\Attributes\Endpoint;
 use Dedoc\Scramble\Attributes\Group;
 use Illuminate\Http\JsonResponse;

@@ -31,7 +31,7 @@ class BookingSessionResource extends Resource
 
     public static function getRecordTitle(?Model $record): string
     {
-        if (!$record) {
+        if (! $record) {
             return static::getModelLabel();
         }
         $userName = $record->booking?->user?->fullname ?? '—';

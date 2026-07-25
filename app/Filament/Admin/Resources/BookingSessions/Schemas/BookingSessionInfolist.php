@@ -3,9 +3,9 @@
 namespace App\Filament\Admin\Resources\BookingSessions\Schemas;
 
 use App\Enums\BookingSessionStatusEnum;
-use Filament\Schemas\Components\Section;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Components\Grid;
+use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Filament\Support\Enums\FontWeight;
 use Filament\Support\Enums\IconPosition;
@@ -84,9 +84,8 @@ class BookingSessionInfolist
 
                                     TextEntry::make('classSession.start_time')
                                         ->label(__('dashboard.resources.booking_sessions.fields.time'))
-                                        ->state(fn ($record) =>
-                                            $record->classSession ?
-                                            substr($record->classSession->start_time, 0, 5) . ' - ' .
+                                        ->state(fn ($record) => $record->classSession ?
+                                            substr($record->classSession->start_time, 0, 5).' - '.
                                             substr($record->classSession->end_time, 0, 5) : '—'
                                         )
                                         ->icon('heroicon-o-clock'),

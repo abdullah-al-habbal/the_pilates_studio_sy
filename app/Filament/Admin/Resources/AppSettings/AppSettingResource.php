@@ -19,9 +19,13 @@ use UnitEnum;
 class AppSettingResource extends Resource
 {
     protected static ?string $model = AppSetting::class;
+
     protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-cog-6-tooth';
+
     protected static string|UnitEnum|null $navigationGroup = 'Configuration';
+
     protected static ?int $navigationSort = 1;
+
     protected static ?string $recordTitleAttribute = 'key';
 
     public static function getRecordTitle(?Model $record): string

@@ -10,6 +10,7 @@ use Filament\Tables\Table;
 class ExpensesRelationManager extends RelationManager
 {
     protected static string $relationship = 'expenses';
+
     protected static ?string $title = 'Expenses';
 
     public function table(Table $table): Table

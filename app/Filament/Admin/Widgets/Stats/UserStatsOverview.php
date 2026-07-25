@@ -29,19 +29,23 @@ class UserStatsOverview extends BaseWidget
     }
 
     private const KEY_TOTAL = 'total';
+
     private const KEY_ACTIVE = 'active';
+
     private const KEY_DEACTIVATED = 'deactivated';
+
     private const KEY_UNVERIFIED = 'unverified';
+
     private const KEY_DELETED = 'deleted';
 
     private function data(): array
     {
         return [
-            self::KEY_TOTAL       => User::withTrashed()->count(),
-            self::KEY_ACTIVE      => User::whereNull('deactivated_at')->whereNull('deleted_at')->count(),
+            self::KEY_TOTAL => User::withTrashed()->count(),
+            self::KEY_ACTIVE => User::whereNull('deactivated_at')->whereNull('deleted_at')->count(),
             self::KEY_DEACTIVATED => User::whereNotNull('deactivated_at')->whereNull('deleted_at')->count(),
-            self::KEY_UNVERIFIED  => User::whereNull('email_verified_at')->whereNull('deleted_at')->count(),
-            self::KEY_DELETED     => User::onlyTrashed()->count(),
+            self::KEY_UNVERIFIED => User::whereNull('email_verified_at')->whereNull('deleted_at')->count(),
+            self::KEY_DELETED => User::onlyTrashed()->count(),
         ];
     }
 

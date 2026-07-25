@@ -24,8 +24,7 @@ class BookingService
     public function __construct(
         private readonly BookingEloquentRepository $repository,
         private readonly PackageService $packageService
-    ) {
-    }
+    ) {}
 
     public function userHasActiveCreditBooking(User $user): bool
     {

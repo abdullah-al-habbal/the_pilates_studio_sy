@@ -1,4 +1,5 @@
 <?php
+
 // filePath: app/Services/StaticPage/StaticPageService.php
 
 declare(strict_types=1);

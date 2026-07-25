@@ -43,7 +43,7 @@ class PackagesTable
 
                 TextColumn::make('price')
                     ->label('Base Price')
-                    ->getStateUsing(fn($record) => $record->getBasePrice())
+                    ->getStateUsing(fn ($record) => $record->getBasePrice())
                     ->money($currencyCode),
 
                 TextColumn::make('bookings_count')

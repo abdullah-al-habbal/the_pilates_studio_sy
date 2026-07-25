@@ -166,7 +166,7 @@ class UserInfolist
                             ->state(fn (User $record) => $record->bookingSessions()->where('attendance_status', 'attended')->count()),
                         TextEntry::make('missed_sessions_count')
                             ->label('Missed')
-                            ->state(fn (User $record) => $record->bookingSessions()->whereIn('attendance_status', ['missed','absent'])->count()),
+                            ->state(fn (User $record) => $record->bookingSessions()->whereIn('attendance_status', ['missed', 'absent'])->count()),
                         TextEntry::make('expenses_count')
                             ->label('Expenses')
                             ->state(fn (User $record) => $record->expenses()->count()),

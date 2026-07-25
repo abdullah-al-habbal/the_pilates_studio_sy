@@ -16,8 +16,7 @@ final readonly class ClientDetailsAction
 
     public function __construct(
         private GetClientDetailsHandler $handler
-    ) {
-    }
+    ) {}
 
     public function __invoke(int $userId): JsonResponse
     {
@@ -29,7 +28,7 @@ final readonly class ClientDetailsAction
                 message: 'Client details retrieved successfully.'
             );
         } catch (\Throwable $e) {
-            Log::error('Operations - ClientDetails failed: ' . $e->getMessage(), [
+            Log::error('Operations - ClientDetails failed: '.$e->getMessage(), [
                 'exception' => $e,
                 'user_id' => $userId,
             ]);

@@ -1,4 +1,5 @@
 <?php
+
 // filePath: app/Enums/BookingStatusEnum.php
 
 declare(strict_types=1);
@@ -76,6 +77,7 @@ enum BookingStatusEnum: string implements HasColor, HasIcon, HasLabel
         foreach (self::cases() as $case) {
             $options[$case->value] = $case->getLabel();
         }
+
         return $options;
     }
 }

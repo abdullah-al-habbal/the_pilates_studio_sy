@@ -21,7 +21,7 @@ final readonly class RejectExpenseAction
 
     public function __invoke(RejectExpenseRequest $request, int $expense): JsonResponse
     {
-        if (!Auth::user()?->isMainAdmin()) {
+        if (! Auth::user()?->isMainAdmin()) {
             return $this->forbidden('Only main admin can reject expenses.');
         }
 
@@ -37,7 +37,8 @@ final readonly class RejectExpenseAction
                 message: 'Expense rejected successfully.'
             );
         } catch (\Throwable $e) {
-            Log::error('Operations - RejectExpense failed: ' . $e->getMessage(), ['exception' => $e]);
+            Log::error('Operations - RejectExpense failed: '.$e->getMessage(), ['exception' => $e]);
+
             return $this->error(message: 'Failed to reject expense.');
         }
     }

@@ -9,18 +9,18 @@ use App\Services\Classes\ClassesService;
 use App\Services\ClassSession\ClassSessionService;
 use App\Services\Instructor\InstructorService;
 use App\Services\Package\PackageService;
-use App\Services\Testimonial\TestimonialService;
 use App\Services\StaticPage\StaticPageService;
-use App\ValueObjects\Landing\LandingSettingsVO;
+use App\Services\Testimonial\TestimonialService;
 use App\ValueObjects\Landing\LandingClassVO;
-use App\ValueObjects\Landing\LandingScheduleDayVO;
-use App\ValueObjects\Landing\LandingSessionVO;
+use App\ValueObjects\Landing\LandingDataVO;
 use App\ValueObjects\Landing\LandingInstructorVO;
 use App\ValueObjects\Landing\LandingPackageVO;
+use App\ValueObjects\Landing\LandingScheduleDayVO;
+use App\ValueObjects\Landing\LandingSessionVO;
+use App\ValueObjects\Landing\LandingSettingsVO;
 use App\ValueObjects\Landing\LandingTestimonialVO;
-use App\ValueObjects\Landing\LandingDataVO;
-use Illuminate\Support\Collection;
 use Carbon\Carbon;
+use Illuminate\Support\Collection;
 
 class LandingDataService
 {
@@ -33,7 +33,7 @@ class LandingDataService
         private readonly TestimonialService $testimonialService,
         private readonly StaticPageService $staticPageService
     ) {}
-    
+
     public function getLandingData(): LandingDataVO
     {
         $hasError = false;
@@ -103,6 +103,7 @@ class LandingDataService
             return LandingSettingsVO::fromAppSettings($this->appSettingService);
         } catch (\Throwable $e) {
             report($e);
+
             return null;
         }
     }
@@ -112,9 +113,10 @@ class LandingDataService
         try {
             return $this->classesService->getActiveClassesForLanding()
                 ->take(9)
-                ->map(fn($c) => LandingClassVO::fromModel($c, $primaryColor));
+                ->map(fn ($c) => LandingClassVO::fromModel($c, $primaryColor));
         } catch (\Throwable $e) {
             report($e);
+
             return null;
         }
     }
@@ -125,7 +127,7 @@ class LandingDataService
             $start = Carbon::today();
             $end = Carbon::today()->addDays(6);
             $sessions = $this->classSessionService->getSessionsForWeek($start->toDateString(), $end->toDateString());
-            $grouped = $sessions->groupBy(fn($s) => $s->date->toDateString());
+            $grouped = $sessions->groupBy(fn ($s) => $s->date->toDateString());
             $days = collect();
             for ($i = 0; $i < 7; $i++) {
                 $date = $start->copy()->addDays($i)->toDateString();
@@ -134,13 +136,15 @@ class LandingDataService
                 $days->push(new LandingScheduleDayVO(
                     date: $date,
                     dayName: $dayName,
-                    sessions: $daySessions->map(fn($s) => LandingSessionVO::fromModel($s)),
+                    sessions: $daySessions->map(fn ($s) => LandingSessionVO::fromModel($s)),
                     count: $daySessions->count(),
                 ));
             }
+
             return $days;
         } catch (\Throwable $e) {
             report($e);
+
             return null;
         }
     }
@@ -150,9 +154,10 @@ class LandingDataService
         try {
             return $this->instructorService->getActiveInstructorsWithProfile()
                 ->take(5)
-                ->map(fn($i) => LandingInstructorVO::fromModel($i));
+                ->map(fn ($i) => LandingInstructorVO::fromModel($i));
         } catch (\Throwable $e) {
             report($e);
+
             return null;
         }
     }
@@ -161,9 +166,11 @@ class LandingDataService
     {
         try {
             $packages = $this->packageService->getTopActivePackages(3);
-            return $packages->map(fn($p) => LandingPackageVO::fromModel($p));
+
+            return $packages->map(fn ($p) => LandingPackageVO::fromModel($p));
         } catch (\Throwable $e) {
             report($e);
+
             return null;
         }
     }
@@ -172,9 +179,11 @@ class LandingDataService
     {
         try {
             $testimonials = $this->testimonialService->getActiveTestimonials();
-            return $testimonials->map(fn($t) => LandingTestimonialVO::fromModel($t));
+
+            return $testimonials->map(fn ($t) => LandingTestimonialVO::fromModel($t));
         } catch (\Throwable $e) {
             report($e);
+
             return null;
         }
     }
@@ -185,6 +194,7 @@ class LandingDataService
             return $this->staticPageService->getAllForFooter();
         } catch (\Throwable $e) {
             report($e);
+
             return null;
         }
     }

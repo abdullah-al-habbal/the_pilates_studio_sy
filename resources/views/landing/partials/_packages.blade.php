@@ -45,7 +45,7 @@
                             @endforeach
                         </ul>
 
-                        <a href="#download" class="flex items-center justify-center gap-2 w-full py-3.5 rounded-xl {{ $index === 1 ? 'bg-primary-600 hover:bg-primary-700 text-white shadow-lg shadow-primary-500/25' : 'bg-slate-100 dark:bg-dark-700 text-slate-700 dark:text-slate-200 hover:bg-primary-50 dark:hover:bg-primary-900/20 hover:text-primary-600 dark:hover:text-primary-400' }} font-semibold transition-all">
+                        <a href="{{ route('landing') }}#download" class="flex items-center justify-center gap-2 w-full py-3.5 rounded-xl {{ $index === 1 ? 'bg-primary-600 hover:bg-primary-700 text-white shadow-lg shadow-primary-500/25' : 'bg-slate-100 dark:bg-dark-700 text-slate-700 dark:text-slate-200 hover:bg-primary-50 dark:hover:bg-primary-900/20 hover:text-primary-600 dark:hover:text-primary-400' }} font-semibold transition-all">
                             <i data-lucide="download" class="w-4 h-4"></i>
                             {{ __('landing.get_in_app') }}
                         </a>

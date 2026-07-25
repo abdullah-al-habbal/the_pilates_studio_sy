@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Repositories\Eloquent\Refund;
@@ -15,8 +16,8 @@ class RefundEloquentRepository
     ): Collection {
         return Refund::query()
             ->selectRaw('currency_id, SUM(amount) as total')
-            ->when($start, fn($q) => $q->where('refunded_at', '>=', $start))
-            ->when($end, fn($q) => $q->where('refunded_at', '<=', $end))
+            ->when($start, fn ($q) => $q->where('refunded_at', '>=', $start))
+            ->when($end, fn ($q) => $q->where('refunded_at', '<=', $end))
             ->groupBy('currency_id')
             ->get()
             ->keyBy('currency_id');

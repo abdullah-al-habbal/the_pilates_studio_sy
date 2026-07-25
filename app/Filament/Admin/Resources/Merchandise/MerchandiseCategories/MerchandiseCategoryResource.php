@@ -20,6 +20,7 @@ use LaraZeus\SpatieTranslatable\Resources\Concerns\Translatable;
 class MerchandiseCategoryResource extends Resource
 {
     use Translatable;
+
     protected static ?string $model = CenterMerchandiseCategory::class;
 
     protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-tag';
@@ -53,7 +54,7 @@ class MerchandiseCategoryResource extends Resource
 
     public static function getNavigationBadge(): ?string
     {
-        return  (string) static::getModel()::query()->count();
+        return (string) static::getModel()::query()->count();
     }
 
     public static function getNavigationBadgeColor(): string|array|null
@@ -79,7 +80,7 @@ class MerchandiseCategoryResource extends Resource
 
                     TextEntry::make('merchandises_count')
                         ->label(__('dashboard.resources.merchandise_categories.fields.merchandises_count'))
-                        ->state(fn($record) => $record->merchandises()->count())
+                        ->state(fn ($record) => $record->merchandises()->count())
                         ->badge()
                         ->color('primary'),
 

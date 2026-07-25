@@ -20,7 +20,7 @@ class ClassCategorySeeder extends Seeder
             ClassCategory::firstOrCreate(
                 ['slug' => Str::slug($cat['en'])],
                 [
-                    'name'  => ['en' => $cat['en'], 'ar' => $cat['ar']],
+                    'name' => ['en' => $cat['en'], 'ar' => $cat['ar']],
                     'color' => $cat['color'],
                 ]
             );

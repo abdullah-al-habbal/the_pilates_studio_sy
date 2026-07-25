@@ -1,4 +1,5 @@
 <?php
+
 // filePath: routes/api/v1/public/mobile_app_version.php
 
 declare(strict_types=1);

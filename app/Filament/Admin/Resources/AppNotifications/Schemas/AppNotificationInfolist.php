@@ -4,8 +4,8 @@ namespace App\Filament\Admin\Resources\AppNotifications\Schemas;
 
 use Filament\Infolists\Components\IconEntry;
 use Filament\Infolists\Components\ImageEntry;
-use Filament\Schemas\Components\Section;
 use Filament\Infolists\Components\TextEntry;
+use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Filament\Support\Enums\FontWeight;
 
@@ -21,13 +21,13 @@ class AppNotificationInfolist
                     ->schema([
                         TextEntry::make('type')
                             ->badge()
-                            ->color(fn(string $state): string => match ($state) {
+                            ->color(fn (string $state): string => match ($state) {
                                 'image' => 'success',
                                 'alert' => 'danger',
                                 'promo' => 'warning',
                                 default => 'gray',
                             })
-                            ->icon(fn(string $state): string => match ($state) {
+                            ->icon(fn (string $state): string => match ($state) {
                                 'image' => 'heroicon-o-photo',
                                 'alert' => 'heroicon-o-exclamation-triangle',
                                 'promo' => 'heroicon-o-megaphone',
@@ -40,10 +40,10 @@ class AppNotificationInfolist
                             ->falseIcon('heroicon-o-clock')
                             ->trueColor('success')
                             ->falseColor('warning')
-                            ->state(fn($record): bool => !is_null($record->read_at)),
+                            ->state(fn ($record): bool => ! is_null($record->read_at)),
                         TextEntry::make('title')
                             ->weight(FontWeight::Bold)
-                            
+
                             ->columnSpanFull()
                             ->formatStateUsing(fn ($state, $record) => $record->getTranslation('title', app()->getLocale())),
                         TextEntry::make('message')
@@ -53,7 +53,7 @@ class AppNotificationInfolist
                             ->formatStateUsing(fn ($state, $record) => $record->getTranslation('message', app()->getLocale())),
                         ImageEntry::make('image')
                             ->label('Attached Image')
-                            ->visible(fn($record): bool => $record->type === 'image' && filled($record->image))
+                            ->visible(fn ($record): bool => $record->type === 'image' && filled($record->image))
                             ->height(200)
                             ->extraImgAttributes(['class' => 'rounded-lg object-cover'])
                             ->columnSpanFull(),
@@ -74,7 +74,7 @@ class AppNotificationInfolist
                             ->dateTime('M d, Y H:i')
                             ->placeholder('Not read yet')
                             ->icon('heroicon-o-check-circle')
-                            ->color(fn($state) => $state ? 'success' : 'gray'),
+                            ->color(fn ($state) => $state ? 'success' : 'gray'),
                         TextEntry::make('created_at')
                             ->label('Sent At')
                             ->dateTime('M d, Y H:i')

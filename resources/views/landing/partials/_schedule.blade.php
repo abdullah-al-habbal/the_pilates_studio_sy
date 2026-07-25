@@ -119,7 +119,7 @@
 
         <div class="mt-8 text-center reveal">
             <p class="text-slate-500 dark:text-slate-400 mb-4">{{ __('landing.see_full_schedule') }}</p>
-            <a href="#download" class="inline-flex items-center gap-2 text-primary-600 dark:text-primary-400 font-semibold hover:gap-3 transition-all">
+            <a href="{{ route('landing') }}#download" class="inline-flex items-center gap-2 text-primary-600 dark:text-primary-400 font-semibold hover:gap-3 transition-all">
                 <i data-lucide="smartphone" class="w-5 h-5"></i>
                 {{ __('landing.see_full_schedule') }}
                 <i data-lucide="arrow-right" class="w-5 h-5"></i>

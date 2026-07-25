@@ -15,8 +15,7 @@ final readonly class ProcessBookingRefundHandler
 {
     public function __construct(
         private RefundValidatorService $refundValidator
-    ) {
-    }
+    ) {}
 
     public function handle(int $bookingId, ?int $amount): Refund
     {

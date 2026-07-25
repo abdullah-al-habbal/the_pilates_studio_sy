@@ -18,8 +18,8 @@ class ClassCategoryFactory extends Factory
         ]);
 
         return [
-            'name'  => ['en' => $name, 'ar' => $name],
-            'slug'  => Str::slug($name),
+            'name' => ['en' => $name, 'ar' => $name],
+            'slug' => Str::slug($name),
             'color' => $this->faker->hexColor(),
         ];
     }

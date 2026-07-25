@@ -84,7 +84,7 @@ return new class extends Migration
             $table->unsignedBigInteger('active_user_id')
                 ->nullable()
                 ->storedAs(
-                    "CASE WHEN status = '" . BookingStatusEnum::ACTIVE->value .
+                    "CASE WHEN status = '".BookingStatusEnum::ACTIVE->value.
                         "' AND remaining_credits > 0 THEN user_id ELSE NULL END"
                 )
                 ->comment('Used to enforce unique active booking per user');

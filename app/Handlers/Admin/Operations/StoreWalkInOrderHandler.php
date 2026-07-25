@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Handlers\Admin\Operations;
@@ -13,8 +14,7 @@ final readonly class StoreWalkInOrderHandler
     public function __construct(
         private BookingSessionService $bookingSessionService,
         private MerchandiseOrderService $orderService,
-    ) {
-    }
+    ) {}
 
     public function handle(
         int $merchandiseId,

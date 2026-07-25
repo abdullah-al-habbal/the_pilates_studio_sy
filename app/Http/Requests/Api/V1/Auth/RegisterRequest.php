@@ -11,7 +11,6 @@ use Illuminate\Validation\Rule;
 
 class RegisterRequest extends BaseApiFormRequest
 {
-
     public function rules(): array
     {
         return [

@@ -11,8 +11,7 @@ final readonly class SwitchLocaleAction
 {
     public function __construct(
         private LanguageService $languageService
-    ) {
-    }
+    ) {}
 
     public function __invoke(string $code): RedirectResponse
     {

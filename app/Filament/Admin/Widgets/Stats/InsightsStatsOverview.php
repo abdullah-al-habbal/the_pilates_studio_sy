@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\DB;
 class InsightsStatsOverview extends BaseWidget
 {
     protected ?string $pollingInterval = null;
+
     protected static ?int $sort = 5;
 
     protected function getHeading(): ?string
@@ -35,13 +36,13 @@ class InsightsStatsOverview extends BaseWidget
 
     private function optInData(): array
     {
-        $total   = UserSetting::count();
+        $total = UserSetting::count();
         $enabled = UserSetting::where('allow_notifications', true)->count();
 
         return [
-            'total'   => $total,
+            'total' => $total,
             'enabled' => $enabled,
-            'rate'    => $total > 0 ? round(($enabled / $total) * 100) : 0,
+            'rate' => $total > 0 ? round(($enabled / $total) * 100) : 0,
         ];
     }
 
@@ -50,7 +51,7 @@ class InsightsStatsOverview extends BaseWidget
         $package = Package::withCount('bookings')->orderByDesc('bookings_count')->first();
 
         return [
-            'name'  => $package?->getTranslation('name', app()->getLocale()) ?? __('widgets.insights.na'),
+            'name' => $package?->getTranslation('name', app()->getLocale()) ?? __('widgets.insights.na'),
             'count' => $package?->bookings_count ?? 0,
         ];
     }
@@ -75,14 +76,14 @@ class InsightsStatsOverview extends BaseWidget
             ->first();
 
         $avgDuration = ClassSession::select('start_time', 'end_time')->get()->avg(
-            fn($s) => Carbon::parse($s->start_time)->diffInMinutes(Carbon::parse($s->end_time))
+            fn ($s) => Carbon::parse($s->start_time)->diffInMinutes(Carbon::parse($s->end_time))
         );
 
         return [
-            'avg_spots'        => $avgSpots,
-            'peak_time'        => $peak ? Carbon::parse($peak->start_time)->format('H:i') : null,
-            'peak_count'       => $peak?->total ?? 0,
-            'avg_duration'     => round($avgDuration ?? 0),
+            'avg_spots' => $avgSpots,
+            'peak_time' => $peak ? Carbon::parse($peak->start_time)->format('H:i') : null,
+            'peak_count' => $peak?->total ?? 0,
+            'avg_duration' => round($avgDuration ?? 0),
         ];
     }
 
@@ -92,7 +93,7 @@ class InsightsStatsOverview extends BaseWidget
 
         return Stat::make(
             __('widgets.insights.notifications_optin'),
-            $d['rate'] . '%'
+            $d['rate'].'%'
         )
             ->description(__('widgets.insights.notifications_optin_desc', ['enabled' => $d['enabled'], 'total' => $d['total']]))
             ->descriptionIcon('heroicon-m-bell')
@@ -101,8 +102,8 @@ class InsightsStatsOverview extends BaseWidget
 
     private function mostUsedPackageStat(): Stat
     {
-        $d     = $this->topPackageData();
-        $label = $d['name'] . ' (' . $d['count'] . '×)';
+        $d = $this->topPackageData();
+        $label = $d['name'].' ('.$d['count'].'×)';
 
         return Stat::make(__('widgets.insights.most_booked_package'), $label)
             ->description(__('widgets.insights.most_booked_package_desc'))
@@ -112,8 +113,8 @@ class InsightsStatsOverview extends BaseWidget
 
     private function mostUsedRecurrenceStat(): Stat
     {
-        $d     = $this->topRecurrenceData();
-        $label = $d['label'] . ' (' . $d['count'] . ')';
+        $d = $this->topRecurrenceData();
+        $label = $d['label'].' ('.$d['count'].')';
 
         return Stat::make(__('widgets.insights.most_used_recurrence'), $label)
             ->description(__('widgets.insights.most_used_recurrence_desc'))
@@ -134,7 +135,7 @@ class InsightsStatsOverview extends BaseWidget
         $d = $this->sessionMetricsData();
 
         $label = $d['peak_time']
-            ? $d['peak_time'] . ' (' . $d['peak_count'] . ')'
+            ? $d['peak_time'].' ('.$d['peak_count'].')'
             : __('widgets.insights.na');
 
         return Stat::make(__('widgets.insights.peak_time'), $label)

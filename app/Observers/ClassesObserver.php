@@ -51,7 +51,7 @@ final class ClassesObserver
             fn (string $field) => $class->wasChanged($field)
         );
 
-        if (!$didChangeSchedule) {
+        if (! $didChangeSchedule) {
             return;
         }
 

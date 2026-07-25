@@ -23,8 +23,8 @@ class ClassImageSeeder extends Seeder
             $primaryUrl = $this->copySourceImage($sourcePath, 'class-images', (string) $class->id, 'primary');
 
             ClassImage::create([
-                'class_id'   => $class->id,
-                'url'        => $primaryUrl,
+                'class_id' => $class->id,
+                'url' => $primaryUrl,
                 'is_primary' => true,
             ]);
 
@@ -33,8 +33,8 @@ class ClassImageSeeder extends Seeder
                 $extraUrl = $this->copySourceImage($sourcePath, 'class-images', (string) $class->id, "gallery-{$i}");
 
                 ClassImage::create([
-                    'class_id'   => $class->id,
-                    'url'        => $extraUrl,
+                    'class_id' => $class->id,
+                    'url' => $extraUrl,
                     'is_primary' => false,
                 ]);
             }

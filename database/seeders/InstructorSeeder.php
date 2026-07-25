@@ -19,7 +19,7 @@ class InstructorSeeder extends Seeder
 
         foreach ($instructors as $data) {
             $slug = Str::slug($data['name']['en']);
-            
+
             $data['image'] = $this->copySourceImage($sourcePath, 'instructors', $slug, 'profile');
 
             Instructor::firstOrCreate(

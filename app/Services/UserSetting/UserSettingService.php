@@ -1,4 +1,5 @@
 <?php
+
 // filePath: app/Services/UserSetting/UserSettingService.php
 
 declare(strict_types=1);
@@ -29,6 +30,7 @@ class UserSettingService
     public function updateFcmToken(int $userId, string $token): UserSetting
     {
         $settings = $this->repository->firstOrCreateForUser($userId);
+
         return $this->repository->updateAndLoad($settings, ['fcm_token' => $token]);
     }
 }

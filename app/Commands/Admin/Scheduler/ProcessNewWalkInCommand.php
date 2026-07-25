@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Commands\Admin\Scheduler;
@@ -11,6 +12,5 @@ final readonly class ProcessNewWalkInCommand
         public string $phoneNumber,
         public ?string $email,
         public string $password,
-    ) {
-    }
+    ) {}
 }

@@ -16,11 +16,12 @@ class AppSettingService
     public function get(string $key, mixed $default = null): mixed
     {
         $setting = $this->repository->getByKey($key);
-        if (!$setting) {
+        if (! $setting) {
             return $default;
         }
         $value = $setting->value;
         $type = $setting->type ?? 'string';
+
         return match ($type) {
             'boolean' => filter_var($value, FILTER_VALIDATE_BOOLEAN),
             'number', 'integer' => (int) $value,
@@ -44,6 +45,7 @@ class AppSettingService
                 return $decoded[$locale] ?? $decoded['en'] ?? null;
             }
         }
+
         return is_string($value) ? $value : null;
     }
 

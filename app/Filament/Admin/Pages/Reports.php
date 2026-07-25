@@ -4,11 +4,13 @@ declare(strict_types=1);
 
 namespace App\Filament\Admin\Pages;
 
+use App\Data\Reports\CurrencySummaryData;
 use App\Models\Currency;
 use App\Repositories\Eloquent\Booking\BookingEloquentRepository;
 use App\Repositories\Eloquent\Classes\ClassesEloquentRepository;
 use App\Repositories\Eloquent\MerchandiseOrder\MerchandiseOrderEloquentRepository;
 use App\Services\Currency\CurrencyService;
+use App\Services\Finance\DailyBalanceService;
 use BackedEnum;
 use Filament\Forms\Components\Checkbox;
 use Filament\Forms\Components\Toggle;
@@ -22,8 +24,6 @@ use Filament\Schemas\Schema;
 use Filament\Support\Enums\FontWeight;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
-use App\Data\Reports\CurrencySummaryData;
-use App\Services\Finance\DailyBalanceService;
 use Illuminate\Support\Facades\Auth;
 
 class Reports extends Page implements HasInfolists
@@ -31,14 +31,21 @@ class Reports extends Page implements HasInfolists
     use InteractsWithInfolists;
 
     protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-presentation-chart-bar';
+
     protected string $view = 'filament.admin.pages.reports';
+
     protected static ?int $navigationSort = 2;
 
     public string $period = 'daily';
+
     public string $dailyDate = '';
+
     public string $month = '';
+
     public string $year = '';
+
     public string $customStart = '';
+
     public string $customEnd = '';
 
     public bool $convertToBase = false;
@@ -46,7 +53,9 @@ class Reports extends Page implements HasInfolists
     public array $selectedCurrencies = [];
 
     private ?array $_stats = null;
+
     private ?Collection $_classes = null;
+
     private ?Collection $_merch = null;
 
     public static function canAccess(): bool
@@ -90,14 +99,14 @@ class Reports extends Page implements HasInfolists
         $summary = $service->getSummary(now()->toDateString(), [$currency->code]);
         $item = $summary->firstWhere('currencyCode', $currency->code);
 
-        if (!$item) {
+        if (! $item) {
             return '—';
         }
         $amount = $item->baseConversionApplied && $item->totalRevenueInBase !== null
             ? $item->totalRevenueInBase
             : $item->totalRevenue;
 
-        return number_format($amount, $currency->decimal_places) . ' ' . $currency->symbol;
+        return number_format($amount, $currency->decimal_places).' '.$currency->symbol;
     }
 
     public static function getNavigationBadgeColor(): string|array|null
@@ -109,7 +118,7 @@ class Reports extends Page implements HasInfolists
     {
         return match ($this->period) {
             'daily' => [Carbon::parse($this->dailyDate)->startOfDay(), Carbon::parse($this->dailyDate)->endOfDay()],
-            'monthly' => [Carbon::parse($this->month . '-01')->startOfMonth(), Carbon::parse($this->month . '-01')->endOfMonth()],
+            'monthly' => [Carbon::parse($this->month.'-01')->startOfMonth(), Carbon::parse($this->month.'-01')->endOfMonth()],
             'yearly' => [Carbon::create((int) $this->year)->startOfYear(), Carbon::create((int) $this->year)->endOfYear()],
             'custom' => [
                 $this->customStart ? Carbon::parse($this->customStart)->startOfDay() : null,
@@ -183,7 +192,7 @@ class Reports extends Page implements HasInfolists
         string $symbol,
         int $decimals,
     ): string {
-        return number_format($amount, $decimals) . ' ' . $symbol;
+        return number_format($amount, $decimals).' '.$symbol;
     }
 
     private function buildCurrencySections(
@@ -192,13 +201,13 @@ class Reports extends Page implements HasInfolists
         bool $hasBaseConversion,
     ): array {
         return $summary->flatMap(function (CurrencySummaryData $currency) use ($baseCurrency, $hasBaseConversion): array {
-            $fmt = fn(int $v): string => $this->formatCurrency(
+            $fmt = fn (int $v): string => $this->formatCurrency(
                 amount: $v,
                 symbol: $currency->currencySymbol,
                 decimals: $currency->currencyDecimals,
             );
 
-            $fmtBase = fn(?int $v): string => $v !== null
+            $fmtBase = fn (?int $v): string => $v !== null
                 ? $this->formatCurrency(
                     amount: $v,
                     symbol: $baseCurrency->symbol,
@@ -221,27 +230,27 @@ class Reports extends Page implements HasInfolists
                                 ->iconColor('primary')
                                 ->weight(FontWeight::Bold),
                             TextEntry::make("packages_{$currency->currencyId}")
-                                ->label("Package Revenue")
+                                ->label('Package Revenue')
                                 ->state($fmt($currency->packageRevenue))
                                 ->icon('heroicon-o-ticket')
                                 ->iconColor('success'),
                             TextEntry::make("merch_{$currency->currencyId}")
-                                ->label("Merchandise Revenue")
+                                ->label('Merchandise Revenue')
                                 ->state($fmt($currency->merchandiseRevenue))
                                 ->icon('heroicon-o-shopping-bag')
                                 ->iconColor('warning'),
                             TextEntry::make("expenses_{$currency->currencyId}")
-                                ->label("Expenses")
+                                ->label('Expenses')
                                 ->state($fmt($currency->totalExpenses))
                                 ->icon('heroicon-o-arrow-trending-down')
                                 ->iconColor('rose'),
                             TextEntry::make("refunds_{$currency->currencyId}")
-                                ->label("Refunds")
+                                ->label('Refunds')
                                 ->state($fmt($currency->totalRefunds))
                                 ->icon('heroicon-o-receipt-refund')
                                 ->iconColor('amber'),
                             TextEntry::make("balance_{$currency->currencyId}")
-                                ->label("True Balance")
+                                ->label('True Balance')
                                 ->state($fmt($currency->trueBalance))
                                 ->icon('heroicon-o-calculator')
                                 ->iconColor($currency->trueBalance >= 0 ? 'emerald' : 'rose')
@@ -254,7 +263,7 @@ class Reports extends Page implements HasInfolists
                     ->icon('heroicon-o-arrow-path')
                     ->iconColor('gray')
                     ->collapsed()
-                    ->description("Using historical exchange rate at transaction time")
+                    ->description('Using historical exchange rate at transaction time')
                     ->schema([
                         Grid::make(['default' => 1, 'sm' => 2])
                             ->schema([
@@ -284,14 +293,13 @@ class Reports extends Page implements HasInfolists
                 Grid::make(['default' => 2, 'sm' => 3, 'md' => 4])
                     ->schema(
                         Currency::where('is_active', true)->get()->map(
-                            fn(Currency $curr) =>
-                            Checkbox::make("currency_{$curr->id}")
+                            fn (Currency $curr) => Checkbox::make("currency_{$curr->id}")
                                 ->label("{$curr->code} {$curr->symbol}")
                                 ->default(in_array($curr->code, $this->selectedCurrencies))
                                 ->live()
-                                ->afterStateUpdated(fn($state) => $this->selectedCurrencies = array_filter(
+                                ->afterStateUpdated(fn ($state) => $this->selectedCurrencies = array_filter(
                                     $this->selectedCurrencies,
-                                    fn($c) => $c !== $curr->code
+                                    fn ($c) => $c !== $curr->code
                                 ) + ($state ? [$curr->code] : []))
                         )->toArray()
                     ),
@@ -305,9 +313,9 @@ class Reports extends Page implements HasInfolists
             ->schema([
                 Toggle::make('convertToBase')
                     ->label("Show amounts converted to {$baseCurrency->code}")
-                    ->helperText("Uses historical exchange rates from transaction snapshots")
+                    ->helperText('Uses historical exchange rates from transaction snapshots')
                     ->live()
-                    ->afterStateUpdated(fn($state) => $this->convertToBase = $state),
+                    ->afterStateUpdated(fn ($state) => $this->convertToBase = $state),
             ]);
     }
 
@@ -355,17 +363,18 @@ class Reports extends Page implements HasInfolists
                             $pct = $stats['total_bookings'] > 0
                                 ? min(100, round(($class->total_attendance / $stats['total_bookings']) * 100))
                                 : 0;
-                            return TextEntry::make('class_' . $i)
+
+                            return TextEntry::make('class_'.$i)
                                 ->label($title)
                                 ->state(
                                     __('dashboard.pages.reports.popular_classes.attendees', ['count' => $class->total_attendance])
-                                    . '   ·   '
-                                    . __('dashboard.pages.reports.popular_classes.sessions', ['count' => $class->sessions_count])
-                                    . '   ·   '
-                                    . __('dashboard.pages.reports.popular_classes.avg', ['count' => $class->avg_attendance])
+                                    .'   ·   '
+                                    .__('dashboard.pages.reports.popular_classes.sessions', ['count' => $class->sessions_count])
+                                    .'   ·   '
+                                    .__('dashboard.pages.reports.popular_classes.avg', ['count' => $class->avg_attendance])
                                 )
                                 ->badge()->color('primary')
-                                ->tooltip($pct . '% of total bookings');
+                                ->tooltip($pct.'% of total bookings');
                         })->toArray()
                     ),
 
@@ -382,14 +391,14 @@ class Reports extends Page implements HasInfolists
 
                             $itemCurrency = Currency::findOrFail($item->currency_id);
 
-                            return TextEntry::make('merch_' . $i)
+                            return TextEntry::make('merch_'.$i)
                                 ->label($name)
                                 ->state(
                                     number_format($item->revenue, $itemCurrency->decimal_places)
-                                    . ' ' . $itemCurrency->symbol
-                                    . " ({$itemCurrency->code})"
-                                    . ' · '
-                                    . __('dashboard.pages.reports.top_merchandise.sold', ['count' => $item->quantity])
+                                    .' '.$itemCurrency->symbol
+                                    ." ({$itemCurrency->code})"
+                                    .' · '
+                                    .__('dashboard.pages.reports.top_merchandise.sold', ['count' => $item->quantity])
                                 )
                                 ->badge()->color('success')->icon('heroicon-o-cube');
                         })->toArray()
@@ -403,7 +412,7 @@ class Reports extends Page implements HasInfolists
         $baseCurrency = app(CurrencyService::class)->getBaseCurrency();
 
         $hasBaseConversion = $summary->contains(
-            fn(CurrencySummaryData $item): bool => $item->baseConversionApplied
+            fn (CurrencySummaryData $item): bool => $item->baseConversionApplied
         );
 
         return $schema->components(array_merge(
@@ -437,8 +446,9 @@ class Reports extends Page implements HasInfolists
 
     private function stats(): array
     {
-        if ($this->_stats !== null)
+        if ($this->_stats !== null) {
             return $this->_stats;
+        }
 
         [$start, $end] = $this->getPeriodDates();
 
@@ -450,17 +460,21 @@ class Reports extends Page implements HasInfolists
 
     private function popularClasses(): Collection
     {
-        if ($this->_classes !== null)
+        if ($this->_classes !== null) {
             return $this->_classes;
+        }
         [$start, $end] = $this->getPeriodDates();
+
         return $this->_classes = app(ClassesEloquentRepository::class)->getPopularClassesSummary(5, $start, $end);
     }
 
     private function merchandiseSales(): Collection
     {
-        if ($this->_merch !== null)
+        if ($this->_merch !== null) {
             return $this->_merch;
+        }
         [$start, $end] = $this->getPeriodDates();
+
         return $this->_merch = app(MerchandiseOrderEloquentRepository::class)->getTopSellingSummary(5, $start, $end);
     }
 }

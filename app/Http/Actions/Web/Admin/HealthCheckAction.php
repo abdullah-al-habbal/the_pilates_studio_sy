@@ -39,7 +39,7 @@ final readonly class HealthCheckAction
             ]);
 
             return $this->error(
-                message: 'Health check failed: ' . $e->getMessage(),
+                message: 'Health check failed: '.$e->getMessage(),
                 status: 500
             );
         }

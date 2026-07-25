@@ -10,12 +10,11 @@ use App\Http\Requests\Api\BaseApiFormRequest;
 
 class VerifyOtpRequest extends BaseApiFormRequest
 {
-
     public function rules(): array
     {
         return [
             'email' => ['required', 'email', 'exists:users,email'],
-            'otp'   => ['required', 'string', 'size:4'],
+            'otp' => ['required', 'string', 'size:4'],
         ];
     }
 }

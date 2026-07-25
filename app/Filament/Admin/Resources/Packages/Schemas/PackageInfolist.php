@@ -4,9 +4,9 @@ namespace App\Filament\Admin\Resources\Packages\Schemas;
 
 use App\Models\Package;
 use App\Services\Currency\CurrencyService;
+use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
-use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Schema;
 use Filament\Support\Enums\FontWeight;
 
@@ -24,11 +24,10 @@ class PackageInfolist
                         ->schema([
                             TextEntry::make('name')
                                 ->weight(FontWeight::Bold)
-                                ->formatStateUsing(fn($state, $record) =>
-                                    $record->getTranslation('name', $locale)),
+                                ->formatStateUsing(fn ($state, $record) => $record->getTranslation('name', $locale)),
                             TextEntry::make('type')
                                 ->badge()
-                                ->color(fn($state): string => match ($state?->value) {
+                                ->color(fn ($state): string => match ($state?->value) {
                                     'standard' => 'success',
                                     'by_system' => 'info',
                                     'for_freeze_client' => 'warning',
@@ -38,8 +37,8 @@ class PackageInfolist
                             TextEntry::make('is_active')
                                 ->label('Active')
                                 ->badge()
-                                ->color(fn(bool $state): string => $state ? 'success' : 'danger')
-                                ->icon(fn(bool $state): string => $state ? 'heroicon-o-check-circle' : 'heroicon-o-x-circle'),
+                                ->color(fn (bool $state): string => $state ? 'success' : 'danger')
+                                ->icon(fn (bool $state): string => $state ? 'heroicon-o-check-circle' : 'heroicon-o-x-circle'),
                         ]),
                     Section::make('Credits')
                         ->icon('heroicon-o-calculator')
@@ -52,9 +51,9 @@ class PackageInfolist
                                 ->icon('heroicon-o-numbered-list'),
                             TextEntry::make('validity_days')
                                 ->label('Validity Period')
-                                ->state(fn($record): string => $record->validity_days ? "{$record->validity_days} days" : 'Unlimited')
+                                ->state(fn ($record): string => $record->validity_days ? "{$record->validity_days} days" : 'Unlimited')
                                 ->icon('heroicon-o-clock')
-                                ->color(fn($state, $record): string => $record->validity_days ? 'warning' : 'success'),
+                                ->color(fn ($state, $record): string => $record->validity_days ? 'warning' : 'success'),
                         ]),
                 ]),
                 Section::make('Pricing')
@@ -63,13 +62,13 @@ class PackageInfolist
                     ->schema([
                         TextEntry::make('base_price')
                             ->label('Base Price')
-                            ->state(fn($record): ?int => $record->getBasePrice())
+                            ->state(fn ($record): ?int => $record->getBasePrice())
                             ->money(app(CurrencyService::class)->getBaseCurrency()->code)
                             ->weight(FontWeight::Bold)
                             ->color('success'),
                         TextEntry::make('total_bookings')
                             ->label('Total Bookings')
-                            ->state(fn($record): int => $record->bookings()->count())
+                            ->state(fn ($record): int => $record->bookings()->count())
                             ->badge()
                             ->color('info')
                             ->icon('heroicon-o-shopping-cart'),
@@ -101,8 +100,8 @@ class PackageInfolist
                             ->label('Deleted')
                             ->dateTime('M d, Y H:i')
                             ->placeholder('Not deleted')
-                            ->color(fn($state) => $state ? 'danger' : 'success')
-                            ->visible(fn(Package $record): bool => $record->trashed()),
+                            ->color(fn ($state) => $state ? 'danger' : 'success')
+                            ->visible(fn (Package $record): bool => $record->trashed()),
                     ]),
             ]);
     }

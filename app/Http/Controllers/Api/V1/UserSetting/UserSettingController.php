@@ -1,4 +1,5 @@
 <?php
+
 // filePath: app/Http/Controllers/Api/V1/UserSetting/UserSettingController.php
 
 declare(strict_types=1);
@@ -82,7 +83,7 @@ class UserSettingController extends Controller
 
             return $this->success(data: ['token' => $settings->fcm_token], message: 'FCM token updated.');
         } catch (\Exception $e) {
-            return $this->error(ErrorCodeEnum::BAD_REQUEST, 'Failed to update FCM token: ' . $e->getMessage());
+            return $this->error(ErrorCodeEnum::BAD_REQUEST, 'Failed to update FCM token: '.$e->getMessage());
         }
     }
 }

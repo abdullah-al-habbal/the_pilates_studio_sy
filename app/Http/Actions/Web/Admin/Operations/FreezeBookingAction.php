@@ -15,8 +15,7 @@ final readonly class FreezeBookingAction
 
     public function __construct(
         private FreezeBookingHandler $handler
-    ) {
-    }
+    ) {}
 
     public function __invoke(int $bookingId): JsonResponse
     {
@@ -27,10 +26,11 @@ final readonly class FreezeBookingAction
                 message: 'Booking frozen successfully.'
             );
         } catch (\Throwable $e) {
-            Log::error('Operations - FreezeBooking failed: ' . $e->getMessage(), [
+            Log::error('Operations - FreezeBooking failed: '.$e->getMessage(), [
                 'exception' => $e,
                 'booking_id' => $bookingId,
             ]);
+
             return $this->unprocessable($e->getMessage());
         }
     }

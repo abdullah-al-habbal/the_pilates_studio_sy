@@ -1,9 +1,10 @@
 <?php
+
 // routes/web/operations/clients.php
 declare(strict_types=1);
 
-use App\Http\Actions\Web\Admin\Operations\GetClientsAction;
 use App\Http\Actions\Web\Admin\Client\ClientDetailsAction;
+use App\Http\Actions\Web\Admin\Operations\GetClientsAction;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('clients')->name('clients.')->group(function (): void {

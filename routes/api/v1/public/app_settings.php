@@ -1,4 +1,5 @@
 <?php
+
 // filePath: routes/api/v1/public/app_settings.php
 
 declare(strict_types=1);

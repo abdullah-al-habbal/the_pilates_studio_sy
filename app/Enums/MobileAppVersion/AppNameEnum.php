@@ -1,4 +1,5 @@
 <?php
+
 // filePath: app/Enums/MobileAppVersion/AppNameEnum.php
 
 declare(strict_types=1);

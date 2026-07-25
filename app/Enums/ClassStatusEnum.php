@@ -8,13 +8,13 @@ use Filament\Support\Contracts\HasLabel;
 
 enum ClassStatusEnum: string implements HasColor, HasIcon, HasLabel
 {
-    case ACTIVE   = 'active';
+    case ACTIVE = 'active';
     case INACTIVE = 'inactive';
 
     public function getLabel(): ?string
     {
         return match ($this) {
-            self::ACTIVE   => __('dashboard.resources.classes.statuses.active'),
+            self::ACTIVE => __('dashboard.resources.classes.statuses.active'),
             self::INACTIVE => __('dashboard.resources.classes.statuses.inactive'),
         };
     }
@@ -22,7 +22,7 @@ enum ClassStatusEnum: string implements HasColor, HasIcon, HasLabel
     public function getColor(): string|array|null
     {
         return match ($this) {
-            self::ACTIVE   => 'success',
+            self::ACTIVE => 'success',
             self::INACTIVE => 'warning',
         };
     }
@@ -30,7 +30,7 @@ enum ClassStatusEnum: string implements HasColor, HasIcon, HasLabel
     public function getIcon(): ?string
     {
         return match ($this) {
-            self::ACTIVE   => 'heroicon-o-check-circle',
+            self::ACTIVE => 'heroicon-o-check-circle',
             self::INACTIVE => 'heroicon-o-pause-circle',
         };
     }

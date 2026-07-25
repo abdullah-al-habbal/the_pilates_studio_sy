@@ -1,5 +1,7 @@
 <?php
+
 declare(strict_types=1);
+
 namespace App\Enums;
 
 use Filament\Support\Contracts\HasColor;
@@ -47,7 +49,7 @@ enum BookingSessionStatusEnum: string implements HasColor, HasIcon, HasLabel
     public static function options(): array
     {
         return collect(self::cases())
-            ->mapWithKeys(fn(self $case) => [$case->value => $case->getLabel()])
+            ->mapWithKeys(fn (self $case) => [$case->value => $case->getLabel()])
             ->all();
     }
 }

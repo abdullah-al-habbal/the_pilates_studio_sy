@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Models;
@@ -58,12 +59,12 @@ class Refund extends Model
 
     public function isBookingRefund(): bool
     {
-        return $this->refundable_type === (new Booking())->getTable();
+        return $this->refundable_type === (new Booking)->getTable();
     }
 
     public function isStoreRefund(): bool
     {
-        return $this->refundable_type === (new MerchandiseOrder())->getTable();
+        return $this->refundable_type === (new MerchandiseOrder)->getTable();
     }
 
     public function getRefundableTitleAttribute(): string

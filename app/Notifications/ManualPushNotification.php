@@ -31,8 +31,8 @@ class ManualPushNotification extends Notification implements ShouldQueue
     {
         return [
             'title' => $this->title,
-            'body'  => $this->body,
-            'data'  => ['type' => 'manual'],
+            'body' => $this->body,
+            'data' => ['type' => 'manual'],
         ];
     }
 }

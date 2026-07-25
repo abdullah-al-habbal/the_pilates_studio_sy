@@ -1,4 +1,5 @@
 <?php
+
 // filePath: app/Traits/ApiResponseTrait.php
 
 declare(strict_types=1);
@@ -25,11 +26,11 @@ trait ApiResponseTrait
             message: $message,
             meta: [
                 'pagination' => [
-                    'total'        => $paginator->total(),
-                    'count'        => $paginator->count(),
-                    'per_page'     => $paginator->perPage(),
+                    'total' => $paginator->total(),
+                    'count' => $paginator->count(),
+                    'per_page' => $paginator->perPage(),
                     'current_page' => $paginator->currentPage(),
-                    'total_pages'  => $paginator->lastPage(),
+                    'total_pages' => $paginator->lastPage(),
                 ],
             ]
         );
@@ -60,7 +61,7 @@ trait ApiResponseTrait
             'status_code' => $status,
         ];
 
-        if (!empty($meta)) {
+        if (! empty($meta)) {
             $response['meta'] = $meta;
         }
 

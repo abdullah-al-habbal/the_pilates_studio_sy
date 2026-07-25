@@ -135,6 +135,7 @@
 
     @include('landing.partials._footer')
 
+    @stack('scripts')
     <script src="{{ asset('js/web/landing/landing.js') }}"></script>
 </body>
 </html>

@@ -20,8 +20,7 @@ final class GetUsersListAction
     public function __construct(
         private readonly GetUsersListHandler $handler,
         private readonly LoggingService $logger
-    ) {
-    }
+    ) {}
 
     public function __invoke(Request $request): JsonResponse
     {
@@ -33,6 +32,7 @@ final class GetUsersListAction
             return $this->success(data: $users, code: SuccessCodeEnum::SUCCESS);
         } catch (Throwable $e) {
             report($e);
+
             return $this->error(
                 code: ErrorCodeEnum::INTERNAL_SERVER_ERROR,
                 message: 'Failed to retrieve users list.'

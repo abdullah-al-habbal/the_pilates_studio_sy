@@ -19,8 +19,7 @@ class StatsService
         private readonly ClassSessionService $classSessionService,
         private readonly InstructorService $instructorService,
         private readonly UserService $userService,
-    ) {
-    }
+    ) {}
 
     public function getOverviewStats(): array
     {

@@ -27,5 +27,3 @@ class LandingDataVO
         public readonly bool $isEmpty,
     ) {}
 }
-
-

@@ -22,7 +22,7 @@ class RecurrencePatternsTable
                 TextColumn::make('name')
                     ->searchable(),
                 TextColumn::make('label')
-                    ->searchable(query: fn (Builder $query, string $search) => $query->where('label->' . app()->getLocale(), 'like', "%{$search}%"))
+                    ->searchable(query: fn (Builder $query, string $search) => $query->where('label->'.app()->getLocale(), 'like', "%{$search}%"))
                     ->formatStateUsing(fn ($state, $record) => $record->getTranslation('label', $locale)),
                 TextColumn::make('interval_days')
                     ->numeric()

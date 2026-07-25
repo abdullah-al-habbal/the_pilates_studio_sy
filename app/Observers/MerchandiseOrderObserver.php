@@ -14,7 +14,7 @@ final class MerchandiseOrderObserver
     {
         $merchandise = CenterMerchandise::find($order->merchandise_id);
 
-        if (!$merchandise) {
+        if (! $merchandise) {
             throw new InvalidArgumentException('Selected merchandise does not exist.');
         }
 

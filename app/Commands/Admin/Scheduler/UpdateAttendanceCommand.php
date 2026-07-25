@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Commands\Admin\Scheduler;
@@ -12,6 +13,5 @@ final readonly class UpdateAttendanceCommand
         public int $bookingSessionId,
         public AttendanceStatusEnum $status,
         public ?int $updatedByAdminId = null,
-    ) {
-    }
+    ) {}
 }

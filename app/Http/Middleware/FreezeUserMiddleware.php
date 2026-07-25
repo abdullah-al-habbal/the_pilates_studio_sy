@@ -1,6 +1,9 @@
 <?php
+
 declare(strict_types=1);
+
 namespace App\Http\Middleware;
+
 use App\Enums\Api\ErrorCodeEnum;
 use App\Traits\ApiResponseTrait;
 use Closure;
@@ -17,6 +20,7 @@ class FreezeUserMiddleware
         if ($user && $user->isFrozen()) {
             return $this->error(ErrorCodeEnum::FROZEN_USER);
         }
+
         return $next($request);
     }
 }

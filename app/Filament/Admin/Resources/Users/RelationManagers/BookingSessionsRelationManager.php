@@ -9,6 +9,7 @@ use Filament\Tables\Table;
 class BookingSessionsRelationManager extends RelationManager
 {
     protected static string $relationship = 'bookingSessions';
+
     protected static ?string $title = 'Class Sessions';
 
     public function table(Table $table): Table
@@ -25,8 +26,8 @@ class BookingSessionsRelationManager extends RelationManager
                     ->badge()
                     ->color(fn ($state) => match ($state) {
                         'attended' => 'success',
-                        'missed'   => 'danger',
-                        default    => 'secondary',
+                        'missed' => 'danger',
+                        default => 'secondary',
                     }),
             ]);
     }

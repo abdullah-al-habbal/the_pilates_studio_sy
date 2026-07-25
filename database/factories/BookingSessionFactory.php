@@ -18,12 +18,12 @@ class BookingSessionFactory extends Factory
     public function definition(): array
     {
         return [
-            'booking_id'       => Booking::where('status', BookingStatusEnum::ACTIVE->value)
+            'booking_id' => Booking::where('status', BookingStatusEnum::ACTIVE->value)
                 ->inRandomOrder()->first()?->id ?? Booking::factory(),
             'class_session_id' => ClassSession::where('status', ClassSessionStatusEnum::SCHEDULED->value)
                 ->inRandomOrder()->first()?->id ?? ClassSession::factory(),
-            'status'           => BookingSessionStatusEnum::RESERVED->value,
-            'cancelled_at'     => null,
+            'status' => BookingSessionStatusEnum::RESERVED->value,
+            'cancelled_at' => null,
         ];
     }
 
@@ -38,7 +38,7 @@ class BookingSessionFactory extends Factory
     public function cancelled(): static
     {
         return $this->state(fn () => [
-            'status'       => BookingSessionStatusEnum::CANCELLED,
+            'status' => BookingSessionStatusEnum::CANCELLED,
             'cancelled_at' => now()->subHours(rand(1, 48)),
         ]);
     }

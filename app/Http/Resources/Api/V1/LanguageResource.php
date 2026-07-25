@@ -14,10 +14,10 @@ class LanguageResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
-            'id'         => $this->id,
-            'code'       => $this->code,
-            'name'       => $this->name,
-            'direction'  => $this->direction,
+            'id' => $this->id,
+            'code' => $this->code,
+            'name' => $this->name,
+            'direction' => $this->direction,
             'is_default' => $this->is_default,
         ];
     }

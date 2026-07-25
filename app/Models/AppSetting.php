@@ -24,9 +24,9 @@ class AppSetting extends Model
     protected function casts(): array
     {
         return [
-            'key'   => 'string',
+            'key' => 'string',
             'value' => 'string',
-            'type'  => AppSettingTypeEnum::class,
+            'type' => AppSettingTypeEnum::class,
         ];
     }
 }

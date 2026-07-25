@@ -56,6 +56,7 @@ final readonly class ExchangeRateSnapshotService
         }
 
         $currency = Currency::find($currencyId);
+
         return $currency?->exchange_rate ? (float) $currency->exchange_rate : null;
     }
 
@@ -65,6 +66,7 @@ final readonly class ExchangeRateSnapshotService
             return 0;
         }
         $amountInBaseUnits = $amount / $snapshotRate;
+
         return (int) round($amountInBaseUnits);
     }
 }

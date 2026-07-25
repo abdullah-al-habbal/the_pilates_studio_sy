@@ -24,13 +24,12 @@ class RecurrencePatternInfolist
                             ->color('info'),
                         TextEntry::make('label')
                             ->label('Display Label')
-                            ->formatStateUsing(fn($state, $record) =>
-                                $record->getTranslation('label', app()->getLocale()))
+                            ->formatStateUsing(fn ($state, $record) => $record->getTranslation('label', app()->getLocale()))
                             ->placeholder('No label set')
                             ->icon('heroicon-o-tag'),
                         TextEntry::make('interval_days')
                             ->label('Interval')
-                            ->state(fn($record): string => "Every {$record->interval_days} day(s)")
+                            ->state(fn ($record): string => "Every {$record->interval_days} day(s)")
                             ->icon('heroicon-o-calendar')
                             ->color('warning')
                             ->weight(FontWeight::Bold),

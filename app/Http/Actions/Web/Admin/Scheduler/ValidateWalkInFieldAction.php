@@ -1,4 +1,5 @@
 <?php
+
 // app/Http/Actions/Web/Admin/Scheduler/ValidateWalkInFieldAction.php
 declare(strict_types=1);
 
@@ -19,15 +20,14 @@ final class ValidateWalkInFieldAction
 
     public function __construct(
         private readonly UserEloquentRepository $repository
-    ) {
-    }
+    ) {}
 
     public function __invoke(Request $request): JsonResponse
     {
         $field = $request->query('field');
         $value = $request->query('value');
 
-        if (!in_array($field, self::ALLOWED_FIELDS, true) || empty($value)) {
+        if (! in_array($field, self::ALLOWED_FIELDS, true) || empty($value)) {
             return $this->error(
                 code: ErrorCodeEnum::VALIDATION_FAILED,
                 message: 'Invalid field. Allowed: phone_number, email.',
@@ -41,7 +41,7 @@ final class ValidateWalkInFieldAction
             data: [
                 'field' => $field,
                 'value' => $value,
-                'available' => !$exists,
+                'available' => ! $exists,
             ],
             code: SuccessCodeEnum::SUCCESS
         );

@@ -10,6 +10,6 @@ final readonly class SendPushNotificationCommand
         public string $title,
         public string $body,
         public string $target,
-        public array  $userIds = [],
+        public array $userIds = [],
     ) {}
 }

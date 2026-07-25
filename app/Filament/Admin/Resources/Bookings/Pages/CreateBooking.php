@@ -12,6 +12,7 @@ class CreateBooking extends CreateRecord
     protected function mutateFormDataBeforeCreate(array $data): array
     {
         $data['created_by'] = auth()->id();
+
         return $data;
     }
 }

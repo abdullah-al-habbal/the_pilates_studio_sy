@@ -8,6 +8,7 @@ use App\Enums\BookingStatusEnum;
 use App\Enums\UserRoleEnum;
 use App\Enums\UserStatusEnum;
 use Filament\Models\Contracts\FilamentUser;
+use Filament\Panel;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -19,7 +20,6 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use Laravel\Sanctum\PersonalAccessToken;
-use Filament\Panel;
 
 /**
  * @method PersonalAccessToken|null currentAccessToken()
@@ -124,20 +124,20 @@ class User extends Authenticatable implements FilamentUser
 
     protected function name(): Attribute
     {
-        return Attribute::make(get: fn() => $this->fullname);
+        return Attribute::make(get: fn () => $this->fullname);
     }
 
     protected function hasCredits(): Attribute
     {
         return Attribute::make(
-            get: fn() => $this->total_remaining_credits > 0
+            get: fn () => $this->total_remaining_credits > 0
         );
     }
 
     protected function canBookNewPackage(): Attribute
     {
         return Attribute::make(
-            get: fn() => !$this->bookings()
+            get: fn () => ! $this->bookings()
                 ->where('status', BookingStatusEnum::ACTIVE)
                 ->where('remaining_credits', '>', 0)
                 ->exists()
@@ -147,28 +147,28 @@ class User extends Authenticatable implements FilamentUser
     protected function canReserveClass(): Attribute
     {
         return Attribute::make(
-            get: fn() => $this->total_remaining_credits > 0 && $this->isActive()
+            get: fn () => $this->total_remaining_credits > 0 && $this->isActive()
         );
     }
 
     protected function isVerified(): Attribute
     {
         return Attribute::make(
-            get: fn() => !is_null($this->email_verified_at)
+            get: fn () => ! is_null($this->email_verified_at)
         );
     }
 
     protected function isDeactivated(): Attribute
     {
         return Attribute::make(
-            get: fn() => !is_null($this->deactivated_at)
+            get: fn () => ! is_null($this->deactivated_at)
         );
     }
 
     protected function hasActiveBooking(): Attribute
     {
         return Attribute::make(
-            get: fn() => !is_null($this->activeCreditBooking)
+            get: fn () => ! is_null($this->activeCreditBooking)
         );
     }
 
@@ -178,6 +178,7 @@ class User extends Authenticatable implements FilamentUser
             ->where('status', BookingStatusEnum::ACTIVE->value)
             ->sum('remaining_credits');
     }
+
     public function getAllowNotificationsAttribute(): bool
     {
         return (bool) $this->settings?->allow_notifications;

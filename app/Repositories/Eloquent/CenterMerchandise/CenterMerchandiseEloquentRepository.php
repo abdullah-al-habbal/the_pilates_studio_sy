@@ -10,8 +10,7 @@ class CenterMerchandiseEloquentRepository
 {
     public function __construct(
         private readonly CenterMerchandise $model
-    ) {
-    }
+    ) {}
 
     public function findForUpdate(int $id): ?CenterMerchandise
     {

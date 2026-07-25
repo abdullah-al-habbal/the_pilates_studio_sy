@@ -12,7 +12,6 @@ class StatsOverview extends BaseWidget
 
     protected static bool $isLazy = false;
 
-
     protected function getStats(): array
     {
         $statsService = app(StatsService::class);
@@ -41,14 +40,14 @@ class StatsOverview extends BaseWidget
                 ->descriptionIcon('heroicon-m-chart-bar')
                 ->color('info'),
 
-            Stat::make(__('dashboard.widgets.stats_overview.attendance_rate'), $statsData['attendance_rate'] . '%')
+            Stat::make(__('dashboard.widgets.stats_overview.attendance_rate'), $statsData['attendance_rate'].'%')
                 ->description(__('dashboard.widgets.stats_overview.attendance_rate_description'))
                 ->descriptionIcon('heroicon-m-calendar')
                 ->chart($statsData['attendance_trend'])
                 ->color($statsData['attendance_rate'] >= 70 ? 'success' : 'danger'),
 
             Stat::make(__('dashboard.widgets.stats_overview.missed'), $statsData['missed'])
-                ->description(__('dashboard.widgets.stats_overview.missed_description', ['trend' => ($statsData['missed_trend'] > 0 ? '+' : '') . $statsData['missed_trend']]))
+                ->description(__('dashboard.widgets.stats_overview.missed_description', ['trend' => ($statsData['missed_trend'] > 0 ? '+' : '').$statsData['missed_trend']]))
                 ->descriptionIcon('heroicon-m-arrow-trending-down')
                 ->color($statsData['missed_trend'] > 0 ? 'danger' : 'success'),
 

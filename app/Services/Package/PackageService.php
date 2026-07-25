@@ -28,6 +28,7 @@ class PackageService
         if (! $package) {
             throw new ModelNotFoundException("Package with ID {$id} not found.");
         }
+
         return $package;
     }
 

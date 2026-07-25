@@ -24,6 +24,7 @@ use LaraZeus\SpatieTranslatable\Resources\Concerns\Translatable;
 class CenterMerchandiseResource extends Resource
 {
     use Translatable;
+
     protected static ?string $model = CenterMerchandise::class;
 
     protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-shopping-bag';
@@ -57,7 +58,7 @@ class CenterMerchandiseResource extends Resource
 
     public static function getNavigationBadge(): ?string
     {
-        return  (string) static::getModel()::query()->count();
+        return (string) static::getModel()::query()->count();
     }
 
     public static function getNavigationBadgeColor(): string|array|null

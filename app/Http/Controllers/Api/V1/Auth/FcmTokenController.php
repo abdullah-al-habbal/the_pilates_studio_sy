@@ -1,5 +1,7 @@
 <?php
+
 declare(strict_types=1);
+
 namespace App\Http\Controllers\Api\V1\Auth;
 
 use App\Enums\Api\SuccessCodeEnum;
@@ -23,6 +25,7 @@ final class FcmTokenController extends BaseApiController
 
         return $this->success(null, SuccessCodeEnum::SUCCESS, 'FCM token stored successfully.');
     }
+
     public function destroy(Request $request): JsonResponse
     {
         $request->user()

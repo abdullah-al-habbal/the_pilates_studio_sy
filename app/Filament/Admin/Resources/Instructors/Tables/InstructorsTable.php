@@ -27,10 +27,10 @@ class InstructorsTable
                     ->circular()
                     ->size(40),
                 TextColumn::make('name')
-                    ->searchable(query: fn (Builder $query, string $search) => $query->where('name->' . app()->getLocale(), 'like', "%{$search}%"))
+                    ->searchable(query: fn (Builder $query, string $search) => $query->where('name->'.app()->getLocale(), 'like', "%{$search}%"))
                     ->formatStateUsing(fn ($state, $record) => $record->getTranslation('name', $locale)),
                 TextColumn::make('title')
-                    ->searchable(query: fn (Builder $query, string $search) => $query->where('title->' . app()->getLocale(), 'like', "%{$search}%"))
+                    ->searchable(query: fn (Builder $query, string $search) => $query->where('title->'.app()->getLocale(), 'like', "%{$search}%"))
                     ->toggleable(isToggledHiddenByDefault: true)
                     ->formatStateUsing(fn ($state, $record) => $record->getTranslation('title', $locale)),
                 TextColumn::make('specialty')
@@ -47,7 +47,7 @@ class InstructorsTable
                     ->formatStateUsing(fn ($state) => is_array($state) ? count($state) : 0)
                     ->badge()
                     ->color(fn ($state) => is_array($state) && count($state) > 0 ? 'success' : 'gray')
-                    ->sortable(query: fn (Builder $query, string $direction) => $query->orderByRaw('JSON_LENGTH(social_links) ' . $direction)),
+                    ->sortable(query: fn (Builder $query, string $direction) => $query->orderByRaw('JSON_LENGTH(social_links) '.$direction)),
                 TextColumn::make('classes_count')
                     ->label('Classes')
                     ->counts('classes')

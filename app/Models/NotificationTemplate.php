@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Models;
@@ -24,6 +25,7 @@ class NotificationTemplate extends Model
             'is_active' => 'boolean',
         ];
     }
+
     public function getResolvedTitle(?string $locale = null): string
     {
         return $this->getTranslation('title', $locale ?? app()->getLocale());

@@ -120,6 +120,7 @@ class InitialDataServiceProvider extends ServiceProvider
                 }
 
                 AppSetting::create($setting);
+
                 continue;
             }
 
@@ -141,6 +142,7 @@ class InitialDataServiceProvider extends ServiceProvider
             if (! $existingPage) {
                 $page['image'] = $this->copySourceImage($sourcePath, 'static-pages', $page['slug'], 'page');
                 StaticPage::create($page);
+
                 continue;
             }
 

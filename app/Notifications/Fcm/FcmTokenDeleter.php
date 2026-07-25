@@ -10,6 +10,7 @@ final class FcmTokenDeleter
     {
         if (method_exists($notifiable, 'fcmTokens')) {
             $notifiable->fcmTokens()->where('token', $token)->delete();
+
             return;
         }
 

@@ -71,11 +71,11 @@ class NotificationTemplateResource extends Resource
                             ->schema([
                                 TextInput::make('title_en')
                                     ->label('Title (English)')
-                                    ->default(fn($record) => $record?->getTranslation('title', 'en'))
+                                    ->default(fn ($record) => $record?->getTranslation('title', 'en'))
                                     ->required(),
                                 Textarea::make('body_en')
                                     ->label('Body (English)')
-                                    ->default(fn($record) => $record?->getTranslation('body', 'en'))
+                                    ->default(fn ($record) => $record?->getTranslation('body', 'en'))
                                     ->required()
                                     ->helperText('Use :class, :instructor, :time, :date for placeholders'),
                             ]),
@@ -83,11 +83,11 @@ class NotificationTemplateResource extends Resource
                             ->schema([
                                 TextInput::make('title_ar')
                                     ->label('Title (Arabic)')
-                                    ->default(fn($record) => $record?->getTranslation('title', 'ar'))
+                                    ->default(fn ($record) => $record?->getTranslation('title', 'ar'))
                                     ->required(),
                                 Textarea::make('body_ar')
                                     ->label('Body (Arabic)')
-                                    ->default(fn($record) => $record?->getTranslation('body', 'ar'))
+                                    ->default(fn ($record) => $record?->getTranslation('body', 'ar'))
                                     ->required()
                                     ->helperText('Use :class, :instructor, :time, :date for placeholders'),
                             ]),
@@ -114,7 +114,7 @@ class NotificationTemplateResource extends Resource
 
                 Tables\Columns\TextColumn::make('title')
                     ->label('Title')
-                    ->getStateUsing(fn($record) => $record->getResolvedTitle('en')),
+                    ->getStateUsing(fn ($record) => $record->getResolvedTitle('en')),
 
                 Tables\Columns\IconColumn::make('is_active')
                     ->label('Active')

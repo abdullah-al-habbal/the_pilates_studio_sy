@@ -21,8 +21,7 @@ class ClassCategoryInfolist
                         ->schema([
                             TextEntry::make('name')
                                 ->weight(FontWeight::Bold)
-                                ->formatStateUsing(fn($state, $record) =>
-                                    $record->getTranslation('name', app()->getLocale())),
+                                ->formatStateUsing(fn ($state, $record) => $record->getTranslation('name', app()->getLocale())),
                             TextEntry::make('slug')
                                 ->badge()
                                 ->color('gray')
@@ -33,8 +32,8 @@ class ClassCategoryInfolist
                         ->schema([
                             TextEntry::make('color')
                                 ->badge()
-                                ->color(fn(?string $state): string => $state ?? 'gray')
-                                ->state(fn($record): string => $record->color ?? 'No color set')
+                                ->color(fn (?string $state): string => $state ?? 'gray')
+                                ->state(fn ($record): string => $record->color ?? 'No color set')
                                 ->icon('heroicon-o-swatch'),
                         ]),
                 ]),
@@ -65,9 +64,9 @@ class ClassCategoryInfolist
                             ->label('Deleted')
                             ->dateTime('M d, Y H:i')
                             ->placeholder('Not deleted')
-                            ->color(fn($state) => $state ? 'danger' : 'success')
-                            ->icon(fn($state) => $state ? 'heroicon-o-x-circle' : 'heroicon-o-check-circle')
-                            ->visible(fn(ClassCategory $record): bool => $record->trashed()),
+                            ->color(fn ($state) => $state ? 'danger' : 'success')
+                            ->icon(fn ($state) => $state ? 'heroicon-o-x-circle' : 'heroicon-o-check-circle')
+                            ->visible(fn (ClassCategory $record): bool => $record->trashed()),
                     ]),
             ]);
     }

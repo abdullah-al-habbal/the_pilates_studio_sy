@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace App\Services\Finance;
@@ -22,8 +23,7 @@ final class DailyBalanceService
         private readonly ClubExpenseEloquentRepository $expenseRepo,
         private readonly RefundEloquentRepository $refundRepo,
         private readonly ExchangeRateSnapshotService $snapshotService,
-    ) {
-    }
+    ) {}
 
     /**
      * @return Collection<int, CurrencySummaryData>
@@ -130,9 +130,10 @@ final class DailyBalanceService
     private function resolveCreatorScope(): ?int
     {
         $user = Auth::user();
-        if (!$user || $user->isMainAdmin()) {
+        if (! $user || $user->isMainAdmin()) {
             return null;
         }
+
         return $user->id;
     }
 

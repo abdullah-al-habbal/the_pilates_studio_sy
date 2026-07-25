@@ -1,4 +1,5 @@
 <?php
+
 // app/Commands/Admin/Operations/GetClientsCommand.php
 declare(strict_types=1);
 

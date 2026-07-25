@@ -1,9 +1,13 @@
 <?php
+
 declare(strict_types=1);
+
 namespace App\Handlers\BookingSession;
+
 use App\Enums\BookingSessionStatusEnum;
 use App\Models\BookingSession;
 use App\Models\User;
+
 class CancelSessionHandler
 {
     public function __invoke(

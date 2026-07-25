@@ -16,8 +16,7 @@ final readonly class RecordExpenseCommand
         public int $recordedBy,
         public ?string $notes = null,
         public ?Carbon $expenseDate = null,
-    ) {
-    }
+    ) {}
 
     public static function fromRequest(RecordExpenseRequest $request, int $recordedBy): self
     {

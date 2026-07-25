@@ -1,4 +1,5 @@
 <?php
+
 // filePath: routes/api/v1/protected/user_settings.php
 
 declare(strict_types=1);
@@ -10,5 +11,5 @@ Route::prefix('user-settings')->name('user-settings.')->group(function () {
     Route::get('/', [UserSettingController::class, 'show'])->name('show');
     Route::patch('/', [UserSettingController::class, 'update'])->name('update');
     Route::post('settings/fcm-token', [UserSettingController::class, 'updateFcmToken'])
-    ->name('settings.fcm-token');
+        ->name('settings.fcm-token');
 });

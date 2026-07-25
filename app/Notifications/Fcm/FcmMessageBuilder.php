@@ -14,8 +14,8 @@ final class FcmMessageBuilder
     public function build(array $payload, string $token): CloudMessage
     {
         $title = $payload['title'] ?? 'Notification';
-        $body  = $payload['body'] ?? '';
-        $data  = array_map(static fn(mixed $v): string => (string) $v, $payload['data'] ?? []);
+        $body = $payload['body'] ?? '';
+        $data = array_map(static fn (mixed $v): string => (string) $v, $payload['data'] ?? []);
 
         $androidConfig = AndroidConfig::fromArray([
             'priority' => 'high',

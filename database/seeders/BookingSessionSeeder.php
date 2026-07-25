@@ -12,8 +12,8 @@ use App\Models\Booking;
 use App\Models\BookingSession;
 use App\Models\ClassSession;
 use App\Models\User;
-use Illuminate\Database\Seeder;
 use DomainException;
+use Illuminate\Database\Seeder;
 
 class BookingSessionSeeder extends Seeder
 {
@@ -21,7 +21,7 @@ class BookingSessionSeeder extends Seeder
     {
         $adam = User::where('email', 'adam.kim@gmail.com')->first();
 
-        if (!$adam) {
+        if (! $adam) {
             return;
         }
 
@@ -36,7 +36,7 @@ class BookingSessionSeeder extends Seeder
 
     private function seedAdamSessions(?Booking $adamBooking): void
     {
-        if (!$adamBooking) {
+        if (! $adamBooking) {
             return;
         }
 
@@ -44,7 +44,7 @@ class BookingSessionSeeder extends Seeder
             ->orderBy('date')
             ->limit(4)
             ->get()
-            ->each(fn(ClassSession $session) => $this->insertSession(
+            ->each(fn (ClassSession $session) => $this->insertSession(
                 $adamBooking->id,
                 $session->id,
                 BookingSessionStatusEnum::RESERVED
@@ -76,7 +76,7 @@ class BookingSessionSeeder extends Seeder
                     ->limit(rand(1, 3))
                     ->get()
                     ->each(function (ClassSession $session) use ($booking) {
-                        if (!$this->isAlreadyBooked($booking->user_id, $session->id)) {
+                        if (! $this->isAlreadyBooked($booking->user_id, $session->id)) {
                             $this->insertSession(
                                 $booking->id,
                                 $session->id,
@@ -99,11 +99,11 @@ class BookingSessionSeeder extends Seeder
                     ->inRandomOrder()
                     ->first();
 
-                if (!$session) {
+                if (! $session) {
                     return;
                 }
 
-                if (!$this->isAlreadyBooked($booking->user_id, $session->id)) {
+                if (! $this->isAlreadyBooked($booking->user_id, $session->id)) {
                     $this->insertSession(
                         $booking->id,
                         $session->id,
@@ -140,7 +140,7 @@ class BookingSessionSeeder extends Seeder
 
     private function isAlreadyBooked(int $userId, int $classSessionId): bool
     {
-        return BookingSession::whereHas('booking', fn($q) => $q->where('user_id', $userId))
+        return BookingSession::whereHas('booking', fn ($q) => $q->where('user_id', $userId))
             ->where('class_session_id', $classSessionId)
             ->where('status', BookingSessionStatusEnum::RESERVED->value)
             ->exists();

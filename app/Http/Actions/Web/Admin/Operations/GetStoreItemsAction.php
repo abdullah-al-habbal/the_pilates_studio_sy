@@ -16,8 +16,7 @@ final readonly class GetStoreItemsAction
 
     public function __construct(
         private GetStoreItemsHandler $handler
-    ) {
-    }
+    ) {}
 
     public function __invoke(): JsonResponse
     {
@@ -29,7 +28,7 @@ final readonly class GetStoreItemsAction
                 message: 'Store items retrieved successfully.'
             );
         } catch (\Throwable $e) {
-            Log::error('Operations - GetStoreItems failed: ' . $e->getMessage(), [
+            Log::error('Operations - GetStoreItems failed: '.$e->getMessage(), [
                 'exception' => $e,
             ]);
 

@@ -20,8 +20,7 @@ final class UpdateAttendanceAction
 
     public function __construct(
         private readonly UpdateAttendanceHandler $handler
-    ) {
-    }
+    ) {}
 
     public function __invoke(UpdateAttendanceRequest $request, int $sessionId, int $bookingSessionId): JsonResponse
     {
@@ -41,6 +40,7 @@ final class UpdateAttendanceAction
             );
         } catch (Throwable $e) {
             report($e);
+
             return $this->error(
                 code: ErrorCodeEnum::INTERNAL_SERVER_ERROR,
                 message: 'Failed to update attendance.'

@@ -1,4 +1,5 @@
 <?php
+
 // filePath: app/Models/MobileAppVersion/MobileAppVersion.php
 
 declare(strict_types=1);

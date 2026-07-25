@@ -23,9 +23,10 @@ use App\Services\Log\LoggingService;
 use Carbon\Carbon;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
-use Illuminate\Support\Collection;
+
 class BookingSessionService
 {
     public function __construct(
@@ -37,8 +38,7 @@ class BookingSessionService
         private readonly BookingService $bookingService,
         private readonly ClassSessionService $classSessionService,
         private readonly LoggingService $logger
-    ) {
-    }
+    ) {}
 
     public function listUserSessions(int $userId, array $filters = []): LengthAwarePaginator
     {
@@ -73,7 +73,7 @@ class BookingSessionService
                 : Carbon::parse($classSession->date);
 
             $cutoff = Carbon::parse(
-                $date->format('Y-m-d') . ' ' . $classSession->start_time
+                $date->format('Y-m-d').' '.$classSession->start_time
             )->subHours(24);
 
             if (now()->greaterThanOrEqualTo($cutoff)) {
@@ -129,10 +129,10 @@ class BookingSessionService
 
             $booking = $this->bookingRepo->findActiveWithCreditsForUser($userId);
 
-            if (!$booking) {
+            if (! $booking) {
                 $package = $this->packageRepo->findActiveWalkInPackage();
 
-                if (!$package) {
+                if (! $package) {
                     $package = $this->packageRepo->createWalkInPackage();
                 }
 
@@ -192,7 +192,7 @@ class BookingSessionService
             $this->bookingService->decrementCredits($booking);
             $booking->refresh();
 
-            if (!$this->bookingService->hasCreditsRemaining($booking)) {
+            if (! $this->bookingService->hasCreditsRemaining($booking)) {
                 $this->bookingService->updateStatus($booking, BookingStatusEnum::EXHAUSTED);
             }
 
@@ -255,7 +255,7 @@ class BookingSessionService
 
     private function assertSessionHasAvailableSpots(int $classSessionId): void
     {
-        if (!$this->classSessionService->hasAvailableSpots($classSessionId)) {
+        if (! $this->classSessionService->hasAvailableSpots($classSessionId)) {
             throw ValidationException::withMessages([
                 'class_session_id' => 'This session is fully booked.',
             ]);
@@ -264,7 +264,7 @@ class BookingSessionService
 
     private function assertBookingHasCredits(Booking $booking): void
     {
-        if (!$this->bookingService->hasCreditsRemaining($booking)) {
+        if (! $this->bookingService->hasCreditsRemaining($booking)) {
             throw ValidationException::withMessages([
                 'booking_id' => 'This booking has no remaining credits.',
             ]);

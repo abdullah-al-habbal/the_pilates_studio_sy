@@ -19,8 +19,7 @@ final readonly class AssignPackageHandler
         private BookingService $bookingService,
         private PricingService $pricingService,
         private AssignPackageValidatorService $validator
-    ) {
-    }
+    ) {}
 
     public function handle(int $userId, int $packageId, ?int $currencyId = null, ?int $clientSentAmount = null, ?int $createdBy = null): Booking
     {

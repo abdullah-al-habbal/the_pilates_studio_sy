@@ -23,7 +23,7 @@ class ClassCategoriesTable
         return $table
             ->columns([
                 TextColumn::make('name')
-                    ->searchable(query: fn (Builder $query, string $search) => $query->where('name->' . app()->getLocale(), 'like', "%{$search}%"))
+                    ->searchable(query: fn (Builder $query, string $search) => $query->where('name->'.app()->getLocale(), 'like', "%{$search}%"))
                     ->formatStateUsing(fn ($state, $record) => $record->getTranslation('name', $locale)),
                 TextColumn::make('slug')
                     ->searchable(),

@@ -9,6 +9,7 @@ enum PackageTypeEnum: string
     case STANDARD = 'standard';
     case BY_SYSTEM = 'by_system';
     case FOR_FREEZE_CLIENT = 'for_freeze_client';
+
     public function label(): string
     {
         return match ($this) {
@@ -17,6 +18,7 @@ enum PackageTypeEnum: string
             self::FOR_FREEZE_CLIENT => 'Unfreeze Residual',
         };
     }
+
     public function color(): string
     {
         return match ($this) {
@@ -25,8 +27,9 @@ enum PackageTypeEnum: string
             self::FOR_FREEZE_CLIENT => 'warning',
         };
     }
+
     public static function options(): array
     {
-        return collect(self::cases())->mapWithKeys(fn($c) => [$c->value => $c->label()])->toArray();
+        return collect(self::cases())->mapWithKeys(fn ($c) => [$c->value => $c->label()])->toArray();
     }
 }

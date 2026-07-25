@@ -23,6 +23,7 @@ class LandingSessionVO
     {
         $className = $session->class?->getTranslation('title', app()->getLocale()) ?? 'N/A';
         $instructorName = $session->class?->instructor?->getTranslation('name', app()->getLocale()) ?? 'N/A';
+
         return new self(
             id: $session->id,
             time: $session->start_time ? Carbon::parse($session->start_time)->format('h:i A') : '',

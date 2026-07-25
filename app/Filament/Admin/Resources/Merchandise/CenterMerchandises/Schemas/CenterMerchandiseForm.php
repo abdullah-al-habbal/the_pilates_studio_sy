@@ -40,31 +40,31 @@ class CenterMerchandiseForm
                 ->icon('heroicon-o-currency-dollar')
                 ->schema([
                     Grid::make(3)->schema([
-                    Repeater::make('prices')
-                        ->relationship()
-                        ->schema([
-                            Select::make('currency_id')
-                                ->label('Currency')
-                                ->relationship('currency', 'name')
-                                ->required(),
-                            TextInput::make('amount')
-                                ->label(__('dashboard.resources.center_merchandises.fields.price') ?? 'Price')
-                                ->required()
-                                ->numeric()
-                                ->minValue(0),
-                        ])
-                        ->columns(2)
-                        ->label(__('dashboard.resources.center_merchandises.sections.pricing'))
-                        ->columnSpanFull(),
+                        Repeater::make('prices')
+                            ->relationship()
+                            ->schema([
+                                Select::make('currency_id')
+                                    ->label('Currency')
+                                    ->relationship('currency', 'name')
+                                    ->required(),
+                                TextInput::make('amount')
+                                    ->label(__('dashboard.resources.center_merchandises.fields.price') ?? 'Price')
+                                    ->required()
+                                    ->numeric()
+                                    ->minValue(0),
+                            ])
+                            ->columns(2)
+                            ->label(__('dashboard.resources.center_merchandises.sections.pricing'))
+                            ->columnSpanFull(),
 
                         TextInput::make('stock_quantity')
                             ->label(__('dashboard.resources.center_merchandises.fields.stock_quantity'))
                             ->required()
                             ->numeric()
                             ->default(0)
-                            ->minValue(fn($record): int => $record?->stock_quantity ?? 0)
+                            ->minValue(fn ($record): int => $record?->stock_quantity ?? 0)
                             ->helperText(
-                                fn($record): ?string => $record
+                                fn ($record): ?string => $record
                                 ? __('dashboard.resources.center_merchandises.helpers.stock_min', ['min' => $record->stock_quantity])
                                 : null
                             ),
@@ -76,7 +76,7 @@ class CenterMerchandiseForm
                             ->searchable()
                             ->preload()
                             ->getOptionLabelFromRecordUsing(
-                                fn($record) => $record->getTranslation('name', app()->getLocale())
+                                fn ($record) => $record->getTranslation('name', app()->getLocale())
                             ),
                     ]),
                 ]),

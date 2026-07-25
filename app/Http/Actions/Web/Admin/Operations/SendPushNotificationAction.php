@@ -1,5 +1,7 @@
 <?php
+
 declare(strict_types=1);
+
 namespace App\Http\Actions\Web\Admin\Operations;
 
 use App\Handlers\Admin\Operations\SendPushNotificationHandler;
@@ -20,9 +22,11 @@ final readonly class SendPushNotificationAction
     {
         try {
             $result = $this->handler->handle($request->toCommand());
+
             return $this->success($result, message: 'Notifications dispatched successfully.');
         } catch (\Throwable $e) {
             Log::error('SendPushNotificationAction failed', ['error' => $e->getMessage()]);
+
             return $this->error(message: 'Failed to dispatch notifications.');
         }
     }

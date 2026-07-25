@@ -1,6 +1,8 @@
 <?php
+
 // app\Console\Commands\ValidateFinancialConfig.php
 declare(strict_types=1);
+
 namespace App\Console\Commands;
 
 use App\Models\Currency;
@@ -9,6 +11,7 @@ use Illuminate\Console\Command;
 class ValidateFinancialConfig extends Command
 {
     protected $signature = 'config:validate-financial';
+
     protected $description = 'Validate financial configuration integrity';
 
     public function handle(): int
@@ -18,7 +21,7 @@ class ValidateFinancialConfig extends Command
         $baseCode = config('currency.base_currency');
         $baseCurrency = Currency::where('code', $baseCode)->where('is_active', true)->first();
 
-        if (!$baseCurrency) {
+        if (! $baseCurrency) {
             $errors[] = "Base currency '{$baseCode}' not found or not active";
         }
 
@@ -35,12 +38,13 @@ class ValidateFinancialConfig extends Command
             ->pluck('code')
             ->toArray();
 
-        if (!empty($invalidRates)) {
-            $errors[] = "Invalid exchange rates (<=0) for currencies: " . implode(', ', $invalidRates);
+        if (! empty($invalidRates)) {
+            $errors[] = 'Invalid exchange rates (<=0) for currencies: '.implode(', ', $invalidRates);
         }
 
         if (empty($errors)) {
             $this->info('✅ Financial configuration validated successfully');
+
             return self::SUCCESS;
         }
 

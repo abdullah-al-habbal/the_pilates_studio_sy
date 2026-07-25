@@ -28,7 +28,7 @@ class InstructorInfolist
                             ImageEntry::make('image')
                                 ->height(200)
                                 ->width(200)
-                                ->extraImgAttributes(['class' => 'rounded-xl object-cover'])
+                                ->extraImgAttributes(['class' => 'rounded-xl object-cover']),
                         ]),
                     Section::make('Personal Information')
                         ->icon('heroicon-o-user')
@@ -36,18 +36,15 @@ class InstructorInfolist
                         ->schema([
                             TextEntry::make('name')
                                 ->weight(FontWeight::Bold)
-                                ->formatStateUsing(fn($state, $record) =>
-                                    $record->getTranslation('name', $locale)),
+                                ->formatStateUsing(fn ($state, $record) => $record->getTranslation('name', $locale)),
                             TextEntry::make('title')
-                                ->formatStateUsing(fn($state, $record) =>
-                                    $record->getTranslation('title', $locale))
+                                ->formatStateUsing(fn ($state, $record) => $record->getTranslation('title', $locale))
                                 ->placeholder('No title')
                                 ->icon('heroicon-o-briefcase'),
                             TextEntry::make('specialty')
                                 ->badge()
                                 ->color('info')
-                                ->formatStateUsing(fn($state, $record) =>
-                                    $record->getTranslation('specialty', $locale))
+                                ->formatStateUsing(fn ($state, $record) => $record->getTranslation('specialty', $locale))
                                 ->placeholder('No specialty')
                                 ->icon('heroicon-o-academic-cap'),
                         ]),
@@ -58,8 +55,7 @@ class InstructorInfolist
                         TextEntry::make('bio')
                             ->html()
                             ->prose()
-                            ->formatStateUsing(fn($state, $record) =>
-                                $record->getTranslation('bio', $locale))
+                            ->formatStateUsing(fn ($state, $record) => $record->getTranslation('bio', $locale))
                             ->placeholder('No biography provided')
                             ->columnSpanFull(),
                     ]),
@@ -119,8 +115,8 @@ class InstructorInfolist
                             ->label('Deleted')
                             ->dateTime('M d, Y H:i')
                             ->placeholder('Not deleted')
-                            ->color(fn($state) => $state ? 'danger' : 'success')
-                            ->visible(fn(Instructor $record): bool => $record->trashed()),
+                            ->color(fn ($state) => $state ? 'danger' : 'success')
+                            ->visible(fn (Instructor $record): bool => $record->trashed()),
                     ]),
             ]);
     }

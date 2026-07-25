@@ -21,14 +21,14 @@ class RefundFactory extends Factory
         ]);
 
         return [
-            'refundable_type' => (new $refundableType())->getTable(),
-            'refundable_id'   => $refundableType::factory(),
-            'user_id'         => User::factory(),
-            'currency_id'     => Currency::factory()->active(),
-            'amount'          => $this->faker->numberBetween(500, 20000),
-            'reason'          => $this->faker->optional()->sentence(),
-            'refunded_by'     => User::factory(),
-            'refunded_at'     => now(),
+            'refundable_type' => (new $refundableType)->getTable(),
+            'refundable_id' => $refundableType::factory(),
+            'user_id' => User::factory(),
+            'currency_id' => Currency::factory()->active(),
+            'amount' => $this->faker->numberBetween(500, 20000),
+            'reason' => $this->faker->optional()->sentence(),
+            'refunded_by' => User::factory(),
+            'refunded_at' => now(),
         ];
     }
 }

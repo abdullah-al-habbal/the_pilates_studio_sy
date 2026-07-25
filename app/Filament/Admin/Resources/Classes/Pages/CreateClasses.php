@@ -1,4 +1,5 @@
 <?php
+
 // filePath: app/Filament/Admin/Resources/Classes/Pages/CreateClasses.php
 
 namespace App\Filament\Admin\Resources\Classes\Pages;

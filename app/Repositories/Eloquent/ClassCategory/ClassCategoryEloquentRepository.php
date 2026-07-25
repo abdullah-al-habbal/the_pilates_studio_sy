@@ -16,7 +16,7 @@ class ClassCategoryEloquentRepository
             'classes' => function ($query) {
                 $query->withCount([
                     'sessions as attended_sessions_count' => function ($q) {
-                        $q->whereHas('bookingSessions', fn($bsq) => $bsq->where('attendance_status', AttendanceStatusEnum::ATTENDED));
+                        $q->whereHas('bookingSessions', fn ($bsq) => $bsq->where('attendance_status', AttendanceStatusEnum::ATTENDED));
                     },
                 ]);
             },

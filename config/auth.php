@@ -1,6 +1,8 @@
 <?php
+
 // config\auth.php
 declare(strict_types=1);
+
 return [
     'return_otp_in_response' => env('RETURN_OTP_IN_RESPONSE'),
     'defaults' => [

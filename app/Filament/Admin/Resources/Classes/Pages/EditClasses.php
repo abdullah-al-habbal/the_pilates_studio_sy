@@ -14,6 +14,7 @@ use LaraZeus\SpatieTranslatable\Resources\Pages\EditRecord\Concerns\Translatable
 class EditClasses extends EditRecord
 {
     use Translatable;
+
     protected static string $resource = ClassesResource::class;
 
     protected function getHeaderActions(): array

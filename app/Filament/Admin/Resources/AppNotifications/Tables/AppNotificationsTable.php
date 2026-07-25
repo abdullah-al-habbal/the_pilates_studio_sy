@@ -26,7 +26,7 @@ class AppNotificationsTable
                     ->sortable(),
                 TextColumn::make('type')
                     ->badge()
-                    ->color(fn(string $state): string => match ($state) {
+                    ->color(fn (string $state): string => match ($state) {
                         'image' => 'success',
                         'alert' => 'danger',
                         'promo' => 'warning',
@@ -37,7 +37,7 @@ class AppNotificationsTable
                     ->label('Image')
                     ->size(40)
                     ->circular()
-                    ->visible(fn($record): bool => $record->type === 'image' && filled($record->image)),
+                    ->visible(fn ($record): bool => $record->type === 'image' && filled($record->image)),
                 TextColumn::make('title')
                     ->searchable()
                     ->limit(40)
@@ -50,7 +50,7 @@ class AppNotificationsTable
                     ->falseIcon('heroicon-o-clock')
                     ->trueColor('success')
                     ->falseColor('warning')
-                    ->state(fn($record): bool => !is_null($record->read_at)),
+                    ->state(fn ($record): bool => ! is_null($record->read_at)),
                 TextColumn::make('created_at')
                     ->label('Sent')
                     ->dateTime('M d, Y H:i')

@@ -36,11 +36,11 @@ return new class extends Migration
             $table->string('cancellation_reason')
                 ->nullable()
                 ->comment('Free-text or enum reason for cancellation');
-            
+
             $table->unsignedTinyInteger('cancellation_type')
                 ->nullable()
                 ->comment('0=user_initiated, 1=admin_override, 2=system_expired');
-            
+
             $table->foreignId('cancelled_by_user_id')
                 ->nullable()
                 ->constrained('users')

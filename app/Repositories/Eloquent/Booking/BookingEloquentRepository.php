@@ -9,8 +9,9 @@ use App\Enums\BookingStatusEnum;
 use App\Models\Booking;
 use Carbon\CarbonInterface;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
+
 class BookingEloquentRepository
 {
     public function getRevenueByCurrency(
@@ -21,12 +22,12 @@ class BookingEloquentRepository
         return Booking::query()
             ->selectRaw('currency_id, SUM(paid_amount) as total, COUNT(*) as count')
             ->whereNotNull('paid_amount')
-            ->when($creatorId, fn($q) => $q->where('created_by', $creatorId))
-            ->when($startDate, fn($q) => $q->where('created_at', '>=', $startDate))
-            ->when($endDate, fn($q) => $q->where('created_at', '<=', $endDate))
+            ->when($creatorId, fn ($q) => $q->where('created_by', $creatorId))
+            ->when($startDate, fn ($q) => $q->where('created_at', '>=', $startDate))
+            ->when($endDate, fn ($q) => $q->where('created_at', '<=', $endDate))
             ->groupBy('currency_id')
             ->get()
-            ->map(fn($item) => (object) [
+            ->map(fn ($item) => (object) [
                 'currency_id' => (int) $item->currency_id,
                 'total_revenue' => (int) $item->total,
                 'booking_count' => (int) $item->count,
@@ -47,12 +48,12 @@ class BookingEloquentRepository
             ')
             ->whereNotNull('paid_amount')
             ->whereNotNull('exchange_rate_snapshot')
-            ->when($creatorId, fn($q) => $q->where('created_by', $creatorId))
-            ->when($startDate, fn($q) => $q->where('created_at', '>=', $startDate))
-            ->when($endDate, fn($q) => $q->where('created_at', '<=', $endDate))
+            ->when($creatorId, fn ($q) => $q->where('created_by', $creatorId))
+            ->when($startDate, fn ($q) => $q->where('created_at', '>=', $startDate))
+            ->when($endDate, fn ($q) => $q->where('created_at', '<=', $endDate))
             ->groupBy('currency_id')
             ->get()
-            ->map(fn($item) => (object) [
+            ->map(fn ($item) => (object) [
                 'currency_id' => (int) $item->currency_id,
                 'total_revenue' => (int) $item->total,
                 'booking_count' => (int) $item->count,
@@ -63,9 +64,9 @@ class BookingEloquentRepository
     public function getTotalCount(?CarbonInterface $startDate = null, ?CarbonInterface $endDate = null, ?int $creatorId = null): int
     {
         return (int) Booking::query()
-            ->when($creatorId, fn($q) => $q->where('created_by', $creatorId))
-            ->when($startDate, fn($q) => $q->where('created_at', '>=', $startDate))
-            ->when($endDate, fn($q) => $q->where('created_at', '<=', $endDate))
+            ->when($creatorId, fn ($q) => $q->where('created_by', $creatorId))
+            ->when($startDate, fn ($q) => $q->where('created_at', '>=', $startDate))
+            ->when($endDate, fn ($q) => $q->where('created_at', '<=', $endDate))
             ->count();
     }
 
@@ -98,11 +99,11 @@ class BookingEloquentRepository
 
     public function getRevenueByPackage(): Collection
     {
-        return Booking::with(['package' => fn($q) => $q->withTrashed()])
+        return Booking::with(['package' => fn ($q) => $q->withTrashed()])
             ->selectRaw('package_id, currency_id, COUNT(*) as bookings_count, SUM(paid_amount) as total_revenue')
             ->groupBy('package_id', 'currency_id')
             ->get()
-            ->map(fn($item) => (object) [
+            ->map(fn ($item) => (object) [
                 'package_name' => $item->package?->getTranslation('name', app()->getLocale()) ?? 'Deleted Package',
                 'currency_id' => (int) $item->currency_id,
                 'revenue' => (int) ($item->total_revenue ?? 0),
@@ -118,7 +119,7 @@ class BookingEloquentRepository
             $query->lockForUpdate();
         }
 
-        if (!empty($relations)) {
+        if (! empty($relations)) {
             $query->with($relations);
         }
 
@@ -129,7 +130,7 @@ class BookingEloquentRepository
     {
         $query = Booking::query()->where('user_id', $userId);
 
-        if (!empty($relations)) {
+        if (! empty($relations)) {
             $query->with($relations);
         }
 
@@ -141,7 +142,7 @@ class BookingEloquentRepository
         return Booking::query()
             ->where('user_id', $userId)
             ->with(['package'])
-            ->when($filters['status'] ?? null, fn($q, $status) => $q->where('status', $status))
+            ->when($filters['status'] ?? null, fn ($q, $status) => $q->where('status', $status))
             ->latest()
             ->paginate($filters['per_page'] ?? 20);
     }
@@ -165,7 +166,7 @@ class BookingEloquentRepository
         return Booking::where('user_id', $userId)
             ->where('status', BookingStatusEnum::ACTIVE)
             ->where('remaining_credits', '>', 0)
-            ->where(fn($q) => $q->whereNull('expires_at')->orWhere('expires_at', '>', now()))
+            ->where(fn ($q) => $q->whereNull('expires_at')->orWhere('expires_at', '>', now()))
             ->lockForUpdate()
             ->first();
     }
@@ -180,7 +181,7 @@ class BookingEloquentRepository
         return Booking::where('user_id', $userId)
             ->where('status', BookingStatusEnum::ACTIVE)
             ->where('remaining_credits', '>', 0)
-            ->where(fn($q) => $q->whereNull('expires_at')->orWhere('expires_at', '>', now()))
+            ->where(fn ($q) => $q->whereNull('expires_at')->orWhere('expires_at', '>', now()))
             ->exists();
     }
 
@@ -218,8 +219,8 @@ class BookingEloquentRepository
     ): int {
         return (int) Booking::query()
             ->where('currency_id', $currencyId)
-            ->when($startDate, fn($q) => $q->where('created_at', '>=', $startDate))
-            ->when($endDate, fn($q) => $q->where('created_at', '<=', $endDate))
+            ->when($startDate, fn ($q) => $q->where('created_at', '>=', $startDate))
+            ->when($endDate, fn ($q) => $q->where('created_at', '<=', $endDate))
             ->sum('paid_amount');
     }
 }

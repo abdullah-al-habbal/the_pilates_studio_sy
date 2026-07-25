@@ -1,12 +1,16 @@
 <?php
+
 declare(strict_types=1);
+
 namespace App\Handlers\User;
+
 use App\Enums\BookingStatusEnum;
 use App\Enums\UserStatusEnum;
 use App\Models\Booking;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use InvalidArgumentException;
+
 class FreezeUserHandler
 {
     /**

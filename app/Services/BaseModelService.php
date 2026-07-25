@@ -1,4 +1,5 @@
 <?php
+
 // filePath: app/Services/BaseModelService.php
 declare(strict_types=1);
 
@@ -20,8 +21,7 @@ abstract class BaseModelService
     abstract protected function modelLabel(): string;
 
     /**
-     * @param  int|string $id
-     * @param  string[]   $includes
+     * @param  string[]  $includes
      * @return TModel
      *
      * @throws ModelNotFoundException

@@ -81,11 +81,12 @@ class BookingSession extends Model
         return Attribute::make(
             get: function () {
                 try {
-                    if (!$this->isReserved() || !$this->classSession) {
+                    if (! $this->isReserved() || ! $this->classSession) {
                         return false;
                     }
-                    return !$this->classSession->is_within_cancellation_window
-                        && !$this->classSession->is_past;
+
+                    return ! $this->classSession->is_within_cancellation_window
+                        && ! $this->classSession->is_past;
                 } catch (\Exception) {
                     return false;
                 }
@@ -98,7 +99,7 @@ class BookingSession extends Model
         return Attribute::make(
             get: function () {
                 try {
-                    if (!$this->isReserved() || !$this->classSession) {
+                    if (! $this->isReserved() || ! $this->classSession) {
                         return false;
                     }
                     $startDateTime = Carbon::create(
@@ -122,7 +123,7 @@ class BookingSession extends Model
         return Attribute::make(
             get: function () {
                 try {
-                    if (!$this->isReserved() || !$this->classSession) {
+                    if (! $this->isReserved() || ! $this->classSession) {
                         return false;
                     }
                     $endDateTime = Carbon::create(
@@ -144,7 +145,7 @@ class BookingSession extends Model
     protected function isRefundable(): Attribute
     {
         return Attribute::make(
-            get: fn() => $this->can_cancel
+            get: fn () => $this->can_cancel
         );
     }
 
@@ -153,7 +154,7 @@ class BookingSession extends Model
         return Attribute::make(
             get: function () {
                 try {
-                    if (!$this->classSession) {
+                    if (! $this->classSession) {
                         return false;
                     }
 

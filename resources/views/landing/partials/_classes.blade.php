@@ -7,7 +7,7 @@
                 <span class="inline-block px-4 py-1.5 bg-primary-50 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300 text-sm font-semibold rounded-full mb-4">{{ __('landing.our_classes') }}</span>
                 <h2 class="text-3xl sm:text-4xl font-bold text-slate-900 dark:text-white">{{ $s->classesTitle }}</h2>
             </div>
-            <a href="#download" class="inline-flex items-center gap-2 text-primary-600 dark:text-primary-400 font-semibold hover:gap-3 transition-all">
+            <a href="{{ route('landing') }}#download" class="inline-flex items-center gap-2 text-primary-600 dark:text-primary-400 font-semibold hover:gap-3 transition-all">
                 {{ __('landing.view_full_schedule') }}
                 <i data-lucide="arrow-right" class="w-5 h-5"></i>
             </a>
@@ -72,7 +72,7 @@
                                 </span>
                             </div>
 
-                            <a href="#download" class="flex items-center justify-center gap-2 w-full py-3 rounded-xl bg-slate-50 dark:bg-dark-700 text-slate-700 dark:text-slate-200 font-semibold text-sm hover:bg-primary-50 dark:hover:bg-primary-900/20 hover:text-primary-600 dark:hover:text-primary-400 transition-all">
+                            <a href="{{ route('landing') }}#download" class="flex items-center justify-center gap-2 w-full py-3 rounded-xl bg-slate-50 dark:bg-dark-700 text-slate-700 dark:text-slate-200 font-semibold text-sm hover:bg-primary-50 dark:hover:bg-primary-900/20 hover:text-primary-600 dark:hover:text-primary-400 transition-all">
                                 <i data-lucide="calendar-plus" class="w-4 h-4"></i>
                                 {{ __('landing.view_schedule') }}
                             </a>

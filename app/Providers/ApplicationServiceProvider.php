@@ -25,8 +25,10 @@ use App\Services\AppSetting\AppSettingService;
 use App\Services\Booking\BookingService;
 use App\Services\BookingSession\BookingSessionService;
 use App\Services\ClassCategory\ClassCategoryService;
-use App\Services\ClassSession\ClassSessionService;
 use App\Services\Classes\ClassesService;
+use App\Services\ClassSession\ClassSessionService;
+use App\Services\Currency\CurrencyService;
+use App\Services\Currency\PricingService;
 use App\Services\Dashboard\StatsService;
 use App\Services\Instructor\InstructorService;
 use App\Services\Landing\LandingDataService;
@@ -34,19 +36,17 @@ use App\Services\Package\PackageService;
 use App\Services\StaticPage\StaticPageService;
 use App\Services\Testimonial\TestimonialService;
 use App\Services\User\UserService;
-use App\Services\Currency\CurrencyService;
-use App\Services\Currency\PricingService;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
-use Illuminate\Support\Facades\Log;
 
 class ApplicationServiceProvider extends ServiceProvider
 {
@@ -177,5 +177,4 @@ class ApplicationServiceProvider extends ServiceProvider
                 ->uncompromised();
         });
     }
-
 }

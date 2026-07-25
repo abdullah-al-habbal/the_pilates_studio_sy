@@ -1,4 +1,5 @@
 <?php
+
 // filePath: app/Enums/Api/SuccessCodeEnum.php
 
 declare(strict_types=1);
@@ -34,7 +35,7 @@ enum SuccessCodeEnum: string
 
     public function getMessage(): string
     {
-        return match($this) {
+        return match ($this) {
             self::SUCCESS => 'Operation completed successfully',
             self::CREATED => 'Resource created successfully',
             self::UPDATED => 'Resource updated successfully',
@@ -57,7 +58,7 @@ enum SuccessCodeEnum: string
 
     public function getStatusCode(): int
     {
-        return match($this) {
+        return match ($this) {
             self::CREATED, self::REGISTER_SUCCESS, self::BOOKING_CREATED, self::PACKAGE_PURCHASED, self::FILE_UPLOADED => 201,
             default => 200,
         };

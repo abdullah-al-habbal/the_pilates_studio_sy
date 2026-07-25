@@ -44,7 +44,7 @@ class MerchandiseOrderResource extends Resource
 
     public static function getRecordTitle(?Model $record): string
     {
-        return $record ? 'Order #' . $record->id : static::getModelLabel();
+        return $record ? 'Order #'.$record->id : static::getModelLabel();
     }
 
     public static function getNavigationBadge(): ?string

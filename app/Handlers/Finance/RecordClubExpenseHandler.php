@@ -1,9 +1,13 @@
 <?php
+
 declare(strict_types=1);
+
 namespace App\Handlers\Finance;
+
 use App\Models\ClubExpense;
 use App\Models\ClubExpenseCategory;
 use Illuminate\Support\Facades\DB;
+
 class RecordClubExpenseHandler
 {
     public function handle(array $data): ClubExpense
@@ -13,6 +17,7 @@ class RecordClubExpenseHandler
                 ['name' => $data['category_name']],
                 ['name' => $data['category_name']]
             );
+
             return ClubExpense::create([
                 'category_id' => $category->id,
                 'amount' => (int) $data['amount'],

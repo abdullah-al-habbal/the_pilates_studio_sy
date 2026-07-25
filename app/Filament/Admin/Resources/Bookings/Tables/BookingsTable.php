@@ -83,9 +83,12 @@ class BookingsTable
                 TextColumn::make('paid_amount')
                     ->label('Paid')
                     ->formatStateUsing(function ($record) {
-                        if ($record->paid_amount === null) return '—';
+                        if ($record->paid_amount === null) {
+                            return '—';
+                        }
                         $currency = $record->currency;
-                        return number_format($record->paid_amount, $currency->decimal_places) . ' ' . $currency->symbol;
+
+                        return number_format($record->paid_amount, $currency->decimal_places).' '.$currency->symbol;
                     })
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),

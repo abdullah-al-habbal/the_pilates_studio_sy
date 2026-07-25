@@ -15,8 +15,7 @@ final readonly class GetSessionDetailsHandler
     public function __construct(
         private ClassSessionEloquentRepository $repository,
         private LoggingService $logger
-    ) {
-    }
+    ) {}
 
     public function handle(GetSessionDetailsQuery $query): array
     {
@@ -32,7 +31,7 @@ final readonly class GetSessionDetailsHandler
             is_array($session->class?->title) => $session->class->title[$locale]
             ?? $session->class->title['en']
             ?? '[MISSING:class.title.translation]',
-            !is_null($session->class?->title) => $session->class->title,
+            ! is_null($session->class?->title) => $session->class->title,
             is_null($session->class) => '[MISSING:class_session.class_relation]',
             default => '[MISSING:class.title]',
         };
@@ -47,8 +46,8 @@ final readonly class GetSessionDetailsHandler
             : 0;
 
         $bookings = $session->bookingSessions
-            ->filter(fn(BookingSession $bs) => $bs->attendance_status !== AttendanceStatusEnum::MISSED)
-            ->map(fn(BookingSession $bs) => [
+            ->filter(fn (BookingSession $bs) => $bs->attendance_status !== AttendanceStatusEnum::MISSED)
+            ->map(fn (BookingSession $bs) => [
                 'id' => $bs->id,
                 'status' => $bs->status?->value ?? '[MISSING:booking_session.status]',
                 'attendance' => $bs->attendance_status?->value ?? null,

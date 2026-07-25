@@ -1,4 +1,5 @@
 <?php
+
 // filePath: routes/console.php
 use App\Console\Commands\Send24HourSessionReminders;
 use Illuminate\Support\Facades\Schedule;

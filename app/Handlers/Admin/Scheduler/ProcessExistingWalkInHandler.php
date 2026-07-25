@@ -15,8 +15,7 @@ final readonly class ProcessExistingWalkInHandler
     public function __construct(
         private BookingSessionService $bookingSessionService,
         private ClassSessionEloquentRepository $classSessionRepo,
-    ) {
-    }
+    ) {}
 
     public function handle(ProcessExistingWalkInCommand $command): array
     {
@@ -32,7 +31,7 @@ final readonly class ProcessExistingWalkInHandler
 
             if ($capacity > 0 && count($command->userIds) > $available) {
                 throw ValidationException::withMessages([
-                    'user_ids' => "Only {$available} spot(s) remaining — cannot add " . count($command->userIds) . ' walk-in(s).',
+                    'user_ids' => "Only {$available} spot(s) remaining — cannot add ".count($command->userIds).' walk-in(s).',
                 ]);
             }
 

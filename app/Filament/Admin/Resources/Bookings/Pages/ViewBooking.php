@@ -1,15 +1,14 @@
 <?php
+
 // filePath: app/Filament/Admin/Resources/Bookings/Pages/ViewBooking.php
 
 namespace App\Filament\Admin\Resources\Bookings\Pages;
 
 use App\Filament\Admin\Resources\Bookings\BookingResource;
-use Filament\Actions\{
-    DeleteAction,
-    EditAction,
-    ForceDeleteAction,
-    RestoreAction,
-};
+use Filament\Actions\DeleteAction;
+use Filament\Actions\EditAction;
+use Filament\Actions\ForceDeleteAction;
+use Filament\Actions\RestoreAction;
 use Filament\Resources\Pages\ViewRecord;
 
 class ViewBooking extends ViewRecord
@@ -27,11 +26,11 @@ class ViewBooking extends ViewRecord
 
             RestoreAction::make()
                 ->label(__('dashboard.resources.bookings.actions.restore'))
-                ->visible(fn($record): bool => $record->trashed()),
+                ->visible(fn ($record): bool => $record->trashed()),
 
             ForceDeleteAction::make()
                 ->label(__('dashboard.resources.bookings.actions.force_delete'))
-                ->visible(fn($record): bool => $record->trashed()),
+                ->visible(fn ($record): bool => $record->trashed()),
         ];
     }
 

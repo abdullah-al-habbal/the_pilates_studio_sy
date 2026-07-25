@@ -1,16 +1,16 @@
 <?php
+
 // filePath: app/Http/Controllers/Api/V1/Profile/ProfileController.php
 
 declare(strict_types=1);
 
 namespace App\Http\Controllers\Api\V1\Profile;
 
+use App\Enums\Api\SuccessCodeEnum;
 use App\Http\Controllers\Api\BaseApiController;
-use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\V1\Profile\UpdateProfileRequest;
 use App\Http\Resources\Api\V1\UserResource;
 use App\Services\Profile\ProfileService;
-use App\Enums\Api\SuccessCodeEnum;
 use Dedoc\Scramble\Attributes\Endpoint;
 use Dedoc\Scramble\Attributes\Group;
 use Illuminate\Http\JsonResponse;

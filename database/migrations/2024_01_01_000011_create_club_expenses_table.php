@@ -1,8 +1,10 @@
 <?php
+
 declare(strict_types=1);
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
+
 return new class extends Migration
 {
     public function up(): void
@@ -10,11 +12,11 @@ return new class extends Migration
         Schema::create('club_expenses', function (Blueprint $table) {
             $table->id();
             $table->foreignId('category_id')->constrained('club_expense_categories')->restrictOnDelete();
-            
+
             $table->foreignId('currency_id')
                 ->constrained('currencies')
                 ->restrictOnDelete();
-                
+
             $table->unsignedInteger('amount');
             $table->text('notes')->nullable();
             $table->string('status')->default('pending')
@@ -34,5 +36,9 @@ return new class extends Migration
             $table->index('currency_id');
         });
     }
-    public function down(): void { Schema::dropIfExists('club_expenses'); }
+
+    public function down(): void
+    {
+        Schema::dropIfExists('club_expenses');
+    }
 };

@@ -21,7 +21,7 @@ final class SendFcmTestNotificationAction
 
         $user->notify(new ManualPushNotification(
             title: 'Test',
-            body:  'Direct HTTP check'
+            body: 'Direct HTTP check'
         ));
 
         return response('sent');

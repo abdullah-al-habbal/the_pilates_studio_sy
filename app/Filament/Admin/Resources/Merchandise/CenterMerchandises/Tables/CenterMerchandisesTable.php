@@ -37,14 +37,14 @@ class CenterMerchandisesTable
                     ->formatStateUsing(fn ($state, $record) => $record->category?->getTranslation('name', $locale)),
                 TextColumn::make('price')
                     ->label(__('dashboard.resources.center_merchandises.fields.price'))
-                    ->getStateUsing(fn($record) => $record->getBasePrice())
+                    ->getStateUsing(fn ($record) => $record->getBasePrice())
                     ->money($currencyCode)
                     ->sortable(),
                 TextColumn::make('stock_quantity')
                     ->label(__('dashboard.resources.center_merchandises.fields.stock_quantity'))
                     ->badge()
                     ->sortable()
-                    ->color(fn(int $state): string => match (true) {
+                    ->color(fn (int $state): string => match (true) {
                         $state === 0 => 'danger',
                         $state < 5 => 'warning',
                         default => 'success',

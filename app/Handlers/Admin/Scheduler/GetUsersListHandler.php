@@ -11,8 +11,7 @@ final readonly class GetUsersListHandler
 {
     public function __construct(
         private UserEloquentRepository $repository
-    ) {
-    }
+    ) {}
 
     public function handle(?int $sessionId = null): Collection
     {
@@ -20,9 +19,9 @@ final readonly class GetUsersListHandler
             ? $this->repository->listExcludingSession($sessionId)
             : $this->repository->list();
 
-        return $users->map(fn($u) => [
+        return $users->map(fn ($u) => [
             'id' => $u->id,
-            'label' => $u->fullname . ($u->phone_number ? ' · ' . $u->phone_number : ''),
+            'label' => $u->fullname.($u->phone_number ? ' · '.$u->phone_number : ''),
         ]);
     }
 }

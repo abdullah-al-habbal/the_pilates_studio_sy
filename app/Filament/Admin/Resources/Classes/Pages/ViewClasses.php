@@ -4,15 +4,14 @@ namespace App\Filament\Admin\Resources\Classes\Pages;
 
 use App\Enums\ClassStatusEnum;
 use App\Filament\Admin\Resources\Classes\ClassesResource;
+use Filament\Actions\Action;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ForceDeleteAction;
 use Filament\Actions\RestoreAction;
-use Filament\Actions\Action;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ViewRecord;
 use Illuminate\Contracts\Support\Htmlable;
-
 use LaraZeus\SpatieTranslatable\Actions\LocaleSwitcher;
 use LaraZeus\SpatieTranslatable\Resources\Pages\ViewRecord\Concerns\Translatable;
 
@@ -45,7 +44,7 @@ class ViewClasses extends ViewRecord
                 ->modalHeading('Cancel This Class')
                 ->modalDescription('This will cancel the class. Members with active bookings should be notified.')
                 ->modalSubmitActionLabel('Yes, cancel it')
-                ->visible(fn() => $this->getRecord()->status === ClassStatusEnum::ACTIVE)
+                ->visible(fn () => $this->getRecord()->status === ClassStatusEnum::ACTIVE)
                 ->action(function (): void {
                     $this->getRecord()->update(['status' => ClassStatusEnum::INACTIVE->value]);
                     $this->refreshFormData(['status']);

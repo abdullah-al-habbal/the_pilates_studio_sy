@@ -44,6 +44,7 @@ final class SendSessionRemindersCommand extends Command
                             'session_id' => $session->id,
                             'booking_id' => $booking->id,
                         ]);
+
                         continue;
                     }
 
@@ -51,6 +52,7 @@ final class SendSessionRemindersCommand extends Command
                         Log::info('Notifications disabled for user', [
                             'user_id' => $user->id,
                         ]);
+
                         continue;
                     }
 
@@ -58,6 +60,7 @@ final class SendSessionRemindersCommand extends Command
                         Log::warning('User missing FCM token', [
                             'user_id' => $user->id,
                         ]);
+
                         continue;
                     }
 
@@ -79,6 +82,7 @@ final class SendSessionRemindersCommand extends Command
         }
 
         $this->info("Processed {$sessions->count()} session reminder(s).");
+
         return self::SUCCESS;
     }
 }

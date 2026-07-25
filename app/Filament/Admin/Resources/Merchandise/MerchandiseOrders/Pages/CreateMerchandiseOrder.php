@@ -17,7 +17,7 @@ class CreateMerchandiseOrder extends CreateRecord
     protected function handleRecordCreation(array $data): Model
     {
         $currencyId = (int) ($data['currency_id'] ?? Currency::where('is_active', true)->value('id'));
-        if (!$currencyId) {
+        if (! $currencyId) {
             throw new \RuntimeException('No active currency found.');
         }
 

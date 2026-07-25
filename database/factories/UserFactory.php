@@ -12,38 +12,38 @@ class UserFactory extends Factory
     public function definition(): array
     {
         return [
-            'fullname'          => $this->faker->name(),
-            'phone_number'      => '+971' . $this->faker->unique()->numerify('#########'),
-            'email'             => $this->faker->unique()->safeEmail(),
-            'password'          => Hash::make('password'),
-            'date_of_birth'     => $this->faker->dateTimeBetween('-50 years', '-18 years')->format('Y-m-d'),
+            'fullname' => $this->faker->name(),
+            'phone_number' => '+971'.$this->faker->unique()->numerify('#########'),
+            'email' => $this->faker->unique()->safeEmail(),
+            'password' => Hash::make('password'),
+            'date_of_birth' => $this->faker->dateTimeBetween('-50 years', '-18 years')->format('Y-m-d'),
             'email_verified_at' => now(),
-            'otp_code'          => null,
-            'otp_expires_at'    => null,
-            'deactivated_at'    => null,
-            'deleted_by'        => null,
-            'status'            => UserStatusEnum::ACTIVE,
-            'role'              => UserRoleEnum::CUSTOMER,
+            'otp_code' => null,
+            'otp_expires_at' => null,
+            'deactivated_at' => null,
+            'deleted_by' => null,
+            'status' => UserStatusEnum::ACTIVE,
+            'role' => UserRoleEnum::CUSTOMER,
         ];
     }
 
     public function unverified(): static
     {
-        return $this->state(fn() => ['email_verified_at' => null]);
+        return $this->state(fn () => ['email_verified_at' => null]);
     }
 
     public function deactivated(): static
     {
-        return $this->state(fn() => ['deactivated_at' => now()]);
+        return $this->state(fn () => ['deactivated_at' => now()]);
     }
 
     public function admin(): static
     {
-        return $this->state(fn() => ['role' => UserRoleEnum::ADMIN]);
+        return $this->state(fn () => ['role' => UserRoleEnum::ADMIN]);
     }
 
     public function mainAdmin(): static
     {
-        return $this->state(fn() => ['role' => UserRoleEnum::MAIN_ADMIN]);
+        return $this->state(fn () => ['role' => UserRoleEnum::MAIN_ADMIN]);
     }
 }

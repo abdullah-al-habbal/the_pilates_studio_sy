@@ -22,6 +22,7 @@ class MerchandiseOrdersTable
                         if (is_array($state)) {
                             return $state[app()->getLocale()] ?? $state['en'] ?? '—';
                         }
+
                         return $record->merchandise?->getTranslation('name', app()->getLocale()) ?? '—';
                     })
                     ->searchable()

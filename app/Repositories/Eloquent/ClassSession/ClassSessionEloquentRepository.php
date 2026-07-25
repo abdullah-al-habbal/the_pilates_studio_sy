@@ -7,6 +7,7 @@ declare(strict_types=1);
 namespace App\Repositories\Eloquent\ClassSession;
 
 use App\Models\ClassSession;
+use Carbon\Carbon;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
@@ -16,8 +17,7 @@ class ClassSessionEloquentRepository
 {
     public function __construct(
         private readonly ClassSession $model
-    ) {
-    }
+    ) {}
 
     public function getSessionsBetween(string $startDate, string $endDate): Collection
     {
@@ -48,11 +48,11 @@ class ClassSessionEloquentRepository
     ): LengthAwarePaginator {
         return $this->model->newQuery()
             ->with(['class.instructor', 'class.primaryImage', 'class.category'])
-            ->when($date, fn($q) => $q->whereDate('date', $date))
-            ->when($dateAfter, fn($q) => $q->whereDate('date', '>=', $dateAfter))
-            ->when($dateBefore, fn($q) => $q->whereDate('date', '<=', $dateBefore))
-            ->when($startAfter, fn($q, $time) => $q->where('start_time', '>=', $time))
-            ->when($classId, fn($q, $id) => $q->where('class_id', $id))
+            ->when($date, fn ($q) => $q->whereDate('date', $date))
+            ->when($dateAfter, fn ($q) => $q->whereDate('date', '>=', $dateAfter))
+            ->when($dateBefore, fn ($q) => $q->whereDate('date', '<=', $dateBefore))
+            ->when($startAfter, fn ($q, $time) => $q->where('start_time', '>=', $time))
+            ->when($classId, fn ($q, $id) => $q->where('class_id', $id))
             ->whereDate('date', '>=', now()->toDateString())
             ->orderBy('date')
             ->orderBy('start_time')
@@ -83,11 +83,12 @@ class ClassSessionEloquentRepository
             ->where('status', 'scheduled')
             ->with([
                 'class.instructor',
-                'bookingSessions.booking.user.bookings' => fn($q) => $q->where('status', 'active')->where('remaining_credits', '>', 0),
+                'bookingSessions.booking.user.bookings' => fn ($q) => $q->where('status', 'active')->where('remaining_credits', '>', 0),
             ])
             ->orderBy('start_time')
             ->get();
     }
+
     public function findOrFailForUpdate(int $id): ClassSession
     {
         return $this->model->newQuery()->lockForUpdate()->findOrFail($id);
@@ -100,7 +101,7 @@ class ClassSessionEloquentRepository
                 'class.instructor',
                 'bookingSessions',
             ])
-            ->when($instructorId, fn($q, $id) => $q->whereHas('class', fn($q) => $q->where('instructor_id', $id)))
+            ->when($instructorId, fn ($q, $id) => $q->whereHas('class', fn ($q) => $q->where('instructor_id', $id)))
             ->whereDate('date', $date)
             ->where('status', 'scheduled')
             ->orderBy('start_time')
@@ -132,6 +133,7 @@ class ClassSessionEloquentRepository
     public function countUpcomingFullSessions(): int
     {
         $now = now();
+
         return $this->model->newQuery()
             ->where(function ($query) use ($now) {
                 $query->whereDate('date', '>', $now->toDateString())
@@ -151,7 +153,7 @@ class ClassSessionEloquentRepository
             ->whereMonth('date', $month)
             ->where('status', 'scheduled')
             ->pluck('date')
-            ->map(fn($date) => \Carbon\Carbon::parse($date)->format('Y-m-d'))
+            ->map(fn ($date) => Carbon::parse($date)->format('Y-m-d'))
             ->unique()
             ->values()
             ->toArray();
@@ -160,7 +162,7 @@ class ClassSessionEloquentRepository
     public function getAvailableSpots(int $id): int
     {
         $session = $this->model->newQuery()->find($id);
-        if (!$session) {
+        if (! $session) {
             return 0;
         }
 
@@ -170,6 +172,7 @@ class ClassSessionEloquentRepository
         }
 
         $reserved = $session->bookingSessions()->count();
+
         return max(0, $capacity - $reserved);
     }
 }

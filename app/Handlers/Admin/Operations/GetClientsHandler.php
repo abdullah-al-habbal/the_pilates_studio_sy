@@ -13,8 +13,8 @@ final readonly class GetClientsHandler
     public function handle(GetClientsCommand $command): LengthAwarePaginator
     {
         return User::with(['bookings.package', 'activeCreditBooking.package', 'frozenCreditBooking.package', 'bookingSessions'])
-            ->when($command->onlyClients, fn($q) => $q->customers())
-            ->when($command->withValidFcm, fn($q) => $q->whereHas('settings', function($q) {
+            ->when($command->onlyClients, fn ($q) => $q->customers())
+            ->when($command->withValidFcm, fn ($q) => $q->whereHas('settings', function ($q) {
                 $q->whereNotNull('fcm_token')->where('fcm_token', '!=', '');
             }))
             ->when($command->search, function ($q) use ($command) {
@@ -30,15 +30,15 @@ final readonly class GetClientsHandler
             })
             ->when($command->filter === 'best_seller', function ($q) {
                 $q->withCount('merchandiseOrders')
-                  ->orderByDesc('merchandise_orders_count');
+                    ->orderByDesc('merchandise_orders_count');
             })
             ->when($command->filter === 'most_active_booking', function ($q) {
-                $q->withMax(['bookings as max_remaining_credits' => function($query) {
+                $q->withMax(['bookings as max_remaining_credits' => function ($query) {
                     $query->where('status', 'active');
                 }], 'remaining_credits')
-                ->orderByDesc('max_remaining_credits');
+                    ->orderByDesc('max_remaining_credits');
             })
-            ->when(!$command->filter, function ($q) {
+            ->when(! $command->filter, function ($q) {
                 $q->latest();
             })
             ->paginate($command->perPage, ['*'], 'page', $command->page);

@@ -9,9 +9,10 @@ namespace App\Repositories\Eloquent\User;
 use App\Enums\BookingStatusEnum;
 use App\Events\User\UserRegisteredEvent;
 use App\Models\User;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
+
 class UserEloquentRepository
 {
     public function countActiveUsers(): int

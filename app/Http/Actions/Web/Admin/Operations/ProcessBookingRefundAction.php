@@ -17,12 +17,11 @@ final readonly class ProcessBookingRefundAction
 
     public function __construct(
         private ProcessBookingRefundHandler $handler
-    ) {
-    }
+    ) {}
 
     public function __invoke(ProcessBookingRefundRequest $request, int $bookingId): JsonResponse
     {
-        if (!Auth::user()?->isMainAdmin()) {
+        if (! Auth::user()?->isMainAdmin()) {
             return $this->forbidden('Only main admin can process refunds.');
         }
 
@@ -36,10 +35,11 @@ final readonly class ProcessBookingRefundAction
                 message: 'Refund processed successfully.'
             );
         } catch (\Throwable $e) {
-            Log::error('Operations - ProcessBookingRefund failed: ' . $e->getMessage(), [
+            Log::error('Operations - ProcessBookingRefund failed: '.$e->getMessage(), [
                 'exception' => $e,
                 'booking_id' => $bookingId,
             ]);
+
             return $this->unprocessable($e->getMessage());
         }
     }

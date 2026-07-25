@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Actions\Web\StaticPage;
 
-use App\Services\StaticPage\StaticPageService;
 use App\Services\Landing\LandingDataService;
+use App\Services\StaticPage\StaticPageService;
 use Illuminate\Contracts\View\View;
 
 class ShowStaticPageAction
@@ -18,7 +18,7 @@ class ShowStaticPageAction
     public function __invoke(string $slug): View
     {
         $page = $this->staticPageService->findBySlug($slug);
-        if (!$page) {
+        if (! $page) {
             abort(404);
         }
 

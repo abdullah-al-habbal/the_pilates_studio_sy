@@ -1,4 +1,5 @@
 <?php
+
 // filePath: app/Http/Requests/Api/V1/UserSetting/UpdateUserSettingRequest.php
 
 declare(strict_types=1);

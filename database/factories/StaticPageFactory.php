@@ -19,10 +19,10 @@ class StaticPageFactory extends Factory
         $imagePath = $this->copySourceImage($sourcePath, 'static-pages', $slug);
 
         return [
-            'slug'    => $slug,
-            'title'   => ['en' => ucwords($title), 'ar' => ucwords($title)],
-            'image'   => $imagePath,
-            'content' => ['en' => '<p>' . $this->faker->paragraph() . '</p>', 'ar' => ''],
+            'slug' => $slug,
+            'title' => ['en' => ucwords($title), 'ar' => ucwords($title)],
+            'image' => $imagePath,
+            'content' => ['en' => '<p>'.$this->faker->paragraph().'</p>', 'ar' => ''],
         ];
     }
 }

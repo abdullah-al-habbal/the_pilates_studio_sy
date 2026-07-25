@@ -30,11 +30,11 @@
                 </p>
 
                 <div class="flex flex-col sm:flex-row gap-4 mb-12">
-                    <a href="#download" class="inline-flex items-center justify-center gap-2 px-8 py-4 bg-primary-600 hover:bg-primary-700 text-white font-semibold rounded-xl transition-all hover:shadow-xl hover:shadow-primary-500/25 hover:-translate-y-0.5">
+                    <a href="{{ route('landing') }}#download" class="inline-flex items-center justify-center gap-2 px-8 py-4 bg-primary-600 hover:bg-primary-700 text-white font-semibold rounded-xl transition-all hover:shadow-xl hover:shadow-primary-500/25 hover:-translate-y-0.5">
                         <i data-lucide="calendar-check" class="w-5 h-5"></i>
                         {{ __('landing.view_schedule') }}
                     </a>
-                    <a href="#download" class="inline-flex items-center justify-center gap-2 px-8 py-4 bg-white dark:bg-dark-800 text-slate-700 dark:text-slate-200 font-semibold rounded-xl border border-slate-200 dark:border-dark-700 hover:border-primary-300 dark:hover:border-primary-700 hover:bg-primary-50 dark:hover:bg-primary-900/20 transition-all hover:-translate-y-0.5">
+                    <a href="{{ route('landing') }}#download" class="inline-flex items-center justify-center gap-2 px-8 py-4 bg-white dark:bg-dark-800 text-slate-700 dark:text-slate-200 font-semibold rounded-xl border border-slate-200 dark:border-dark-700 hover:border-primary-300 dark:hover:border-primary-700 hover:bg-primary-50 dark:hover:bg-primary-900/20 transition-all hover:-translate-y-0.5">
                         <i data-lucide="smartphone" class="w-5 h-5"></i>
                         {{ __('landing.get_app') }}
                     </a>
@@ -127,7 +127,7 @@
     </div>
 
     <div class="absolute bottom-8 left-1/2 -translate-x-1/2 animate-bounce">
-        <a href="#features" class="flex flex-col items-center gap-2 text-slate-400 hover:text-primary-600 dark:hover:text-primary-400 transition-colors">
+        <a href="{{ route('landing') }}#features" class="flex flex-col items-center gap-2 text-slate-400 hover:text-primary-600 dark:hover:text-primary-400 transition-colors">
             <span class="text-xs font-medium">{{ __('landing.scroll_explore') }}</span>
             <i data-lucide="chevron-down" class="w-5 h-5"></i>
         </a>
