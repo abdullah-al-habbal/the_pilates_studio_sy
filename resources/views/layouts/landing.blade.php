@@ -6,24 +6,46 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
 
-    <title>{{ ($landingData->settings->siteName ?? '') . ' — ' . ($landingData->settings->siteTagline ?? '') }}</title>
-    <meta name="description" content="{{ $landingData->settings->siteDescription ?? '' }}">
-    <meta name="keywords" content="yoga, pilates, dance fitness, fitness studio, wellness">
+    {{-- Basic Meta Tags --}}
+    <title>{{ $landingData->settings->metaTitle ?? '' }}</title>
+    <meta name="description" content="{{ $landingData->settings->metaDescription ?? '' }}">
+    <meta name="keywords" content="yoga, pilates, dance fitness, fitness studio, wellness, Damascus, Syria">
     <meta name="author" content="{{ $landingData->settings->siteName ?? '' }}">
+    <meta name="robots" content="index, follow">
+    <meta name="googlebot" content="index, follow">
     <link rel="canonical" href="{{ url('/') }}">
 
+    {{-- Favicon --}}
+    @if($landingData->settings->faviconUrl)
+        <link rel="icon" type="image/png" sizes="32x32" href="{{ $landingData->settings->faviconUrl }}">
+        <link rel="icon" type="image/png" sizes="16x16" href="{{ $landingData->settings->faviconUrl }}">
+        <link rel="apple-touch-icon" sizes="180x180" href="{{ $landingData->settings->faviconUrl }}">
+    @endif
+
+    {{-- Open Graph / Facebook --}}
     <meta property="og:type" content="website">
     <meta property="og:url" content="{{ url('/') }}">
-    <meta property="og:title" content="{{ ($landingData->settings->siteName ?? '') . ' — ' . ($landingData->settings->siteTagline ?? '') }}">
-    <meta property="og:description" content="{{ $landingData->settings->siteDescription ?? '' }}">
-    <meta property="og:image" content="{{ $landingData->settings->logoUrl ?? '' }}">
+    <meta property="og:title" content="{{ $landingData->settings->metaTitle ?? '' }}">
+    <meta property="og:description" content="{{ $landingData->settings->metaDescription ?? '' }}">
+    <meta property="og:image" content="{{ $landingData->settings->ogImageUrl ?? '' }}">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
     <meta property="og:locale" content="{{ str_replace('_', '-', app()->getLocale()) }}">
+    <meta property="og:site_name" content="{{ $landingData->settings->siteName ?? '' }}">
 
-    <meta property="twitter:card" content="summary_large_image">
-    <meta property="twitter:url" content="{{ url('/') }}">
-    <meta property="twitter:title" content="{{ ($landingData->settings->siteName ?? '') . ' — ' . ($landingData->settings->siteTagline ?? '') }}">
-    <meta property="twitter:description" content="{{ $landingData->settings->siteDescription ?? '' }}">
-    <meta property="twitter:image" content="{{ $landingData->settings->logoUrl ?? '' }}">
+    {{-- Twitter --}}
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:url" content="{{ url('/') }}">
+    <meta name="twitter:title" content="{{ $landingData->settings->metaTitle ?? '' }}">
+    <meta name="twitter:description" content="{{ $landingData->settings->metaDescription ?? '' }}">
+    <meta name="twitter:image" content="{{ $landingData->settings->ogImageUrl ?? '' }}">
+
+    {{-- Structured Data --}}
+    @if($landingData->settings->structuredDataJson !== '{}')
+    <script type="application/ld+json">
+    {!! $landingData->settings->structuredDataJson !!}
+    </script>
+    @endif
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>

@@ -109,12 +109,17 @@ class InitialDataServiceProvider extends ServiceProvider
     private function ensureAppSettings(): void
     {
         $sourcePath = public_path('assets/images/website/landing_page/hero_section/hero_image.webp');
+        $logoPath = public_path('assets/images/website/landing_page/hero_section/logo.jpg');
 
         foreach (self::REQUIRED_SETTINGS as $setting) {
             $existingSetting = AppSetting::where('key', $setting['key'])->first();
 
             if (! $existingSetting) {
-                if (($setting['type'] ?? null) === 'image') {
+                if (($setting['key'] ?? null) === 'site_logo') {
+                    if (File::exists($logoPath)) {
+                        $setting['value'] = $this->copySourceImage($logoPath, 'app-settings', 'site-logo', 'logo');
+                    }
+                } elseif (($setting['type'] ?? null) === 'image') {
                     $identifier = str_replace('_', '-', $setting['key']);
                     $setting['value'] = $this->copySourceImage($sourcePath, 'app-settings', $identifier, $setting['key']);
                 }
@@ -124,7 +129,12 @@ class InitialDataServiceProvider extends ServiceProvider
                 continue;
             }
 
-            if (($setting['type'] ?? null) === 'image' && empty($existingSetting->value)) {
+            if ($setting['key'] === 'site_logo' && empty($existingSetting->value)) {
+                if (File::exists($logoPath)) {
+                    $existingSetting->value = $this->copySourceImage($logoPath, 'app-settings', 'site-logo', 'logo');
+                    $existingSetting->save();
+                }
+            } elseif (($setting['type'] ?? null) === 'image' && empty($existingSetting->value)) {
                 $identifier = str_replace('_', '-', $setting['key']);
                 $existingSetting->value = $this->copySourceImage($sourcePath, 'app-settings', $identifier, $setting['key']);
                 $existingSetting->save();
