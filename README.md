@@ -31,7 +31,7 @@ Action → Handler → Service → Repository → Model
 - **Reports (Filament)** — Per-currency financial summaries with optional base conversion
 - **Mobile API (v1)** — Sanctum-protected endpoints for booking, class sessions, profiles, notifications
 - **Landing Page** — Dynamic public site with class schedule, instructors, packages, testimonials
-
+    
 ## Setup
 
 ```bash
