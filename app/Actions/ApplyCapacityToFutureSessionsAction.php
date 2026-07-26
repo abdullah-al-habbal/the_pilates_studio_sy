@@ -20,11 +20,12 @@ final class ApplyCapacityToFutureSessionsAction
      *
      * @throws ValidationException
      */
-    public function execute(Classes $class, string $reason): array
+    public function execute(Classes $class, int $capacity, string $reason): array
     {
         return $this->handler->handle(
             new ApplyCapacityToFutureSessionsCommand(
                 classId: $class->id,
+                capacity: $capacity,
                 reason: $reason,
             )
         );

@@ -81,6 +81,13 @@ class ClassesEloquentRepository
             ->take($limit);
     }
 
+    public function updateClassCapacity(int $classId, int $capacity): bool
+    {
+        return (bool) $this->model->newQuery()
+            ->where('id', $classId)
+            ->update(['total_spots' => $capacity]);
+    }
+
     public function findById(int $id): ?Classes
     {
         return $this->model->newQuery()

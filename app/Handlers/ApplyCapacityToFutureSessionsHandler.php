@@ -7,6 +7,7 @@ namespace App\Handlers;
 use App\Commands\ApplyCapacityToFutureSessionsCommand;
 use App\Enums\BookingSessionStatusEnum;
 use App\Models\Classes;
+use App\Repositories\Eloquent\Classes\ClassesEloquentRepository;
 use App\Repositories\Eloquent\ClassSession\ClassSessionEloquentRepository;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -17,6 +18,7 @@ final readonly class ApplyCapacityToFutureSessionsHandler
 {
     public function __construct(
         private ClassSessionEloquentRepository $repository,
+        private ClassesEloquentRepository $classesRepository,
     ) {}
 
     /**
@@ -27,7 +29,8 @@ final readonly class ApplyCapacityToFutureSessionsHandler
     public function handle(ApplyCapacityToFutureSessionsCommand $command): array
     {
         $class = Classes::findOrFail($command->classId);
-        $newCapacity = (int) $class->total_spots;
+        $previousCapacity = (int) $class->total_spots;
+        $newCapacity = $command->capacity;
 
         $futureSessions = $this->repository->getFutureScheduledSessions($command->classId);
 
@@ -57,14 +60,18 @@ final readonly class ApplyCapacityToFutureSessionsHandler
 
         $sessionIds = $futureSessions->pluck('id')->toArray();
 
-        DB::transaction(function () use ($sessionIds, $newCapacity) {
+        DB::transaction(function () use ($command, $sessionIds, $newCapacity) {
+            $this->classesRepository->updateClassCapacity($command->classId, $newCapacity);
             $this->repository->bulkUpdateCapacity($sessionIds, $newCapacity);
         });
 
         Log::info('[Capacity:Class]', [
             'class_id' => $command->classId,
+            'previous_capacity' => $previousCapacity,
             'new_capacity' => $newCapacity,
+            'capacity_change' => $newCapacity - $previousCapacity,
             'affected_sessions' => count($sessionIds),
+            'affected_session_ids' => $sessionIds,
             'admin_id' => Auth::id(),
             'reason' => $command->reason,
         ]);

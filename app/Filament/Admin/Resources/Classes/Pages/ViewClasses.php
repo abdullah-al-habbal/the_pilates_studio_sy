@@ -13,6 +13,7 @@ use Filament\Actions\ForceDeleteAction;
 use Filament\Actions\RestoreAction;
 use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ViewRecord;
 use Illuminate\Contracts\Support\Htmlable;
@@ -71,9 +72,13 @@ class ViewClasses extends ViewRecord
                 ->color('warning')
                 ->visible(fn () => $futureSessionsCount > 0)
                 ->form([
-                    Placeholder::make('current_capacity')
-                        ->label('Current Class Capacity')
-                        ->content(fn () => (string) $record->total_spots.' spots')
+                    TextInput::make('capacity')
+                        ->label('New Capacity')
+                        ->numeric()
+                        ->required()
+                        ->minValue(1)
+                        ->integer()
+                        ->default(fn () => $record->total_spots)
                         ->columnSpanFull(),
 
                     Placeholder::make('affected_count')
@@ -90,11 +95,12 @@ class ViewClasses extends ViewRecord
                         ->columnSpanFull(),
                 ])
                 ->modalHeading('Apply Capacity to Future Sessions')
-                ->modalDescription(fn () => "Push the current class capacity ({$record->total_spots} spots) to all {$futureSessionsCount} future scheduled session(s).")
+                ->modalDescription(fn () => "Update class capacity and apply to all {$futureSessionsCount} future scheduled session(s).")
                 ->modalSubmitActionLabel('Apply to Future Sessions')
                 ->action(function (array $data) use ($record): void {
                     $result = app(ApplyCapacityToFutureSessionsAction::class)->execute(
                         class: $record,
+                        capacity: (int) $data['capacity'],
                         reason: $data['reason'],
                     );
 
