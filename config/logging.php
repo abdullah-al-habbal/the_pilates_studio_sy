@@ -2,7 +2,6 @@
 
 declare(strict_types=1);
 
-use App\Logging\CustomLoggerFactory;
 use Monolog\Handler\NullHandler;
 use Monolog\Handler\StreamHandler;
 use Monolog\Handler\SyslogUdpHandler;
@@ -15,12 +14,6 @@ return [
         'trace' => env('LOG_DEPRECATIONS_TRACE', false),
     ],
     'channels' => [
-        'custom' => [
-            'driver' => 'custom',
-            'via' => CustomLoggerFactory::class,
-            'level' => env('LOG_LEVEL', 'debug'),
-            'bubble' => true,
-        ],
         'stack' => [
             'driver' => 'stack',
             'channels' => explode(',', (string) env('LOG_STACK', 'daily')),
