@@ -5,11 +5,20 @@ declare(strict_types=1);
 namespace App\Logging;
 
 use Monolog\Handler\StreamHandler;
+use Monolog\Level;
 use Monolog\LogRecord;
 
 final class TimestampLogHandler extends StreamHandler
 {
     private ?string $currentDate = null;
+
+    public function __construct(
+        private readonly string $logsPath,
+        int|string|Level $level = Level::Debug,
+        bool $bubble = true,
+    ) {
+        parent::__construct(stream: null, level: $level, bubble: $bubble);
+    }
 
     public function write(LogRecord $record): void
     {
@@ -37,6 +46,6 @@ final class TimestampLogHandler extends StreamHandler
         $month = $record->datetime->format('m');
         $day = $record->datetime->format('d');
 
-        return $this->streamPath.DIRECTORY_SEPARATOR.$year.DIRECTORY_SEPARATOR.$month.DIRECTORY_SEPARATOR.$day;
+        return $this->logsPath.DIRECTORY_SEPARATOR.$year.DIRECTORY_SEPARATOR.$month.DIRECTORY_SEPARATOR.$day;
     }
 }

@@ -13,7 +13,7 @@ class CustomLoggerFactory
     public function __invoke(array $config): Log
     {
         $handler = new TimestampLogHandler(
-            streamPath: $config['path'] ?? storage_path('logs'),
+            logsPath: $config['path'] ?? storage_path('logs'),
             level: $this->parseLevel($config['level'] ?? LogLevel::DEBUG),
             bubble: $config['bubble'] ?? true,
         );
