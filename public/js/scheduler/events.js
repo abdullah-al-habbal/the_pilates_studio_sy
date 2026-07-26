@@ -37,6 +37,20 @@
             ui.$('btn-close-modal')?.addEventListener('click', modal.close);
             ui.$('modal-backdrop')?.addEventListener('click', modal.close);
 
+            ui.$('btn-adjust-capacity')?.addEventListener('click', modal.openCapacityModal);
+            ui.$('btn-close-capacity-modal')?.addEventListener('click', modal.closeCapacityModal);
+            ui.$('capacity-modal-backdrop')?.addEventListener('click', modal.closeCapacityModal);
+            ui.$('btn-cancel-capacity')?.addEventListener('click', modal.closeCapacityModal);
+            ui.$('btn-save-capacity')?.addEventListener('click', modal.saveCapacity);
+
+            ui.$('capacity-input')?.addEventListener('input', (e) => {
+                state.capacity.newCapacity = e.target.value;
+                state.capacity.error = '';
+            });
+            ui.$('capacity-reason')?.addEventListener('input', (e) => {
+                state.capacity.reason = e.target.value;
+            });
+
             ui.$('tab-btn-attendees')?.addEventListener('click', () => modal.switchTab('attendees'));
             ui.$('tab-btn-walkin')?.addEventListener('click',    () => modal.switchTab('walkin'));
 

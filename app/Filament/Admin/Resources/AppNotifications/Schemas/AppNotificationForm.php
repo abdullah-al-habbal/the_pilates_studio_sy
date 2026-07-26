@@ -39,6 +39,7 @@ class AppNotificationForm
                     ->rows(4),
                 FileUpload::make('image')
                     ->image()
+                    ->disk('public')
                     ->directory('notifications')
                     ->maxSize(2048)
                     ->visible(fn ($get): bool => $get('type') === 'image')

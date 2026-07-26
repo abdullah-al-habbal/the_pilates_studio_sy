@@ -22,7 +22,8 @@ class TestimonialForm
                     ->required()
                     ->columnSpanFull(),
                 FileUpload::make('avatar')
-                    ->image(),
+                    ->image()
+                    ->disk('public'),
                 Select::make('rating')
                     ->options([1 => '1', 2 => '2', 3 => '3', 4 => '4', 5 => '5'])
                     ->default(5)

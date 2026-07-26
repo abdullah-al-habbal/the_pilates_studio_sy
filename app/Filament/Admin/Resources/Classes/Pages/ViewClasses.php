@@ -2,6 +2,8 @@
 
 namespace App\Filament\Admin\Resources\Classes\Pages;
 
+use App\Actions\ApplyCapacityToFutureSessionsAction;
+use App\Enums\ClassSessionStatusEnum;
 use App\Enums\ClassStatusEnum;
 use App\Filament\Admin\Resources\Classes\ClassesResource;
 use Filament\Actions\Action;
@@ -9,6 +11,8 @@ use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ForceDeleteAction;
 use Filament\Actions\RestoreAction;
+use Filament\Forms\Components\Placeholder;
+use Filament\Forms\Components\Textarea;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ViewRecord;
 use Illuminate\Contracts\Support\Htmlable;
@@ -33,6 +37,13 @@ class ViewClasses extends ViewRecord
 
     protected function getHeaderActions(): array
     {
+        $record = $this->getRecord();
+
+        $futureSessionsCount = $record->sessions()
+            ->where('date', '>=', now()->toDateString())
+            ->where('status', ClassSessionStatusEnum::SCHEDULED)
+            ->count();
+
         return [
             LocaleSwitcher::make(),
 
@@ -51,6 +62,45 @@ class ViewClasses extends ViewRecord
                     Notification::make()
                         ->title('Class has been cancelled.')
                         ->warning()
+                        ->send();
+                }),
+
+            Action::make('apply_capacity_to_future_sessions')
+                ->label('Apply Capacity to Future Sessions')
+                ->icon('heroicon-o-arrow-path-rounded-square')
+                ->color('warning')
+                ->visible(fn () => $futureSessionsCount > 0)
+                ->form([
+                    Placeholder::make('current_capacity')
+                        ->label('Current Class Capacity')
+                        ->content(fn () => (string) $record->total_spots.' spots')
+                        ->columnSpanFull(),
+
+                    Placeholder::make('affected_count')
+                        ->label('Affected Future Sessions')
+                        ->content(fn () => (string) $futureSessionsCount.' session(s)')
+                        ->columnSpanFull(),
+
+                    Textarea::make('reason')
+                        ->label('Reason')
+                        ->required()
+                        ->rows(3)
+                        ->maxLength(500)
+                        ->placeholder('Why is this capacity change being applied to future sessions?')
+                        ->columnSpanFull(),
+                ])
+                ->modalHeading('Apply Capacity to Future Sessions')
+                ->modalDescription(fn () => "Push the current class capacity ({$record->total_spots} spots) to all {$futureSessionsCount} future scheduled session(s).")
+                ->modalSubmitActionLabel('Apply to Future Sessions')
+                ->action(function (array $data) use ($record): void {
+                    $result = app(ApplyCapacityToFutureSessionsAction::class)->execute(
+                        class: $record,
+                        reason: $data['reason'],
+                    );
+
+                    Notification::make()
+                        ->title("Capacity applied to {$result['affected']} future session(s).")
+                        ->success()
                         ->send();
                 }),
 

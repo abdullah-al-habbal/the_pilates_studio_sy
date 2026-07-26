@@ -6,6 +6,7 @@ namespace App\Models;
 
 use App\Enums\ClassStatusEnum;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -110,5 +111,35 @@ class Classes extends Model
         return $this->sessions()
             ->whereHas('bookingSessions')
             ->exists();
+    }
+
+    public function scopeDashboardSearch(Builder $query, string $term, array $locales = ['en', 'ar']): Builder
+    {
+        $term = trim($term);
+        $like = '%'.addcslashes($term, '\\%_').'%';
+
+        return $query->where(function (Builder $q) use ($like, $locales) {
+            $q->where(function (Builder $titleQuery) use ($like, $locales) {
+                foreach ($locales as $locale) {
+                    $titleQuery->orWhere("title->{$locale}", 'like', $like);
+                }
+            });
+
+            $q->orWhereHas('instructor', function (Builder $instructorQuery) use ($like, $locales) {
+                $instructorQuery->where(function (Builder $nested) use ($like, $locales) {
+                    foreach ($locales as $locale) {
+                        $nested->orWhere("name->{$locale}", 'like', $like);
+                    }
+                });
+            });
+
+            $q->orWhereHas('category', function (Builder $categoryQuery) use ($like, $locales) {
+                $categoryQuery->where(function (Builder $nested) use ($like, $locales) {
+                    foreach ($locales as $locale) {
+                        $nested->orWhere("name->{$locale}", 'like', $like);
+                    }
+                });
+            });
+        });
     }
 }

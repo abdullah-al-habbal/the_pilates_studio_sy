@@ -37,6 +37,7 @@ class StaticPageForm
                     ->columnSpanFull(),
                 FileUpload::make('image')
                     ->image()
+                    ->disk('public')
                     ->directory('static-pages'),
             ]);
     }

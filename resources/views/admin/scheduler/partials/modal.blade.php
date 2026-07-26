@@ -16,3 +16,4 @@
         </div>
     </div>
 </div>
+@include('admin.scheduler.partials.modal.capacity-adjust')

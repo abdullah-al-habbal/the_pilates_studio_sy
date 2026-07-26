@@ -17,10 +17,21 @@
         <div class="h-6 bg-gray-100 dark:bg-gray-800 rounded-lg w-2/3 animate-pulse"></div>
         <div class="h-4 bg-gray-100 dark:bg-gray-800 rounded-lg w-1/2 animate-pulse"></div>
     </div>
-    <button id="btn-close-modal" type="button"
-        class="shrink-0 rounded-xl p-2 text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:white transition-all">
-        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12" />
-        </svg>
-    </button>
+    <div class="flex items-center gap-2 shrink-0">
+        <button id="btn-adjust-capacity" type="button"
+            class="hidden rounded-xl p-2 text-gray-400 hover:bg-amber-50 dark:hover:bg-amber-900/20
+                   hover:text-amber-600 dark:hover:text-amber-400 transition-all"
+            title="Adjust Capacity">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                    d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
+            </svg>
+        </button>
+        <button id="btn-close-modal" type="button"
+            class="shrink-0 rounded-xl p-2 text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:white transition-all">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+        </button>
+    </div>
 </div>

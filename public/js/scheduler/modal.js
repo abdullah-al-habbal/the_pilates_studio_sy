@@ -27,12 +27,15 @@
                 newErrors: {}
             };
 
+            state.capacity = { show: false, saving: false, error: '' };
+
             render.modal();
             await S.modal.fetchDetails(sessionId);
         },
 
         close: () => {
             state.modal.show = false;
+            state.capacity = { show: false, saving: false, error: '' };
             render.modal();
         },
 
@@ -65,6 +68,75 @@
                 render.modalHeader();
                 render.attendeesTab();
                 render.walkinTab();
+            }
+        },
+
+        openCapacityModal: () => {
+            const s = state.modal.session;
+            if (!s) return;
+
+            state.capacity = {
+                show: true,
+                saving: false,
+                error: '',
+                currentCapacity: s.capacity,
+                reserved: s.reserved,
+                minAllowed: s.reserved,
+                newCapacity: s.capacity,
+                reason: '',
+            };
+            render.capacityModal();
+        },
+
+        closeCapacityModal: () => {
+            state.capacity.show = false;
+            render.capacityModal();
+        },
+
+        saveCapacity: async () => {
+            const c = state.capacity;
+            const val = parseInt(c.newCapacity, 10);
+
+            if (!val || val < 1) {
+                c.error = 'Capacity must be at least 1.';
+                render.capacityModal();
+                return;
+            }
+            if (val < c.minAllowed) {
+                c.error = `Capacity cannot be less than ${c.minAllowed} already reserved booking(s).`;
+                render.capacityModal();
+                return;
+            }
+            if (!c.reason.trim()) {
+                c.error = 'Please provide a reason for this change.';
+                render.capacityModal();
+                return;
+            }
+
+            c.saving = true;
+            c.error = '';
+            render.capacityModal();
+
+            try {
+                const json = await api.postCapacity(state.modal.sessionId, val, c.reason.trim());
+                if (json.success) {
+                    state.capacity.show = false;
+                    S.modal.showToast('Capacity updated successfully.');
+                    await S.modal.fetchDetails(state.modal.sessionId);
+                    await S.events.loadSessions();
+                } else {
+                    c.error = json.message || 'Failed to update capacity.';
+                }
+            } catch (err) {
+                console.error('Capacity Update Error:', err);
+                if (err.status === 422 && err.errors) {
+                    c.error = Object.values(err.errors).flat().join(' ');
+                } else {
+                    c.error = err.message || 'Failed to update capacity. Please try again.';
+                }
+            } finally {
+                c.saving = false;
+                render.capacityModal();
             }
         },
 

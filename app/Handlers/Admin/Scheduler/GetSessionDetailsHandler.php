@@ -36,8 +36,8 @@ final readonly class GetSessionDetailsHandler
             default => '[MISSING:class.title]',
         };
 
-        $instructor = $session->class?->instructor?->fullname
-            ?? ($session->class ? '[MISSING:instructor.fullname]' : '[MISSING:class_relation→instructor]');
+        $instructor = $session->class?->instructor?->name
+            ?? ($session->class ? '[MISSING:instructor.name]' : '[MISSING:class_relation→instructor]');
 
         $reserved = $session->bookingSessions->count();
         $capacity = (int) ($session->total_spots ?? 0);

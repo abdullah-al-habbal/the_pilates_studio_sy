@@ -12,6 +12,7 @@ use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class ClassSessionEloquentRepository
 {
@@ -28,7 +29,7 @@ class ClassSessionEloquentRepository
             ->orderBy('date')
             ->orderBy('start_time');
 
-        \Log::info('Schedule query:', [
+        Log::info('Schedule query:', [
             'sql' => $query->toSql(),
             'bindings' => $query->getBindings(),
             'start' => $startDate,
@@ -76,6 +77,7 @@ class ClassSessionEloquentRepository
             ])->find($id);
     }
 
+    // todo: we must add data type for the variable
     public function getSessionsByDate($date): Collection
     {
         return $this->model->newQuery()
@@ -174,5 +176,31 @@ class ClassSessionEloquentRepository
         $reserved = $session->bookingSessions()->count();
 
         return max(0, $capacity - $reserved);
+    }
+
+    public function updateCapacity(int $id, int $capacity): bool
+    {
+        return (bool) $this->model->newQuery()
+            ->where('id', $id)
+            ->update(['total_spots' => $capacity]);
+    }
+
+    public function getFutureScheduledSessions(int $classId): Collection
+    {
+        return $this->model->newQuery()
+            ->with(['bookingSessions'])
+            ->where('class_id', $classId)
+            ->where('date', '>=', now()->toDateString())
+            ->where('status', 'scheduled')
+            ->orderBy('date')
+            ->orderBy('start_time')
+            ->get();
+    }
+
+    public function bulkUpdateCapacity(array $sessionIds, int $capacity): int
+    {
+        return $this->model->newQuery()
+            ->whereIn('id', $sessionIds)
+            ->update(['total_spots' => $capacity]);
     }
 }

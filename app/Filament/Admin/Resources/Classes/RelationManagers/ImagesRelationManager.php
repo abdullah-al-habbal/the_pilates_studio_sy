@@ -34,15 +34,16 @@ class ImagesRelationManager extends RelationManager
                     ->label(__('dashboard.resources.class_images.fields.url'))
                     ->image()
                     ->imageEditor()
+                    ->disk('public')
                     ->imageEditorAspectRatios([
                         '16:9',
                         '4:3',
                         '1:1',
                     ])
                     ->maxSize(5120)
-                    ->required()
                     ->directory('classes/gallery')
                     ->visibility('public')
+                    ->required(fn (string $operation) => $operation === 'create')
                     ->columnSpanFull(),
 
                 Toggle::make('is_primary')

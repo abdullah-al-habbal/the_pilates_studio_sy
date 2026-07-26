@@ -35,7 +35,8 @@ class InstructorForm
                     ->defaultItems(0)
                     ->addActionLabel('Add social link'),
                 FileUpload::make('image')
-                    ->image(),
+                    ->image()
+                    ->disk('public'),
             ]);
     }
 }

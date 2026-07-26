@@ -7,6 +7,7 @@ use App\Http\Actions\Web\Admin\Scheduler\GetDailySessionsAction;
 use App\Http\Actions\Web\Admin\Scheduler\GetSessionDetailsAction;
 use App\Http\Actions\Web\Admin\Scheduler\GetSessionsDaysInMonthAction;
 use App\Http\Actions\Web\Admin\Scheduler\UpdateAttendanceAction;
+use App\Http\Actions\Web\Admin\Scheduler\UpdateSessionCapacityAction;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('sessions')->name('sessions.')->group(function (): void {
@@ -14,4 +15,5 @@ Route::prefix('sessions')->name('sessions.')->group(function (): void {
     Route::get('/days-in-month', GetSessionsDaysInMonthAction::class)->name('days-in-month');
     Route::get('/{sessionId}', GetSessionDetailsAction::class)->name('show');
     Route::post('/{sessionId}/attendance/{bookingSessionId}', UpdateAttendanceAction::class)->name('attendance');
+    Route::post('/{sessionId}/capacity', UpdateSessionCapacityAction::class)->name('capacity');
 });

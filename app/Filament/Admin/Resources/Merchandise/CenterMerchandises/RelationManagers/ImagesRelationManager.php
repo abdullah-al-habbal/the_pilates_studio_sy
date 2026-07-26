@@ -31,10 +31,11 @@ class ImagesRelationManager extends RelationManager
             FileUpload::make('url')
                 ->label(__('dashboard.resources.center_merchandises.fields.image'))
                 ->image()
+                ->disk('public')
                 ->directory('merchandise-images')
                 ->visibility('public')
                 ->imagePreviewHeight('150')
-                ->required(),
+                ->required(fn (string $operation) => $operation === 'create'),
 
             Toggle::make('is_primary')
                 ->label(__('dashboard.resources.center_merchandises.fields.is_primary'))

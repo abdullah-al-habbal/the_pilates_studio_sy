@@ -198,10 +198,11 @@ class ClassesForm
                                     ->label(__('dashboard.resources.classes.fields.image'))
                                     ->image()
                                     ->imageEditor()
+                                    ->disk('public')
                                     ->maxSize(5120)
                                     ->directory('classes/gallery')
                                     ->visibility('public')
-                                    ->required()
+                                    ->required(fn (string $operation) => $operation === 'create')
                                     ->columnSpan(2),
 
                                 Toggle::make('is_primary')

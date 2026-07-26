@@ -9,6 +9,7 @@
         session:        (id)                   => `${BASE}/sessions/${id}`,
         users:          (sessionId) => `${BASE}/users?session_id=${sessionId}`,
         attendance:     (sessionId, bookingId) => `${BASE}/sessions/${sessionId}/attendance/${bookingId}`,
+        capacity:       (sessionId)            => `${BASE}/sessions/${sessionId}/capacity`,
         walkInExisting: (sessionId)            => `${BASE}/sessions/${sessionId}/walkin/existing`,
         walkInNew:      (sessionId)            => `${BASE}/sessions/${sessionId}/walkin/new`,
         validateField:  `${BASE}/walkin/validate`,
@@ -69,6 +70,12 @@
             request(ROUTES.attendance(sessionId, bookingId), {
                 method: 'POST',
                 body:   JSON.stringify({ status }),
+            }),
+
+        postCapacity: (sessionId, capacity, reason) =>
+            request(ROUTES.capacity(sessionId), {
+                method: 'POST',
+                body:   JSON.stringify({ capacity, reason }),
             }),
 
         postExistingWalkIn: (sessionId, userIds) =>

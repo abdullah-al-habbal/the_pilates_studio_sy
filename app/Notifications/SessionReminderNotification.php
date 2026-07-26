@@ -52,7 +52,7 @@ class SessionReminderNotification extends Notification implements ShouldQueue
 
         $class = $this->session->class;
         $classTitle = $class->getTranslation('title', $locale);
-        $instructor = $class->instructor?->fullname ?? 'Instructor';
+        $instructor = $class->instructor?->name ?? 'Instructor';
 
         $date = $this->session->date->format('M d, Y');
         $time = $this->session->start_time;

@@ -106,6 +106,9 @@
                     ui.text('modal-date',        s.date);
                     ui.text('modal-time',        `${s.start_time} – ${s.end_time}`);
                     ui.text('modal-instructor',  s.instructor);
+
+                    const btn = ui.$('btn-adjust-capacity');
+                    if (btn) btn.classList.remove('hidden');
                 }
             }
         },
@@ -317,6 +320,40 @@
             } else {
                 ui.hide('modal-toast');
             }
+        },
+
+        capacityModal: () => {
+            const c = state.capacity;
+            if (!c.show) {
+                ui.hide('capacity-modal-backdrop');
+                ui.hide('capacity-modal-panel');
+                return;
+            }
+            ui.show('capacity-modal-backdrop');
+            ui.show('capacity-modal-panel');
+
+            const s = state.modal.session;
+            ui.text('capacity-modal-class-name', s ? s.title : '');
+            ui.text('capacity-modal-current', c.currentCapacity);
+            ui.text('capacity-modal-reserved', c.reserved);
+            ui.text('capacity-modal-min', c.minAllowed);
+
+            const input = ui.$('capacity-input');
+            if (input) input.value = c.newCapacity;
+
+            const reason = ui.$('capacity-reason');
+            if (reason) reason.value = c.reason;
+
+            if (c.error) {
+                ui.show('capacity-modal-error');
+                ui.text('capacity-modal-error-msg', c.error);
+            } else {
+                ui.hide('capacity-modal-error');
+            }
+
+            const saveBtn = ui.$('btn-save-capacity');
+            if (saveBtn) saveBtn.disabled = c.saving;
+            ui.text('btn-save-capacity-text', c.saving ? 'Saving...' : 'Save Capacity');
         },
     };
 

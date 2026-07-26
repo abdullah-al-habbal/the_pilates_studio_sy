@@ -5,6 +5,7 @@
 namespace App\Filament\Admin\Resources\Classes\Tables;
 
 use App\Enums\ClassStatusEnum;
+use App\Filament\Admin\Resources\Classes\ClassesResource;
 use App\Models\Instructor;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
@@ -36,7 +37,9 @@ class ClassesTable
 
                 TextColumn::make('title')
                     ->label(__('dashboard.resources.classes.fields.title'))
-                    ->searchable()
+                    ->searchable(query: function (Builder $query, string $search): Builder {
+                        return $query->dashboardSearch($search, ClassesResource::getTranslatableLocales());
+                    })
                     ->sortable()
                     ->weight(FontWeight::Bold)
                     ->limit(30)
@@ -48,10 +51,7 @@ class ClassesTable
                 TextColumn::make('instructor.name')
                     ->label(__('dashboard.resources.classes.fields.instructor'))
                     ->searchable(query: function (Builder $query, string $search): Builder {
-                        return $query->whereHas(
-                            'instructor',
-                            fn ($q) => $q->where('name', 'like', "%{$search}%")
-                        );
+                        return $query->dashboardSearch($search, ClassesResource::getTranslatableLocales());
                     })
                     ->sortable(query: function (Builder $query, string $direction): Builder {
                         return $query->orderBy(
@@ -68,7 +68,9 @@ class ClassesTable
                     ->label(__('dashboard.resources.classes.fields.category'))
                     ->badge()
                     ->color('info')
-                    ->searchable()
+                    ->searchable(query: function (Builder $query, string $search): Builder {
+                        return $query->dashboardSearch($search, ClassesResource::getTranslatableLocales());
+                    })
                     ->toggleable()
                     ->formatStateUsing(fn ($state, $record) => $record->category?->getTranslation('name', app()->getLocale())),
 

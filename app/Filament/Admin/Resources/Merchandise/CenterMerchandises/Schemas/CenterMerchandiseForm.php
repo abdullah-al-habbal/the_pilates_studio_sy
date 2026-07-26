@@ -91,10 +91,11 @@ class CenterMerchandiseForm
                             FileUpload::make('url')
                                 ->label(__('dashboard.resources.center_merchandises.fields.image'))
                                 ->image()
+                                ->disk('public')
                                 ->directory('merchandise-images')
                                 ->visibility('public')
                                 ->imagePreviewHeight('120')
-                                ->required()
+                                ->required(fn (string $operation) => $operation === 'create')
                                 ->columnSpan(2),
 
                             Toggle::make('is_primary')
