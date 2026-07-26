@@ -6,6 +6,7 @@ namespace App\Logging;
 
 use Illuminate\Contracts\Logging\Log;
 use Illuminate\Log\Logger;
+use Monolog\Level;
 use Psr\Log\LogLevel;
 
 class CustomLoggerFactory
