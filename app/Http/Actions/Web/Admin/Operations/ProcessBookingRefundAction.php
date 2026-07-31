@@ -26,7 +26,7 @@ final readonly class ProcessBookingRefundAction
         }
 
         try {
-            $amount = $request->has('amount') ? (int) $request->amount : null;
+            $amount = $request->input('amount') !== null ? (int) $request->input('amount') : null;
 
             $refund = $this->handler->handle($bookingId, $amount);
 

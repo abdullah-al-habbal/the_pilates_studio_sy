@@ -1,5 +1,7 @@
 <?php
 
+// filePath: database/migrations/2024_01_01_000001_create_packages_table.php
+
 declare(strict_types=1);
 
 use App\Enums\PackageTypeEnum;
@@ -20,8 +22,8 @@ return new class extends Migration
                 ->comment('standard | by_system | for_freeze_client');
             $table->string('generated_reason')->nullable()
                 ->comment('Populated when type != standard');
-            $table->unsignedSmallInteger('validity_days')->default(0)
-                ->comment('If > 0, booking expires_at = created_at + validity_days. 0 means no expiry');
+            $table->unsignedSmallInteger('validity_days')->nullable()->default(null)
+                ->comment('If not null and > 0, booking expires_at = created_at + validity_days. null means no expiry');
             $table->json('features')->nullable();
 
             $table->timestamps();

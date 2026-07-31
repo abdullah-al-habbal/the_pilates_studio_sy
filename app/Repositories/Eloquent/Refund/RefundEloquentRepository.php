@@ -10,6 +10,11 @@ use Illuminate\Support\Collection;
 
 class RefundEloquentRepository
 {
+    public function create(array $data): Refund
+    {
+        return Refund::create($data);
+    }
+
     public function getTotalsByCurrency(
         ?CarbonInterface $start = null,
         ?CarbonInterface $end = null,

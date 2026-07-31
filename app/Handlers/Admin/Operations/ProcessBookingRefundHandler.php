@@ -7,20 +7,29 @@ namespace App\Handlers\Admin\Operations;
 use App\Enums\BookingStatusEnum;
 use App\Models\Booking;
 use App\Models\Refund;
+use App\Repositories\Eloquent\Booking\BookingEloquentRepository;
+use App\Repositories\Eloquent\Refund\RefundEloquentRepository;
 use App\Services\Validation\RefundValidatorService;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
 final readonly class ProcessBookingRefundHandler
 {
     public function __construct(
-        private RefundValidatorService $refundValidator
+        private RefundValidatorService $refundValidator,
+        private BookingEloquentRepository $bookingRepository,
+        private RefundEloquentRepository $refundRepository,
     ) {}
 
     public function handle(int $bookingId, ?int $amount): Refund
     {
         return DB::transaction(function () use ($bookingId, $amount): Refund {
-            $booking = Booking::lockForUpdate()->findOrFail($bookingId);
+            $booking = $this->bookingRepository->find($bookingId, lockForUpdate: true);
+
+            if (! $booking) {
+                throw new ModelNotFoundException('Booking not found.');
+            }
 
             $this->refundValidator->assertRefundEligible($booking, $amount);
 
@@ -31,7 +40,7 @@ final readonly class ProcessBookingRefundHandler
                 ? $snapshot
                 : ($booking->currency?->exchange_rate ?? 1.0);
 
-            $refund = Refund::create([
+            $refund = $this->refundRepository->create([
                 'refundable_type' => Booking::class,
                 'refundable_id' => $booking->id,
                 'user_id' => $booking->user_id,
