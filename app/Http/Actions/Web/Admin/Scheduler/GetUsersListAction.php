@@ -7,10 +7,10 @@ namespace App\Http\Actions\Web\Admin\Scheduler;
 use App\Enums\Api\ErrorCodeEnum;
 use App\Enums\Api\SuccessCodeEnum;
 use App\Handlers\Admin\Scheduler\GetUsersListHandler;
+use App\Http\Requests\Admin\Scheduler\GetUsersListRequest;
 use App\Services\Log\LoggingService;
 use App\Traits\ApiResponseTrait;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 use Throwable;
 
 final class GetUsersListAction
@@ -22,12 +22,12 @@ final class GetUsersListAction
         private readonly LoggingService $logger
     ) {}
 
-    public function __invoke(Request $request): JsonResponse
+    public function __invoke(GetUsersListRequest $request): JsonResponse
     {
         try {
-            $sessionId = $request->query('session_id');
+            $sessionId = $request->validated('session_id');
             $this->logger->info('[Scheduler:GetUsersListAction] Fetching Users List', ['session_id' => $sessionId]);
-            $users = $this->handler->handle($sessionId ? (int) $sessionId : null);
+            $users = $this->handler->handle($sessionId !== null ? (int) $sessionId : null);
 
             return $this->success(data: $users, code: SuccessCodeEnum::SUCCESS);
         } catch (Throwable $e) {

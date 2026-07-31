@@ -4,33 +4,22 @@ declare(strict_types=1);
 
 namespace App\Http\Actions\Web\Admin\Operations;
 
-use App\Enums\ClubExpenseStatusEnum;
-use App\Models\ClubExpense;
+use App\Handlers\Admin\Operations\GetExpenseBreakdownHandler;
+use App\Http\Requests\Admin\Operations\GetExpenseBreakdownRequest;
 use App\Traits\ApiResponseTrait;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 
 final class GetExpenseBreakdownAction
 {
     use ApiResponseTrait;
 
-    public function __invoke(Request $request): JsonResponse
-    {
-        $date = $request->get('date', now()->toDateString());
-        $expenses = ClubExpense::where('expense_date', $date)
-            ->whereIn('status', [ClubExpenseStatusEnum::PENDING, ClubExpenseStatusEnum::APPROVED])
-            ->with('category')
-            ->get()
-            ->groupBy('category_id')
-            ->map(function ($group) {
-                $first = $group->first();
+    public function __construct(
+        private readonly GetExpenseBreakdownHandler $handler
+    ) {}
 
-                return [
-                    'category_name' => $first->category?->name,
-                    'total_amount' => $group->sum('amount'),
-                ];
-            })
-            ->values();
+    public function __invoke(GetExpenseBreakdownRequest $request): JsonResponse
+    {
+        $expenses = $this->handler->handle($request->getDate());
 
         return $this->success(data: $expenses->toArray());
     }

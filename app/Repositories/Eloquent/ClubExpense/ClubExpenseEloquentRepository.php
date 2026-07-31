@@ -31,4 +31,22 @@ class ClubExpenseEloquentRepository
     {
         return ClubExpense::create($data);
     }
+
+    public function getBreakdownByDate(string $date): Collection
+    {
+        return ClubExpense::query()
+            ->where('expense_date', $date)
+            ->whereIn('status', [
+                ClubExpenseStatusEnum::PENDING->value,
+                ClubExpenseStatusEnum::APPROVED->value,
+            ])
+            ->with('category')
+            ->get()
+            ->groupBy('category_id')
+            ->map(fn ($group) => [
+                'category_name' => $group->first()->category?->name,
+                'total_amount' => $group->sum('amount'),
+            ])
+            ->values();
+    }
 }

@@ -74,13 +74,19 @@ class BookingFreezeService
                 $newExpiry = now()->addDays($remainingDays);
             }
 
-            $booking->update(['unfrozen_at' => now()]);
+            $remainingCredits = $booking->remaining_credits;
+
+            $booking->update([
+                'unfrozen_at' => now(),
+                'status' => BookingStatusEnum::CANCELLED,
+                'remaining_credits' => 0,
+            ]);
 
             return Booking::create([
                 'user_id' => $booking->user_id,
                 'package_id' => $booking->package_id,
-                'total_credits' => $booking->remaining_credits,
-                'remaining_credits' => $booking->remaining_credits,
+                'total_credits' => $remainingCredits,
+                'remaining_credits' => $remainingCredits,
                 'status' => BookingStatusEnum::ACTIVE,
                 'expires_at' => $newExpiry,
                 'source_type' => BookingSourceTypeEnum::FREEZE_RESUME,

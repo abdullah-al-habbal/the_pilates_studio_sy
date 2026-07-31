@@ -246,6 +246,7 @@ class User extends Authenticatable implements FilamentUser
     {
         return $this->hasOne(Booking::class)
             ->where('status', BookingStatusEnum::FROZEN)
+            ->whereNull('unfrozen_at')
             ->latest();
     }
 

@@ -6,12 +6,11 @@ namespace App\Actions\Debug;
 
 use App\Models\User;
 use App\Notifications\ManualPushNotification;
-use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
 final class SendFcmTestNotificationAction
 {
-    public function __invoke(Request $request): Response
+    public function __invoke(): Response
     {
         $user = User::with('settings')->first();
 
