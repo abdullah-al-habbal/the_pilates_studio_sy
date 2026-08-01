@@ -8,11 +8,11 @@ namespace App\Services\MobileAppVersion;
 
 use App\Enums\MobileAppVersion\AppNameEnum;
 use App\Enums\MobileAppVersion\MobilePlatformEnum;
+use App\Exceptions\DomainException;
 use App\Models\MobileAppVersion\MobileAppVersion;
 use App\Repositories\Eloquent\MobileAppVersion\MobileAppVersionEloquentRepository;
 use Illuminate\Support\Facades\Log;
 use InvalidArgumentException;
-use RuntimeException;
 
 readonly class AppVersionService
 {
@@ -34,7 +34,7 @@ readonly class AppVersionService
                 'error' => 'No active configuration found for this app and platform',
             ]);
 
-            throw new RuntimeException(
+            throw new DomainException(
                 'Mobile app version configuration is missing. Please contact support.',
                 503
             );
@@ -66,7 +66,7 @@ readonly class AppVersionService
         $isValid = $this->repository->validateConfiguration();
 
         if (! $isValid) {
-            throw new RuntimeException(
+            throw new DomainException(
                 'Invalid mobile app version configuration detected. Please check logs for details.',
                 500
             );

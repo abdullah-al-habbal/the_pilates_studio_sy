@@ -126,6 +126,7 @@ export function applyCurrencyFilter() {
     const dateInput = document.getElementById('balance-date');
     if (dateInput) {
         renderBalance(dateInput.value);
+        renderExpenseBreakdown(dateInput.value);
     }
 }
 
@@ -135,6 +136,7 @@ export function initFinanceTab() {
 
     dateInput.addEventListener('change', (e) => {
         renderBalance(e.target.value);
+        renderExpenseBreakdown(e.target.value);
         if (window.updateGlobalStats) window.updateGlobalStats(e.target.value);
     });
 

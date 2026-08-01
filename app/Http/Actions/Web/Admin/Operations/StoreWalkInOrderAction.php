@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Actions\Web\Admin\Operations;
 
+use App\DTOs\Operations\WalkInOrderDTO;
 use App\Handlers\Admin\Operations\StoreWalkInOrderHandler;
 use App\Http\Requests\Admin\Operations\StoreWalkInOrderRequest;
 use App\Traits\ApiResponseTrait;
@@ -21,16 +22,17 @@ final readonly class StoreWalkInOrderAction
     public function __invoke(StoreWalkInOrderRequest $request): JsonResponse
     {
         try {
-            $order = $this->handler->handle(
-                // fix: use a command class to hande the attributes
+            $dto = new WalkInOrderDTO(
                 merchandiseId: (int) $request->merchandise_id,
                 quantity: (int) $request->quantity,
                 currencyId: (int) $request->currency_id,
                 fullname: $request->fullname,
                 phoneNumber: $request->phone_number,
                 email: $request->email,
-                createdBy: (int) auth()->id()
+                createdBy: $request->user()?->id,
             );
+
+            $order = $this->handler->handle($dto);
 
             return $this->created(
                 data: $order,

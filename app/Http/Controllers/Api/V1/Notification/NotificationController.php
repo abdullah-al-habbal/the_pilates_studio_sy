@@ -7,6 +7,7 @@ namespace App\Http\Controllers\Api\V1\Notification;
 
 use App\Http\Controllers\Api\BaseApiController;
 use App\Http\Requests\Api\V1\Notification\BulkMarkAsReadRequest;
+use App\Http\Requests\Api\V1\Notification\ListNotificationsRequest;
 use App\Http\Resources\Api\V1\NotificationResource;
 use App\Models\User;
 use App\Services\Notification\NotificationService;
@@ -23,14 +24,14 @@ class NotificationController extends BaseApiController
     ) {}
 
     #[Endpoint('List notifications', description: 'Returns a list of user notifications.')]
-    public function index(Request $request): JsonResponse
+    public function index(ListNotificationsRequest $request): JsonResponse
     {
         /** @var User $user */
         $user = $request->user();
 
         $notifications = $this->notificationService->getUserNotifications(
             $user,
-            $request->only(['unread'])
+            $request->validated()
         );
 
         return $this->success(

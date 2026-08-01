@@ -9,6 +9,7 @@ namespace App\Http\Controllers\Api\V1\Booking;
 use App\Enums\Api\SuccessCodeEnum;
 use App\Http\Controllers\Api\BaseApiController;
 use App\Http\Requests\Api\V1\Booking\CreateBookingRequest;
+use App\Http\Requests\Api\V1\Booking\ListBookingsRequest;
 use App\Http\Resources\Api\V1\BookingCollection;
 use App\Http\Resources\Api\V1\BookingResource;
 use App\Services\Booking\BookingService;
@@ -28,9 +29,9 @@ class BookingController extends BaseApiController
     ) {}
 
     #[Endpoint('List bookings', description: 'Returns a paginated list of user bookings.')]
-    public function index(Request $request): JsonResponse
+    public function index(ListBookingsRequest $request): JsonResponse
     {
-        $filters = $request->only(['status', 'per_page']);
+        $filters = $request->validated();
         $bookings = $this->bookingService->listUserBookings($request->user()->id, $filters);
 
         return $this->success(new BookingCollection($bookings));

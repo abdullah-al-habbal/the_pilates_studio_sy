@@ -29,7 +29,6 @@ class EnsureActiveBookingMiddleware
             );
         }
 
-        // Check expiry
         if ($activeBooking->isExpired()) {
             return $this->error(
                 ErrorCodeEnum::BOOKING_EXPIRED,

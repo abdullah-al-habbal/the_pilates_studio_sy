@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services\Merchandise;
 
+use App\DTOs\Operations\PlaceOrderDTO;
 use App\Models\CenterMerchandise;
 use App\Models\MerchandiseOrder;
 use App\Repositories\Eloquent\MerchandiseOrder\MerchandiseOrderEloquentRepository;
@@ -18,13 +19,13 @@ class MerchandiseOrderService
         private readonly PricingService $pricingService,
     ) {}
 
-    public function placeOrder(int $customerId, int $merchandiseId, int $quantity, int $currencyId, ?int $createdBy = null): MerchandiseOrder
+    public function placeOrder(PlaceOrderDTO $dto): MerchandiseOrder
     {
-        return DB::transaction(function () use ($customerId, $merchandiseId, $quantity, $currencyId, $createdBy): MerchandiseOrder {
+        return DB::transaction(function () use ($dto): MerchandiseOrder {
             /** @var CenterMerchandise $item */
-            $item = CenterMerchandise::lockForUpdate()->findOrFail($merchandiseId);
+            $item = CenterMerchandise::lockForUpdate()->findOrFail($dto->merchandiseId);
 
-            if ($item->stock_quantity < $quantity) {
+            if ($item->stock_quantity < $dto->quantity) {
                 throw ValidationException::withMessages([
                     'quantity' => "Insufficient stock. Available: {$item->stock_quantity}.",
                 ]);
@@ -38,19 +39,19 @@ class MerchandiseOrderService
                 ]);
             }
 
-            $paidAmount = $this->pricingService->calculateAmount($basePrice * $quantity, $currencyId);
+            $paidAmount = $this->pricingService->calculateAmount($basePrice * $dto->quantity, $dto->currencyId);
 
-            $item->decrement('stock_quantity', $quantity);
+            $item->decrement('stock_quantity', $dto->quantity);
 
-            $exchangeRateSnapshot = $this->pricingService->getExchangeRateForSnapshot($currencyId);
+            $exchangeRateSnapshot = $this->pricingService->getExchangeRateForSnapshot($dto->currencyId);
 
             return MerchandiseOrder::create([
-                'merchandise_id' => $merchandiseId,
-                'customer_id' => $customerId,
-                'created_by' => $createdBy,
-                'quantity' => $quantity,
+                'merchandise_id' => $dto->merchandiseId,
+                'customer_id' => $dto->customerId,
+                'created_by' => $dto->createdBy,
+                'quantity' => $dto->quantity,
                 'ordered_at' => now(),
-                'currency_id' => $currencyId,
+                'currency_id' => $dto->currencyId,
                 'paid_amount' => $paidAmount,
                 'exchange_rate_snapshot' => $exchangeRateSnapshot,
             ]);

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Actions\Web\Admin\Operations;
 
+use App\DTOs\Operations\PlaceOrderDTO;
 use App\Handlers\Admin\Operations\PlaceOrderHandler;
 use App\Http\Requests\Admin\Operations\PlaceOrderRequest;
 use App\Traits\ApiResponseTrait;
@@ -21,14 +22,15 @@ final readonly class PlaceOrderAction
     public function __invoke(PlaceOrderRequest $request): JsonResponse
     {
         try {
-            $order = $this->handler->handle(
-                // fix: use a command class to hande the attrivutes.
-                (int) $request->customer_id,
-                (int) $request->merchandise_id,
-                (int) $request->quantity,
-                (int) $request->currency_id,
-                createdBy: (int) auth()->id()
+            $dto = new PlaceOrderDTO(
+                customerId: (int) $request->customer_id,
+                merchandiseId: (int) $request->merchandise_id,
+                quantity: (int) $request->quantity,
+                currencyId: (int) $request->currency_id,
+                createdBy: $request->user()?->id,
             );
+
+            $order = $this->handler->handle($dto);
 
             return $this->created(
                 data: $order,

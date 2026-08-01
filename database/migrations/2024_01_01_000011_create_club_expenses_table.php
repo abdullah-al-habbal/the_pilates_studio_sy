@@ -17,7 +17,7 @@ return new class extends Migration
                 ->constrained('currencies')
                 ->restrictOnDelete();
 
-            $table->unsignedInteger('amount');
+            $table->unsignedBigInteger('amount');
             $table->text('notes')->nullable();
             $table->string('status')->default('pending')
                 ->comment('pending | approved | rejected');

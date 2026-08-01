@@ -19,7 +19,7 @@ return new class extends Migration
                 ->constrained('currencies')
                 ->restrictOnDelete();
 
-            $table->unsignedInteger('amount');
+            $table->unsignedBigInteger('amount');
             $table->decimal('exchange_rate_snapshot', 12, 6)
                 ->nullable()
                 ->comment('Rate at refund time relative to base currency');

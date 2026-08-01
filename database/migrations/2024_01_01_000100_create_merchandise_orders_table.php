@@ -31,7 +31,7 @@ return new class extends Migration
             $table->softDeletes();
 
             $table->foreignId('currency_id')->nullable()->constrained('currencies');
-            $table->unsignedInteger('paid_amount')->nullable();
+            $table->unsignedBigInteger('paid_amount')->nullable();
             $table->decimal('exchange_rate_snapshot', 12, 6)
                 ->nullable()
                 ->comment('Rate at purchase time relative to base currency');
@@ -40,7 +40,7 @@ return new class extends Migration
                 ->nullable()
                 ->comment('Snapshot of merchandise name at order time');
 
-            $table->unsignedInteger('merchandise_unit_price_snapshot')
+            $table->unsignedBigInteger('merchandise_unit_price_snapshot')
                 ->nullable()
                 ->comment('Snapshot of unit price in order currency at order time');
 

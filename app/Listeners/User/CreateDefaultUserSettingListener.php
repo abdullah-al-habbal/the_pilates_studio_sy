@@ -5,11 +5,11 @@ declare(strict_types=1);
 namespace App\Listeners\User;
 
 use App\Events\User\UserRegisteredEvent;
+use App\Exceptions\DomainException;
 use App\Repositories\Eloquent\Language\LanguageEloquentRepository;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Support\Facades\Log;
-use RuntimeException;
 use Throwable;
 
 class CreateDefaultUserSettingListener implements ShouldQueue
@@ -25,7 +25,7 @@ class CreateDefaultUserSettingListener implements ShouldQueue
     public function handle(UserRegisteredEvent $event): void
     {
         $defaultLanguage = $this->languageRepo->getDefault()
-            ?? throw new RuntimeException('Default language missing');
+            ?? throw new DomainException('Default language missing');
 
         $event->user->settings()->create([
             'preferred_language_id' => $defaultLanguage->id,

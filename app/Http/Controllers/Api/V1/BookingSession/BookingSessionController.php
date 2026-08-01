@@ -7,6 +7,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Api\V1\BookingSession;
 
 use App\Http\Controllers\Api\BaseApiController;
+use App\Http\Requests\Api\V1\BookingSession\ListBookingSessionsRequest;
 use App\Http\Requests\Api\V1\BookingSession\ReserveSessionRequest;
 use App\Http\Resources\Api\V1\BookingSessionCollection;
 use App\Http\Resources\Api\V1\BookingSessionResource;
@@ -37,9 +38,9 @@ class BookingSessionController extends BaseApiController
     }
 
     #[Endpoint('List booking sessions', description: 'Returns a paginated list of user booking sessions.')]
-    public function index(Request $request): JsonResponse
+    public function index(ListBookingSessionsRequest $request): JsonResponse
     {
-        $filters = $request->only(['status', 'per_page']);
+        $filters = $request->validated();
         $sessions = $this->bookingSessionService->listUserSessions($request->user()->id, $filters);
 
         return $this->success(new BookingSessionCollection($sessions));
@@ -54,7 +55,7 @@ class BookingSessionController extends BaseApiController
     }
 
     #[Endpoint('Cancel booking session', description: 'Cancels a reserved booking session and refunds credit if within policy.')]
-    public function cancel(Request $request, int $id): JsonResponse
+    public function cancel(int $id): JsonResponse
     {
         $this->bookingSessionService->cancel($id);
 

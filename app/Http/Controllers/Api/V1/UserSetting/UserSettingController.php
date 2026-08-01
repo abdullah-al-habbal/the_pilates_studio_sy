@@ -9,6 +9,7 @@ namespace App\Http\Controllers\Api\V1\UserSetting;
 use App\Enums\Api\ErrorCodeEnum;
 use App\Enums\Api\SuccessCodeEnum;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Api\V1\UserSetting\UpdateFcmTokenRequest;
 use App\Http\Requests\Api\V1\UserSetting\UpdateUserSettingRequest;
 use App\Http\Resources\Api\V1\UserSettingResource;
 use App\Services\UserSetting\UserSettingService;
@@ -71,10 +72,8 @@ class UserSettingController extends Controller
     }
 
     #[Endpoint('Update FCM Token', description: 'Update the FCM token for the authenticated user.')]
-    public function updateFcmToken(Request $request): JsonResponse
+    public function updateFcmToken(UpdateFcmTokenRequest $request): JsonResponse
     {
-        $request->validate(['token' => 'required|string']);
-
         try {
             $settings = $this->userSettingService->updateFcmToken(
                 $request->user()->id,

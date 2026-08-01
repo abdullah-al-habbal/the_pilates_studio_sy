@@ -3,12 +3,12 @@
 namespace Database\Seeders;
 
 use App\Enums\ClassStatusEnum;
+use App\Exceptions\SeederDependencyMissingException;
 use App\Models\ClassCategory;
 use App\Models\Classes;
 use App\Models\Instructor;
 use App\Models\RecurrencePattern;
 use Illuminate\Database\Seeder;
-use RuntimeException;
 
 class ClassesSeeder extends Seeder
 {
@@ -26,15 +26,15 @@ class ClassesSeeder extends Seeder
         $biweeklyId = RecurrencePattern::where('name', 'biweekly')->value('id');
 
         if (! $sarahId || ! $adamId || ! $emmaId) {
-            throw new RuntimeException('Instructor seed dependency missing.');
+            throw new SeederDependencyMissingException('Instructor seed dependency missing.');
         }
 
         if (! $reformerId || ! $matId || ! $towerId) {
-            throw new RuntimeException('ClassCategory seed dependency missing.');
+            throw new SeederDependencyMissingException('ClassCategory seed dependency missing.');
         }
 
         if (! $weeklyId || ! $biweeklyId) {
-            throw new RuntimeException('RecurrencePattern seed dependency missing.');
+            throw new SeederDependencyMissingException('RecurrencePattern seed dependency missing.');
         }
 
         $fixed = [

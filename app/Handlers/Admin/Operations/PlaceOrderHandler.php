@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Handlers\Admin\Operations;
 
+use App\DTOs\Operations\PlaceOrderDTO;
 use App\Models\MerchandiseOrder;
 use App\Services\Merchandise\MerchandiseOrderService;
 
@@ -13,8 +14,8 @@ final readonly class PlaceOrderHandler
         private MerchandiseOrderService $orderService
     ) {}
 
-    public function handle(int $customerId, int $merchandiseId, int $quantity, int $currencyId, ?int $createdBy = null): MerchandiseOrder
+    public function handle(PlaceOrderDTO $dto): MerchandiseOrder
     {
-        return $this->orderService->placeOrder($customerId, $merchandiseId, $quantity, $currencyId, $createdBy);
+        return $this->orderService->placeOrder($dto);
     }
 }

@@ -7,6 +7,7 @@ declare(strict_types=1);
 namespace App\Actions\V1\MobileAppVersion\GetCompatibility;
 
 use App\Enums\Api\ErrorCodeEnum;
+use App\Exceptions\DomainException;
 use App\Http\Requests\Api\V1\MobileAppVersion\GetCompatibilityRequest;
 use App\Services\MobileAppVersion\AppVersionService;
 use App\Traits\ApiResponseTrait;
@@ -15,7 +16,6 @@ use Dedoc\Scramble\Attributes\Group;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
-use RuntimeException;
 
 #[Group('Mobile App Version')]
 final readonly class GetCompatibilityAction
@@ -59,7 +59,7 @@ final readonly class GetCompatibilityAction
                 'latest_version' => $compat['latest_version'],
             ]);
 
-        } catch (RuntimeException $e) {
+        } catch (DomainException $e) {
             Log::error('Mobile app version configuration error in action', [
                 'message' => $e->getMessage(),
                 'app_name' => $request->validatedAppName()->value,

@@ -45,7 +45,7 @@ return new class extends Migration
                 ->nullable()
                 ->comment('Expiration timestamp based on package validity');
 
-            $table->unsignedInteger('paid_amount')->nullable();
+            $table->unsignedBigInteger('paid_amount')->nullable();
 
             $table->foreignId('currency_id')
                 ->nullable()

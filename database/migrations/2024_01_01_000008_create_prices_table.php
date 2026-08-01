@@ -14,7 +14,7 @@ return new class extends Migration
             $table->id();
             $table->morphs('priceable');
             $table->foreignId('currency_id')->constrained('currencies')->cascadeOnDelete();
-            $table->unsignedInteger('amount')->comment('Price in smallest currency unit');
+            $table->unsignedBigInteger('amount')->comment('Price in smallest currency unit');
             $table->timestamps();
 
             $table->unique(['priceable_type', 'priceable_id', 'currency_id'], 'unique_price_morph_currency');

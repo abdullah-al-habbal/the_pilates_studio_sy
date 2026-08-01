@@ -9,12 +9,12 @@ namespace App\Http\Middleware\MobileAppVersion;
 use App\Enums\Api\ErrorCodeEnum;
 use App\Enums\MobileAppVersion\AppNameEnum;
 use App\Enums\MobileAppVersion\MobilePlatformEnum;
+use App\Exceptions\DomainException;
 use App\Services\MobileAppVersion\AppVersionService;
 use App\Traits\ApiResponseTrait;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
-use RuntimeException;
 use Symfony\Component\HttpFoundation\Response;
 
 readonly class CheckAppVersionMiddleware
@@ -68,7 +68,7 @@ readonly class CheckAppVersionMiddleware
             $request->attributes->set('app_version_compat', $compat);
 
             return $next($request);
-        } catch (RuntimeException $e) {
+        } catch (DomainException $e) {
             Log::error('Mobile app version configuration error', [
                 'message' => $e->getMessage(),
                 'path' => $request->path(),
