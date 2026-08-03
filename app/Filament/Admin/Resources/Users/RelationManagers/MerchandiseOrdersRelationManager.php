@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Filament\Admin\Resources\Users\RelationManagers;
 
+use App\Enums\UserRoleEnum;
+use App\Filament\Admin\Resources\Users\RelationManagers\Concerns\RestrictsByUserRole;
 use App\Services\Currency\CurrencyService;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\ViewAction;
@@ -15,6 +17,10 @@ use Illuminate\Database\Eloquent\Model;
 
 class MerchandiseOrdersRelationManager extends RelationManager
 {
+    use RestrictsByUserRole;
+
+    protected static array $allowedOwnerRoles = [UserRoleEnum::CUSTOMER->value];
+
     protected static string $relationship = 'merchandiseOrders';
 
     public static function getTitle(Model $ownerRecord, string $pageClass): string

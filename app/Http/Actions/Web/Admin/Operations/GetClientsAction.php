@@ -7,7 +7,9 @@ namespace App\Http\Actions\Web\Admin\Operations;
 use App\Handlers\Admin\Operations\GetClientsHandler;
 use App\Http\Requests\Admin\Operations\GetClientsRequest;
 use App\Http\Resources\Admin\Operations\ClientListItemResource;
+use App\Http\Resources\Admin\Operations\ClientOptionResource;
 use App\Traits\ApiResponseTrait;
+use Illuminate\Contracts\Pagination\CursorPaginator as CursorPaginatorContract;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Log;
 
@@ -25,6 +27,17 @@ final readonly class GetClientsAction
             $paginator = $this->handler->handle(
                 $request->toCommand()
             );
+
+            if ($paginator instanceof CursorPaginatorContract) {
+                return $this->success(
+                    data: ClientOptionResource::collection($paginator->items()),
+                    message: 'Clients retrieved successfully.',
+                    meta: [
+                        'next_cursor' => $paginator->nextCursor()?->encode(),
+                        'has_more' => $paginator->hasMorePages(),
+                    ]
+                );
+            }
 
             return $this->paginated(
                 $paginator,

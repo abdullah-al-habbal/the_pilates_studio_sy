@@ -133,7 +133,7 @@ class MerchandiseOrderForm
                 ->schema([
                     Select::make('customer_id')
                         ->label(__('dashboard.resources.merchandise_orders.fields.customer'))
-                        ->relationship('customer', 'fullname')
+                        ->options(fn () => User::customers()->orderBy('fullname')->pluck('fullname', 'id'))
                         ->searchable()
                         ->preload()
                         ->placeholder(__('dashboard.resources.merchandise_orders.placeholders.walk_in'))

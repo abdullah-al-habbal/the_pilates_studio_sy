@@ -1,17 +1,18 @@
 // filePath: public/js/operations/modules/notifications.js
 const OperationsNotifications = (() => {
     const state = {
-        selectedUsers: new Map(),      
-        currentPage: 1,
-        lastPage: 1,
+        selectedUsers: new Map(),
+        nextCursor: null,
+        hasMore: true,
         isLoading: false,
         searchQuery: '',
         users: [],
         dropdownEl: null,
         isFocused: false,
         blurTimer: null,
+        searchTimeout: null,
     };
-    const PER_PAGE = 15;   // matches backend default
+    const PER_PAGE = 10;   // matches backend cursor per_page default
 
     function init() {
         _bindCharCounters();
@@ -101,55 +102,46 @@ const OperationsNotifications = (() => {
         if (!dropdown) return;
         state.dropdownEl = dropdown;
         dropdown.addEventListener('scroll', () => {
-            if (state.isLoading) return;
+            if (state.isLoading || !state.hasMore) return;
             const { scrollTop, scrollHeight, clientHeight } = dropdown;
             if (scrollTop + clientHeight >= scrollHeight - 40) {
-                _loadNextPage();
+                _loadMore();
             }
         });
     }
 
     function _resetAndSearch(query) {
         state.searchQuery = query;
-        state.currentPage = 1;
-        state.lastPage = 1;
         state.users = [];
-        state.isLoading = true;
-        _renderDropdown();      
+        state.nextCursor = null;
+        state.hasMore = true;
+        _fetch(null);
     }
 
-    function _loadNextPage() {
-        if (state.isLoading) return;
-        if (state.currentPage >= state.lastPage) return;
+    function _loadMore() {
+        if (state.isLoading || !state.hasMore || !state.nextCursor) return;
+        _fetch(state.nextCursor);
+    }
+
+    async function _fetch(cursor = null) {
+        const dropdown = state.dropdownEl;
+        if (!dropdown || state.isLoading) return;
         state.isLoading = true;
         _renderDropdown();
-        _fetchPage(state.currentPage + 1);
-    }
-
-    async function _fetchPage(page) {
-        const dropdown = state.dropdownEl;
-        if (!dropdown) return;
         try {
-            const result = await OperationsAPI.getClients(
+            const result = await OperationsAPI.getClientsCursor(
                 state.searchQuery,
-                page,
-                '',
+                cursor,
                 PER_PAGE,
                 { onlyClients: true, withValidFcm: true },
             );
             const users = result.data ?? [];
-            const meta = result.meta?.pagination ?? {};
-            state.lastPage = meta.total_pages ?? 1;
-            state.currentPage = page;
-            if (page === 1) {
-                state.users = users;
-            } else {
-                state.users = state.users.concat(users);
-            }
-            state.isLoading = false;
-            _renderDropdown();
+            state.users = cursor ? state.users.concat(users) : users;
+            state.nextCursor = result.meta?.next_cursor ?? null;
+            state.hasMore = Boolean(result.meta?.has_more);
         } catch (e) {
             console.error('User search failed', e);
+        } finally {
             state.isLoading = false;
             _renderDropdown();
         }
@@ -239,8 +231,8 @@ const OperationsNotifications = (() => {
         if (input) input.value = '';
         state.searchQuery = '';
         state.users = [];
-        state.currentPage = 1;
-        state.lastPage = 1;
+        state.nextCursor = null;
+        state.hasMore = true;
         state.isLoading = false;
         _renderDropdown();
     }

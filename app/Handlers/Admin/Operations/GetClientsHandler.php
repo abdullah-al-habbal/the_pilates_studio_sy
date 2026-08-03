@@ -6,11 +6,47 @@ namespace App\Handlers\Admin\Operations;
 
 use App\Commands\Admin\Operations\GetClientsCommand;
 use App\Models\User;
+use Illuminate\Contracts\Pagination\CursorPaginator as CursorPaginatorContract;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Pagination\Cursor;
 
 final readonly class GetClientsHandler
 {
-    public function handle(GetClientsCommand $command): LengthAwarePaginator
+    public function handle(GetClientsCommand $command): LengthAwarePaginator|CursorPaginatorContract
+    {
+        if ($command->pagination === 'cursor') {
+            return $this->cursorMode($command);
+        }
+
+        return $this->offsetMode($command);
+    }
+
+    private function cursorMode(GetClientsCommand $command): CursorPaginatorContract
+    {
+        $cursor = $command->cursor !== null ? Cursor::fromEncoded($command->cursor) : null;
+
+        return User::query()
+            ->when($command->onlyClients, fn ($q) => $q->customers())
+            ->when($command->withValidFcm, fn ($q) => $q->whereHas('settings', function ($q) {
+                $q->whereNotNull('fcm_token')->where('fcm_token', '!=', '');
+            }))
+            ->when($command->search, function ($q) use ($command) {
+                $q->where(function ($subQ) use ($command) {
+                    $subQ->where('fullname', 'like', "%{$command->search}%")
+                        ->orWhere('phone_number', 'like', "%{$command->search}%");
+                });
+            })
+            ->select(['id', 'fullname', 'phone_number'])
+            ->orderBy('id')
+            ->cursorPaginate(
+                $command->perPage,
+                ['id', 'fullname', 'phone_number'],
+                'cursor',
+                $cursor
+            );
+    }
+
+    private function offsetMode(GetClientsCommand $command): LengthAwarePaginator
     {
         return User::with(['bookings.package', 'activeCreditBooking.package', 'frozenCreditBooking.package', 'bookingSessions'])
             ->when($command->onlyClients, fn ($q) => $q->customers())

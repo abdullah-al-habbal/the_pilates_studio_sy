@@ -10,6 +10,8 @@ final readonly class GetClientsCommand
     public function __construct(
         public ?string $search = null,
         public int $page = 1,
+        public ?string $cursor = null,
+        public ?string $pagination = null,
         public ?string $filter = null,
         public int $perPage = 15,
         public bool $onlyClients = false,

@@ -26,8 +26,8 @@ class UserForm
                 TextInput::make('email')
                     ->label('Email address')
                     ->email()
-                    ->required()
-                    ->unique(ignoreRecord: true, modifyRuleUsing: fn (Unique $rule) => $rule->where('is_active', 1)),
+                    ->nullable()
+                    ->unique(ignoreRecord: true, modifyRuleUsing: fn (Unique $rule) => $rule->where('is_active', 1)->whereNotNull('email')),
                 TextInput::make('password')
                     ->password()
                     ->revealable()
@@ -37,7 +37,18 @@ class UserForm
                     ->helperText(fn (string $context) => $context === 'edit' ? 'Leave blank to keep current password.' : null),
                 DatePicker::make('date_of_birth'),
                 Select::make('role')
-                    ->options(UserRoleEnum::options())
+                    ->options(function ($livewire) {
+                        $options = collect(UserRoleEnum::cases())
+                            ->reject(fn ($case) => $case === UserRoleEnum::MAIN_ADMIN)
+                            ->mapWithKeys(fn ($case) => [$case->value => $case->label()]);
+
+                        $record = $livewire?->record ?? null;
+                        if ($record?->role === UserRoleEnum::MAIN_ADMIN) {
+                            $options->put(UserRoleEnum::MAIN_ADMIN->value, UserRoleEnum::MAIN_ADMIN->label());
+                        }
+
+                        return $options;
+                    })
                     ->required()
                     ->native(false),
                 Select::make('status')

@@ -2,6 +2,7 @@
 
 namespace App\Filament\Admin\Resources\AppNotifications\Schemas;
 
+use App\Models\User;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
@@ -15,7 +16,7 @@ class AppNotificationForm
         return $schema
             ->components([
                 Select::make('user_id')
-                    ->relationship('user', 'fullname')
+                    ->options(fn () => User::customers()->orderBy('fullname')->pluck('fullname', 'id'))
                     ->searchable()
                     ->preload()
                     ->required()

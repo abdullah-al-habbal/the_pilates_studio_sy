@@ -43,6 +43,14 @@ const OperationsAPI = {
         return this.request(url);
     },
 
+    getClientsCursor(search = "", cursor = null, perPage = 10, options = {}) {
+        let url = `/admin/operations/clients?search=${encodeURIComponent(search)}&per_page=${perPage}&pagination=cursor`;
+        if (cursor) url += `&cursor=${encodeURIComponent(cursor)}`;
+        if (options.onlyClients) url += '&only_clients=1';
+        if (options.withValidFcm) url += '&with_valid_fcm=1';
+        return this.request(url);
+    },
+
     sendNotification(payload) {
         return this.request('/admin/operations/notifications/send', 'POST', payload);
     },
