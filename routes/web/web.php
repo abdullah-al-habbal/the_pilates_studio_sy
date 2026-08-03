@@ -1,6 +1,6 @@
 <?php
 
-// /home/lenovo/work/projects/pilates/routes/web/web.php
+// filePath: routes/web/web.php
 declare(strict_types=1);
 
 use App\Actions\Web\Landing\GetLandingDataAction;

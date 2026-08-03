@@ -1,5 +1,5 @@
 <?php
-// routes/web/operations/finance.php
+// filePath: routes/web/operations/finance.php
 
 declare(strict_types=1);
 use App\Http\Actions\Web\Admin\Operations\GetDailyBalanceAction;

@@ -1,6 +1,6 @@
 <?php
 
-// routes/web/operations/notifications.php
+// filePath: routes/web/operations/notifications.php
 declare(strict_types=1);
 
 use App\Http\Actions\Web\Admin\Operations\SendPushNotificationAction;

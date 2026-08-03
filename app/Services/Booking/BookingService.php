@@ -11,7 +11,6 @@ use App\Models\Booking;
 use App\Models\Package;
 use App\Models\User;
 use App\Repositories\Eloquent\Booking\BookingEloquentRepository;
-use App\Services\Package\PackageService;
 use Carbon\Carbon;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -22,8 +21,7 @@ use Illuminate\Validation\ValidationException;
 class BookingService
 {
     public function __construct(
-        private readonly BookingEloquentRepository $repository,
-        private readonly PackageService $packageService
+        private readonly BookingEloquentRepository $repository
     ) {}
 
     public function userHasActiveCreditBooking(User $user): bool
@@ -154,24 +152,6 @@ class BookingService
     public function sumUsedCredits(): int
     {
         return $this->repository->sumUsedCredits();
-    }
-
-    public function createWalkInBooking(int $userId, ?int $createdBy = null): Booking
-    {
-        return DB::transaction(function () use ($userId, $createdBy): Booking {
-            $package = $this->packageService->findActiveWalkInPackage()
-                ?? $this->packageService->createWalkInPackage();
-
-            return $this->repository->create([
-                'user_id' => $userId,
-                'created_by' => $createdBy,
-                'package_id' => $package->id,
-                'total_credits' => 1,
-                'remaining_credits' => 1,
-                'status' => BookingStatusEnum::ACTIVE->value,
-                'expires_at' => now()->endOfDay(),
-            ]);
-        });
     }
 
     public function getRevenueByPackage(): Collection

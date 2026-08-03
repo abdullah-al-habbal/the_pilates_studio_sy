@@ -17,8 +17,10 @@ use App\Repositories\Eloquent\BookingSession\BookingSessionEloquentRepository;
 use App\Repositories\Eloquent\ClassSession\ClassSessionEloquentRepository;
 use App\Repositories\Eloquent\Package\PackageEloquentRepository;
 use App\Repositories\Eloquent\User\UserEloquentRepository;
+use App\Services\AppSetting\AppSettingService;
 use App\Services\Booking\BookingService;
 use App\Services\ClassSession\ClassSessionService;
+use App\Services\Currency\PricingService;
 use App\Services\Log\LoggingService;
 use Carbon\Carbon;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
@@ -37,7 +39,9 @@ class BookingSessionService
         private readonly UserEloquentRepository $userRepo,
         private readonly BookingService $bookingService,
         private readonly ClassSessionService $classSessionService,
-        private readonly LoggingService $logger
+        private readonly LoggingService $logger,
+        private readonly PricingService $pricingService,
+        private readonly AppSettingService $appSettings,
     ) {}
 
     public function listUserSessions(int $userId, array $filters = []): LengthAwarePaginator
@@ -130,10 +134,14 @@ class BookingSessionService
             $booking = $this->bookingRepo->findActiveWithCreditsForUser($userId);
 
             if (! $booking) {
-                $package = $this->packageRepo->findActiveWalkInPackage();
+                $price = (int) $this->appSettings->get('walk_in_price', 16);
+                $package = $this->packageRepo->findOrCreateWalkInPackage($price);
 
-                if (! $package) {
-                    $package = $this->packageRepo->createWalkInPackage();
+                $currencyId = $this->pricingService->getBaseCurrencyId();
+                $paidAmount = $package->getPriceForCurrency($currencyId);
+
+                if ($paidAmount === null) {
+                    throw new \RuntimeException('Walk-in package has no base price configured.');
                 }
 
                 $booking = $this->bookingRepo->create([
@@ -143,6 +151,9 @@ class BookingSessionService
                     'remaining_credits' => 1,
                     'status' => BookingStatusEnum::ACTIVE,
                     'created_by' => $createdBy,
+                    'paid_amount' => $paidAmount,
+                    'currency_id' => $currencyId,
+                    'exchange_rate_snapshot' => $this->pricingService->getExchangeRateForSnapshot($currencyId),
                 ]);
             }
 

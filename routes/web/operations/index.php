@@ -1,6 +1,6 @@
 <?php
 
-// routes/web/operations/index.php
+// filePath: routes/web/operations/index.php
 declare(strict_types=1);
 use App\Http\Actions\Web\Admin\Operations\OperationsIndexAction;
 use Illuminate\Support\Facades\Route;

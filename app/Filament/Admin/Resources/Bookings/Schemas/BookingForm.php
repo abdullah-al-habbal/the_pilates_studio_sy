@@ -31,7 +31,19 @@ class BookingForm
 
                     Select::make('user_id')
                         ->label(__('dashboard.resources.bookings.fields.user'))
-                        ->options(fn () => User::pluck('fullname', 'id'))
+                        ->options(function ($livewire) {
+                            $users = User::customers()
+                                ->whereDoesntHave('bookings', fn ($q) => $q->blockingNewPurchase())
+                                ->orderBy('fullname')
+                                ->pluck('fullname', 'id');
+
+                            $record = $livewire?->record ?? null;
+                            if ($record?->user_id && ! $users->has($record->user_id)) {
+                                $users->put($record->user_id, $record->user?->fullname ?? $record->user_id);
+                            }
+
+                            return $users;
+                        })
                         ->searchable()
                         ->preload()
                         ->required()
@@ -86,23 +98,7 @@ class BookingForm
 
                                 $hasBlockingBooking = Booking::query()
                                     ->where('user_id', $value)
-                                    ->when($currentBookingId, fn ($q) => $q->where('id', '!=', $currentBookingId))
-                                    ->where(function ($query) {
-                                        $query->where(function ($q) {
-                                            $q->where('status', BookingStatusEnum::ACTIVE)
-                                                ->where('remaining_credits', '>', 0)
-                                                ->where(function ($dateQ) {
-                                                    $dateQ->whereNull('expires_at')
-                                                        ->orWhere('expires_at', '>', now());
-                                                });
-                                        })->orWhere(function ($q) {
-                                            $q->where('status', BookingStatusEnum::FROZEN)
-                                                ->where(function ($dateQ) {
-                                                    $dateQ->whereNull('expires_at')
-                                                        ->orWhere('expires_at', '>', now());
-                                                });
-                                        });
-                                    })
+                                    ->blockingNewPurchase($currentBookingId)
                                     ->exists();
 
                                 if ($hasBlockingBooking) {

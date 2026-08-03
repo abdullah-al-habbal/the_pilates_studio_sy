@@ -84,6 +84,22 @@ class Booking extends Model
         });
     }
 
+    public function scopeBlockingNewPurchase($query, ?int $exceptBookingId = null)
+    {
+        return $query
+            ->when($exceptBookingId, fn ($q) => $q->where('id', '!=', $exceptBookingId))
+            ->where(function ($q) {
+                $q->where(function ($inner) {
+                    $inner->where('status', BookingStatusEnum::ACTIVE)
+                        ->where('remaining_credits', '>', 0)
+                        ->where(fn ($d) => $d->whereNull('expires_at')->orWhere('expires_at', '>', now()));
+                })->orWhere(function ($inner) {
+                    $inner->where('status', BookingStatusEnum::FROZEN)
+                        ->where(fn ($d) => $d->whereNull('expires_at')->orWhere('expires_at', '>', now()));
+                });
+            });
+    }
+
     public function deductCredit(): void
     {
         if ($this->remaining_credits <= 0) {

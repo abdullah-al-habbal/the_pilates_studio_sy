@@ -13,7 +13,9 @@ use App\Http\Requests\Api\V1\Booking\ListBookingsRequest;
 use App\Http\Resources\Api\V1\BookingCollection;
 use App\Http\Resources\Api\V1\BookingResource;
 use App\Services\Booking\BookingService;
+use App\Services\Currency\PricingService;
 use App\Services\Package\PackageService;
+use App\Services\Validation\AssignPackageValidatorService;
 use Dedoc\Scramble\Attributes\Endpoint;
 use Dedoc\Scramble\Attributes\Group;
 use Illuminate\Http\JsonResponse;
@@ -25,7 +27,9 @@ class BookingController extends BaseApiController
 {
     public function __construct(
         private readonly BookingService $bookingService,
-        private readonly PackageService $packageService
+        private readonly PackageService $packageService,
+        private readonly PricingService $pricingService,
+        private readonly AssignPackageValidatorService $assignPackageValidator,
     ) {}
 
     #[Endpoint('List bookings', description: 'Returns a paginated list of user bookings.')]
@@ -63,7 +67,24 @@ class BookingController extends BaseApiController
         $user = $request->user();
         $package = $this->packageService->findById($request->package_id);
 
-        $booking = $this->bookingService->createFromPackage($user, $package);
+        $currencyId = $request->filled('currency_id')
+            ? (int) $request->input('currency_id')
+            : $this->pricingService->getBaseCurrencyId();
+
+        $paidAmount = $this->assignPackageValidator->validateAndComputeAmount(
+            $package->id,
+            $currencyId,
+            $request->filled('paid_amount') ? (int) $request->input('paid_amount') : null
+        );
+
+        $booking = $this->bookingService->createFromPackage(
+            $user,
+            $package,
+            null,
+            $currencyId,
+            $paidAmount,
+            $this->pricingService->getExchangeRateForSnapshot($currencyId)
+        );
 
         return $this->created(
             new BookingResource($booking),

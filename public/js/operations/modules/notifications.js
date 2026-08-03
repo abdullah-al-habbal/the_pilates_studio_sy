@@ -1,4 +1,4 @@
-// public/js/operations/modules/notifications.js
+// filePath: public/js/operations/modules/notifications.js
 const OperationsNotifications = (() => {
     const state = {
         selectedUsers: new Map(),      

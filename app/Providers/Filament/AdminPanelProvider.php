@@ -32,7 +32,6 @@ use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Blade;
-use Illuminate\Support\Facades\Log;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 use LaraZeus\SpatieTranslatable\SpatieTranslatablePlugin;
 
@@ -40,17 +39,6 @@ class AdminPanelProvider extends PanelProvider
 {
     public function panel(Panel $panel): Panel
     {
-        $user = Auth::user();
-
-        Log::info('FILAMENT USER', [
-            'running_in_console' => app()->runningInConsole(),
-            'authenticated' => Auth::check(),
-            'id' => $user?->id,
-            'class' => $user ? get_class($user) : null,
-            'email' => $user?->email,
-            'role' => $user?->role?->value ?? $user?->role,
-        ]);
-
         return $panel
             ->login()
             ->id('admin')

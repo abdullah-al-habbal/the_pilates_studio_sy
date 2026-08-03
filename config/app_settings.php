@@ -212,5 +212,11 @@ return [
             'type' => 'image',
             'description' => 'Hero section background image',
         ],
+        [
+            'key' => 'walk_in_price',
+            'value' => '16',
+            'type' => 'number',
+            'description' => 'Walk-in session price in base currency',
+        ],
     ],
 ];

@@ -9,6 +9,7 @@ enum PackageTypeEnum: string
     case STANDARD = 'standard';
     case BY_SYSTEM = 'by_system';
     case FOR_FREEZE_CLIENT = 'for_freeze_client';
+    case WALK_IN = 'walk_in';
 
     public function label(): string
     {
@@ -16,6 +17,7 @@ enum PackageTypeEnum: string
             self::STANDARD => 'Standard',
             self::BY_SYSTEM => 'System Generated',
             self::FOR_FREEZE_CLIENT => 'Unfreeze Residual',
+            self::WALK_IN => 'Walk-in',
         };
     }
 
@@ -25,6 +27,7 @@ enum PackageTypeEnum: string
             self::STANDARD => 'gray',
             self::BY_SYSTEM => 'info',
             self::FOR_FREEZE_CLIENT => 'warning',
+            self::WALK_IN => 'success',
         };
     }
 

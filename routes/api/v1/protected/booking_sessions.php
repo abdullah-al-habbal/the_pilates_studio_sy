@@ -1,6 +1,6 @@
 <?php
 
-// routes\api\v1\protected\booking_sessions.php
+// filePath: routes\api\v1\protected\booking_sessions.php
 declare(strict_types=1);
 
 use App\Actions\V1\BookingSession\ListUserSessionsAction;

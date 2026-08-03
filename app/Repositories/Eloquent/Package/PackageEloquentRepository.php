@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Repositories\Eloquent\Package;
 
+use App\Enums\PackageTypeEnum;
 use App\Models\Package;
 use App\Services\Currency\CurrencyService;
 use App\Services\Currency\PricingService;
@@ -60,26 +61,46 @@ class PackageEloquentRepository
 
     public function findActiveWalkInPackage(): ?Package
     {
-        return Package::where('total_credits', 1)
+        return Package::where('type', PackageTypeEnum::WALK_IN)
             ->where('is_active', true)
             ->first();
     }
 
-    public function createWalkInPackage(): Package
+    public function findOrCreateWalkInPackage(int $price): Package
     {
+        $package = $this->findActiveWalkInPackage();
+
+        if (! $package) {
+            $baseCurrencyId = $this->pricingService->getBaseCurrencyId();
+
+            $package = Package::create([
+                'name' => ['en' => 'Walk-in Session', 'ar' => 'جلسة دخول مباشر'],
+                'total_credits' => 1,
+                'is_active' => true,
+                'type' => PackageTypeEnum::WALK_IN,
+            ]);
+
+            $package->prices()->create([
+                'currency_id' => $baseCurrencyId,
+                'amount' => $price,
+            ]);
+
+            return $package;
+        }
+
         $baseCurrencyId = $this->pricingService->getBaseCurrencyId();
+        $priceRow = $package->prices()->where('currency_id', $baseCurrencyId)->first();
 
-        $package = Package::create([
-            'name' => ['en' => 'Walk-in Session', 'ar' => 'جلسة دخول مباشر'],
-            'total_credits' => 1,
-            'is_active' => true,
-        ]);
-
-        // fix: the walk out not free. it based on the same package price. so, we must update the method to accept the currecny and price
-        $package->prices()->create([
-            'currency_id' => $baseCurrencyId,
-            'amount' => 0,
-        ]);
+        if ($priceRow) {
+            if ((int) $priceRow->amount !== $price) {
+                $priceRow->update(['amount' => $price]);
+            }
+        } else {
+            $package->prices()->create([
+                'currency_id' => $baseCurrencyId,
+                'amount' => $price,
+            ]);
+        }
 
         return $package;
     }

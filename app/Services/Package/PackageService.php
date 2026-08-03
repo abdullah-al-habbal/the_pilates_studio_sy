@@ -52,14 +52,4 @@ class PackageService
 
         return $package;
     }
-
-    public function findActiveWalkInPackage(): ?Package
-    {
-        return $this->repository->findActiveWalkInPackage();
-    }
-
-    public function createWalkInPackage(): Package
-    {
-        return $this->repository->createWalkInPackage();
-    }
 }

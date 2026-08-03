@@ -1,6 +1,6 @@
 <?php
 
-// routes/web/scheduler/sessions.php
+// filePath: routes/web/scheduler/sessions.php
 declare(strict_types=1);
 
 use App\Http\Actions\Web\Admin\Scheduler\GetDailySessionsAction;
