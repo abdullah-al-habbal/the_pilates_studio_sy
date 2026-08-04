@@ -28,6 +28,20 @@ final readonly class GetClientsAction
                 $request->toCommand()
             );
 
+            Log::info('Operations - GetClients', [
+                'pagination' => $request->query('pagination', 'offset'),
+                'search' => $request->query('search'),
+                'cursor' => $request->query('cursor'),
+                'only_clients' => (bool) $request->query('only_clients', false),
+                'with_valid_fcm' => (bool) $request->query('with_valid_fcm', false),
+                'result_class' => get_class($paginator),
+                'count' => $paginator->count(),
+                'next_cursor' => $paginator instanceof CursorPaginatorContract
+                    ? $paginator->nextCursor()?->encode()
+                    : null,
+                'has_more' => $paginator->hasMorePages(),
+            ]);
+
             if ($paginator instanceof CursorPaginatorContract) {
                 return $this->success(
                     data: ClientOptionResource::collection($paginator->items()),

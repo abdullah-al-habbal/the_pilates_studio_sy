@@ -9,9 +9,11 @@ class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
-        $this->cleanupGeneratedAssets();
+        if (! app()->environment('production')) {
+            $this->cleanupGeneratedAssets();
+        }
 
-        $this->call([
+        $seeders = [
             CurrencySeeder::class,
             LanguageSeeder::class,
             RecurrencePatternSeeder::class,
@@ -21,19 +23,27 @@ class DatabaseSeeder extends Seeder
             StaticPageSeeder::class,
             CenterMerchandiseCategorySeeder::class,
             CenterMerchandiseSeeder::class,
-            UserSeeder::class,
+            AdminSeeder::class,
             UserSettingSeeder::class,
-            ClassesSeeder::class,
-            ClassImageSeeder::class,
-            ClassSessionSeeder::class,
-            BookingSeeder::class,
-            BookingSessionSeeder::class,
             AppNotificationSeeder::class,
             NotificationTemplateSeeder::class,
             AppSettingSeeder::class,
             MobileAppVersionSeeder::class,
             TestimonialSeeder::class,
-        ]);
+        ];
+
+        if (! app()->environment('production')) {
+            array_splice($seeders, 10, 0, [
+                ClientSeeder::class,
+                ClassesSeeder::class,
+                ClassImageSeeder::class,
+                ClassSessionSeeder::class,
+                BookingSeeder::class,
+                BookingSessionSeeder::class,
+            ]);
+        }
+
+        $this->call($seeders);
     }
 
     private function cleanupGeneratedAssets(): void

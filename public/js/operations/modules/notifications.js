@@ -129,18 +129,32 @@ const OperationsNotifications = (() => {
         state.isLoading = true;
         _renderDropdown();
         try {
+            const params = {
+                search: state.searchQuery,
+   cleanupGeneratedAssets             cursor: cursor ?? '',
+                per_page: PER_PAGE,
+                only_clients: 1,
+            };
+            console.log('[Notifications] fetching users', params);
             const result = await OperationsAPI.getClientsCursor(
                 state.searchQuery,
                 cursor,
                 PER_PAGE,
-                { onlyClients: true, withValidFcm: true },
+                { onlyClients: true },
             );
             const users = result.data ?? [];
             state.users = cursor ? state.users.concat(users) : users;
             state.nextCursor = result.meta?.next_cursor ?? null;
             state.hasMore = Boolean(result.meta?.has_more);
+            console.log('[Notifications] response', {
+                returned: users.length,
+                total_loaded: state.users.length,
+                next_cursor: state.nextCursor,
+                has_more: state.hasMore,
+                response_meta: result.meta,
+            });
         } catch (e) {
-            console.error('User search failed', e);
+            console.error('[Notifications] user fetch failed', e);
         } finally {
             state.isLoading = false;
             _renderDropdown();
