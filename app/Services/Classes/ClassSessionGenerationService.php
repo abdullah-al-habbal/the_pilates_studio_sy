@@ -8,27 +8,25 @@ use App\Enums\BookingSessionStatusEnum;
 use App\Enums\ClassSessionStatusEnum;
 use App\Models\Classes;
 use App\Models\ClassSession;
+use App\Services\Validation\ClassScheduleValidationService;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
-use InvalidArgumentException;
+use Illuminate\Validation\ValidationException;
 
 final class ClassSessionGenerationService
 {
+    public function __construct(
+        private readonly ClassScheduleValidationService $validator
+    ) {}
+
     public function generate(Classes $class): void
     {
+        $this->validator->validate($class);
+
         $pattern = $class->recurrencePattern;
-
-        if (! $pattern || $pattern->interval_days <= 0) {
-            throw new InvalidArgumentException('Valid recurrence pattern with interval > 0 is required.');
-        }
-
         $start = Carbon::parse($class->start_date)->startOfDay();
         $end = Carbon::parse($class->end_date)->endOfDay();
         $interval = $pattern->interval_days;
-
-        if ($start->greaterThan($end)) {
-            throw new InvalidArgumentException('End date must be on or after start date.');
-        }
 
         $rows = [];
         $cursor = $start->copy();
@@ -48,17 +46,41 @@ final class ClassSessionGenerationService
             $cursor->addDays($interval);
         }
 
-        if (! empty($rows)) {
-            ClassSession::insertOrIgnore($rows);
+        if ($rows === []) {
+            throw ValidationException::withMessages([
+                'end_date' => 'The selected date range did not generate any sessions.',
+            ]);
         }
+
+        ClassSession::insert($rows);
     }
 
     public function regenerate(Classes $class): void
     {
         DB::transaction(function () use ($class) {
+            $this->assertRegenerable($class);
+
             $class->sessions()->forceDelete();
             $this->generate($class);
         });
+    }
+
+    public function assertRegenerable(Classes $class): void
+    {
+        if ($this->hasBookings($class)) {
+            throw ValidationException::withMessages([
+                'start_date' => 'This class has booked sessions. You cannot change the schedule because customers paid for these specific dates. Create a new class instead.',
+            ]);
+        }
+    }
+
+    public function assertCapacityValid(Classes $class, int $newTotalSpots): void
+    {
+        if ($this->wouldExceedCapacity($class, $newTotalSpots)) {
+            throw ValidationException::withMessages([
+                'total_spots' => 'Cannot reduce total spots below the number of currently reserved spots.',
+            ]);
+        }
     }
 
     public function hasBookings(Classes $class): bool

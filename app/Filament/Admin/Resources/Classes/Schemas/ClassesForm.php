@@ -9,6 +9,8 @@ use App\Models\ClassCategory;
 use App\Models\Classes;
 use App\Models\Instructor;
 use App\Models\RecurrencePattern;
+use App\Services\Validation\ClassScheduleValidationService;
+use Closure;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Placeholder;
@@ -20,7 +22,9 @@ use Filament\Forms\Components\TimePicker;
 use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
+use Illuminate\Validation\ValidationException;
 
 class ClassesForm
 {
@@ -88,6 +92,8 @@ class ClassesForm
                                 })
                                 ->searchable()
                                 ->required()
+                                ->live()
+                                ->rule(self::scheduleWindowRule())
                                 ->disabled(fn (?Classes $record) => $record?->exists && $record->hasBookedSessions())
                                 ->helperText(__('dashboard.resources.classes.helpers.recurrence_pattern'))
                                 ->columnSpan(1),
@@ -102,7 +108,7 @@ class ClassesForm
 
                 Placeholder::make('money_lock_warning')
                     ->label('')
-                    ->content(fn (?Classes $record) => 'This class has customer bookings. Changing dates or recurrence would violate paid reservations. To offer different dates, create a new class.')
+                    ->content(fn (?Classes $record) => 'This class has customer bookings. Changing dates, times, or recurrence would violate paid reservations. To offer different dates, create a new class.')
                     ->visible(fn (?Classes $record) => $record?->exists && $record->hasBookedSessions())
                     ->columnSpanFull(),
 
@@ -114,6 +120,8 @@ class ClassesForm
                             DatePicker::make('start_date')
                                 ->label(__('dashboard.resources.classes.fields.start_date'))
                                 ->required()
+                                ->live()
+                                ->rule(self::scheduleWindowRule())
                                 ->displayFormat('M d, Y')
                                 ->native(false)
                                 ->closeOnDateSelection()
@@ -124,6 +132,8 @@ class ClassesForm
                             DatePicker::make('end_date')
                                 ->label(__('dashboard.resources.classes.fields.end_date'))
                                 ->required()
+                                ->live()
+                                ->rule(self::scheduleWindowRule())
                                 ->displayFormat('M d, Y')
                                 ->native(false)
                                 ->closeOnDateSelection()
@@ -139,6 +149,7 @@ class ClassesForm
                                     ->displayFormat('H:i')
                                     ->native(false)
                                     ->seconds(false)
+                                    ->disabled(fn (?Classes $record) => $record?->exists && $record->hasBookedSessions())
                                     ->helperText(__('dashboard.resources.classes.helpers.start_time'))
                                     ->columnSpan(1),
 
@@ -149,6 +160,7 @@ class ClassesForm
                                     ->native(false)
                                     ->seconds(false)
                                     ->after('start_time')
+                                    ->disabled(fn (?Classes $record) => $record?->exists && $record->hasBookedSessions())
                                     ->helperText(__('dashboard.resources.classes.helpers.end_time'))
                                     ->columnSpan(1),
                             ])->columnSpan(1),
@@ -218,5 +230,28 @@ class ClassesForm
                             ->columnSpanFull(),
                     ]),
             ]);
+    }
+
+    private static function scheduleWindowRule(): Closure
+    {
+        return function (Get $get): Closure {
+            return function (string $attribute, mixed $value, Closure $fail) use ($get): void {
+                $pattern = RecurrencePattern::find((int) $get('recurrence_pattern_id'));
+
+                if (! $pattern) {
+                    return;
+                }
+
+                try {
+                    app(ClassScheduleValidationService::class)->assertValidWindow(
+                        $get('start_date'),
+                        $get('end_date'),
+                        $pattern->interval_days,
+                    );
+                } catch (ValidationException $exception) {
+                    $fail(collect($exception->errors())->flatten()->first());
+                }
+            };
+        };
     }
 }
