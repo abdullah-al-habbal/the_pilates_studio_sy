@@ -20,6 +20,7 @@ class BookingInfolist
                 Section::make(__('dashboard.resources.bookings.sections.information'))
                     ->description(__('dashboard.resources.bookings.sections.information_desc'))
                     ->icon('heroicon-o-information-circle')
+                    ->columnSpanFull()
                     ->columns(2)
                     ->schema([
                         Fieldset::make('Customer & Plan Details')
@@ -30,14 +31,14 @@ class BookingInfolist
                                     ->weight(FontWeight::Bold)
                                     ->icon('heroicon-o-user')
                                     ->iconPosition(IconPosition::Before)
-                                    ->state(fn (Booking $record) => $record->user?->fullname ?? '—'),
+                                    ->state(fn (Booking $record) => $record->user?->fullname ?? __('dashboard.placeholders.not_set')),
 
                                 TextEntry::make('package.name')
                                     ->label(__('dashboard.resources.bookings.fields.package'))
                                     ->badge()
                                     ->color('info')
                                     ->icon('heroicon-o-cube')
-                                    ->formatStateUsing(fn ($state, Booking $record) => $record->package?->getTranslation('name', app()->getLocale()) ?? '—'),
+                                    ->formatStateUsing(fn ($state, Booking $record) => $record->package?->getTranslation('name', app()->getLocale()) ?? __('dashboard.placeholders.not_set')),
 
                                 TextEntry::make('validity_days_snapshot')
                                     ->label('Package Validity (at Purchase)')
@@ -68,7 +69,7 @@ class BookingInfolist
                                     ->label('Paid Amount')
                                     ->formatStateUsing(function ($state, Booking $record) {
                                         if ($state === null) {
-                                            return '—';
+                                            return __('dashboard.placeholders.not_set');
                                         }
                                         $currency = $record->currency;
 
@@ -133,7 +134,7 @@ class BookingInfolist
                             ->label('Exchange Rate Snapshot')
                             ->formatStateUsing(function ($state, Booking $record) {
                                 if ($state === null) {
-                                    return '—';
+                                    return __('dashboard.placeholders.not_set');
                                 }
                                 $currency = $record->currency;
                                 $code = $currency?->code;

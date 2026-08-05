@@ -40,7 +40,7 @@
                         <input type="radio" name="notif-target" value="all" id="target-all" checked class="accent-primary-600">
                         <div>
                             <p class="text-sm font-bold">All Users</p>
-                            <p class="text-xs text-slate-400">Everyone with an FCM token</p>
+                            <p class="text-xs text-slate-400">Anyone with a phone set up to receive notifications</p>
                         </div>
                     </label>
                     <label class="flex-1 flex items-center gap-3 p-3 rounded-xl cursor-pointer border-2 border-transparent

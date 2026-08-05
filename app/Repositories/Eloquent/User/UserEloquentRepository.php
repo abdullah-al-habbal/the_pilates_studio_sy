@@ -114,6 +114,7 @@ class UserEloquentRepository
     public function list(array $filters = []): EloquentCollection
     {
         return User::query()
+            ->customers()
             ->orderBy('fullname')
             ->get();
     }
@@ -128,6 +129,7 @@ class UserEloquentRepository
     public function listExcludingSession(int $sessionId): Collection
     {
         return User::orderBy('fullname')
+            ->customers()
             ->whereDoesntHave('bookingSessions', function ($q) use ($sessionId) {
                 $q->where('class_session_id', $sessionId);
             })

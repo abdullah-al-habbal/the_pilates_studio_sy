@@ -18,14 +18,12 @@ class DatabaseSeeder extends Seeder
             LanguageSeeder::class,
             RecurrencePatternSeeder::class,
             ClassCategorySeeder::class,
-            InstructorSeeder::class,
             PackageSeeder::class,
             StaticPageSeeder::class,
             CenterMerchandiseCategorySeeder::class,
             CenterMerchandiseSeeder::class,
             AdminSeeder::class,
             UserSettingSeeder::class,
-            AppNotificationSeeder::class,
             NotificationTemplateSeeder::class,
             AppSettingSeeder::class,
             MobileAppVersionSeeder::class,
@@ -34,8 +32,10 @@ class DatabaseSeeder extends Seeder
 
         if (! app()->environment('production')) {
             array_splice($seeders, 10, 0, [
+                InstructorSeeder::class,
                 ClientSeeder::class,
                 ClassesSeeder::class,
+                AppNotificationSeeder::class,
                 ClassImageSeeder::class,
                 ClassSessionSeeder::class,
                 BookingSeeder::class,

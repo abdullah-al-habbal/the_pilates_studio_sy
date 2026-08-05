@@ -131,7 +131,7 @@ const OperationsNotifications = (() => {
         try {
             const params = {
                 search: state.searchQuery,
-   cleanupGeneratedAssets             cursor: cursor ?? '',
+                cursor: cursor ?? '',
                 per_page: PER_PAGE,
                 only_clients: 1,
             };
@@ -191,7 +191,7 @@ const OperationsNotifications = (() => {
                 </label>`;
             }).join('');
         } else if (!state.isLoading) {
-            html += '<p class="px-4 py-3 text-xs text-slate-400 italic">No users found.</p>';
+            html += '<p class="px-4 py-3 text-xs text-slate-400 italic">No matching users. Only people who have allowed notifications on their phone can be selected.</p>';
         }
 
         if (state.isLoading) {

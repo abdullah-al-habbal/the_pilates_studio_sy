@@ -26,7 +26,7 @@ final readonly class GetClientsHandler
         $cursor = $command->cursor !== null ? Cursor::fromEncoded($command->cursor) : null;
 
         return User::query()
-            ->when($command->onlyClients, fn ($q) => $q->customers())
+            ->customers()
             ->when($command->withValidFcm, fn ($q) => $q->whereHas('settings', function ($q) {
                 $q->whereNotNull('fcm_token')->where('fcm_token', '!=', '');
             }))
@@ -49,7 +49,7 @@ final readonly class GetClientsHandler
     private function offsetMode(GetClientsCommand $command): LengthAwarePaginator
     {
         return User::with(['bookings.package', 'activeCreditBooking.package', 'frozenCreditBooking.package', 'bookingSessions'])
-            ->when($command->onlyClients, fn ($q) => $q->customers())
+            ->customers()
             ->when($command->withValidFcm, fn ($q) => $q->whereHas('settings', function ($q) {
                 $q->whereNotNull('fcm_token')->where('fcm_token', '!=', '');
             }))

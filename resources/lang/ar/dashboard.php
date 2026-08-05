@@ -90,6 +90,9 @@ return [
             ],
         ],
     ],
+    'placeholders' => [
+        'not_set' => 'غير محدد',
+    ],
     'resources' => [
         'center_merchandises' => [
             'singular' => 'منتج',
