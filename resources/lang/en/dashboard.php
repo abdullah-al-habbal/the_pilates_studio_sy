@@ -96,6 +96,9 @@ return [
         'copied' => 'Copied!',
         'no_image' => 'No Image',
     ],
+    'placeholders' => [
+        'not_set' => 'Not set',
+    ],
     'filters' => [
         'trashed' => 'Trashed',
     ],

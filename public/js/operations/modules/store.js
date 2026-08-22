@@ -1,6 +1,20 @@
 // filePath: /home/lenovo/work/projects/the_pilates_studio_sy/public/js/operations/modules/store.js
 import { updateGlobalStats } from "./tabs.js";
 
+const saleClientPicker = {
+    users: [],
+    nextCursor: null,
+    hasMore: true,
+    isLoading: false,
+    query: '',
+    searchTimeout: null,
+    isFocused: false,
+    blurTimer: null,
+    selected: null,
+    error: null,
+};
+const SALE_CLIENT_PAGE_SIZE = 10;
+
 export function initStoreTab() {
     renderStore();
 }
@@ -112,10 +126,20 @@ export async function showQuickSale(itemId) {
         <div id="existing-customer-form" class="space-y-4">
             <div class="space-y-2">
                 <label class="text-sm font-bold text-slate-600 dark:text-slate-400">Select Customer</label>
-                <select name="customer_id" id="sale-customer-select"
-                    class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 rounded-xl border-transparent focus:ring-2 focus:ring-primary-500 outline-none">
-                    <option value="">Loading customers...</option>
-                </select>
+                <input type="hidden" id="sale-customer-id" value="">
+                <div class="relative">
+                    <input type="text" id="sale-customer-search" placeholder="Search by name or phone…"
+                           autocomplete="off"
+                           class="w-full pl-10 pr-4 py-3 bg-slate-50 dark:bg-slate-800 rounded-xl border-transparent focus:ring-2 focus:ring-primary-500 outline-none">
+                    <svg class="w-4 h-4 absolute left-3 top-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                    </svg>
+                </div>
+                <div id="sale-customer-results"
+                     class="hidden max-h-56 overflow-y-auto rounded-xl border border-slate-200 dark:border-slate-700 
+                            bg-white dark:bg-slate-900 shadow-sm divide-y divide-slate-100 dark:divide-slate-800">
+                </div>
+                <div id="sale-customer-chip" class="hidden"></div>
             </div>
         </div>`;
 
@@ -221,33 +245,225 @@ export async function showQuickSale(itemId) {
 
     refreshPreview();
 
-    try {
-        const result = await OperationsAPI.getClients("", 1);
-        const select = document.getElementById("sale-customer-select");
-        if (select) {
-            select.innerHTML =
-                '<option value="">-- Choose Client --</option>' +
-                result.data
-                    .map(
-                        (u) =>
-                            `<option value="${u.id}">${u.fullname} (${u.phone_number})</option>`,
-                    )
-                    .join("");
+    _initSalePicker();
+}
+
+function _initSalePicker() {
+    Object.assign(saleClientPicker, {
+        users: [],
+        nextCursor: null,
+        hasMore: true,
+        isLoading: false,
+        query: '',
+        selected: null,
+        error: null,
+    });
+
+    const input = document.getElementById("sale-customer-search");
+    const results = document.getElementById("sale-customer-results");
+    if (!input || !results) return;
+
+    _renderSaleClientChip();
+
+    input.addEventListener("focus", () => {
+        saleClientPicker.isFocused = true;
+        clearTimeout(saleClientPicker.blurTimer);
+        if (saleClientPicker.users.length > 0 || saleClientPicker.isLoading) {
+            _renderSaleClientResults();
+            return;
         }
+        _resetAndSearch('');
+    });
+
+    input.addEventListener("blur", () => {
+        saleClientPicker.blurTimer = setTimeout(() => {
+            if (saleClientPicker.isFocused) return;
+            results.classList.add("hidden");
+        }, 200);
+    });
+
+    input.addEventListener("input", (e) => {
+        clearTimeout(saleClientPicker.searchTimeout);
+        saleClientPicker.searchTimeout = setTimeout(() => {
+            const query = e.target.value.trim();
+            if (query === saleClientPicker.query) return;
+            _resetAndSearch(query);
+        }, 300);
+    });
+
+    results.addEventListener("mouseenter", () => {
+        clearTimeout(saleClientPicker.blurTimer);
+        saleClientPicker.isFocused = true;
+    });
+    results.addEventListener("mouseleave", () => {
+        saleClientPicker.isFocused = false;
+        if (document.activeElement !== input) {
+            saleClientPicker.blurTimer = setTimeout(() => {
+                if (!saleClientPicker.isFocused) results.classList.add("hidden");
+            }, 200);
+        }
+    });
+    results.addEventListener("scroll", () => {
+        if (saleClientPicker.isLoading || !saleClientPicker.hasMore) return;
+        const { scrollTop, scrollHeight, clientHeight } = results;
+        if (scrollTop + clientHeight >= scrollHeight - 40) {
+            _loadMoreSaleClients();
+        }
+    });
+
+    _resetAndSearch('');
+}
+
+function _resetAndSearch(query) {
+    saleClientPicker.query = query;
+    saleClientPicker.users = [];
+    saleClientPicker.nextCursor = null;
+    saleClientPicker.hasMore = true;
+    saleClientPicker.error = null;
+    _fetchSaleClients(null);
+}
+
+function _loadMoreSaleClients() {
+    if (
+        saleClientPicker.isLoading ||
+        !saleClientPicker.hasMore ||
+        !saleClientPicker.nextCursor
+    ) return;
+    _fetchSaleClients(saleClientPicker.nextCursor);
+}
+
+async function _fetchSaleClients(cursor) {
+    const results = document.getElementById("sale-customer-results");
+    if (!results || saleClientPicker.isLoading) return;
+    saleClientPicker.isLoading = true;
+    _renderSaleClientResults();
+    try {
+        const result = await OperationsAPI.getClientsCursor(
+            saleClientPicker.query,
+            cursor,
+            SALE_CLIENT_PAGE_SIZE,
+            {},
+        );
+        const users = result.data ?? [];
+        saleClientPicker.users = cursor
+            ? saleClientPicker.users.concat(users)
+            : users;
+        saleClientPicker.nextCursor = result.meta?.next_cursor ?? null;
+        saleClientPicker.hasMore = Boolean(result.meta?.has_more);
+        saleClientPicker.error = null;
     } catch (e) {
-        console.error("Failed to load customers for sale:", e);
-        const select = document.getElementById("sale-customer-select");
-        if (select)
-            select.innerHTML =
-                '<option value="">Failed to load clients</option>';
-        OperationsUI.toast("Failed to load customers", "error");
+        console.error("[Store] failed to load clients", e);
+        saleClientPicker.error = e.message || "Failed to load clients.";
+    } finally {
+        saleClientPicker.isLoading = false;
+        _renderSaleClientResults();
     }
 }
 
-export function toggleSaleMode(mode) {
-    const isExisting = mode === "existing";
+function _renderSaleClientResults() {
+    const results = document.getElementById("sale-customer-results");
+    if (!results) return;
 
-    document
+    const shouldShow =
+        saleClientPicker.isFocused &&
+        (saleClientPicker.users.length > 0 ||
+            saleClientPicker.isLoading ||
+            saleClientPicker.error);
+    if (!shouldShow) {
+        results.classList.add("hidden");
+        return;
+    }
+
+    results.classList.remove("hidden");
+
+    let html = "";
+
+    if (saleClientPicker.error) {
+        html += `
+            <div class="px-4 py-3 space-y-1">
+                <p class="text-sm text-rose-500 font-bold">Failed to load clients.</p>
+                <p class="text-xs text-slate-400">${_esc(saleClientPicker.error)}</p>
+                <button onclick="window.retrySaleClients()"
+                        class="text-xs text-primary-600 underline">Try again</button>
+            </div>`;
+    } else if (saleClientPicker.users.length > 0) {
+        html += saleClientPicker.users
+            .map(
+                (u) => `
+                <button onclick="window.selectSaleClient(${u.id}, '${_esc(u.fullname)}', '${_esc(u.phone_number)}')"
+                        class="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-primary-50 dark:hover:bg-primary-900/20 cursor-pointer transition-colors rounded-lg text-left">
+                    <span class="flex-1 text-sm font-medium text-gray-900 dark:text-white">${_esc(u.fullname)}</span>
+                    <span class="text-xs text-slate-400">${_esc(u.phone_number)}</span>
+                </button>`,
+            )
+            .join("");
+    } else if (!saleClientPicker.isLoading) {
+        html += '<p class="px-4 py-3 text-xs text-slate-400 italic">No clients found. Try a different name or phone number.</p>';
+    }
+
+    if (saleClientPicker.isLoading) {
+        html += `
+            <div class="flex items-center justify-center px-4 py-3 text-primary-500 text-xs gap-2">
+                <div class="w-4 h-4 border-2 border-primary-500 border-t-transparent rounded-full animate-spin"></div>
+                Loading…
+            </div>`;
+    }
+
+    results.innerHTML = html;
+}
+
+function selectSaleClient(id, fullname, phone_number) {
+    saleClientPicker.selected = { id, fullname, phone_number };
+    const hidden = document.getElementById("sale-customer-id");
+    if (hidden) hidden.value = id;
+    const results = document.getElementById("sale-customer-results");
+    if (results) results.classList.add("hidden");
+    _renderSaleClientChip();
+}
+
+function clearSaleClient() {
+    saleClientPicker.selected = null;
+    const hidden = document.getElementById("sale-customer-id");
+    if (hidden) hidden.value = "";
+    _renderSaleClientChip();
+}
+
+function retrySaleClients() {
+    const input = document.getElementById("sale-customer-search");
+    _resetAndSearch(input?.value?.trim() ?? '');
+}
+
+function _renderSaleClientChip() {
+    const chip = document.getElementById("sale-customer-chip");
+    if (!chip) return;
+
+    const { selected } = saleClientPicker;
+    if (!selected) {
+        chip.classList.add("hidden");
+        chip.innerHTML = "";
+        return;
+    }
+
+    chip.classList.remove("hidden");
+    chip.innerHTML = `
+        <span class="inline-flex items-center gap-1.5 px-3 py-1 bg-primary-100 dark:bg-primary-900/30
+                     text-primary-700 dark:text-primary-300 text-xs font-medium rounded-full">
+            ${_esc(selected.fullname)}${selected.phone_number ? ` (${_esc(selected.phone_number)})` : ""}
+            <button onclick="window.clearSaleClient()"
+                    class="hover:text-rose-500 transition-colors font-bold">&times;</button>
+        </span>`;
+}
+
+function _esc(str) {
+    return String(str ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;");
+}
+
+export function toggleSaleMode(mode) {
+    const isExisting = mode === "existing";    document
         .getElementById("existing-customer-form")
         .classList.toggle("hidden", !isExisting);
     document
@@ -310,7 +526,7 @@ export async function submitQuickSale() {
             );
         } else {
             const customerId = document.getElementById(
-                "sale-customer-select",
+                "sale-customer-id",
             ).value;
             if (!customerId) {
                 OperationsUI.toast("Please select a customer.", "warning");
@@ -343,3 +559,6 @@ window.renderStore = renderStore;
 window.showQuickSale = showQuickSale;
 window.toggleSaleMode = toggleSaleMode;
 window.submitQuickSale = submitQuickSale;
+window.selectSaleClient = selectSaleClient;
+window.clearSaleClient = clearSaleClient;
+window.retrySaleClients = retrySaleClients;

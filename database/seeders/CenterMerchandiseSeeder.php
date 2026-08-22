@@ -25,14 +25,14 @@ class CenterMerchandiseSeeder extends Seeder
             [
                 'name' => ['en' => 'Yoga Mat', 'ar' => 'حصيرة يوجا'],
                 'description' => ['en' => 'High quality non-slip yoga mat.', 'ar' => 'حصيرة يوجا عالية الجودة غير قابلة للانزلاق.'],
-                'base_price' => 325000,
+                'base_price' => 30,
                 'stock_quantity' => 10,
                 'category_id' => $categories->random()->id,
             ],
             [
                 'name' => ['en' => 'Water Bottle', 'ar' => 'قنينة ماء'],
                 'description' => ['en' => '1L stainless steel water bottle.', 'ar' => 'قنينة ماء سعة 1 لتر من الفولاذ المقاوم للصدأ.'],
-                'base_price' => 195000,
+                'base_price' => 1,
                 'stock_quantity' => 20,
                 'category_id' => $categories->random()->id,
             ],

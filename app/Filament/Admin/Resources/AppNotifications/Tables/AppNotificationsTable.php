@@ -37,12 +37,12 @@ class AppNotificationsTable
                     ->label('Image')
                     ->size(40)
                     ->circular()
-                    ->visible(fn ($record): bool => $record->type === 'image' && filled($record->image)),
+                    ->visible(fn ($record): bool => $record !== null && $record->type === 'image' && filled($record->image)),
                 TextColumn::make('title')
                     ->searchable()
                     ->limit(40)
                     ->sortable()
-                    ->formatStateUsing(fn ($state, $record) => $record->getTranslation('title', $locale)),
+                    ->formatStateUsing(fn ($state, $record) => $record?->getTranslation('title', $locale) ?? ''),
                 IconColumn::make('read_at')
                     ->label('Status')
                     ->boolean()
