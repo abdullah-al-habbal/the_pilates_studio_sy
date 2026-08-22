@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Enums\ClassStatusEnum;
+use App\Enums\WeekdayEnum;
 use App\Exceptions\SeederDependencyMissingException;
 use App\Models\ClassCategory;
 use App\Models\Classes;
@@ -43,6 +44,7 @@ class ClassesSeeder extends Seeder
                 'instructor_id' => $sarahId,
                 'class_category_id' => $reformerId,
                 'recurrence_pattern_id' => $weeklyId,
+                'weekdays' => null,
                 'title' => [
                     'en' => 'Reformer Flow',
                     'ar' => 'تدفق الريفورمر',
@@ -62,7 +64,9 @@ class ClassesSeeder extends Seeder
             [
                 'instructor_id' => $adamId,
                 'class_category_id' => $matId,
-                'recurrence_pattern_id' => $weeklyId,
+                // Weekday mode: runs only on Sundays and Wednesdays.
+                'recurrence_pattern_id' => null,
+                'weekdays' => [WeekdayEnum::SUNDAY->value, WeekdayEnum::WEDNESDAY->value],
                 'title' => [
                     'en' => 'Mat Essentials',
                     'ar' => 'أساسيات المات',
@@ -83,6 +87,7 @@ class ClassesSeeder extends Seeder
                 'instructor_id' => $emmaId,
                 'class_category_id' => $towerId,
                 'recurrence_pattern_id' => $biweeklyId,
+                'weekdays' => null,
                 'title' => [
                     'en' => 'Tower Power',
                     'ar' => 'قوة التاور',
@@ -111,7 +116,8 @@ class ClassesSeeder extends Seeder
                 );
             }
 
-            Classes::factory(10)->create();
+            Classes::factory(7)->create();
+            Classes::factory(3)->interval()->create();
             Classes::factory(3)->inactive()->create();
         });
     }

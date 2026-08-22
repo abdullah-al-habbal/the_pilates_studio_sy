@@ -6,6 +6,7 @@ declare(strict_types=1);
 
 namespace App\Http\Resources\Api\V1;
 
+use App\Enums\WeekdayEnum;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -24,6 +25,11 @@ class ClassesResource extends JsonResource
             'duration_minutes' => $this->duration_minutes,
             'start_date' => $this->start_date?->toDateString(),
             'end_date' => $this->end_date?->toDateString(),
+            // Readable day names, e.g. ["sunday","wednesday"]; null when the
+            // class repeats on a fixed interval instead.
+            'weekdays' => $this->hasWeekdaySchedule()
+                ? array_map(fn (WeekdayEnum $day) => $day->value, $this->weekdayCases())
+                : null,
             'total_spots' => $this->total_spots,
             'instructor' => new InstructorResource($this->whenLoaded('instructor')),
             'category' => new ClassCategoryResource($this->whenLoaded('category')),

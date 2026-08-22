@@ -7,12 +7,24 @@ namespace Database\Seeders;
 use App\Enums\ClassSessionStatusEnum;
 use App\Models\Classes;
 use App\Models\ClassSession;
+use App\Services\Classes\SessionDateCalculator;
 use Carbon\Carbon;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Collection;
 
+/**
+ * Generates sessions for classes created with events suppressed (see ClassesSeeder).
+ *
+ * Date arithmetic is delegated to SessionDateCalculator so seeded data cannot
+ * drift from what the application generates at runtime. Conflicts are
+ * deliberately NOT enforced here — seed classes are randomised and would fail
+ * arbitrarily; insertOrIgnore absorbs the resulting duplicates.
+ */
 class ClassSessionSeeder extends Seeder
 {
+    public function __construct(
+        private readonly SessionDateCalculator $calculator = new SessionDateCalculator
+    ) {}
+
     public function run(): void
     {
         Classes::query()
@@ -20,13 +32,43 @@ class ClassSessionSeeder extends Seeder
             ->chunkById(50, function ($classes): void {
                 /** @var Classes $class */
                 foreach ($classes as $class) {
-                    if ($class->recurrencePattern) {
-                        $this->generateFromRecurrence($class);
-                    } else {
+                    $dates = $this->datesFor($class);
+
+                    if ($dates === []) {
                         $this->createSingleSession($class);
+
+                        continue;
                     }
+
+                    $this->insertSessions($class, $dates);
                 }
             });
+    }
+
+    /**
+     * @return list<Carbon>
+     */
+    private function datesFor(Classes $class): array
+    {
+        // Seed data may be incomplete; a bad range should skip the class rather
+        // than abort the whole seeder.
+        try {
+            $end = $class->end_date?->copy() ?? $class->start_date->copy()->addMonths(3);
+
+            if ($class->hasWeekdaySchedule()) {
+                return $this->calculator->forWeekdays($class->start_date, $end, $class->weekdayCases());
+            }
+
+            $interval = $class->recurrencePattern?->interval_days;
+
+            if ($interval === null || $interval <= 0) {
+                return [];
+            }
+
+            return $this->calculator->forInterval($class->start_date, $end, (int) $interval);
+        } catch (\Throwable) {
+            return [];
+        }
     }
 
     private function createSingleSession(Classes $class): void
@@ -45,59 +87,24 @@ class ClassSessionSeeder extends Seeder
         ]);
     }
 
-    private function generateFromRecurrence(Classes $class): void
+    /**
+     * @param  list<Carbon>  $dates
+     */
+    private function insertSessions(Classes $class, array $dates): void
     {
-        $pattern = $class->recurrencePattern;
-
-        if (! $pattern || $pattern->interval_days <= 0) {
-            return;
-        }
-
-        $startDate = $class->start_date->copy();
-
-        $endDate = $class->end_date
-            ? $class->end_date->copy()
-            : $startDate->copy()->addMonths(3);
-
-        $dates = $this->generateDates($startDate, $endDate, $pattern->interval_days);
-
-        if ($dates->isEmpty()) {
-            return;
-        }
-
-        $rows = $dates->map(function (Carbon $date) use ($class) {
-            return [
-                'class_id' => $class->id,
-                'date' => $date->format('Y-m-d'),
-                'start_time' => $class->start_time,
-                'end_time' => $class->end_time,
-                'total_spots' => $class->total_spots,
-                'status' => $date->isPast()
-                    ? ClassSessionStatusEnum::COMPLETED->value
-                    : ClassSessionStatusEnum::SCHEDULED->value,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ];
-        })->toArray();
+        $rows = array_map(fn (Carbon $date) => [
+            'class_id' => $class->id,
+            'date' => $date->toDateString(),
+            'start_time' => $class->start_time,
+            'end_time' => $class->end_time,
+            'total_spots' => $class->total_spots,
+            'status' => $date->isPast()
+                ? ClassSessionStatusEnum::COMPLETED->value
+                : ClassSessionStatusEnum::SCHEDULED->value,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ], $dates);
 
         ClassSession::insertOrIgnore($rows);
-    }
-
-    private function generateDates(Carbon $start, Carbon $end, int $intervalDays): Collection
-    {
-        $dates = collect();
-        $current = $start->copy();
-
-        $maxIterations = 500;
-        $iterations = 0;
-
-        while ($current->lte($end) && $iterations < $maxIterations) {
-            $dates->push($current->copy());
-
-            $current->addDays($intervalDays);
-            $iterations++;
-        }
-
-        return $dates;
     }
 }

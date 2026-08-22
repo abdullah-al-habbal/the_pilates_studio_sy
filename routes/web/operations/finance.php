@@ -1,4 +1,5 @@
 <?php
+
 // filePath: routes/web/operations/finance.php
 
 declare(strict_types=1);

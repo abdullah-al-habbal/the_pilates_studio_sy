@@ -5,12 +5,14 @@
 namespace App\Filament\Admin\Resources\Classes\Schemas;
 
 use App\Enums\ClassStatusEnum;
+use App\Enums\WeekdayEnum;
 use App\Models\ClassCategory;
 use App\Models\Classes;
 use App\Models\Instructor;
 use App\Models\RecurrencePattern;
 use App\Services\Validation\ClassScheduleValidationService;
 use Closure;
+use Filament\Forms\Components\CheckboxList;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Placeholder;
@@ -20,6 +22,7 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\TimePicker;
 use Filament\Forms\Components\Toggle;
+use Filament\Forms\Components\ToggleButtons;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Utilities\Get;
@@ -28,6 +31,10 @@ use Illuminate\Validation\ValidationException;
 
 class ClassesForm
 {
+    public const MODE_WEEKDAYS = 'weekdays';
+
+    public const MODE_INTERVAL = 'interval';
+
     public static function configure(Schema $schema): Schema
     {
         $locale = app()->getLocale();
@@ -78,25 +85,7 @@ class ClassesForm
                                 ->required()
                                 ->maxLength(255)
                                 ->helperText(__('dashboard.resources.classes.helpers.title'))
-                                ->columnSpan(1),
-
-                            Select::make('recurrence_pattern_id')
-                                ->label(__('dashboard.resources.classes.fields.recurrence_pattern'))
-                                ->options(function () use ($locale) {
-                                    return RecurrencePattern::query()
-                                        ->select('id', 'name', 'label')
-                                        ->get()
-                                        ->mapWithKeys(fn (RecurrencePattern $pattern) => [
-                                            $pattern->id => $pattern->getTranslation('label', $locale) ?: $pattern->name,
-                                        ]);
-                                })
-                                ->searchable()
-                                ->required()
-                                ->live()
-                                ->rule(self::scheduleWindowRule())
-                                ->disabled(fn (?Classes $record) => $record?->exists && $record->hasBookedSessions())
-                                ->helperText(__('dashboard.resources.classes.helpers.recurrence_pattern'))
-                                ->columnSpan(1),
+                                ->columnSpanFull(),
                         ]),
 
                         RichEditor::make('about')
@@ -116,6 +105,66 @@ class ClassesForm
                     ->description(__('dashboard.resources.classes.sections.schedule_desc'))
                     ->icon('heroicon-o-calendar')
                     ->schema([
+                        ToggleButtons::make('schedule_mode')
+                            ->label(__('dashboard.resources.classes.fields.schedule_mode'))
+                            ->options([
+                                self::MODE_WEEKDAYS => __('dashboard.resources.classes.fields.weekdays'),
+                                self::MODE_INTERVAL => __('dashboard.resources.classes.fields.recurrence_pattern'),
+                            ])
+                            ->icons([
+                                self::MODE_WEEKDAYS => 'heroicon-o-calendar-days',
+                                self::MODE_INTERVAL => 'heroicon-o-arrow-path',
+                            ])
+                            ->inline()
+                            ->required()
+                            ->live()
+                            // Form-only field: the mode is implied by which of the
+                            // two columns ends up set, so it is never persisted.
+                            ->dehydrated(false)
+                            ->default(self::MODE_WEEKDAYS)
+                            ->afterStateHydrated(function (ToggleButtons $component, ?Classes $record): void {
+                                if ($record?->exists) {
+                                    $component->state(
+                                        $record->hasWeekdaySchedule() ? self::MODE_WEEKDAYS : self::MODE_INTERVAL
+                                    );
+                                }
+                            })
+                            ->disabled(fn (?Classes $record) => $record?->exists && $record->hasBookedSessions())
+                            ->helperText(__('dashboard.resources.classes.helpers.schedule_mode'))
+                            ->columnSpanFull(),
+
+                        CheckboxList::make('weekdays')
+                            ->label(__('dashboard.resources.classes.fields.weekdays'))
+                            ->options(WeekdayEnum::options())
+                            ->columns(4)
+                            ->bulkToggleable()
+                            ->live()
+                            ->rule(self::scheduleWindowRule())
+                            ->visible(fn (Get $get) => $get('schedule_mode') === self::MODE_WEEKDAYS)
+                            ->required(fn (Get $get) => $get('schedule_mode') === self::MODE_WEEKDAYS)
+                            ->disabled(fn (?Classes $record) => $record?->exists && $record->hasBookedSessions())
+                            ->helperText(__('dashboard.resources.classes.helpers.weekdays'))
+                            ->columnSpanFull(),
+
+                        Select::make('recurrence_pattern_id')
+                            ->label(__('dashboard.resources.classes.fields.recurrence_pattern'))
+                            ->options(function () use ($locale) {
+                                return RecurrencePattern::query()
+                                    ->select('id', 'name', 'label')
+                                    ->get()
+                                    ->mapWithKeys(fn (RecurrencePattern $pattern) => [
+                                        $pattern->id => $pattern->getTranslation('label', $locale) ?: $pattern->name,
+                                    ]);
+                            })
+                            ->searchable()
+                            ->live()
+                            ->rule(self::scheduleWindowRule())
+                            ->visible(fn (Get $get) => $get('schedule_mode') === self::MODE_INTERVAL)
+                            ->required(fn (Get $get) => $get('schedule_mode') === self::MODE_INTERVAL)
+                            ->disabled(fn (?Classes $record) => $record?->exists && $record->hasBookedSessions())
+                            ->helperText(__('dashboard.resources.classes.helpers.recurrence_pattern'))
+                            ->columnSpanFull(),
+
                         Grid::make(3)->schema([
                             DatePicker::make('start_date')
                                 ->label(__('dashboard.resources.classes.fields.start_date'))
@@ -146,6 +195,8 @@ class ClassesForm
                                 TimePicker::make('start_time')
                                     ->label(__('dashboard.resources.classes.fields.start_time'))
                                     ->required()
+                                    ->live()
+                                    ->rule(self::scheduleWindowRule())
                                     ->displayFormat('H:i')
                                     ->native(false)
                                     ->seconds(false)
@@ -156,6 +207,8 @@ class ClassesForm
                                 TimePicker::make('end_time')
                                     ->label(__('dashboard.resources.classes.fields.end_time'))
                                     ->required()
+                                    ->live()
+                                    ->rule(self::scheduleWindowRule())
                                     ->displayFormat('H:i')
                                     ->native(false)
                                     ->seconds(false)
@@ -232,21 +285,68 @@ class ClassesForm
             ]);
     }
 
+    /**
+     * Force exactly one scheduling mode into the payload.
+     *
+     * Hidden Filament components are not dehydrated, so on edit the field for
+     * the mode that is *not* selected never reaches $data — which would leave a
+     * stale value in the database and produce a class with both modes set.
+     * Nulling the unused column explicitly is what makes mode switching work.
+     *
+     * @param  array<string, mixed>  $data
+     * @return array<string, mixed>
+     */
+    public static function normaliseScheduleMode(array $data): array
+    {
+        unset($data['schedule_mode']);
+
+        $weekdays = $data['weekdays'] ?? null;
+
+        if (is_array($weekdays) && $weekdays !== []) {
+            $data['weekdays'] = array_values($weekdays);
+            $data['recurrence_pattern_id'] = null;
+
+            return $data;
+        }
+
+        $data['weekdays'] = null;
+
+        return $data;
+    }
+
+    /**
+     * Live window validation, shared by every field that can invalidate it.
+     *
+     * In weekday mode there is no interval, so the minimum-span rule is skipped
+     * and only the start/end ordering is checked.
+     */
     private static function scheduleWindowRule(): Closure
     {
         return function (Get $get): Closure {
             return function (string $attribute, mixed $value, Closure $fail) use ($get): void {
-                $pattern = RecurrencePattern::find((int) $get('recurrence_pattern_id'));
+                $isWeekdayMode = $get('schedule_mode') === self::MODE_WEEKDAYS;
 
-                if (! $pattern) {
-                    return;
+                $intervalDays = null;
+
+                if (! $isWeekdayMode) {
+                    $pattern = RecurrencePattern::find((int) $get('recurrence_pattern_id'));
+
+                    if (! $pattern) {
+                        return;
+                    }
+
+                    $intervalDays = $pattern->interval_days;
                 }
 
+                $validator = app(ClassScheduleValidationService::class);
+
                 try {
-                    app(ClassScheduleValidationService::class)->assertValidWindow(
+                    $validator->assertValidTimes($get('start_time'), $get('end_time'));
+
+                    $validator->assertValidWindow(
                         $get('start_date'),
                         $get('end_date'),
-                        $pattern->interval_days,
+                        $intervalDays,
                     );
                 } catch (ValidationException $exception) {
                     $fail(collect($exception->errors())->flatten()->first());

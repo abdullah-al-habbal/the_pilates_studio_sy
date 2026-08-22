@@ -5,6 +5,7 @@
 namespace App\Filament\Admin\Resources\Classes\Schemas;
 
 use App\Enums\ClassStatusEnum;
+use App\Enums\WeekdayEnum;
 use Filament\Infolists\Components\IconEntry;
 use Filament\Infolists\Components\ImageEntry;
 use Filament\Infolists\Components\RepeatableEntry;
@@ -117,10 +118,23 @@ class ClassesInfolist
                         ->icon('heroicon-o-users')
                         ->iconPosition(IconPosition::Before),
 
+                    TextEntry::make('weekdays')
+                        ->label(__('dashboard.resources.classes.fields.weekdays'))
+                        ->icon('heroicon-o-calendar-days')
+                        ->iconPosition(IconPosition::Before)
+                        ->badge()
+                        ->color('info')
+                        ->visible(fn ($record) => $record->hasWeekdaySchedule())
+                        ->state(fn ($record) => collect($record->weekdayCases())
+                            ->map(fn (WeekdayEnum $day) => $day->getLabel())
+                            ->all()
+                        ),
+
                     IconEntry::make('recurrence_pattern_id')
                         ->label(__('dashboard.resources.classes.fields.recurrence_pattern'))
                         ->icon(fn ($state) => $state ? 'heroicon-o-arrow-path' : 'heroicon-o-x-mark')
                         ->color(fn ($state) => $state ? 'success' : 'gray')
+                        ->visible(fn ($record) => ! $record->hasWeekdaySchedule())
                         ->state(
                             fn ($record) => $record->recurrencePattern?->getTranslation('label', $locale) ??
                             $record->recurrencePattern?->name ??

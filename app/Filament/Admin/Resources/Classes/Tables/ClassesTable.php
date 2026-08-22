@@ -5,7 +5,9 @@
 namespace App\Filament\Admin\Resources\Classes\Tables;
 
 use App\Enums\ClassStatusEnum;
+use App\Enums\WeekdayEnum;
 use App\Filament\Admin\Resources\Classes\ClassesResource;
+use App\Models\Classes;
 use App\Models\Instructor;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
@@ -22,6 +24,7 @@ use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Str;
 use LaraZeus\SpatieTranslatable\Actions\LocaleSwitcher;
 
 class ClassesTable
@@ -86,6 +89,19 @@ class ClassesTable
                     ->time('H:i')
                     ->sortable()
                     ->icon('heroicon-o-clock')
+                    ->toggleable(),
+
+                TextColumn::make('schedule_summary')
+                    ->label(__('dashboard.resources.classes.fields.schedule_mode'))
+                    ->badge()
+                    ->color(fn (Classes $record) => $record->hasWeekdaySchedule() ? 'info' : 'gray')
+                    ->state(fn (Classes $record) => $record->hasWeekdaySchedule()
+                        ? collect($record->weekdayCases())
+                            ->map(fn (WeekdayEnum $day) => Str::substr($day->getLabel(), 0, 3))
+                            ->implode(', ')
+                        : ($record->recurrencePattern?->getTranslation('label', app()->getLocale())
+                            ?? __('dashboard.resources.classes.placeholders.no_recurrence'))
+                    )
                     ->toggleable(),
 
                 TextColumn::make('total_spots')

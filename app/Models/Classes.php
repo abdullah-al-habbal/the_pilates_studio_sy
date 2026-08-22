@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Models;
 
 use App\Enums\ClassStatusEnum;
+use App\Enums\WeekdayEnum;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
@@ -31,6 +32,7 @@ class Classes extends Model
         'instructor_id',
         'class_category_id',
         'recurrence_pattern_id',
+        'weekdays',
         'title',
         'about',
         'start_time',
@@ -46,6 +48,7 @@ class Classes extends Model
         return [
             'start_date' => 'date',
             'end_date' => 'date',
+            'weekdays' => 'array',
             'total_spots' => 'integer',
             'status' => ClassStatusEnum::class,
         ];
@@ -54,6 +57,29 @@ class Classes extends Model
     public function isActive(): bool
     {
         return $this->status === ClassStatusEnum::ACTIVE;
+    }
+
+    /**
+     * A class is scheduled either by explicit weekdays or by a recurrence
+     * pattern's interval. Exactly one mode is set; see
+     * ClassScheduleValidationService::assertExactlyOneMode().
+     */
+    public function hasWeekdaySchedule(): bool
+    {
+        return $this->weekdayCases() !== [];
+    }
+
+    public function hasIntervalSchedule(): bool
+    {
+        return $this->recurrence_pattern_id !== null;
+    }
+
+    /**
+     * @return list<WeekdayEnum>
+     */
+    public function weekdayCases(): array
+    {
+        return WeekdayEnum::normalise($this->weekdays);
     }
 
     protected function durationMinutes(): Attribute

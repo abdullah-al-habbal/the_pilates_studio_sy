@@ -5,6 +5,12 @@
 namespace App\Filament\Admin\Resources\Classes\RelationManagers;
 
 use App\Enums\ClassSessionStatusEnum;
+use App\Models\Classes;
+use App\Models\ClassSession;
+use App\Services\Validation\ClassScheduleValidationService;
+use App\Services\Validation\SessionConflictDetector;
+use Carbon\Carbon;
+use Closure;
 use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
@@ -16,10 +22,12 @@ use Filament\Forms\Components\TimePicker;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Schemas\Components\Grid;
+use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
+use Illuminate\Validation\ValidationException;
 
 class SessionsRelationManager extends RelationManager
 {
@@ -35,6 +43,8 @@ class SessionsRelationManager extends RelationManager
                     DatePicker::make('date')
                         ->label(__('dashboard.resources.class_sessions.fields.date'))
                         ->required()
+                        ->live()
+                        ->rule($this->conflictRule())
                         ->displayFormat('M d, Y')
                         ->native(false)
                         ->closeOnDateSelection(),
@@ -49,6 +59,8 @@ class SessionsRelationManager extends RelationManager
                     TimePicker::make('start_time')
                         ->label(__('dashboard.resources.class_sessions.fields.start_time'))
                         ->required()
+                        ->live()
+                        ->rule($this->conflictRule())
                         ->displayFormat('H:i')
                         ->native(false)
                         ->seconds(false),
@@ -56,6 +68,8 @@ class SessionsRelationManager extends RelationManager
                     TimePicker::make('end_time')
                         ->label(__('dashboard.resources.class_sessions.fields.end_time'))
                         ->required()
+                        ->live()
+                        ->rule($this->conflictRule())
                         ->displayFormat('H:i')
                         ->native(false)
                         ->seconds(false)
@@ -180,5 +194,45 @@ class SessionsRelationManager extends RelationManager
             ->emptyStateDescription(__('dashboard.resources.class_sessions.empty_state.description'))
             ->emptyStateIcon('heroicon-o-calendar')
             ->defaultSort('date', 'asc');
+    }
+
+    /**
+     * Hand-added and hand-edited sessions go through the same conflict rules as
+     * generated ones. Without this, the relation manager is a back door around
+     * ClassSessionGenerationService and any schedule rule it enforces.
+     */
+    private function conflictRule(): Closure
+    {
+        return function (Get $get, ?ClassSession $record): Closure {
+            return function (string $attribute, mixed $value, Closure $fail) use ($get, $record): void {
+                $date = $get('date');
+                $startTime = $get('start_time');
+                $endTime = $get('end_time');
+
+                if ($date === null || $startTime === null || $endTime === null) {
+                    return;
+                }
+
+                /** @var Classes $class */
+                $class = $this->getOwnerRecord();
+
+                try {
+                    app(ClassScheduleValidationService::class)
+                        ->assertValidTimes($startTime, $endTime);
+
+                    app(SessionConflictDetector::class)->assertNoConflicts(
+                        dates: [Carbon::parse($date)->startOfDay()],
+                        startTime: $startTime,
+                        endTime: $endTime,
+                        instructorId: $class->instructor_id === null ? null : (int) $class->instructor_id,
+                        classId: (int) $class->id,
+                        ignoreSessionId: $record?->id === null ? null : (int) $record->id,
+                        errorKey: 'date',
+                    );
+                } catch (ValidationException $exception) {
+                    $fail(collect($exception->errors())->flatten()->first());
+                }
+            };
+        };
     }
 }
