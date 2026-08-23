@@ -7,10 +7,10 @@
 | | |
 |---|---|
 | **Last updated** | 2026-08-23 |
-| **Phase** | Core feature complete & tested; hardening + rollout outstanding |
-| **Tests** | **75 passing / 0 failing** (172 assertions, ~4s) |
-| **Branch** | `main` (uncommitted working tree) |
-| **Migration status** | applied to `pilates_studio_test_db` only — **not** to dev or production |
+| **Phase** | Phases 1–3 done. Remaining: browser pass + production migration |
+| **Tests** | **91 passing / 0 failing** (198 assertions, ~8s) |
+| **Branches** | `feature/strict-scheduling-rules` → `275be5f`, `efca3e5`<br>`fix/booking-overbooking` → `9e6bfae` (current) |
+| **Migration status** | applied to **dev** and `pilates_studio_test_db`. **Not** production |
 
 ---
 
@@ -49,7 +49,8 @@ Old behaviour (`interval_days = 7`) produced 9 **Saturdays** — 0/18 correct.
 | Decision | Answer |
 |---|---|
 | Coexistence | **Two modes.** Exactly one of `weekdays` / `recurrence_pattern_id` must be set |
-| Conflict scope | **Instructor overlap** + **same-class self-overlap** only. Cross-class overlap between *different* instructors is allowed |
+| Conflict scope | **Instructor overlap** + **same-class self-overlap**. Cross-class overlap between *different, non-null* instructors is allowed |
+| Instructor-less classes | **Block any overlap, both directions** (decided 2026-08-23). A class with no instructor is treated as occupying the studio |
 | Cancelled sessions | **Release their slot** (do not block) |
 | Partial conflicts | **Reject the whole batch** — nothing is written |
 | Midnight crossing | **Forbidden** — `end_time > start_time` enforced at the service layer |
@@ -97,6 +98,9 @@ Old behaviour (`interval_days = 7`) produced 9 **Saturdays** — 0/18 correct.
 
 - [x] `tests/TestCase.php` created
 - [x] **Isolated MySQL test database `pilates_studio_test_db`** created. Dev DB untouched
+- [x] `PackageFactory` — SYP/USD currencies switched from `Currency::factory()->create()` to
+      `firstOrCreate`. Creating a second package in one test used to violate
+      `currencies_code_unique`, which made the booking subsystem effectively untestable
 - [x] `phpunit.xml` — `DB_CONNECTION` sqlite → mysql, `DB_DATABASE` `:memory:` → `pilates_studio_test_db`
       *Reason: the suite could never have run on sqlite — `users.is_active` uses `storedAs("IF(...)")`, which SQLite cannot parse. The sqlite config was aspirational.*
 - [x] `.env.testing` — **was pointing tests at the dev database on the wrong port (3307)**. Now `APP_ENV=testing`, port `3306`, `DB_DATABASE=pilates_studio_test_db`. This was a live footgun: any `RefreshDatabase` run would have wiped dev data. Backup: `<scratchpad>/.env.testing.bak`
@@ -106,11 +110,12 @@ Old behaviour (`interval_days = 7`) produced 9 **Saturdays** — 0/18 correct.
 | Count | File | Covers |
 |---:|---|---|
 | 17 | `tests/Unit/SessionDateCalculatorTest.php` | The 18-date fixture; Saturday start excluded; inclusive end; 1/7 weekdays; duplicates; ordering; 500 cap; `interval_days` 1/7/14/30 all proven unable to reproduce the weekday set |
-| 22 | `tests/Feature/SessionConflictDetectorTest.php` | All 5 overlap shapes + both back-to-back directions; instructor scope; different-instructor allowed; self-overlap; cancelled releases slot; soft-deleted ignored; completed blocks; soft-deleted class ignored; `ignoreSessionId`; batch rejection; unique-index pre-check |
+| 26 | `tests/Feature/SessionConflictDetectorTest.php` | All 5 overlap shapes + both back-to-back directions; instructor scope; different-instructor allowed; self-overlap; **studio contention in both directions**; cancelled releases slot; soft-deleted ignored; completed blocks; soft-deleted class ignored; `ignoreSessionId`; batch rejection; unique-index pre-check |
 | 15 | `tests/Feature/ClassWeekdayGenerationTest.php` | Generation via the real observer; times/capacity copied; **no bookings ever created**; interval mode intact; both/neither mode rejected; time and date-range rules; single-day range; one conflict rejects all 18 rows |
 | 10 | `tests/Feature/ClassRegenerationTest.php` | Weekday/date/time changes regenerate; mode switching; idempotence; non-schedule change does *not* regenerate; booked-class protection (update + delete); unbooked delete cascades |
 | 6 | `tests/Feature/ClassesAdminPanelTest.php` | Real Filament pages: list renders; admin creates a weekday class → 18 sessions; empty weekdays rejected; bad times rejected; edit to interval mode clears weekdays; instructor conflict surfaces **and creates nothing** |
 | 5 | `tests/Feature/ClassesFormSchemaTest.php` | Form schema builds; mode normalisation clears the unused column in both directions |
+| 12 | `tests/Feature/BookingCapacityTest.php` | Cancelled reservations release their spot; repository and model accessor agree; zero-capacity is unbookable; full session rejected; capacity never exceeded; **query-order guards** for lock-before-count and lock ordering. **7 of the 12 fail if either fix is reverted** |
 
 ### 3.6 Verified end-to-end
 
@@ -125,15 +130,20 @@ Old behaviour (`interval_days = 7`) produced 9 **Saturdays** — 0/18 correct.
 
 ### 4.1 Blocking rollout
 
-- [ ] **Review the working tree.** 21 modified + 7 new paths, nothing committed yet.
-      `git status` / `git diff`. Note two incidental pint-only diffs in
-      `routes/web/operations/finance.php` and `routes/web/scheduler/walkin.php`
-      (blank line after `<?php`) — unrelated to this feature; keep or drop deliberately.
-- [ ] **Commit on a branch, not `main`.** Current branch is `main`.
-- [ ] **Run the migration on dev**, then production.
-      `php artisan migrate` — additive and non-destructive (adds a nullable column,
-      relaxes a NOT NULL). Existing classes keep `recurrence_pattern_id` and behave identically.
-      *Acceptance:* existing classes still list their sessions; no class has both modes set.
+- [x] ~~Review the working tree / commit on a branch~~ **DONE.** 33 files on
+      `feature/strict-scheduling-rules` (`275be5f`, `efca3e5`), then `fix/booking-overbooking`
+      (`9e6bfae`). The two pint-only diffs in `routes/web/operations/finance.php` and
+      `routes/web/scheduler/walkin.php` (blank line after `<?php`) went in with the first
+      commit — unrelated to this feature, drop them if you prefer a clean diff.
+- [x] ~~Run the migration on dev~~ **DONE.** `recurrence_pattern_id` is nullable, FK intact,
+      `weekdays` added. **Note: the dev database had 0 classes and 0 sessions**, so nothing
+      was migrated in anger — `InstructorSeeder` was run (additive, `firstOrCreate`) to give
+      the browser pass something to work with. Dev now has 3 instructors, 3 categories,
+      4 recurrence patterns, 2 admins.
+- [ ] **Run the migration on production.** Still outstanding. Additive and non-destructive,
+      but production has real class data, unlike dev.
+      *Acceptance:* existing classes still list their sessions; no class has both modes set:
+      `select count(*) from classes where weekdays is not null and recurrence_pattern_id is not null;`
 - [ ] **Decide `.env.testing` / `phpunit.xml`.** Both are git-tracked and now point at
       `pilates_studio_test_db`. Confirm this is what you want committed, and that CI (if any)
       creates that database. `.github/workflows/deploy.yml` does not currently run tests —
@@ -149,10 +159,13 @@ Old behaviour (`interval_days = 7`) produced 9 **Saturdays** — 0/18 correct.
 
 ### 4.2 Known gaps in this feature
 
-- [ ] **Instructor-less classes get no conflict check at all.**
-      `classes.instructor_id` is nullable; with instructor-only scope, two classes with no
-      instructor can overlap freely. Follows directly from the locked decision — confirm
-      it is acceptable, or make `instructor_id` required.
+- [x] ~~**Instructor-less classes get no conflict check at all.**~~ **RESOLVED 2026-08-23**
+      (`efca3e5`). A class with no instructor now conflicts with every overlapping class, in
+      **both** directions — an unstaffed candidate contends with all existing sessions, and an
+      existing unstaffed session blocks a candidate that does have an instructor. Without the
+      second direction, creation order would decide whether the collision was caught. New
+      `ScheduleConflictVO::REASON_STUDIO` distinguishes it in the error message.
+      No rooms table was added; this is the proxy for single-studio contention.
 - [ ] **`ClassSessionResource` (API) exposes no weekday context.** `ClassesResource` does.
       Add only if the mobile app needs it.
 - [ ] **No API endpoint to create/update classes.** There never was one; the audit
@@ -172,20 +185,18 @@ Old behaviour (`interval_days = 7`) produced 9 **Saturdays** — 0/18 correct.
 
 Each is real, reproducible, and **unrelated to weekday scheduling**. Verified still present.
 
-- [ ] **R2 — capacity mis-counted two different ways.**
-      `ClassSessionEloquentRepository::getAvailableSpots()` counts **all** booking sessions
-      including `cancelled` (`$session->bookingSessions()->count()`, no status filter),
-      while `ClassSession::getAvailableSpotsAttribute()` filters to `reserved`.
-      The API reserve path uses the former → **cancelled bookings permanently consume spots**.
-      Same method returns `PHP_INT_MAX` when `total_spots <= 0`, making a zero-capacity
-      session infinitely bookable.
-      *Fix:* filter to `reserved`; return `0`, not `PHP_INT_MAX`, for non-positive capacity.
-- [ ] **R3 — TOCTOU race in reserve.** `BookingSessionService::reserve()` calls
-      `assertSessionHasAvailableSpots()` (line ~200, unlocked read) **before**
-      `classSessionService->find($id, true)` takes `lockForUpdate` (line ~202).
-      Two concurrent requests both pass, then serialise on the lock, and both insert → over-capacity.
-      *Fix:* acquire the lock first, then count.
-- [ ] **R9 — orphaned duplicate handlers.** `app/Handlers/BookingSession/ReserveSessionHandler.php`
+- [x] ~~**R2 — capacity mis-counted two different ways.**~~ **FIXED 2026-08-23** (`9e6bfae`).
+      `getAvailableSpots()` now filters to `reserved` and returns `0` (not `PHP_INT_MAX`) for
+      non-positive capacity. It agrees with `ClassSession::getAvailableSpotsAttribute()`, and
+      a test asserts they stay in agreement. `countUpcomingFullSessions()` had the same
+      missing filter and was fixed too.
+- [x] ~~**R3 — TOCTOU race in reserve.**~~ **FIXED 2026-08-23** (`9e6bfae`). The class session
+      is locked before its reservations are counted. Also: `reserve()` locked booking→session
+      while `oneTimeAttend()` locks session→booking, so the two could deadlock against each
+      other; both now lock session→booking. Guarded by a test asserting query order, since a
+      single-process test cannot reproduce the race itself.
+- [ ] **R9 — orphaned duplicate handlers.** *(now the highest-value remaining cleanup: it is
+      an unguarded copy of the code just fixed in R2/R3)* `app/Handlers/BookingSession/ReserveSessionHandler.php`
       (no transaction, no lock, **no capacity check whatsoever**) and `CancelSessionHandler.php`
       are referenced nowhere. Wiring either up reintroduces overbooking.
       *Fix:* delete both.
@@ -239,7 +250,7 @@ Filament ClassesForm  (schedule_mode → normaliseScheduleMode → exactly one c
 ## 6. How to verify
 
 ```bash
-# Full suite — expect 75 passed
+# Full suite — expect 91 passed
 php artisan test
 
 # Just this feature
@@ -248,7 +259,8 @@ php artisan test tests/Unit/SessionDateCalculatorTest.php \
                  tests/Feature/ClassWeekdayGenerationTest.php \
                  tests/Feature/ClassRegenerationTest.php \
                  tests/Feature/ClassesAdminPanelTest.php \
-                 tests/Feature/ClassesFormSchemaTest.php
+                 tests/Feature/ClassesFormSchemaTest.php \
+                 tests/Feature/BookingCapacityTest.php
 
 # Seed the ISOLATED test database (never the dev one — check the name first)
 php artisan tinker --env=testing --execute='echo DB::getDatabaseName();'
@@ -274,4 +286,7 @@ rejection naming the conflicting date, and **no** new class row.
 | 2026-08-23 | Test infrastructure built from scratch; isolated test DB created; `.env.testing` dev-DB footgun fixed |
 | 2026-08-23 | R4 atomicity gap closed via page-scoped `$hasDatabaseTransactions` after a test caught a conflicting class committing with zero sessions |
 | 2026-08-23 | 75/75 tests green, pint clean, seeded data verified |
-| | _next: §4.1 rollout_ |
+| 2026-08-23 | **Phase 1:** committed to `feature/strict-scheduling-rules`; dev migrated (found dev had 0 classes); `InstructorSeeder` run so the browser pass has data |
+| 2026-08-23 | **Phase 2:** instructor-less classes now block any overlap, both directions (`efca3e5`) |
+| 2026-08-23 | **Phase 3:** R2 capacity leak + R3 reserve race fixed, plus a latent deadlock from inconsistent lock ordering; `PackageFactory` made reusable (`9e6bfae`). 91/91 green |
+| | _next: browser pass on `/admin/classes`, then the production migration_ |
