@@ -7,9 +7,9 @@
 | | |
 |---|---|
 | **Last updated** | 2026-08-23 |
-| **Phase** | Phases 1–3 done. Remaining: browser pass + production migration |
+| **Phase** | Phases 1–3 done + R9 cleanup. Remaining: browser pass + production migration |
 | **Tests** | **91 passing / 0 failing** (198 assertions, ~8s) |
-| **Branches** | `feature/strict-scheduling-rules` → `275be5f`, `efca3e5`<br>`fix/booking-overbooking` → `9e6bfae` (current) |
+| **Branches** | Stacked, left that way by owner's call — merging `fix/booking-overbooking` brings everything.<br>`feature/strict-scheduling-rules` → `275be5f`, `efca3e5`<br>`fix/booking-overbooking` → `9e6bfae`, `0b1bdfc`, + the R9 cleanup commit (current tip) |
 | **Migration status** | applied to **dev** and `pilates_studio_test_db`. **Not** production |
 
 ---
@@ -93,6 +93,7 @@ Old behaviour (`interval_days = 7`) produced 9 **Saturdays** — 0/18 correct.
 - [x] **R12 — missing Arabic keys** → added
 - [x] **Midnight-crossing / zero-length sessions** — previously only the Filament UI blocked `end_time <= start_time`; factories, seeders and tinker could create them. Now enforced in the service
 - [x] **Silent no-op** — a class with no recurrence pattern used to be created with zero sessions and no error
+- [x] **R9 — orphaned duplicate handlers deleted.** **2026-08-23.** `app/Handlers/BookingSession/ReserveSessionHandler.php` and `CancelSessionHandler.php` removed (the directory is now gone; `app/Handlers/V1/BookingSession/` is a different, live namespace and was left alone). Both were referenced nowhere — verified by grep across `app routes config database tests bootstrap` and the whole repo for the namespace — and autoloading is plain PSR-4 with no classmap, so nothing resolved them. They were an unguarded copy of the code fixed in R2/R3: `ReserveSessionHandler` had no transaction, no lock and no capacity check at all (it still carried an unfinished `// Existing reservation logic...` placeholder), and `CancelSessionHandler` wrote the status and refunded the credit in two unwrapped statements with no already-cancelled guard, so cancelling twice would have refunded credit twice. The live paths (`BookingSessionService::reserve()` / `cancel()` / `oneTimeAttend()`, Filament `CreateBookingSession`) are unaffected
 
 ### 3.4 Test infrastructure (built from nothing — `tests/` was empty)
 
@@ -195,11 +196,6 @@ Each is real, reproducible, and **unrelated to weekday scheduling**. Verified st
       while `oneTimeAttend()` locks session→booking, so the two could deadlock against each
       other; both now lock session→booking. Guarded by a test asserting query order, since a
       single-process test cannot reproduce the race itself.
-- [ ] **R9 — orphaned duplicate handlers.** *(now the highest-value remaining cleanup: it is
-      an unguarded copy of the code just fixed in R2/R3)* `app/Handlers/BookingSession/ReserveSessionHandler.php`
-      (no transaction, no lock, **no capacity check whatsoever**) and `CancelSessionHandler.php`
-      are referenced nowhere. Wiring either up reintroduces overbooking.
-      *Fix:* delete both.
 - [ ] **R7 — soft-deleting a class hard-deletes its sessions.** `ClassesObserver::deleting`
       runs `$class->sessions()->forceDelete()` (base-query delete, scopes not applied) while
       `Classes` uses `SoftDeletes` → restoring a class yields zero sessions, unrecoverable.
@@ -289,4 +285,5 @@ rejection naming the conflicting date, and **no** new class row.
 | 2026-08-23 | **Phase 1:** committed to `feature/strict-scheduling-rules`; dev migrated (found dev had 0 classes); `InstructorSeeder` run so the browser pass has data |
 | 2026-08-23 | **Phase 2:** instructor-less classes now block any overlap, both directions (`efca3e5`) |
 | 2026-08-23 | **Phase 3:** R2 capacity leak + R3 reserve race fixed, plus a latent deadlock from inconsistent lock ordering; `PackageFactory` made reusable (`9e6bfae`). 91/91 green |
-| | _next: browser pass on `/admin/classes`, then the production migration_ |
+| 2026-08-23 | **R9 cleanup:** both orphaned `App\Handlers\BookingSession` handlers deleted. 91/91 still green — nothing referenced them |
+| | _next: **owner's manual browser pass** on `/admin/classes` and the app, then the production migration_ |
