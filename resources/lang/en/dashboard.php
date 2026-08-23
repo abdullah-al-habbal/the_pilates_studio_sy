@@ -342,6 +342,7 @@ return [
                 'conflicts_found' => 'Schedule conflict: :count overlapping session(s) found. :details',
                 'conflict_line' => ':date :start-:end overlaps ":class" (:reason)',
                 'conflict_reason_instructor' => 'same instructor',
+                'conflict_reason_studio' => 'studio contention (class without an instructor)',
                 'conflict_reason_same_class' => 'same class',
             ],
             'fields' => [

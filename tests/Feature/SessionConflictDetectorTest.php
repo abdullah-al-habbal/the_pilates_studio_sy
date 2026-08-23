@@ -49,11 +49,14 @@ final class SessionConflictDetectorTest extends TestCase
         ?Instructor $instructor = null,
         string $status = ClassSessionStatusEnum::SCHEDULED->value,
         bool $trashed = false,
+        bool $instructorless = false,
     ): Classes {
         $class = Classes::withoutEvents(fn () => Classes::factory()
             ->onWeekdays([WeekdayEnum::SUNDAY])
             ->create([
-                'instructor_id' => ($instructor ?? $this->instructor)->id,
+                'instructor_id' => $instructorless
+                    ? null
+                    : ($instructor ?? $this->instructor)->id,
                 'class_category_id' => $this->category->id,
                 'start_time' => $startTime,
                 'end_time' => $endTime,
@@ -177,18 +180,77 @@ final class SessionConflictDetectorTest extends TestCase
         $this->assertSame(ScheduleConflictVO::REASON_SAME_CLASS, $conflicts[0]->reason);
     }
 
+    // -------------------------------------------------- instructor-less classes
+
     #[Test]
-    public function nothing_conflicts_when_there_is_no_instructor_and_no_class(): void
+    public function an_instructorless_candidate_conflicts_with_any_overlapping_class(): void
     {
+        // A class with no instructor stands in for studio occupancy, so it
+        // contends with a class taught by someone else.
         $this->classWithSession('2026-08-02', '16:00:00', '17:00:00');
 
-        $this->assertSame([], $this->detector->detect(
+        $conflicts = $this->detector->detect(
+            dates: [Carbon::parse('2026-08-02')->startOfDay()],
+            startTime: '16:30',
+            endTime: '17:30',
+            instructorId: null,
+            classId: null,
+        );
+
+        $this->assertCount(1, $conflicts);
+        $this->assertSame(ScheduleConflictVO::REASON_STUDIO, $conflicts[0]->reason);
+    }
+
+    #[Test]
+    public function an_existing_instructorless_class_blocks_a_candidate_that_has_an_instructor(): void
+    {
+        // The rule has to hold in both directions, otherwise ordering decides
+        // whether the collision is caught.
+        $this->classWithSession('2026-08-02', '16:00:00', '17:00:00', instructorless: true);
+
+        $conflicts = $this->detect('2026-08-02', '16:30', '17:30');
+
+        $this->assertCount(1, $conflicts);
+        $this->assertSame(ScheduleConflictVO::REASON_STUDIO, $conflicts[0]->reason);
+    }
+
+    #[Test]
+    public function two_instructorless_classes_conflict(): void
+    {
+        $this->classWithSession('2026-08-02', '16:00:00', '17:00:00', instructorless: true);
+
+        $conflicts = $this->detector->detect(
             dates: [Carbon::parse('2026-08-02')->startOfDay()],
             startTime: '16:00',
             endTime: '17:00',
             instructorId: null,
             classId: null,
+        );
+
+        $this->assertCount(1, $conflicts);
+    }
+
+    #[Test]
+    public function an_instructorless_class_still_allows_back_to_back_sessions(): void
+    {
+        // Studio contention uses the same half-open window as everything else.
+        $this->classWithSession('2026-08-02', '16:00:00', '17:00:00', instructorless: true);
+
+        $this->assertSame([], $this->detector->detect(
+            dates: [Carbon::parse('2026-08-02')->startOfDay()],
+            startTime: '17:00',
+            endTime: '18:00',
+            instructorId: null,
+            classId: null,
         ));
+    }
+
+    #[Test]
+    public function an_instructorless_class_does_not_conflict_on_a_different_date(): void
+    {
+        $this->classWithSession('2026-08-02', '16:00:00', '17:00:00', instructorless: true);
+
+        $this->assertSame([], $this->detect('2026-08-03', '16:00', '17:00'));
     }
 
     #[Test]

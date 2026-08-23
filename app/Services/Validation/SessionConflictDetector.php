@@ -14,11 +14,13 @@ use Illuminate\Validation\ValidationException;
 /**
  * Detects schedule collisions on real datetime windows.
  *
- * Scope is deliberately narrow, per the agreed business rules:
+ * Scope, per the agreed business rules:
  *   - an instructor may not teach two overlapping sessions;
- *   - a class may not overlap itself.
- * Two classes with *different* instructors are free to overlap — the studio has
- * no room/resource model, so there is nothing else to contend over.
+ *   - a class may not overlap itself;
+ *   - a class with NO instructor contends with every overlapping class, in both
+ *     directions. It stands in for single-studio contention: there is no room
+ *     entity to key on, so an unstaffed class is treated as occupying the space.
+ * Two classes with different, non-null instructors are free to overlap.
  *
  * Cancelled sessions release their slot. Soft-deleted sessions are ignored
  * entirely (note that the unique index on class_sessions does NOT ignore them,
@@ -42,11 +44,6 @@ final readonly class SessionConflictDetector
             return [];
         }
 
-        // With no instructor and no class to contend with, nothing can conflict.
-        if ($instructorId === null && $classId === null) {
-            return [];
-        }
-
         $start = $this->normaliseTime($startTime);
         $end = $this->normaliseTime($endTime);
 
@@ -64,15 +61,24 @@ final readonly class SessionConflictDetector
             // back-to-back sessions (16:00-17:00 then 17:00-18:00) do not collide.
             ->where('class_sessions.start_time', '<', $end)
             ->where('class_sessions.end_time', '>', $start)
-            ->where(function (Builder $query) use ($instructorId, $classId) {
-                if ($instructorId !== null) {
-                    $query->orWhere('classes.instructor_id', $instructorId);
-                }
+            ->when(
+                // A candidate with no instructor contends with everything, so it
+                // needs no narrowing clause at all.
+                $instructorId !== null,
+                fn (Builder $query) => $query->where(
+                    function (Builder $query) use ($instructorId, $classId) {
+                        $query->orWhere('classes.instructor_id', $instructorId);
 
-                if ($classId !== null) {
-                    $query->orWhere('class_sessions.class_id', $classId);
-                }
-            })
+                        // The other direction of the same rule: an existing
+                        // class with no instructor blocks this candidate too.
+                        $query->orWhereNull('classes.instructor_id');
+
+                        if ($classId !== null) {
+                            $query->orWhere('class_sessions.class_id', $classId);
+                        }
+                    }
+                )
+            )
             ->when(
                 $ignoreSessionId !== null,
                 fn (Builder $query) => $query->where('class_sessions.id', '!=', $ignoreSessionId)
@@ -96,9 +102,7 @@ final readonly class SessionConflictDetector
                 endTime: (string) $row->end_time,
                 classId: (int) $row->class_id,
                 classTitle: $this->titleOf($row),
-                reason: ((int) $row->class_id === $classId)
-                    ? ScheduleConflictVO::REASON_SAME_CLASS
-                    : ScheduleConflictVO::REASON_INSTRUCTOR,
+                reason: $this->reasonFor($row, $instructorId, $classId),
                 sessionId: (int) $row->id,
             ))
             ->values()
@@ -183,6 +187,25 @@ final readonly class SessionConflictDetector
     private function normaliseTime(mixed $time): string
     {
         return Carbon::parse((string) $time)->format('H:i:s');
+    }
+
+    /**
+     * Why this row collides: same class, the same instructor twice, or studio
+     * contention where one of the two sides has no instructor at all.
+     */
+    private function reasonFor(object $row, ?int $instructorId, ?int $classId): string
+    {
+        if ($classId !== null && (int) $row->class_id === $classId) {
+            return ScheduleConflictVO::REASON_SAME_CLASS;
+        }
+
+        $rowInstructorId = $row->instructor_id === null ? null : (int) $row->instructor_id;
+
+        if ($instructorId !== null && $rowInstructorId === $instructorId) {
+            return ScheduleConflictVO::REASON_INSTRUCTOR;
+        }
+
+        return ScheduleConflictVO::REASON_STUDIO;
     }
 
     private function titleOf(object $row): string

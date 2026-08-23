@@ -325,6 +325,7 @@ return [
                 'conflicts_found' => 'تعارض في الجدولة: تم العثور على :count موعد متعارض. :details',
                 'conflict_line' => ':date :start-:end يتعارض مع ":class" (:reason)',
                 'conflict_reason_instructor' => 'نفس المدرب',
+                'conflict_reason_studio' => 'تعارض في الاستوديو (حصة بدون مدرب)',
                 'conflict_reason_same_class' => 'نفس الحصة',
             ],
             'statuses' => [
