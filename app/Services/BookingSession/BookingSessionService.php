@@ -192,6 +192,16 @@ class BookingSessionService
         ]);
 
         return DB::transaction(function () use ($bookingId, $classSessionId) {
+            // Lock the class session BEFORE counting its reservations. The
+            // capacity check used to run against an unlocked read, so two
+            // concurrent requests for the last spot both passed it and then
+            // serialised on the lock, and both inserted.
+            //
+            // Lock order is class session then booking, matching
+            // oneTimeAttend(); the two used to acquire them in opposite orders,
+            // which is a deadlock waiting to happen.
+            $this->classSessionService->find($classSessionId, true);
+
             $booking = $this->bookingService->find($bookingId, true);
 
             $this->assertBookingHasCredits($booking);
@@ -199,7 +209,6 @@ class BookingSessionService
             $this->assertNoDuplicateSessionForUser($booking->user_id, $classSessionId);
             $this->assertSessionHasAvailableSpots($classSessionId);
 
-            $this->classSessionService->find($classSessionId, true);
             $this->bookingService->decrementCredits($booking);
             $booking->refresh();
 

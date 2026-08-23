@@ -6,6 +6,7 @@ declare(strict_types=1);
 
 namespace App\Repositories\Eloquent\ClassSession;
 
+use App\Enums\BookingSessionStatusEnum;
 use App\Models\ClassSession;
 use Carbon\Carbon;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
@@ -144,7 +145,12 @@ class ClassSessionEloquentRepository
                             ->whereTime('start_time', '>', $now->toTimeString());
                     });
             })
-            ->whereHas('bookingSessions', null, '>=', DB::raw('class_sessions.total_spots'))
+            ->whereHas(
+                'bookingSessions',
+                fn ($query) => $query->where('status', BookingSessionStatusEnum::RESERVED->value),
+                '>=',
+                DB::raw('class_sessions.total_spots')
+            )
             ->count();
     }
 
@@ -169,11 +175,18 @@ class ClassSessionEloquentRepository
         }
 
         $capacity = (int) ($session->total_spots ?? 0);
+
+        // A session with no capacity has no spots. This previously returned
+        // PHP_INT_MAX, which made a zero-capacity session infinitely bookable.
         if ($capacity <= 0) {
-            return PHP_INT_MAX;
+            return 0;
         }
 
-        $reserved = $session->bookingSessions()->count();
+        // Only live reservations consume a spot. Counting cancelled rows too
+        // meant a cancelled booking held its seat forever.
+        $reserved = $session->bookingSessions()
+            ->where('status', BookingSessionStatusEnum::RESERVED->value)
+            ->count();
 
         return max(0, $capacity - $reserved);
     }
