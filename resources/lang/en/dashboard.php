@@ -350,6 +350,8 @@ return [
                 'title' => 'Class Title',
                 'about' => 'About',
                 'instructor' => 'Instructor',
+                'instructor_name_en' => 'Instructor Name (EN)',
+                'instructor_name_ar' => 'Instructor Name (AR)',
                 'instructor_email' => 'Instructor Email',
                 'category' => 'Category',
                 'recurrence_pattern' => 'Recurrence Pattern',
@@ -400,6 +402,7 @@ return [
             ],
             'helpers' => [
                 'instructor' => 'Select the instructor teaching this class',
+                'instructor_name_ar' => 'Leave blank to reuse the English name.',
                 'category' => 'Choose the class category',
                 'title' => 'Enter the class title (supports multiple languages)',
                 'recurrence_pattern' => 'A fixed interval measured from the start date (e.g. every 7 days).',
@@ -426,6 +429,7 @@ return [
             ],
             'actions' => [
                 'add_image' => 'Add another image',
+                'create_instructor' => 'Create New Instructor',
             ],
             'units' => [
                 'minutes' => 'min',

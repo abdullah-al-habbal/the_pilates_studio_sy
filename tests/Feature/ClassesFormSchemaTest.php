@@ -5,7 +5,10 @@ declare(strict_types=1);
 namespace Tests\Feature;
 
 use App\Filament\Admin\Resources\Classes\Schemas\ClassesForm;
+use App\Models\Instructor;
+use Filament\Forms\Components\Select;
 use Filament\Schemas\Schema;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
@@ -15,6 +18,8 @@ use Tests\TestCase;
  */
 final class ClassesFormSchemaTest extends TestCase
 {
+    use RefreshDatabase;
+
     #[Test]
     public function the_class_form_schema_builds_and_exposes_both_scheduling_modes(): void
     {
@@ -96,5 +101,65 @@ final class ClassesFormSchemaTest extends TestCase
         ]);
 
         $this->assertSame(['wednesday', 'sunday'], $data['weekdays']);
+    }
+
+    // ------------------------------------------- inline instructor creation
+
+    #[Test]
+    public function the_instructor_select_offers_an_inline_create_option(): void
+    {
+        $schema = ClassesForm::configure(Schema::make());
+
+        $select = null;
+
+        $find = function (array $components) use (&$find, &$select): void {
+            foreach ($components as $component) {
+                if ($component instanceof Select && $component->getName() === 'instructor_id') {
+                    $select = $component;
+                }
+
+                if (method_exists($component, 'getDefaultChildComponents')) {
+                    $find($component->getDefaultChildComponents());
+                }
+            }
+        };
+
+        $find($schema->getComponents());
+
+        $this->assertNotNull($select, 'instructor_id select is missing from the form.');
+        $this->assertTrue(
+            $select->hasCreateOptionActionFormSchema(),
+            'instructor_id should let an admin add an instructor without leaving the page.'
+        );
+    }
+
+    #[Test]
+    public function creating_an_instructor_stores_both_locales(): void
+    {
+        $id = ClassesForm::createInstructor(['name' => ['en' => 'Sara', 'ar' => 'سارة']]);
+
+        $instructor = Instructor::findOrFail($id);
+
+        $this->assertSame('Sara', $instructor->getTranslation('name', 'en'));
+        $this->assertSame('سارة', $instructor->getTranslation('name', 'ar'));
+    }
+
+    #[Test]
+    public function a_blank_arabic_name_falls_back_to_the_english_one(): void
+    {
+        // Otherwise the Arabic panel would render an option with an empty label.
+        $id = ClassesForm::createInstructor(['name' => ['en' => 'Sara', 'ar' => '  ']]);
+
+        $instructor = Instructor::findOrFail($id);
+
+        $this->assertSame('Sara', $instructor->getTranslation('name', 'ar'));
+    }
+
+    #[Test]
+    public function a_missing_arabic_key_is_tolerated(): void
+    {
+        $id = ClassesForm::createInstructor(['name' => ['en' => 'Sara']]);
+
+        $this->assertSame('Sara', Instructor::findOrFail($id)->getTranslation('name', 'ar'));
     }
 }

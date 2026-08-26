@@ -171,4 +171,44 @@ final class ClassesAdminPanelTest extends TestCase
 
         $this->assertSame(1, Classes::count());
     }
+
+    #[Test]
+    public function an_admin_can_add_an_instructor_from_the_select_modal(): void
+    {
+        // The dev database can legitimately hold zero instructors while the
+        // field is required, which otherwise deadlocks the whole create form.
+        Instructor::query()->forceDelete();
+
+        $component = Livewire::test(CreateClasses::class)
+            ->callFormComponentAction('instructor_id', 'createOption', data: [
+                'name' => ['en' => 'Sara', 'ar' => 'سارة'],
+            ])
+            ->assertHasNoFormErrors();
+
+        $instructor = Instructor::firstOrFail();
+
+        $this->assertSame('Sara', $instructor->getTranslation('name', 'en'));
+        $this->assertSame('سارة', $instructor->getTranslation('name', 'ar'));
+
+        // The new option must also be selected, or the admin has to hunt for it.
+        $component->assertFormSet(['instructor_id' => $instructor->id]);
+    }
+
+    #[Test]
+    public function an_instructor_created_from_the_modal_can_carry_a_class(): void
+    {
+        Instructor::query()->forceDelete();
+
+        $component = Livewire::test(CreateClasses::class)
+            ->callFormComponentAction('instructor_id', 'createOption', data: [
+                'name' => ['en' => 'Sara', 'ar' => 'سارة'],
+            ]);
+
+        $component
+            ->fillForm($this->formData(['instructor_id' => Instructor::firstOrFail()->id]))
+            ->call('create')
+            ->assertHasNoFormErrors();
+
+        $this->assertSame(18, Classes::firstOrFail()->sessions()->count());
+    }
 }

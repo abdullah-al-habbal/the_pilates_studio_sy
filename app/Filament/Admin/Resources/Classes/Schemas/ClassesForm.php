@@ -61,6 +61,28 @@ class ClassesForm
                                 ->required()
                                 ->loadingMessage(__('dashboard.messages.loading'))
                                 ->searchPrompt(__('dashboard.messages.search_prompt'))
+                                // Instructors are a small lookup an admin often has to add
+                                // mid-flow. The dedicated InstructorForm cannot be reused
+                                // here: it relies on the resource's locale switcher, which a
+                                // modal has no access to, so the locales are asked for
+                                // explicitly instead.
+                                ->createOptionForm([
+                                    TextInput::make('name.en')
+                                        ->label(__('dashboard.resources.classes.fields.instructor_name_en'))
+                                        ->required()
+                                        ->maxLength(255),
+
+                                    TextInput::make('name.ar')
+                                        ->label(__('dashboard.resources.classes.fields.instructor_name_ar'))
+                                        ->maxLength(255)
+                                        ->helperText(__('dashboard.resources.classes.helpers.instructor_name_ar')),
+                                ])
+                                ->createOptionAction(
+                                    fn ($action) => $action
+                                        ->modalHeading(__('dashboard.resources.classes.actions.create_instructor'))
+                                        ->modalWidth('md')
+                                )
+                                ->createOptionUsing(fn (array $data): int => self::createInstructor($data))
                                 ->helperText(__('dashboard.resources.classes.helpers.instructor'))
                                 ->columnSpan(1),
 
@@ -283,6 +305,26 @@ class ClassesForm
                             ->columnSpanFull(),
                     ]),
             ]);
+    }
+
+    /**
+     * Persist an instructor created from the Select's modal.
+     *
+     * `name` is a translatable json column, so a blank Arabic name would be
+     * stored as an explicit null and render an empty option label in the
+     * Arabic panel. Falling back to the English name mirrors InstructorFactory
+     * and keeps every option labelled in both locales.
+     *
+     * @param  array<string, mixed>  $data
+     */
+    public static function createInstructor(array $data): int
+    {
+        $en = trim((string) ($data['name']['en'] ?? ''));
+        $ar = trim((string) ($data['name']['ar'] ?? ''));
+
+        return Instructor::create([
+            'name' => ['en' => $en, 'ar' => $ar !== '' ? $ar : $en],
+        ])->id;
     }
 
     /**

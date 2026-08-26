@@ -297,11 +297,14 @@ return [
         ],
         'classes' => [
             'fields' => [
+                'instructor_name_en' => 'اسم المدرب (إنجليزي)',
+                'instructor_name_ar' => 'اسم المدرب (عربي)',
                 'recurrence_pattern' => 'نمط التكرار',
                 'weekdays' => 'يتكرر في',
                 'schedule_mode' => 'طريقة التكرار',
             ],
             'helpers' => [
+                'instructor_name_ar' => 'اتركه فارغاً لاستخدام الاسم الإنجليزي.',
                 'recurrence_pattern' => 'فترة ثابتة تُحسب من تاريخ البداية (مثلاً كل 7 أيام).',
                 'weekdays' => 'تُعقد الحصة في الأيام المحددة فقط، بين تاريخي البداية والانتهاء.',
                 'schedule_mode' => 'اختر أياماً محددة من الأسبوع، أو فترة ثابتة تُحسب من تاريخ البداية.',
@@ -335,6 +338,7 @@ return [
             'actions' => [
                 'mark_completed' => 'تعليم كمكتمل',
                 'mark_cancelled' => 'إلغاء الحصة',
+                'create_instructor' => 'إنشاء مدرب جديد',
             ],
             'notifications' => [
                 'completed' => 'تم تعليم الحصة كمكتملة.',
