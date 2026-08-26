@@ -14,7 +14,8 @@ class ClassCategoryForm
                 TextInput::make('name')
                     ->required(),
                 TextInput::make('slug')
-                    ->required(),
+                    ->required()
+                    ->unique(ignoreRecord: true),
                 TextInput::make('color'),
             ]);
     }

@@ -430,6 +430,8 @@ return [
             'actions' => [
                 'add_image' => 'Add another image',
                 'create_instructor' => 'Create New Instructor',
+                'mark_completed' => 'Mark as Completed',
+                'mark_cancelled' => 'Cancel Class',
             ],
             'units' => [
                 'minutes' => 'min',
