@@ -71,10 +71,6 @@ class AdminPanelProvider extends PanelProvider
             ->middleware($this->getMiddleware())
             ->authMiddleware($this->getAuthMiddleware())
             ->renderHook(
-                'panels::global-search.before',
-                fn (): string => view('filament.components.locale-switcher')->render(),
-            )
-            ->renderHook(
                 'panels::user-menu.before',
                 fn (): string => Auth::user()?->isAdmin()
                     ? Blade::render('

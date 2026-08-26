@@ -36,6 +36,7 @@ use App\Services\Package\PackageService;
 use App\Services\StaticPage\StaticPageService;
 use App\Services\Testimonial\TestimonialService;
 use App\Services\User\UserService;
+use BezhanSalleh\LanguageSwitch\LanguageSwitch;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
@@ -104,6 +105,12 @@ class ApplicationServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $this->registerPolicies();
+
+        LanguageSwitch::configureUsing(function (LanguageSwitch $switch) {
+            $switch
+                ->locales(['ar', 'en'])
+                ->visible(outsidePanels: false);
+        });
 
         RateLimiter::for('api', function (Request $request) {
             return Limit::perMinute(60)->by($request->user()?->id ?: $request->ip());
