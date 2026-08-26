@@ -217,40 +217,40 @@ class Reports extends Page implements HasInfolists
 
             $sections = [];
 
-            $sections[] = Section::make("{$currency->currencyCode} — Financial Summary")
+            $sections[] = Section::make(__('dashboard.pages.reports.financial_summary', ['currency' => $currency->currencyCode]))
                 ->icon('heroicon-o-banknotes')
                 ->iconColor('primary')
                 ->schema([
                     Grid::make(['default' => 1, 'sm' => 2, 'lg' => 3])
                         ->schema([
                             TextEntry::make("revenue_{$currency->currencyId}")
-                                ->label("Total Revenue ({$currency->currencyCode})")
+                                ->label(__('dashboard.pages.reports.total_revenue_with_code', ['code' => $currency->currencyCode]))
                                 ->state($fmt($currency->totalRevenue))
                                 ->icon('heroicon-o-currency-dollar')
                                 ->iconColor('primary')
                                 ->weight(FontWeight::Bold),
                             TextEntry::make("packages_{$currency->currencyId}")
-                                ->label('Package Revenue')
+                                ->label(__('dashboard.pages.reports.package_revenue'))
                                 ->state($fmt($currency->packageRevenue))
                                 ->icon('heroicon-o-ticket')
                                 ->iconColor('success'),
                             TextEntry::make("merch_{$currency->currencyId}")
-                                ->label('Merchandise Revenue')
+                                ->label(__('dashboard.pages.reports.merchandise_revenue'))
                                 ->state($fmt($currency->merchandiseRevenue))
                                 ->icon('heroicon-o-shopping-bag')
                                 ->iconColor('warning'),
                             TextEntry::make("expenses_{$currency->currencyId}")
-                                ->label('Expenses')
+                                ->label(__('dashboard.pages.reports.expenses'))
                                 ->state($fmt($currency->totalExpenses))
                                 ->icon('heroicon-o-arrow-trending-down')
                                 ->iconColor('rose'),
                             TextEntry::make("refunds_{$currency->currencyId}")
-                                ->label('Refunds')
+                                ->label(__('dashboard.pages.reports.refunds'))
                                 ->state($fmt($currency->totalRefunds))
                                 ->icon('heroicon-o-receipt-refund')
                                 ->iconColor('amber'),
                             TextEntry::make("balance_{$currency->currencyId}")
-                                ->label('True Balance')
+                                ->label(__('dashboard.pages.reports.true_balance'))
                                 ->state($fmt($currency->trueBalance))
                                 ->icon('heroicon-o-calculator')
                                 ->iconColor($currency->trueBalance >= 0 ? 'emerald' : 'rose')
@@ -259,21 +259,21 @@ class Reports extends Page implements HasInfolists
                 ]);
 
             if ($hasBaseConversion && $currency->baseConversionApplied && $currency->currencyCode !== $baseCurrency->code) {
-                $sections[] = Section::make("→ Converted to {$baseCurrency->code}")
+                $sections[] = Section::make(__('dashboard.pages.reports.converted_to', ['code' => $baseCurrency->code]))
                     ->icon('heroicon-o-arrow-path')
                     ->iconColor('gray')
                     ->collapsed()
-                    ->description('Using historical exchange rate at transaction time')
+                    ->description(__('dashboard.pages.reports.historical_rate_description'))
                     ->schema([
                         Grid::make(['default' => 1, 'sm' => 2])
                             ->schema([
                                 TextEntry::make("revenue_base_{$currency->currencyId}")
-                                    ->label("Total Revenue in {$baseCurrency->code}")
+                                    ->label(__('dashboard.pages.reports.total_revenue_in', ['code' => $baseCurrency->code]))
                                     ->state($fmtBase($currency->totalRevenueInBase))
                                     ->icon('heroicon-o-currency-dollar')
                                     ->iconColor('primary'),
                                 TextEntry::make("balance_base_{$currency->currencyId}")
-                                    ->label("True Balance in {$baseCurrency->code}")
+                                    ->label(__('dashboard.pages.reports.true_balance_in', ['code' => $baseCurrency->code]))
                                     ->state($fmtBase($currency->trueBalanceInBase))
                                     ->icon('heroicon-o-calculator')
                                     ->iconColor($currency->trueBalanceInBase >= 0 ? 'emerald' : 'rose'),
@@ -287,7 +287,7 @@ class Reports extends Page implements HasInfolists
 
     private function buildCurrencyFilterSection(): Section
     {
-        return Section::make('Filter by Currency')
+        return Section::make(__('dashboard.pages.reports.filter_by_currency'))
             ->icon('heroicon-o-funnel')
             ->schema([
                 Grid::make(['default' => 2, 'sm' => 3, 'md' => 4])
@@ -308,12 +308,12 @@ class Reports extends Page implements HasInfolists
 
     private function buildDisplayOptionsSection(Currency $baseCurrency): Section
     {
-        return Section::make('Display Options')
+        return Section::make(__('dashboard.pages.reports.display_options'))
             ->icon('heroicon-o-cog-6-tooth')
             ->schema([
                 Toggle::make('convertToBase')
-                    ->label("Show amounts converted to {$baseCurrency->code}")
-                    ->helperText('Uses historical exchange rates from transaction snapshots')
+                    ->label(__('dashboard.pages.reports.show_converted', ['code' => $baseCurrency->code]))
+                    ->helperText(__('dashboard.pages.reports.historical_rate_hint'))
                     ->live()
                     ->afterStateUpdated(fn ($state) => $this->convertToBase = $state),
             ]);
@@ -354,7 +354,7 @@ class Reports extends Page implements HasInfolists
                     ->icon('heroicon-o-fire')->iconColor('warning')
                     ->schema(
                         $classes->isEmpty()
-                        ? [TextEntry::make('no_classes')->hiddenLabel()->state('No data for this period.')->color('gray')]
+                        ? [TextEntry::make('no_classes')->hiddenLabel()->state(__('dashboard.pages.reports.no_data'))->color('gray')]
                         : $classes->values()->map(function ($class, int $i) use ($stats): TextEntry {
                             $locale = app()->getLocale();
                             $title = is_array($class->title)
@@ -382,7 +382,7 @@ class Reports extends Page implements HasInfolists
                     ->icon('heroicon-o-chart-bar-square')->iconColor('success')
                     ->schema(
                         $merch->isEmpty()
-                        ? [TextEntry::make('no_merch')->hiddenLabel()->state('No sales for this period.')->color('gray')]
+                        ? [TextEntry::make('no_merch')->hiddenLabel()->state(__('dashboard.pages.reports.no_data'))->color('gray')]
                         : $merch->values()->map(function ($item, int $i): TextEntry {
                             $locale = app()->getLocale();
                             $name = is_array($item->name)
@@ -418,12 +418,12 @@ class Reports extends Page implements HasInfolists
         return $schema->components(array_merge(
             [
                 $hasBaseConversion
-                ? Section::make('⚠️ Base Currency Conversion Notice')
+                ? Section::make(__('dashboard.pages.reports.base_conversion_notice'))
                     ->icon('heroicon-o-exclamation-triangle')
                     ->iconColor('amber')
                     ->schema([
                         TextEntry::make('conversion_notice')
-                            ->state("All amounts marked 'Converted to {$baseCurrency->code}' use historical exchange rates captured at the time of each transaction. This ensures audit accuracy even if current rates change.")
+                            ->state(__('dashboard.pages.reports.conversion_notice_message', ['code' => $baseCurrency->code]))
                             ->hiddenLabel()
                             ->columnSpanFull(),
                     ])

@@ -28,11 +28,21 @@ class RecurrencePatternResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-arrow-path';
 
-    protected static string|UnitEnum|null $navigationGroup = 'Configuration';
+    protected static string|UnitEnum|null $navigationGroup = null;
 
     protected static ?int $navigationSort = 1;
 
     protected static ?string $recordTitleAttribute = 'label';
+
+    public static function getNavigationGroup(): string
+    {
+        return __('dashboard.navigation.groups.configuration');
+    }
+
+    public static function getNavigationLabel(): string
+    {
+        return __('dashboard.navigation.resources.recurrence_patterns');
+    }
 
     public static function getTranslatableLocales(): array
     {

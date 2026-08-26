@@ -22,11 +22,21 @@ class AppSettingResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-cog-6-tooth';
 
-    protected static string|UnitEnum|null $navigationGroup = 'Configuration';
+    protected static string|UnitEnum|null $navigationGroup = null;
 
     protected static ?int $navigationSort = 1;
 
     protected static ?string $recordTitleAttribute = 'key';
+
+    public static function getNavigationGroup(): string
+    {
+        return __('dashboard.navigation.groups.configuration');
+    }
+
+    public static function getNavigationLabel(): string
+    {
+        return __('dashboard.navigation.resources.app_settings');
+    }
 
     public static function getRecordTitle(?Model $record): string
     {

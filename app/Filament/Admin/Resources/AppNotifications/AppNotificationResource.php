@@ -24,11 +24,21 @@ class AppNotificationResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-bell';
 
-    protected static string|UnitEnum|null $navigationGroup = 'Users';
+    protected static string|UnitEnum|null $navigationGroup = null;
 
     protected static ?int $navigationSort = 2;
 
     protected static ?string $recordTitleAttribute = 'title';
+
+    public static function getNavigationGroup(): string
+    {
+        return __('dashboard.navigation.groups.users');
+    }
+
+    public static function getNavigationLabel(): string
+    {
+        return __('dashboard.navigation.resources.app_notifications');
+    }
 
     public static function getTranslatableLocales(): array
     {

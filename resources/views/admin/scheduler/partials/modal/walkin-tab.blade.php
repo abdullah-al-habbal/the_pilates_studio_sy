@@ -9,8 +9,8 @@
             </svg>
         </div>
         <div>
-            <p class="font-black text-sm uppercase tracking-tight">{{ __('dashboard::dashboard.scheduler_ui.modal.full_capacity_title') }}</p>
-            <p class="text-xs font-medium opacity-80 mt-0.5">{{ __('dashboard::dashboard.scheduler_ui.modal.full_capacity_desc') }}</p>
+            <p class="font-black text-sm uppercase tracking-tight">{{ __('dashboard.scheduler_ui.modal.full_capacity_title') }}</p>
+            <p class="text-xs font-medium opacity-80 mt-0.5">{{ __('dashboard.scheduler_ui.modal.full_capacity_desc') }}</p>
         </div>
     </div>
 
@@ -18,11 +18,11 @@
         <div class="flex p-1 bg-gray-100 dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700">
             <button id="walkin-mode-existing" type="button"
                 class="flex-1 py-2 px-4 rounded-lg text-xs font-bold transition-all duration-300">
-                {{ __('dashboard::dashboard.scheduler_ui.modal.existing_toggle') }}
+                {{ __('dashboard.scheduler_ui.modal.existing_toggle') }}
             </button>
             <button id="walkin-mode-new" type="button"
                 class="flex-1 py-2 px-4 rounded-lg text-xs font-bold transition-all duration-300">
-                {{ __('dashboard::dashboard.scheduler_ui.modal.new_member_toggle') }}
+                {{ __('dashboard.scheduler_ui.modal.new_member_toggle') }}
             </button>
         </div>
 

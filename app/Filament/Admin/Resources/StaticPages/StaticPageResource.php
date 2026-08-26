@@ -25,11 +25,21 @@ class StaticPageResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-document-text';
 
-    protected static string|UnitEnum|null $navigationGroup = 'Configuration';
+    protected static string|UnitEnum|null $navigationGroup = null;
 
     protected static ?int $navigationSort = 8;
 
     protected static ?string $recordTitleAttribute = 'slug';
+
+    public static function getNavigationGroup(): string
+    {
+        return __('dashboard.navigation.groups.configuration');
+    }
+
+    public static function getNavigationLabel(): string
+    {
+        return __('dashboard.navigation.resources.static_pages');
+    }
 
     public static function getTranslatableLocales(): array
     {

@@ -6,7 +6,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>{{ __('dashboard::dashboard.scheduler_ui.header.dashboard') }} – {{ config('app.name') }}</title>
+    <title>{{ __('dashboard.scheduler_ui.header.dashboard') }} – {{ config('app.name') }}</title>
 
     <script>
         if (localStorage.getItem('scheduler-theme') === 'dark') {
@@ -29,7 +29,7 @@
 
     @php
         $schedulerTranslations = \Illuminate\Support\Arr::dot(
-            __('dashboard::dashboard.scheduler_ui')
+            __('dashboard.scheduler_ui')
         );
     @endphp
     <script>

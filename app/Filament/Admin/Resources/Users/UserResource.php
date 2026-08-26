@@ -31,11 +31,21 @@ class UserResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-users';
 
-    protected static string|UnitEnum|null $navigationGroup = 'Users';
+    protected static string|UnitEnum|null $navigationGroup = null;
 
     protected static ?int $navigationSort = 1;
 
     protected static ?string $recordTitleAttribute = 'fullname';
+
+    public static function getNavigationGroup(): string
+    {
+        return __('dashboard.navigation.groups.users');
+    }
+
+    public static function getNavigationLabel(): string
+    {
+        return __('dashboard.navigation.resources.users');
+    }
 
     public static function getRecordTitle(?Model $record): string
     {

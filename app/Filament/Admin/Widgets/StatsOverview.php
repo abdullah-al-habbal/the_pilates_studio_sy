@@ -57,13 +57,13 @@ class StatsOverview extends BaseWidget
                 ->color('danger'),
 
             Stat::make(__('dashboard.navigation.scheduler'), '')
-                ->description('Quick access to today\'s schedule and attendance')
+                ->description(__('dashboard.widgets.stats_overview.scheduler_description'))
                 ->descriptionIcon('heroicon-m-calendar-days')
                 ->color('primary')
                 ->url('/admin/scheduler'),
 
             Stat::make(__('dashboard.navigation.groups.operations'), '')
-                ->description('Manage client packages, store orders, and finances')
+                ->description(__('dashboard.widgets.stats_overview.operations_description'))
                 ->descriptionIcon('heroicon-m-cog-6-tooth')
                 ->color('primary')
                 ->url('/admin/operations'),

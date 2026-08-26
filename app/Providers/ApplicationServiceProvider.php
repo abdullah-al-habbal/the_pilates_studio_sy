@@ -109,7 +109,7 @@ class ApplicationServiceProvider extends ServiceProvider
         LanguageSwitch::configureUsing(function (LanguageSwitch $switch) {
             $switch
                 ->locales(['ar', 'en'])
-                ->visible(outsidePanels: false);
+                ->visible(outsidePanels: true);
         });
 
         RateLimiter::for('api', function (Request $request) {

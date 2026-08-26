@@ -6,7 +6,7 @@
         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
         </svg>
-        {{ __('dashboard::dashboard.scheduler_ui.header.dashboard') }}
+        {{ __('dashboard.scheduler_ui.header.dashboard') }}
     </a>
 
     <div class="h-5 w-px bg-gray-200 dark:bg-gray-700 hidden sm:block"></div>
@@ -20,7 +20,7 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                     d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
             </svg>
-            {{ __('dashboard::dashboard.scheduler_ui.header.today') }}
+            {{ __('dashboard.scheduler_ui.header.today') }}
         </button>
 
         <button id="btn-refresh" type="button"
@@ -31,7 +31,7 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                     d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
             </svg>
-            {{ __('dashboard::dashboard.scheduler_ui.header.refresh') }}
+            {{ __('dashboard.scheduler_ui.header.refresh') }}
         </button>
 
         <input type="date" id="input-date" class="rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800
@@ -41,7 +41,7 @@
         <select id="input-instructor" class="rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800
                    text-sm text-gray-900 dark:text-gray-100 px-3 py-1.5 shadow-sm
                    focus:border-primary-500 focus:ring-primary-500">
-            <option value="">{{ __('dashboard::dashboard.scheduler_ui.header.all_instructors') }}</option>
+            <option value="">{{ __('dashboard.scheduler_ui.header.all_instructors') }}</option>
         </select>
     </div>
 
@@ -60,7 +60,7 @@
                 </div>
                 <span
                     class="text-xs font-black text-primary-700 dark:text-primary-300 tabular-nums uppercase tracking-tight">
-                    <span id="sessions-count">0</span> {{ __('dashboard::dashboard.scheduler_ui.header.sessions') }}
+                    <span id="sessions-count">0</span> {{ __('dashboard.scheduler_ui.header.sessions') }}
                 </span>
             </div>
         </div>
@@ -71,7 +71,7 @@
                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                 <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
             </svg>
-            <span class="text-[10px] font-black uppercase tracking-widest animate-pulse">{{ __('dashboard::dashboard.scheduler_ui.header.syncing') }}</span>
+            <span class="text-[10px] font-black uppercase tracking-widest animate-pulse">{{ __('dashboard.scheduler_ui.header.syncing') }}</span>
         </div>
     </div>
 </header>

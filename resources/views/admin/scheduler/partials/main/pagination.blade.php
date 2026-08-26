@@ -6,20 +6,20 @@
         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path d="M15 19l-7-7 7-7" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
         </svg>
-        {{ __('dashboard::dashboard.scheduler_ui.pagination.prev') }}
+        {{ __('dashboard.scheduler_ui.pagination.prev') }}
     </button>
 
     <div class="flex items-center gap-1.5">
-        <span class="text-xs font-bold text-gray-400 uppercase tracking-widest">{{ __('dashboard::dashboard.scheduler_ui.pagination.page') }}</span>
+        <span class="text-xs font-bold text-gray-400 uppercase tracking-widest">{{ __('dashboard.scheduler_ui.pagination.page') }}</span>
         <span id="page-current"
             class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-primary-50 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400 font-bold text-sm">1</span>
-        <span class="text-xs font-bold text-gray-400 uppercase tracking-widest">{{ __('dashboard::dashboard.scheduler_ui.pagination.of') }}</span>
+        <span class="text-xs font-bold text-gray-400 uppercase tracking-widest">{{ __('dashboard.scheduler_ui.pagination.of') }}</span>
         <span id="page-last" class="text-sm font-bold text-gray-700 dark:text-gray-300">1</span>
     </div>
 
     <button id="btn-next"
         class="inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-gray-200 dark:border-gray-700 text-sm font-bold text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 disabled:opacity-30 disabled:cursor-not-allowed transition-all">
-        {{ __('dashboard::dashboard.scheduler_ui.pagination.next') }}
+        {{ __('dashboard.scheduler_ui.pagination.next') }}
         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path d="M9 5l7 7-7 7" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
         </svg>
