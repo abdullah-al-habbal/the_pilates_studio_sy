@@ -191,14 +191,14 @@ const OperationsNotifications = (() => {
                 </label>`;
             }).join('');
         } else if (!state.isLoading) {
-            html += '<p class="px-4 py-3 text-xs text-slate-400 italic">No matching users. Only people who have allowed notifications on their phone can be selected.</p>';
+            html += '<p class="px-4 py-3 text-xs text-slate-400 italic">' + window.__('operations_ui.notifications.no_matching_users') + '</p>';
         }
 
         if (state.isLoading) {
             html += `
             <div class="flex items-center justify-center px-4 py-3 text-primary-500 text-xs gap-2">
                 <div class="w-4 h-4 border-2 border-primary-500 border-t-transparent rounded-full animate-spin"></div>
-                Loading…
+                ${window.__('operations_ui.store.loading')}
             </div>`;
         }
 
@@ -226,7 +226,7 @@ const OperationsNotifications = (() => {
         if (!container) return;
 
         if (state.selectedUsers.size === 0) {
-            container.innerHTML = '<p class="text-xs text-slate-400 italic">No users selected yet.</p>';
+            container.innerHTML = '<p class="text-xs text-slate-400 italic">' + window.__('operations_ui.notifications.no_users_selected') + '</p>';
             return;
         }
 
@@ -257,12 +257,12 @@ const OperationsNotifications = (() => {
         const target = document.querySelector('input[name="notif-target"]:checked')?.value ?? 'all';
 
         if (!title || !body) {
-            OperationsUI.toast('Title and body are required.', 'error');
+            OperationsUI.toast(window.__('operations_ui.notifications.title_body_required'), 'error');
             return;
         }
 
         if (target === 'specific' && state.selectedUsers.size === 0) {
-            OperationsUI.toast('Select at least one user for targeted delivery.', 'error');
+            OperationsUI.toast(window.__('operations_ui.notifications.select_user_required'), 'error');
             return;
         }
 
@@ -280,7 +280,7 @@ const OperationsNotifications = (() => {
             const result = await OperationsAPI.sendNotification(payload);
             _setResultsPanel('success', result.data);
             _appendHistory(payload, result.data);
-            OperationsUI.toast(`Dispatched to ${result.data?.dispatched ?? 0} user(s).`, 'success');
+            OperationsUI.toast(`${window.__('operations_ui.notifications.dispatched_to')} ${result.data?.dispatched ?? 0} ${window.__('operations_ui.notifications.users_suffix')}`, 'success');
         } catch (e) {
             _setResultsPanel('error', e.message);
             OperationsUI.toast(e.message, 'error');
@@ -295,7 +295,7 @@ const OperationsNotifications = (() => {
             panel.innerHTML = `
                 <div class="flex flex-col items-center gap-3 text-primary-500">
                     <div class="w-8 h-8 border-2 border-primary-500 border-t-transparent rounded-full animate-spin"></div>
-                    <p class="text-sm font-medium">Dispatching…</p>
+                    <p class="text-sm font-medium">${window.__('operations_ui.notifications.dispatching')}</p>
                 </div>`;
             return;
         }
@@ -304,23 +304,23 @@ const OperationsNotifications = (() => {
             panel.innerHTML = `
                 <div class="flex flex-col items-center gap-2 text-rose-500">
                     <span class="text-3xl">❌</span>
-                    <p class="text-sm font-bold">Dispatch Failed</p>
+                    <p class="text-sm font-bold">${window.__('operations_ui.notifications.dispatch_failed')}</p>
                     <p class="text-xs text-slate-400">${_esc(data)}</p>
                 </div>`;
             return;
         }
 
         const metrics = [
-            { label: 'Dispatched',  value: data?.dispatched  ?? 0, color: 'text-emerald-600' },
-            { label: 'Users Found', value: data?.total_users ?? 0, color: 'text-primary-600' },
-            { label: 'Failed',      value: data?.failed      ?? 0, color: 'text-rose-500' },
+            { label: window.__('operations_ui.notifications.dispatched_metric'),  value: data?.dispatched  ?? 0, color: 'text-emerald-600' },
+            { label: window.__('operations_ui.notifications.users_found_metric'), value: data?.total_users ?? 0, color: 'text-primary-600' },
+            { label: window.__('operations_ui.notifications.failed_metric'),      value: data?.failed      ?? 0, color: 'text-rose-500' },
         ];
 
         panel.innerHTML = `
             <div class="space-y-4 w-full px-4">
                 <div class="flex items-center gap-2 text-emerald-600">
                     <span class="text-2xl">✅</span>
-                    <p class="font-bold">Dispatch Complete</p>
+                    <p class="font-bold">${window.__('operations_ui.notifications.dispatch_complete')}</p>
                 </div>
                 <div class="grid grid-cols-3 gap-3">
                     ${metrics.map((m) => `
@@ -346,7 +346,7 @@ const OperationsNotifications = (() => {
                 <p class="text-slate-400 truncate">${_esc(payload.body)}</p>
             </div>
             <div class="text-right shrink-0 ml-3 space-y-0.5">
-                <p class="font-bold text-emerald-600">${result?.dispatched ?? 0} sent</p>
+                <p class="font-bold text-emerald-600">${result?.dispatched ?? 0} ${window.__('operations_ui.notifications.sent')}</p>
                 <p class="text-slate-400">${new Date().toLocaleTimeString()}</p>
             </div>`;
         container.prepend(entry);

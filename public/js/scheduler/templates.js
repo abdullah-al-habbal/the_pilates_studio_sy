@@ -28,7 +28,7 @@
         <p class="text-sm font-extrabold text-primary-600 dark:text-primary-400 tabular-nums tracking-tight">${session.start_time}</p>
         <p class="text-[10px] uppercase font-bold text-gray-400 mt-1">${session.end_time}</p>
         <div class="inline-flex items-center mt-2 px-1.5 py-0.5 rounded-md bg-gray-50 dark:bg-gray-800 text-[10px] font-bold text-gray-500">
-            ${session.duration_minutes}m
+            ${session.duration_minutes}${window.__('scheduler_ui.templates.minute_suffix')}
         </div>
     </div>
 
@@ -59,13 +59,13 @@
             <div class="h-full rounded-full transition-all duration-700 ease-out ${barColor}"
                  style="width:${session.fill_pct}%"></div>
         </div>` : ''}
-        <p class="text-[10px] font-bold text-gray-400 mt-1.5 uppercase tracking-wider">${session.attended} Checked</p>
+        <p class="text-[10px] font-bold text-gray-400 mt-1.5 uppercase tracking-wider">${session.attended} ${window.__('scheduler_ui.templates.checked')}</p>
     </div>
 
     <div class="flex items-center gap-4">
         <span class="hidden lg:inline-flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest
                      border px-3 py-1.5 rounded-xl shrink-0 transition-all ${statusClass}">
-            ${session.is_full ? 'Full' : (session.fill_pct >= 75 ? 'Limited' : 'Open')}
+            ${session.is_full ? window.__('scheduler_ui.templates.status_full') : (session.fill_pct >= 75 ? window.__('scheduler_ui.templates.status_limited') : window.__('scheduler_ui.templates.status_open'))}
         </span>
         <button onclick="Scheduler.modal.open(${session.id})" type="button"
                 class="group/btn relative inline-flex items-center justify-center gap-2 overflow-hidden
@@ -77,7 +77,7 @@
                       d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2
                          M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
             </svg>
-            <span class="hidden sm:inline">Manage</span>
+            <span class="hidden sm:inline">${window.__('scheduler_ui.templates.manage_button')}</span>
         </button>
     </div>
 </div>`;
@@ -110,7 +110,7 @@
                                bg-green-50 dark:bg-green-900/30 text-green-600 dark:text-green-400
                                px-2 py-0.5 rounded-lg border border-green-100 dark:border-green-800/50
                                shadow-sm">
-                       ${credits} Credit${credits !== 1 ? 's' : ''}
+                       ${credits} ${credits !== 1 ? window.__('scheduler_ui.templates.credit_plural') : window.__('scheduler_ui.templates.credit_singular')}
                    </span>`
                 : '';
 
@@ -118,7 +118,7 @@
                 ? `<span class="text-[9px] font-black uppercase tracking-tight
                                bg-green-500 text-white px-2 py-0.5 rounded-lg
                                shadow-sm shadow-green-500/30 animate-pulse-once">
-                       ✓ Checked In
+                       ${window.__('scheduler_ui.templates.checked_in_badge')}
                    </span>`
                 : '';
 
@@ -126,14 +126,14 @@
                 ? `<span class="text-[9px] font-black uppercase tracking-tight
                                bg-red-500 text-white px-2 py-0.5 rounded-lg
                                shadow-sm shadow-red-500/30">
-                       Missed
+                       ${window.__('scheduler_ui.templates.missed_badge')}
                    </span>`
                 : '';
 
             const actionButtons = isLocked ? '' : `
                 <button onclick="Scheduler.events.toggleAttendance(${b.id}, 'attended')"
                         ${isPending ? 'disabled' : ''}
-                        title="Mark as attended"
+                        title="${window.__('scheduler_ui.templates.mark_attended_tooltip')}"
                         class="w-10 h-10 flex items-center justify-center rounded-xl transition-all
                                disabled:opacity-30 disabled:cursor-not-allowed
                                bg-gray-50 dark:bg-gray-800 text-gray-400
@@ -146,7 +146,7 @@
                 </button>
                 <button onclick="Scheduler.events.toggleAttendance(${b.id}, 'missed')"
                         ${isPending ? 'disabled' : ''}
-                        title="Mark as missed"
+                        title="${window.__('scheduler_ui.templates.mark_missed_tooltip')}"
                         class="w-10 h-10 flex items-center justify-center rounded-xl transition-all
                                disabled:opacity-30 disabled:cursor-not-allowed
                                bg-gray-50 dark:bg-gray-800 text-gray-400

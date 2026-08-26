@@ -47,7 +47,7 @@
         select: (user) => {
             const spots = state.modal.session?.available_spots ?? null;
             if (spots !== null && state.walkin.selected.length >= spots) {
-                state.walkin.error = 'No more spots available in this session.';
+                state.walkin.error = window.__('scheduler_ui.walkin.no_spots');
                 render.walkinExisting();
                 return;
             }
@@ -81,8 +81,8 @@
             try {
                 const json = await api.validateField(field, value);
                 if (json.success && !json.data.available) {
-                    const label = field === 'phone_number' ? 'phone number' : 'email';
-                    state.walkin.newErrors[field] = [`This ${label} is already registered.`];
+                    const label = field === 'phone_number' ? window.__('scheduler_ui.walkin.phone_label') : window.__('scheduler_ui.walkin.email_label');
+                    state.walkin.newErrors[field] = [window.__('scheduler_ui.walkin.already_registered').replace(':label', label)];
                 } else {
                     delete state.walkin.newErrors[field];
                 }
@@ -101,17 +101,17 @@
                 const json    = await api.postExistingWalkIn(state.modal.sessionId, userIds);
                 if (json.success) {
                     state.walkin.selected = [];
-                    modal.showToast(json.message || 'Walk-ins added successfully.');
-                    S.toaster.success(json.message || 'Walk-ins added successfully.');
+                    modal.showToast(json.message || window.__('scheduler_ui.walkin.walkins_added'));
+                    S.toaster.success(json.message || window.__('scheduler_ui.walkin.walkins_added'));
                     modal.switchTab('attendees');
                     await modal.fetchDetails(state.modal.sessionId);
                     await S.events.loadSessions();
                 } else {
-                    state.walkin.error = json.message || 'Failed to add walk-ins.';
+                    state.walkin.error = json.message || window.__('scheduler_ui.walkin.walkins_failed');
                     S.toaster.error(state.walkin.error);
                 }
             } catch (err) {
-                state.walkin.error = err.message || 'Connection failed. Please try again.';
+                state.walkin.error = err.message || window.__('scheduler_ui.walkin.connection_failed');
                 S.toaster.error(state.walkin.error);
             } finally {
                 state.walkin.submitting = false;
@@ -125,7 +125,7 @@
 
             const hasValidationErrors = Object.keys(state.walkin.newErrors).length > 0;
             if (hasValidationErrors) {
-                S.toaster.warning('Please fix the validation errors before submitting.');
+                S.toaster.warning(window.__('scheduler_ui.walkin.validation_errors'));
                 return;
             }
 
@@ -144,21 +144,21 @@
                     ui.val('input-phone',    '');
                     ui.val('input-email',    '');
 
-                    modal.showToast(json.message || 'New member created successfully.');
-                    S.toaster.success(json.message || 'New member created and added to session.');
+                    modal.showToast(json.message || window.__('scheduler_ui.walkin.member_created'));
+                    S.toaster.success(json.message || window.__('scheduler_ui.walkin.member_created_added'));
                     modal.switchTab('attendees');
                     await modal.fetchDetails(state.modal.sessionId);
                     await S.events.loadSessions();
                 } else {
-                    state.walkin.newErrors.general = json.message || 'Failed to create member.';
+                    state.walkin.newErrors.general = json.message || window.__('scheduler_ui.walkin.member_create_failed');
                     S.toaster.error(state.walkin.newErrors.general);
                 }
             } catch (err) {
                 if (err.status === 422) {
                     state.walkin.newErrors = err.errors || {};
-                    S.toaster.warning('Please check the form for validation errors.');
+                    S.toaster.warning(window.__('scheduler_ui.walkin.check_form'));
                 } else {
-                    state.walkin.newErrors.general = err.message || 'Something went wrong.';
+                    state.walkin.newErrors.general = err.message || window.__('scheduler_ui.walkin.something_wrong');
                     S.toaster.error(state.walkin.newErrors.general);
                 }
             } finally {

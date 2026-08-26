@@ -6,7 +6,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>Operations Hub – {{ config('app.name') }}</title>
+    <title>{{ __('dashboard::dashboard.navigation.groups.operations') }} – {{ config('app.name') }}</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -121,14 +121,14 @@
             <div
                 class="w-10 h-10 bg-primary-600 rounded-xl flex items-center justify-center text-white font-bold text-xl shadow-lg shadow-primary-500/30">
                 P</div>
-            <h1 class="text-xl font-bold tracking-tight">Operations <span class="text-primary-500">Hub</span></h1>
+            <h1 class="text-xl font-bold tracking-tight">{{ __('dashboard::dashboard.navigation.groups.operations') }} <span class="text-primary-500">Hub</span></h1>
             <a href="{{ url('/admin') }}"
                 class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-sm transition-all flex items-center gap-2">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
                 </svg>
-                Filament Dashboard
+                {{ __('dashboard::dashboard.scheduler_ui.header.dashboard') }}
             </a>
         </div>
 
@@ -161,6 +161,18 @@
     </div>
 
     <div id="toast-container" class="fixed bottom-6 right-6 z-[200] flex flex-col gap-3"></div>
+
+    @php
+        $operationsTranslations = \Illuminate\Support\Arr::dot(
+            __('dashboard::dashboard.operations_ui')
+        );
+    @endphp
+    <script>
+        window.__ = function(key) {
+            var t = @json($operationsTranslations);
+            return t[key] || key;
+        };
+    </script>
 
     <script src="{{ asset('js/operations/api.js') }}"></script>
     <script src="{{ asset('js/operations/ui.js') }}"></script>

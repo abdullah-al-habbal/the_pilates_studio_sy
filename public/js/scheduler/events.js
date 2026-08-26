@@ -122,15 +122,15 @@
                         });
                 } else {
                     state.error = {
-                        title:   'Load Failed',
-                        message: json.message || 'Could not retrieve sessions.',
+                        title:   window.__('scheduler_ui.events.load_failed'),
+                        message: json.message || window.__('scheduler_ui.events.could_not_retrieve'),
                     };
                 }
             } catch (err) {
                 console.error('[Scheduler:events] loadSessions error:', err);
                 state.error = {
-                    title:   'Connection Lost',
-                    message: 'Please check your internet connection and try again.',
+                    title:   window.__('scheduler_ui.events.connection_lost'),
+                    message: window.__('scheduler_ui.events.check_connection'),
                 };
             } finally {
                 state.loading = false;
@@ -222,16 +222,16 @@
                 const json = await api.postAttendance(state.modal.sessionId, bookingId, status);
 
                 if (json.success) {
-                    const label = status === 'attended' ? 'marked as attended ✓' : 'marked as missed';
-                    S.toaster.success(`Attendance ${label} successfully.`);
+                    const label = status === 'attended' ? window.__('scheduler_ui.events.marked_attended') : window.__('scheduler_ui.events.marked_missed');
+                    S.toaster.success(`${window.__('scheduler_ui.events.attendance_prefix')} ${label} ${window.__('scheduler_ui.events.success_suffix')}`);
                     await modal.fetchDetails(state.modal.sessionId);
                     await S.events.loadSessions();
                 } else {
-                    S.toaster.error(json.message || 'Failed to update attendance.');
+                    S.toaster.error(json.message || window.__('scheduler_ui.events.attendance_failed'));
                 }
             } catch (err) {
                 console.error('[Scheduler:events] toggleAttendance error:', err);
-                S.toaster.error('Failed to update attendance. Please try again.');
+                S.toaster.error(window.__('scheduler_ui.events.attendance_retry'));
             } finally {
                 render.attendeesTab();
             }

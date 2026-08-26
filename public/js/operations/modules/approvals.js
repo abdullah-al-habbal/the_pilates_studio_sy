@@ -17,12 +17,12 @@ async function loadPendingExpenses(container) {
         console.error('Failed to load pending expenses:', e);
         container.innerHTML = `
             <div class="glass-card rounded-2xl p-8 text-center space-y-3">
-                <p class="text-rose-500 font-bold">Failed to load pending expenses</p>
+                <p class="text-rose-500 font-bold">${window.__('operations_ui.approvals.load_failed')}</p>
                 <p class="text-sm text-slate-400">${e.message}</p>
                 <button onclick="renderApprovalsShimmer(document.getElementById('approvals-container'));loadPendingExpenses(document.getElementById('approvals-container'))"
-                    class="text-xs text-primary-600 underline">Retry</button>
+                    class="text-xs text-primary-600 underline">${window.__('operations_ui.approvals.retry')}</button>
             </div>`;
-        OperationsUI.toast('Failed to load pending expenses', 'error');
+        OperationsUI.toast(window.__('operations_ui.approvals.load_failed'), 'error');
     }
 }
 
@@ -52,8 +52,8 @@ function renderApprovals(container, data) {
                 <svg class="w-12 h-12 mx-auto text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
-                <p class="text-lg font-bold text-slate-600 dark:text-slate-300">All Clear!</p>
-                <p class="text-sm text-slate-400">All expenses have been reviewed.</p>
+                <p class="text-lg font-bold text-slate-600 dark:text-slate-300">${window.__('operations_ui.approvals.all_clear')}</p>
+                <p class="text-sm text-slate-400">${window.__('operations_ui.approvals.all_reviewed')}</p>
             </div>`;
         return;
     }
@@ -78,30 +78,30 @@ function renderApprovals(container, data) {
                         </div>
                         <p class="text-sm font-semibold text-primary-600 dark:text-primary-400">${exp.category_name}</p>
                         ${exp.notes ? `<p class="text-xs text-slate-500 italic">${exp.notes}</p>` : ''}
-                        <p class="text-xs text-slate-400">Recorded by <span class="font-medium text-slate-600 dark:text-slate-300">${exp.recorded_by_name}</span></p>
+                        <p class="text-xs text-slate-400">${window.__('operations_ui.approvals.recorded_by')} <span class="font-medium text-slate-600 dark:text-slate-300">${exp.recorded_by_name}</span></p>
                     </div>
                     <div class="flex items-center gap-2 shrink-0">
                         <button onclick="window.approveExpense(${exp.id})"
                             class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl transition-all hover:scale-[1.02] active:scale-[0.98] btn-single-action">
-                            Approve
+                            ${window.__('operations_ui.approvals.approve')}
                         </button>
                         <button onclick="window.showRejectModal(${exp.id})"
                             class="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold rounded-xl transition-all hover:scale-[1.02] active:scale-[0.98]">
-                            Reject
+                            ${window.__('operations_ui.approvals.reject')}
                         </button>
                     </div>
                 </div>
                 <div id="reject-form-${exp.id}" class="hidden mt-4 pt-4 border-t border-slate-200 dark:border-slate-700 space-y-3">
-                    <textarea id="reject-reason-${exp.id}" rows="2" placeholder="Reason for rejection..."
+                    <textarea id="reject-reason-${exp.id}" rows="2" placeholder="${window.__('operations_ui.approvals.rejection_placeholder')}"
                         class="w-full px-4 py-2 bg-slate-50 dark:bg-slate-800 rounded-lg border-transparent focus:ring-2 focus:ring-rose-500 outline-none text-sm"></textarea>
                     <div class="flex gap-2">
                         <button onclick="window.confirmReject(${exp.id})"
                             class="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold rounded-xl transition-all btn-single-action">
-                            Confirm Rejection
+                            ${window.__('operations_ui.approvals.confirm_rejection')}
                         </button>
                         <button onclick="window.hideRejectModal(${exp.id})"
                             class="px-4 py-2 bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300 text-xs font-bold rounded-xl transition-all">
-                            Cancel
+                            ${window.__('operations_ui.approvals.cancel')}
                         </button>
                     </div>
                 </div>
@@ -118,7 +118,7 @@ window.approveExpense = async function(expenseId) {
 
     try {
         await OperationsAPI.approveExpense(expenseId);
-        OperationsUI.toast('Expense approved!', 'success');
+        OperationsUI.toast(window.__('operations_ui.approvals.expense_approved'), 'success');
         const container = document.getElementById('approvals-container');
         renderApprovalsShimmer(container);
         loadPendingExpenses(container);
@@ -141,7 +141,7 @@ window.hideRejectModal = function(expenseId) {
 window.confirmReject = async function(expenseId) {
     const reason = document.getElementById(`reject-reason-${expenseId}`)?.value?.trim();
     if (!reason) {
-        OperationsUI.toast('Please enter a rejection reason.', 'warning');
+        OperationsUI.toast(window.__('operations_ui.approvals.rejection_reason_required'), 'warning');
         return;
     }
 
@@ -150,7 +150,7 @@ window.confirmReject = async function(expenseId) {
 
     try {
         await OperationsAPI.rejectExpense(expenseId, reason);
-        OperationsUI.toast('Expense rejected.', 'success');
+        OperationsUI.toast(window.__('operations_ui.approvals.expense_rejected'), 'success');
         const container = document.getElementById('approvals-container');
         renderApprovalsShimmer(container);
         loadPendingExpenses(container);

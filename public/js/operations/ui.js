@@ -146,7 +146,7 @@ const OperationsUI = {
         if (!Array.isArray(data) || data.length === 0) {
             container.innerHTML = `
                 <div class="glass-card rounded-2xl p-8 text-center text-slate-400">
-                    No financial data for this period.
+                    ${window.__('operations_ui.finance.no_data')}
                 </div>`;
             return;
         }
@@ -170,37 +170,37 @@ const OperationsUI = {
                 </button>
                 <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mt-4">
                     <div class="glass-card rounded-xl p-4 border-b-2 border-primary-400">
-                        <p class="text-[10px] font-bold text-slate-400 uppercase mb-1">Total Revenue</p>
+                        <p class="text-[10px] font-bold text-slate-400 uppercase mb-1">${window.__('operations_ui.finance.total_revenue')}</p>
                         <p class="text-lg font-black text-slate-900 dark:text-white truncate">
                             ${fmt(c.total_revenue, c.currency_decimals, c.currency_code)}
                         </p>
                     </div>
                     <div class="glass-card rounded-xl p-4 border-b-2 border-sky-400">
-                        <p class="text-[10px] font-bold text-slate-400 uppercase mb-1">Packages</p>
+                        <p class="text-[10px] font-bold text-slate-400 uppercase mb-1">${window.__('operations_ui.finance.packages')}</p>
                         <p class="text-lg font-black text-sky-600 truncate">
                             ${fmt(c.package_revenue, c.currency_decimals, c.currency_code)}
                         </p>
                     </div>
                     <div class="glass-card rounded-xl p-4 border-b-2 border-gold-400">
-                        <p class="text-[10px] font-bold text-slate-400 uppercase mb-1">Merchandise</p>
+                        <p class="text-[10px] font-bold text-slate-400 uppercase mb-1">${window.__('operations_ui.finance.merchandise')}</p>
                         <p class="text-lg font-black text-gold-600 truncate">
                             ${fmt(c.merchandise_revenue, c.currency_decimals, c.currency_code)}
                         </p>
                     </div>
                     <div class="glass-card rounded-xl p-4 border-b-2 border-rose-400">
-                        <p class="text-[10px] font-bold text-slate-400 uppercase mb-1">Expenses</p>
+                        <p class="text-[10px] font-bold text-slate-400 uppercase mb-1">${window.__('operations_ui.finance.expenses')}</p>
                         <p class="text-lg font-black text-rose-500 truncate">
                             ${fmt(c.total_expenses, c.currency_decimals, c.currency_code)}
                         </p>
                     </div>
                     <div class="glass-card rounded-xl p-4 border-b-2 border-amber-400">
-                        <p class="text-[10px] font-bold text-slate-400 uppercase mb-1">Refunds</p>
+                        <p class="text-[10px] font-bold text-slate-400 uppercase mb-1">${window.__('operations_ui.finance.refunds')}</p>
                         <p class="text-lg font-black text-amber-500 truncate">
                             ${fmt(c.total_refunds, c.currency_decimals, c.currency_code)}
                         </p>
                     </div>
                     <div class="glass-card rounded-xl p-4 border-b-2 border-emerald-400 bg-emerald-50/10">
-                        <p class="text-[10px] font-bold text-emerald-600 uppercase mb-1">True Balance</p>
+                        <p class="text-[10px] font-bold text-emerald-600 uppercase mb-1">${window.__('operations_ui.finance.true_balance')}</p>
                         <p class="text-lg font-black ${c.true_balance >= 0 ? "text-emerald-600" : "text-rose-600"} truncate">
                             ${fmt(c.true_balance, c.currency_decimals, c.currency_code)}
                         </p>
@@ -217,7 +217,7 @@ const OperationsUI = {
 
         if (!Array.isArray(data) || data.length === 0) {
             container.innerHTML =
-                '<p class="text-sm text-slate-500">No data for today.</p>';
+                '<p class="text-sm text-slate-500">' + window.__('operations_ui.finance.no_today_data') + '</p>';
             return;
         }
 

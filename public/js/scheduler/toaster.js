@@ -47,7 +47,7 @@
                 </div>
                 <p class="flex-1 text-sm font-bold ${v.msg} leading-snug mt-0.5">${message}</p>
                 <button data-dismiss
-                        aria-label="Dismiss"
+                        aria-label="${window.__('scheduler_ui.toaster.dismiss')}"
                         class="shrink-0 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors mt-0.5">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/>

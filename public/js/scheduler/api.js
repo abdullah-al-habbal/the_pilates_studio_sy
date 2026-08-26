@@ -46,7 +46,7 @@
 
         if (!response.ok) {
             const err = await response.json().catch(() => ({}));
-            throw { status: response.status, message: err.message || 'Network response was not ok' };
+            throw { status: response.status, message: err.message || window.__('scheduler_ui.api.network_error') };
         }
 
         return response.json();

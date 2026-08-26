@@ -14,7 +14,7 @@ let currentClientPage = 1;
 function humanizeRemainingDays(daysTotal) {
     if (daysTotal == null || isNaN(daysTotal)) return "";
     const total = Math.round(Number(daysTotal));
-    if (total <= 0) return "No days left";
+    if (total <= 0) return window.__('operations_ui.clients.no_days_left');
 
     const months = Math.floor(total / 30);
     const remainingAfterMonths = total % 30;
@@ -22,13 +22,13 @@ function humanizeRemainingDays(daysTotal) {
     const days = remainingAfterMonths % 7;
 
     const parts = [];
-    if (months > 0) parts.push(`${months} month${months !== 1 ? "s" : ""}`);
-    if (weeks > 0) parts.push(`${weeks} week${weeks !== 1 ? "s" : ""}`);
-    if (days > 0) parts.push(`${days} day${days !== 1 ? "s" : ""}`);
+    if (months > 0) parts.push(`${months} ${months !== 1 ? window.__('operations_ui.clients.months') : window.__('operations_ui.clients.month')}`);
+    if (weeks > 0) parts.push(`${weeks} ${weeks !== 1 ? window.__('operations_ui.clients.weeks') : window.__('operations_ui.clients.week')}`);
+    if (days > 0) parts.push(`${days} ${days !== 1 ? window.__('operations_ui.clients.days') : window.__('operations_ui.clients.day')}`);
 
-    if (parts.length === 0) parts.push(`${days} day${days !== 1 ? "s" : ""}`);
+    if (parts.length === 0) parts.push(`${days} ${days !== 1 ? window.__('operations_ui.clients.days') : window.__('operations_ui.clients.day')}`);
 
-    return parts.join(", ") + " left";
+    return parts.join(", ") + " " + window.__('operations_ui.clients.left');
 }
 
 export function applyClientFilter(pillEl) {
@@ -85,7 +85,7 @@ export async function renderClients(search = "", page = 1) {
         if (!result.data || result.data.length === 0) {
             tbody.innerHTML = `
                 <tr>
-                    <td colspan="6" class="text-center py-12 text-slate-400">No clients found.</td>
+                    <td colspan="6" class="text-center py-12 text-slate-400">${window.__('operations_ui.clients.no_clients')}</td>
                 </tr>`;
             return;
         }
@@ -95,9 +95,9 @@ export async function renderClients(search = "", page = 1) {
                 const statusBadge = buildStatusBadge(user.status);
                 const listPackage = user.frozen_package ?? user.active_package;
                 const packageCell = listPackage
-                    ? `<span class="text-sm font-medium">${listPackage.name}${user.frozen_package ? ' <span class="text-sky-600 text-xs">(frozen)</span>' : ''}</span>
+                    ? `<span class="text-sm font-medium">${listPackage.name}${user.frozen_package ? ' <span class="text-sky-600 text-xs">' + window.__('operations_ui.clients.frozen_suffix') + '</span>' : ''}</span>
                    <span class="text-xs text-slate-400 ml-1">(${listPackage.remaining_credits}/${listPackage.total_credits})</span>`
-                    : '<span class="text-xs text-slate-400 italic">No package</span>';
+                    : `<span class="text-xs text-slate-400 italic">${window.__('operations_ui.clients.no_package')}</span>`;
 
                 return `
                 <tr class="border-b border-slate-100 dark:border-slate-800/50 hover:bg-slate-50/50 dark:hover:bg-slate-800/20 transition-colors">
@@ -107,12 +107,12 @@ export async function renderClients(search = "", page = 1) {
                     <td class="px-6 py-4">${packageCell}</td>
                     <td class="px-6 py-4">
                         <span class="text-sm font-medium">${user.sessions_attended}</span>
-                        <span class="text-xs text-slate-400 ml-1">attended</span>
+                        <span class="text-xs text-slate-400 ml-1">${window.__('operations_ui.clients.attended_suffix')}</span>
                     </td>
                     <td class="px-6 py-4 text-right">
                         <button onclick="window.showClientDetails(${user.id})"
                                 class="text-primary-600 hover:text-primary-700 font-bold text-sm btn-single-action">
-                            Details
+                            ${window.__('operations_ui.clients.details_button')}
                         </button>
                     </td>
                 </tr>`;
@@ -126,13 +126,13 @@ export async function renderClients(search = "", page = 1) {
             <tr>
                 <td colspan="6" class="text-center py-12">
                     <div class="flex flex-col items-center gap-2">
-                        <span class="text-rose-500 font-bold">Error loading clients</span>
+                        <span class="text-rose-500 font-bold">${window.__('operations_ui.clients.error_loading')}</span>
                         <p class="text-xs text-slate-400">${e.message}</p>
-                        <button onclick="window.renderClients()" class="text-xs text-primary-600 underline">Try again</button>
+                        <button onclick="window.renderClients()" class="text-xs text-primary-600 underline">${window.__('operations_ui.clients.try_again')}</button>
                     </div>
                 </td>
             </tr>`;
-        OperationsUI.toast("Failed to load clients", "error");
+        OperationsUI.toast(window.__('operations_ui.clients.failed_to_load'), "error");
     }
 }
 
@@ -154,7 +154,7 @@ function renderPagination(meta) {
     const p = meta.pagination;
     container.innerHTML = `
         <span class="text-xs text-slate-500 font-medium">
-            Page ${p.current_page} of ${p.total_pages} (${p.total} clients)
+            ${window.__('operations_ui.clients.pagination_page')} ${p.current_page} ${window.__('operations_ui.clients.pagination_of')} ${p.total_pages} (${p.total} ${window.__('operations_ui.clients.pagination_clients')})
         </span>
         <div class="flex gap-1">
             <button onclick="window.renderClients(document.getElementById('client-search')?.value ?? '', ${p.current_page - 1})"
@@ -168,7 +168,7 @@ function renderPagination(meta) {
 
 export async function showClientDetails(userId) {
     OperationsUI.openModal(
-        "Client Workspace",
+        window.__('operations_ui.clients.modal_title'),
         `
         <div class="space-y-6">
             ${Array(3)
@@ -197,17 +197,17 @@ export async function showClientDetails(userId) {
         const actionButton = isFrozen
             ? `<button onclick="window.handleUnfreeze(${user.frozen_package.id}, ${user.id})"
                        class="bg-primary-600 text-white px-5 py-2.5 rounded-xl font-bold text-sm hover:scale-105 transition-all btn-single-action">
-                       🔓 Unfreeze Package
+                       🔓 ${window.__('operations_ui.clients.unfreeze_button')}
                    </button>`
             : user.active_package?.remaining_credits === 0
               ? `<button onclick="window.showPackageAssignment(${user.id})"
                         class="bg-primary-600 text-white px-5 py-2.5 rounded-xl font-bold text-sm hover:scale-105 transition-all btn-single-action">
-                        + Assign New Package
+                        ${window.__('operations_ui.clients.assign_new_package')}
                    </button>`
               : !user.active_package
                 ? `<button onclick="window.showPackageAssignment(${user.id})"
                           class="bg-primary-600 text-white px-5 py-2.5 rounded-xl font-bold text-sm hover:scale-105 transition-all btn-single-action">
-                          + Assign Package
+                                                    ${window.__('operations_ui.clients.assign_package')}
                       </button>`
                 : "";
 
@@ -219,7 +219,7 @@ export async function showClientDetails(userId) {
                    ${daysLeftText}
                </span>`
                 : currentPackage?.expires_at
-                  ? '<span class="px-2 py-0.5 rounded-lg bg-rose-100 text-rose-700 text-xs font-bold">No days left</span>'
+                  ? `<span class="px-2 py-0.5 rounded-lg bg-rose-100 text-rose-700 text-xs font-bold">${window.__('operations_ui.clients.no_days_left')}</span>`
                   : "";
 
         const snap = user.activity_snapshot ?? {
@@ -237,7 +237,7 @@ export async function showClientDetails(userId) {
                         </div>
                         <div>
                             <h4 class="text-2xl font-bold">${user.fullname}</h4>
-                            <p class="text-slate-500">${user.phone_number} &bull; Member since ${user.member_since ?? "—"}</p>
+                            <p class="text-slate-500">${user.phone_number} &bull; ${window.__('operations_ui.clients.member_since')} ${user.member_since ?? "—"}</p>
                         </div>
                     </div>
                     ${actionButton}
@@ -247,7 +247,7 @@ export async function showClientDetails(userId) {
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <!-- Current Package -->
                     <div class="glass-card rounded-2xl p-6 border-l-4 ${isFrozen ? "border-sky-500" : "border-gold-500"}">
-                        <h5 class="text-xs font-bold text-slate-400 uppercase mb-4">${isFrozen ? "Frozen Package" : "Current Package"}</h5>
+                        <h5 class="text-xs font-bold text-slate-400 uppercase mb-4">${isFrozen ? window.__('operations_ui.clients.frozen_package_label') : window.__('operations_ui.clients.table_current_package')}</h5>
                         ${
                             currentPackage
                                 ? `
@@ -255,18 +255,18 @@ export async function showClientDetails(userId) {
                                 <div class="flex justify-between items-start">
                                     <div>
                                         <p class="text-xl font-bold">${currentPackage.name}</p>
-                                        <p class="text-sm text-slate-500">Source: ${currentPackage.source_type ?? "—"}</p>
+                                        <p class="text-sm text-slate-500">${window.__('operations_ui.clients.source_label')} ${currentPackage.source_type ?? "—"}</p>
                                     </div>
                                     <div class="text-right">
                                         <p class="text-2xl font-black text-primary-600">
                                             ${currentPackage.remaining_credits} / ${currentPackage.total_credits}
                                         </p>
-                                        <p class="text-xs font-bold text-slate-400">CREDITS</p>
+                                        <p class="text-xs font-bold text-slate-400">${window.__('operations_ui.clients.credits_label')}</p>
                                     </div>
                                 </div>
                                 <div class="flex justify-between items-center pt-2">
                                     <span class="text-sm font-medium text-slate-600 dark:text-slate-400">
-                                        Expires: ${currentPackage.expires_at ?? "Never"}
+                                        ${window.__('operations_ui.clients.expires_label')} ${currentPackage.expires_at ?? window.__('operations_ui.clients.never')}
                                     </span>
                                     ${daysBadge}
                                 </div>
@@ -275,18 +275,18 @@ export async function showClientDetails(userId) {
                                         isFrozen
                                             ? `<button onclick="window.handleUnfreeze(${currentPackage.id}, ${user.id})"
                                                 class="flex-1 bg-emerald-100 text-emerald-700 py-2 rounded-lg font-bold text-xs uppercase tracking-wider hover:bg-emerald-200 transition-colors btn-single-action">
-                                                Unfreeze Now
+                                                ${window.__('operations_ui.clients.unfreeze_now')}
                                            </button>`
                                             : currentPackage
                                                     .remaining_credits === 0
                                               ? `<div class="space-y-3 pt-2">
                                                 <div class="rounded-xl bg-amber-50 dark:bg-amber-900/20 border border-amber-200 px-4 py-3 text-sm text-amber-700 dark:text-amber-300">
-                                                    ⚠ This package has been fully used (0 credits remaining).<br>
-                                                    <strong>Assign a new package to continue.</strong>
+                                                    ⚠ ${window.__('operations_ui.clients.fully_used')}<br>
+                                                    <strong>${window.__('operations_ui.clients.assign_new_to_continue')}</strong>
                                                 </div>
                                                 <button onclick="window.showPackageAssignment(${user.id})"
                                                     class="w-full bg-primary-600 text-white py-2.5 rounded-lg font-bold text-sm hover:bg-primary-700 transition-colors btn-single-action">
-                                                    + Assign Package
+                          ${window.__('operations_ui.clients.assign_package')}
                                                 </button>
                                             </div>`
                                               : (() => {
@@ -322,13 +322,13 @@ export async function showClientDetails(userId) {
                                                 <div class="flex flex-1 gap-2">
                                                     <button onclick="window.handleFreeze(${currentPackage.id}, ${user.id})"
                                                         class="flex-1 bg-amber-100 text-amber-700 py-2 rounded-lg font-bold text-xs uppercase tracking-wider hover:bg-amber-200 transition-colors btn-single-action">
-                                                        Freeze
+                                                        ${window.__('operations_ui.clients.freeze_button')}
                                                     </button>
                                                     <button onclick="window.showRefundModal(${currentPackage.id}, ${paidAmountJs}, ${currencyIdJs}, ${user.id})"
                                                         ${refundBtnDisabled ? "disabled" : ""}
                                                         ${refundTitle}
                                                         class="flex-1 bg-rose-100 text-rose-700 py-2 rounded-lg font-bold text-xs uppercase tracking-wider ${refundCls} transition-colors btn-single-action">
-                                                        Refund
+                                                        ${window.__('operations_ui.clients.refund_button')}
                                                     </button>
                                                 </div>`;
                                                 })()
@@ -337,23 +337,23 @@ export async function showClientDetails(userId) {
                             </div>`
                                 : `
                             <div class="flex flex-col items-center py-6 text-center">
-                                <p class="text-slate-400 font-medium">No active package found.</p>
-                                <p class="text-xs text-slate-400 mt-1">Client needs a new subscription.</p>
+                                <p class="text-slate-400 font-medium">${window.__('operations_ui.clients.no_active_package')}</p>
+                                <p class="text-xs text-slate-400 mt-1">${window.__('operations_ui.clients.client_needs_subscription')}</p>
                             </div>`
                         }
                     </div>
 
                     <!-- Activity Snapshot -->
                     <div class="glass-card rounded-2xl p-6">
-                        <h5 class="text-xs font-bold text-slate-400 uppercase mb-4">Activity Snapshot</h5>
+                        <h5 class="text-xs font-bold text-slate-400 uppercase mb-4">${window.__('operations_ui.clients.activity_snapshot')}</h5>
                         <div class="grid grid-cols-2 gap-4">
                             <div class="p-4 bg-slate-50 dark:bg-slate-800 rounded-xl">
                                 <p class="text-2xl font-bold">${snap.total_sessions_attended}</p>
-                                <p class="text-xs text-slate-500 font-medium">Attended</p>
+                                <p class="text-xs text-slate-500 font-medium">${window.__('operations_ui.clients.attended_label')}</p>
                             </div>
                             <div class="p-4 bg-slate-50 dark:bg-slate-800 rounded-xl">
                                 <p class="text-2xl font-bold text-rose-500">${snap.total_sessions_cancelled}</p>
-                                <p class="text-xs text-slate-500 font-medium">Cancelled</p>
+                                <p class="text-xs text-slate-500 font-medium">${window.__('operations_ui.clients.cancelled_label')}</p>
                             </div>
                         </div>
                     </div>
@@ -361,7 +361,7 @@ export async function showClientDetails(userId) {
 
                 <!-- Store Purchases -->
                 <div class="space-y-4">
-                    <h5 class="text-xs font-bold text-slate-400 uppercase">Recent Store Purchases</h5>
+                    <h5 class="text-xs font-bold text-slate-400 uppercase">${window.__('operations_ui.clients.recent_store_purchases')}</h5>
                     <div class="border border-slate-100 dark:border-slate-800 rounded-xl overflow-hidden">
                         ${
                             user.store_purchases &&
@@ -374,7 +374,7 @@ export async function showClientDetails(userId) {
                                             (o) => `
                                         <tr>
                                             <td class="px-4 py-3">${o.item_name}</td>
-                                            <td class="px-4 py-3 text-slate-500">${o.quantity} unit(s)</td>
+                                            <td class="px-4 py-3 text-slate-500">${o.quantity} ${window.__('operations_ui.clients.unit_singular')}</td>
                                             <td class="px-4 py-3 font-bold">${OperationsUI.formatCurrency(o.total_price ?? 0)}</td>
                                             <td class="px-4 py-3 text-right text-xs text-slate-400">${o.ordered_at ?? ""}</td>
                                         </tr>`,
@@ -383,26 +383,26 @@ export async function showClientDetails(userId) {
                                 </tbody>
                             </table>`
                                 : `
-                            <p class="p-6 text-center text-slate-400 italic">No purchase history.</p>`
+                            <p class="p-6 text-center text-slate-400 italic">${window.__('operations_ui.clients.no_purchase_history')}</p>`
                         }
                     </div>
                 </div>
             </div>`;
 
-        OperationsUI.openModal("Client Workspace", content);
+        OperationsUI.openModal(window.__('operations_ui.clients.modal_title'), content);
     } catch (e) {
         console.error("Failed to load client details:", e);
         OperationsUI.openModal(
-            "Client Workspace",
+            window.__('operations_ui.clients.modal_title'),
             `
             <div class="flex flex-col items-center py-16 gap-4">
                 <svg class="w-12 h-12 text-rose-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                           d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
                 </svg>
-                <p class="text-rose-500 font-bold">Failed to load client details</p>
+                <p class="text-rose-500 font-bold">${window.__('operations_ui.clients.client_details_failed')}</p>
                 <p class="text-sm text-slate-400">${e.message}</p>
-                <button onclick="OperationsUI.closeModal()" class="px-4 py-2 bg-slate-100 dark:bg-slate-800 rounded-xl text-sm font-medium">Close</button>
+                <button onclick="OperationsUI.closeModal()" class="px-4 py-2 bg-slate-100 dark:bg-slate-800 rounded-xl text-sm font-medium">${window.__('operations_ui.clients.close_button')}</button>
             </div>`,
         );
     }
@@ -411,7 +411,7 @@ export async function showClientDetails(userId) {
 export function showRefundModal(bookingId, maxAmount, currencyId, userId) {
     if (maxAmount === null || maxAmount === undefined || maxAmount <= 0) {
         OperationsUI.toast(
-            "Refund unavailable: no payment amount was recorded for this booking.",
+            window.__('operations_ui.clients.refund_unavailable'),
             "error",
         );
         return;
@@ -421,7 +421,7 @@ export function showRefundModal(bookingId, maxAmount, currencyId, userId) {
         (c) => c.id == currencyId,
     );
     if (!currency) {
-        OperationsUI.toast("Currency not found for this payment", "error");
+        OperationsUI.toast(window.__('operations_ui.clients.currency_not_found'), "error");
         return;
     }
     const code = currency.code;
@@ -435,34 +435,34 @@ export function showRefundModal(bookingId, maxAmount, currencyId, userId) {
     const content = `
         <div class="space-y-4">
             <p class="text-sm text-slate-600">
-                The original payment was <strong>${amountStr}</strong>.
-                You may issue a partial refund or leave the field empty for a full refund.
+                ${window.__('operations_ui.clients.original_payment_was')} <strong>${amountStr}</strong>.
+                ${window.__('operations_ui.clients.partial_refund_hint')}
             </p>
             <div class="space-y-1">
-                <label class="text-xs font-bold text-slate-500 uppercase">Refund Amount (optional)</label>
+                <label class="text-xs font-bold text-slate-500 uppercase">${window.__('operations_ui.clients.refund_amount_label')}</label>
                 <input
                     type="number"
                     id="refund-amount"
-                    placeholder="Leave empty for full refund (${amountStr})"
+                    placeholder="${window.__('operations_ui.clients.full_refund_hint')} (${amountStr})"
                     min="1"
                     step="1"
                     max="${maxAmount}"
                     class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 rounded-xl border-transparent focus:ring-2 focus:ring-primary-500 outline-none"
                 >
                 <p class="text-xs text-slate-400">
-                    Minimum: 1 &bull; Maximum: ${amountStr}
+                    ${window.__('operations_ui.clients.minimum_label')} 1 &bull; ${window.__('operations_ui.clients.maximum_label')} ${amountStr}
                 </p>
             </div>
             <div class="rounded-xl bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 px-4 py-3 text-xs text-amber-700 dark:text-amber-300">
-                ⚠ Confirming will <strong>cancel the subscription</strong> immediately.
+                ⚠ ${window.__('operations_ui.clients.confirm_cancel_hint')}
             </div>
             <button
                 onclick="window.submitRefund(${bookingId}, ${userId}, ${maxAmount})"
                 class="w-full bg-rose-600 text-white py-3 rounded-xl font-bold text-sm hover:bg-rose-700 transition-colors btn-single-action">
-                Confirm Refund &amp; Cancel Subscription
+                ${window.__('operations_ui.clients.confirm_refund_button')}
             </button>
         </div>`;
-    OperationsUI.openModal("Refund Package", content);
+    OperationsUI.openModal(window.__('operations_ui.clients.refund_modal_title'), content);
 }
 
 export async function submitRefund(bookingId, userId, maxAmount) {
@@ -472,7 +472,7 @@ export async function submitRefund(bookingId, userId, maxAmount) {
     if (rawVal !== "" && rawVal !== null && rawVal !== undefined) {
         if (!/^[0-9]+$/.test(rawVal)) {
             OperationsUI.toast( 
-                "Refund amount must be a whole number in the smallest currency unit.",
+                window.__('operations_ui.clients.refund_not_whole_number'),
                 "error",
             );
             return;
@@ -481,14 +481,14 @@ export async function submitRefund(bookingId, userId, maxAmount) {
         const parsed = parseInt(rawVal, 10);
         if (parsed < 1) {
             OperationsUI.toast(
-                "Refund amount must be a positive whole number.",
+                window.__('operations_ui.clients.refund_not_positive'),
                 "error",
             );
             return;
         }
         if (parsed > maxAmount) {
             OperationsUI.toast(
-                `Refund amount cannot exceed the paid amount (${maxAmount}).`,
+                `${window.__('operations_ui.clients.refund_exceeds_paid')} (${maxAmount}).`,
                 "error",
             );
             return;
@@ -499,7 +499,7 @@ export async function submitRefund(bookingId, userId, maxAmount) {
     try {
         await OperationsAPI.refundBooking(bookingId, amount);
         OperationsUI.toast(
-            "Refund processed and subscription cancelled successfully.",
+            window.__('operations_ui.clients.refund_success'),
             "success",
         );
         OperationsUI.closeModal();

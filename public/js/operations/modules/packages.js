@@ -4,7 +4,7 @@ import { renderClients, showClientDetails } from "./clients.js";
 async function createNewPackage(userId, formData) {
     try {
         await OperationsAPI.createPackage(formData);
-        OperationsUI.toast("Package created!", "success");
+        OperationsUI.toast(window.__('operations_ui.packages.package_created'), "success");
         showPackageAssignment(userId);
     } catch (e) {
         OperationsUI.toast(e.message, "error");
@@ -14,7 +14,7 @@ async function createNewPackage(userId, formData) {
 async function updatePackage(userId, packageId, formData) {
     try {
         await OperationsAPI.updatePackage(packageId, formData);
-        OperationsUI.toast("Package updated!", "success");
+        OperationsUI.toast(window.__('operations_ui.packages.package_updated'), "success");
         showPackageAssignment(userId);
     } catch (e) {
         OperationsUI.toast(e.message, "error");
@@ -23,20 +23,20 @@ async function updatePackage(userId, packageId, formData) {
 
 async function deletePackage(userId, packageId) {
     const result = await Swal.fire({
-        title: "Delete package?",
-        text: "It will no longer be assignable.",
+        title: window.__('operations_ui.packages.delete_title'),
+        text: window.__('operations_ui.packages.delete_text'),
         icon: "warning",
         showCancelButton: true,
         confirmButtonColor: "#e11d48",
         cancelButtonColor: "#64748b",
-        confirmButtonText: "Yes, delete it!",
+        confirmButtonText: window.__('operations_ui.packages.confirm_delete'),
     });
 
     if (!result.isConfirmed) return;
 
     try {
         await OperationsAPI.deletePackage(packageId);
-        OperationsUI.toast("Package deleted.", "success");
+        OperationsUI.toast(window.__('operations_ui.packages.package_deleted'), "success");
         showPackageAssignment(userId);
     } catch (e) {
         OperationsUI.toast(e.message, "error");
@@ -45,7 +45,7 @@ async function deletePackage(userId, packageId) {
 
 export async function showPackageAssignment(userId) {
     OperationsUI.openModal(
-        "Assign New Package",
+        window.__('operations_ui.packages.assign_modal_title'),
         `
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             ${Array(4)
@@ -72,7 +72,7 @@ export async function showPackageAssignment(userId) {
         const content = `
             <div class="mb-4">
                 <button id="show-create-package-form" class="w-full bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 py-2.5 rounded-xl font-medium text-sm transition-colors">
-                    + New Package
+                    ${window.__('operations_ui.packages.new_package_button')}
                 </button>
             </div>
             <div id="package-grid" class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -83,7 +83,7 @@ export async function showPackageAssignment(userId) {
             <!-- Global hidden edit container (will be populated dynamically) -->
             <div id="edit-package-container" class="hidden"></div>`;
 
-        OperationsUI.openModal("Assign New Package", content);
+        OperationsUI.openModal(window.__('operations_ui.packages.assign_modal_title'), content);
         attachGlobalHandlers(userId);
 
         packages.forEach((p) => {
@@ -91,7 +91,7 @@ export async function showPackageAssignment(userId) {
         });
     } catch (e) {
         console.error("Failed to load packages:", e);
-        OperationsUI.toast("Failed to load packages", "error");
+        OperationsUI.toast(window.__('operations_ui.packages.load_failed'), "error");
     }
 }
 
@@ -113,16 +113,16 @@ function renderPackageCard(p, userId) {
             <div class="flex justify-between items-start">
                 <span class="text-lg font-bold text-slate-900 dark:text-white">${p.name}</span>
                 <div class="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <button onclick="window.editPackage(${userId}, ${p.id})" title="Edit" class="p-1 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg">
+                    <button onclick="window.editPackage(${userId}, ${p.id})" title="${window.__('operations_ui.packages.edit_title')}" class="p-1 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
                     </button>
-                    <button onclick="window.deletePackage(${userId}, ${p.id})" title="Delete" class="p-1 hover:bg-rose-100 dark:hover:bg-rose-900/20 rounded-lg text-rose-600">
+                    <button onclick="window.deletePackage(${userId}, ${p.id})" title="${window.__('operations_ui.packages.delete_title_attr')}" class="p-1 hover:bg-rose-100 dark:hover:bg-rose-900/20 rounded-lg text-rose-600">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
                     </button>
                 </div>
             </div>
             <span class="text-sm text-slate-500 mb-4">
-                ${p.total_credits} Sessions &bull; ${p.validity_days ? `${p.validity_days} Days` : "No expiry"}
+                ${p.total_credits} ${window.__('operations_ui.packages.sessions_unit')} &bull; ${p.validity_days ? `${p.validity_days} ${window.__('operations_ui.packages.days_unit')}` : window.__('operations_ui.packages.no_expiry')}
             </span>
             <div class="space-y-3 mt-auto">
                 <div class="flex gap-2">
@@ -132,13 +132,13 @@ function renderPackageCard(p, userId) {
                     </select>
                     <input type="number" id="amount-${p.id}" value="${amount}" min="0" readonly
                            class="flex-1 px-3 py-2 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm outline-none cursor-not-allowed"
-                           placeholder="Amount"
+                           placeholder="${window.__('operations_ui.packages.amount_placeholder')}"
                            data-prices="${pricesJson}"
                            data-base-price="${p.base_price ?? 0}">
                 </div>
                 <button id="assign-btn-${p.id}" onclick="window.handlePackageAssign(${userId}, ${p.id})"
                         class="w-full bg-primary-600 hover:bg-primary-700 text-white font-bold py-2 rounded-xl transition-colors btn-single-action">
-                    Assign Package
+                    ${window.__('operations_ui.packages.assign_button')}
                 </button>
             </div>
         </div>`;
@@ -167,17 +167,17 @@ function renderPackageForm(context, userId, packageData = null) {
     return `
         <div class="space-y-4 p-6 glass-card rounded-2xl border-2 border-primary-500/20">
             <div>
-                <label class="text-xs font-bold text-slate-500 uppercase">Package Name</label>
-                <input id="${context}-pkg-name" value="${defaultName}" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-sm outline-none focus:ring-2 focus:ring-primary-500" placeholder="e.g. Premium 10 Sessions">
+                <label class="text-xs font-bold text-slate-500 uppercase">${window.__('operations_ui.packages.name_label')}</label>
+                <input id="${context}-pkg-name" value="${defaultName}" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-sm outline-none focus:ring-2 focus:ring-primary-500" placeholder="${window.__('operations_ui.packages.name_placeholder')}">
             </div>
             <div class="grid grid-cols-2 gap-4">
                 <div>
-                    <label class="text-xs font-bold text-slate-500 uppercase">Sessions</label>
+                    <label class="text-xs font-bold text-slate-500 uppercase">${window.__('operations_ui.packages.sessions_label')}</label>
                     <input type="number" id="${context}-pkg-credits" min="1" value="${defaultCredits}" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-sm outline-none focus:ring-2 focus:ring-primary-500">
                 </div>
                 <div>
-                    <label class="text-xs font-bold text-slate-500 uppercase">Validity (days, optional)</label>
-                    <input type="number" id="${context}-pkg-validity" min="0" value="${defaultValidity}" placeholder="Leave empty for no expiry" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-sm outline-none focus:ring-2 focus:ring-primary-500">
+                    <label class="text-xs font-bold text-slate-500 uppercase">${window.__('operations_ui.packages.validity_label')}</label>
+                    <input type="number" id="${context}-pkg-validity" min="0" value="${defaultValidity}" placeholder="${window.__('operations_ui.packages.validity_placeholder')}" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-sm outline-none focus:ring-2 focus:ring-primary-500">
                 </div>
             </div>
             <div class="grid grid-cols-2 gap-4">
@@ -188,14 +188,14 @@ function renderPackageForm(context, userId, packageData = null) {
                     </select>
                 </div>
                 <div>
-                    <label class="text-xs font-bold text-slate-500 uppercase">Price</label>
+                    <label class="text-xs font-bold text-slate-500 uppercase">${window.__('operations_ui.packages.price_label')}</label>
                     <input type="number" id="${context}-pkg-price" min="0" value="${defaultAmount}" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-sm outline-none focus:ring-2 focus:ring-primary-500">
                 </div>
             </div>
             <div class="flex gap-2 pt-2">
-                <button id="cancel-${context}-package" class="flex-1 bg-slate-100 dark:bg-slate-800 py-2.5 rounded-xl text-sm font-medium btn-single-action transition-colors">Cancel</button>
+                <button id="cancel-${context}-package" class="flex-1 bg-slate-100 dark:bg-slate-800 py-2.5 rounded-xl text-sm font-medium btn-single-action transition-colors">${window.__('operations_ui.packages.cancel_button')}</button>
                 <button id="submit-${context}-package" class="flex-1 bg-primary-600 hover:bg-primary-700 text-white py-2.5 rounded-xl text-sm font-bold btn-single-action transition-all">
-                    ${isEdit ? "Save Changes" : "Create & Reload"}
+                    ${isEdit ? window.__('operations_ui.packages.save_changes') : window.__('operations_ui.packages.create_reload')}
                 </button>
             </div>
         </div>`;
@@ -244,7 +244,7 @@ function attachGlobalHandlers(userId) {
             };
 
             if (!data.name || !data.total_credits) {
-                OperationsUI.toast("Name and sessions are required.", "error");
+                OperationsUI.toast(window.__('operations_ui.packages.name_sessions_required'), "error");
                 return;
             }
 
@@ -257,7 +257,7 @@ window.editPackage = async function (userId, packageId) {
         const result = await OperationsAPI.getPackages();
         const packages = result.data;
         const pkg = packages.find((p) => p.id == packageId);
-        if (!pkg) throw new Error("Package not found.");
+        if (!pkg) throw new Error(window.__('operations_ui.packages.package_not_found'));
 
         const card = document.getElementById(`card-${packageId}`);
         if (!card) return;
@@ -300,7 +300,7 @@ window.editPackage = async function (userId, packageId) {
 
                 if (!data.name || !data.total_credits) {
                     OperationsUI.toast(
-                        "Name and sessions are required.",
+                        window.__('operations_ui.packages.name_sessions_required'),
                         "error",
                     );
                     return;
@@ -309,7 +309,7 @@ window.editPackage = async function (userId, packageId) {
                 updatePackage(userId, packageId, data);
             });
     } catch (e) {
-        OperationsUI.toast("Could not load package for editing.", "error");
+        OperationsUI.toast(window.__('operations_ui.packages.could_not_load_edit'), "error");
     }
 };
 
@@ -321,13 +321,13 @@ export async function handlePackageAssign(userId, packageId) {
     const currencyId = document.getElementById(`currency-${packageId}`)?.value;
 
     if (!currencyId) {
-        OperationsUI.toast("Please select a currency.", "error");
+        OperationsUI.toast(window.__('operations_ui.store.select_currency'), "error");
         return;
     }
 
     try {
         await OperationsAPI.assignPackage(userId, packageId, currencyId);
-        OperationsUI.toast("Package assigned successfully!", "success");
+        OperationsUI.toast(window.__('operations_ui.packages.assign_success'), "success");
         OperationsUI.closeModal();
         renderClients();
     } catch (e) {
@@ -337,20 +337,20 @@ export async function handlePackageAssign(userId, packageId) {
 
 export async function handleFreeze(bookingId, userId) {
     const result = await Swal.fire({
-        title: "Freeze this package?",
-        text: "Validity calculations will pause until unfrozen.",
+        title: window.__('operations_ui.packages.freeze_title'),
+        text: window.__('operations_ui.packages.freeze_text'),
         icon: "question",
         showCancelButton: true,
         confirmButtonColor: "#f59e0b",
         cancelButtonColor: "#64748b",
-        confirmButtonText: "Yes, freeze it!",
+        confirmButtonText: window.__('operations_ui.packages.confirm_freeze'),
     });
 
     if (!result.isConfirmed) return;
 
     try {
         await OperationsAPI.freezeBooking(bookingId);
-        OperationsUI.toast("Package frozen successfully.", "success");
+        OperationsUI.toast(window.__('operations_ui.packages.package_frozen'), "success");
         showClientDetails(userId);
     } catch (e) {
         OperationsUI.toast(e.message, "error");
@@ -359,20 +359,20 @@ export async function handleFreeze(bookingId, userId) {
 
 export async function handleUnfreeze(bookingId, userId) {
     const result = await Swal.fire({
-        title: "Unfreeze package?",
-        text: "A new replacement booking will be created for the remaining validity.",
+        title: window.__('operations_ui.packages.unfreeze_title'),
+        text: window.__('operations_ui.packages.unfreeze_text'),
         icon: "info",
         showCancelButton: true,
         confirmButtonColor: "#10b981",
         cancelButtonColor: "#64748b",
-        confirmButtonText: "Yes, unfreeze!",
+        confirmButtonText: window.__('operations_ui.packages.confirm_unfreeze'),
     });
 
     if (!result.isConfirmed) return;
 
     try {
         await OperationsAPI.unfreezeBooking(bookingId);
-        OperationsUI.toast("Package unfrozen and resumed.", "success");
+        OperationsUI.toast(window.__('operations_ui.packages.package_unfrozen'), "success");
         showClientDetails(userId);
     } catch (e) {
         OperationsUI.toast(e.message, "error");
@@ -400,7 +400,7 @@ window.updatePackageAmount = function (packageId) {
     if (assignBtn) {
         if (amount === 0) {
             assignBtn.disabled = true;
-            assignBtn.title = "No price available for this currency";
+            assignBtn.title = window.__('operations_ui.packages.no_price_currency');
             assignBtn.classList.add("opacity-50", "cursor-not-allowed");
         } else {
             assignBtn.disabled = false;

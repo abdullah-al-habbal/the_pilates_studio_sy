@@ -8,12 +8,11 @@
         </svg>
     </div>
     <div>
-        <h3 id="error-title" class="text-lg font-bold text-gray-900 dark:text-white">System Error</h3>
-        <p id="error-message" class="text-sm text-gray-500 dark:text-gray-400 mt-1 max-w-xs">We encountered a problem
-            loading sessions. Please try again.</p>
+        <h3 id="error-title" class="text-lg font-bold text-gray-900 dark:text-white">{{ __('dashboard::dashboard.scheduler_ui.error_state.title') }}</h3>
+        <p id="error-message" class="text-sm text-gray-500 dark:text-gray-400 mt-1 max-w-xs">{{ __('dashboard::dashboard.scheduler_ui.error_state.description') }}</p>
     </div>
     <button id="btn-retry"
         class="px-4 py-2 bg-primary-600 text-white rounded-lg text-sm font-semibold hover:bg-primary-500 transition-colors">
-        Retry Connection
+        {{ __('dashboard::dashboard.scheduler_ui.error_state.retry') }}
     </button>
 </div>

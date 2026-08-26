@@ -4,9 +4,9 @@
         class="hidden bg-gray-50 dark:bg-gray-800/40 rounded-2xl p-4 border border-gray-100 dark:border-gray-800">
         <div
             class="flex items-center justify-between text-[10px] font-black uppercase tracking-widest text-gray-500 mb-2">
-            <span>Live Engagement</span>
+            <span>{{ __('dashboard::dashboard.scheduler_ui.modal.live_engagement') }}</span>
             <span class="text-primary-600 dark:text-primary-400"><span id="capacity-reserved">0</span> /
-                <span id="capacity-total">0</span> Reserved</span>
+                <span id="capacity-total">0</span> {{ __('dashboard::dashboard.scheduler_ui.modal.reserved') }}</span>
         </div>
         <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 relative overflow-hidden">
             <div id="capacity-bar-fill" class="h-full rounded-full transition-all duration-1000 ease-out bg-primary-500"
@@ -29,8 +29,8 @@
                     d="M12 8v4m0 4h.01M21 12A9 9 0 113 12a9 9 0 0118 0z" />
             </svg>
         </div>
-        <p class="text-sm font-bold text-red-500">Unable to load reservations</p>
-        <p id="attendees-error-message" class="text-xs text-red-300">Something went wrong while fetching attendees.</p>
+        <p class="text-sm font-bold text-red-500">{{ __('dashboard::dashboard.scheduler_ui.modal.unable_to_load_reservations') }}</p>
+        <p id="attendees-error-message" class="text-xs text-red-300">{{ __('dashboard::dashboard.scheduler_ui.modal.fetch_error') }}</p>
     </div>
 
     <div id="attendees-empty" class="hidden flex flex-col items-center py-16 gap-4 text-gray-400">
@@ -41,8 +41,8 @@
                     d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0" />
             </svg>
         </div>
-        <p class="text-sm font-bold text-gray-500">No reservations yet</p>
-        <p class="text-xs text-gray-400">Attendees will appear here once they book.</p>
+        <p class="text-sm font-bold text-gray-500">{{ __('dashboard::dashboard.scheduler_ui.modal.no_reservations_title') }}</p>
+        <p class="text-xs text-gray-400">{{ __('dashboard::dashboard.scheduler_ui.modal.no_reservations_desc') }}</p>
     </div>
 
     <div id="attendees-list" class="hidden grid gap-3"></div>

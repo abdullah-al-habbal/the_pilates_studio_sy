@@ -46,7 +46,7 @@ function initCategoryDropdown() {
         if (matches.length === 0) {
             const empty = document.createElement('div');
             empty.className = 'px-4 py-2 text-xs text-slate-400 italic';
-            empty.textContent = 'No matches – press Enter to create';
+            empty.textContent = window.__('operations_ui.finance.no_matches');
             dropdown.appendChild(empty);
         } else {
             matches.forEach((category) => {
@@ -112,13 +112,13 @@ export async function renderBalance(date = '') {
         if (container) {
             container.innerHTML = `
                 <div class="glass-card rounded-2xl p-8 text-center space-y-3">
-                    <p class="text-rose-500 font-bold">Failed to load financial data</p>
+                    <p class="text-rose-500 font-bold">${window.__('operations_ui.finance.finance_load_failed')}</p>
                     <p class="text-sm text-slate-400">${e.message}</p>
                     <button onclick="window.renderBalance(document.getElementById('balance-date').value)"
-                        class="text-xs text-primary-600 underline">Try again</button>
+                        class="text-xs text-primary-600 underline">${window.__('operations_ui.approvals.retry')}</button>
                 </div>`;
         }
-        OperationsUI.toast('Failed to load balance', 'error');
+        OperationsUI.toast(window.__('operations_ui.finance.balance_load_failed'), 'error');
     }
 }
 
@@ -163,12 +163,12 @@ export function initFinanceTab() {
 
         if (btn) {
             btn.disabled = true;
-            btn.textContent = 'Saving…';
+            btn.textContent = window.__('operations_ui.finance.saving');
         }
 
         try {
             await OperationsAPI.recordExpense(payload);
-            OperationsUI.toast('Expense recorded!', 'success');
+            OperationsUI.toast(window.__('operations_ui.finance.expense_recorded'), 'success');
             e.target.reset();
             // re-enable category input and hide clear button if present
             const catInput = document.getElementById('category-input');
@@ -185,7 +185,7 @@ export function initFinanceTab() {
         } finally {
             if (btn) {
                 btn.disabled = false;
-                btn.textContent = 'Save Expense';
+                btn.textContent = window.__('operations_ui.finance.save_expense');
             }
         }
     });
@@ -195,19 +195,19 @@ export function initFinanceTab() {
 async function renderExpenseBreakdown(date = '') {
     const container = document.getElementById('expense-breakdown');
     if (!container) return;
-    container.innerHTML = '<p class="text-sm text-slate-400">Loading breakdown...</p>';
+    container.innerHTML = '<p class="text-sm text-slate-400">' + window.__('operations_ui.finance.loading_breakdown') + '</p>';
     try {
         const result = await OperationsAPI.request(`/admin/operations/finance/expenses/breakdown?date=${encodeURIComponent(date)}`);
         const expenses = result.data ?? [];
         if (!expenses.length) {
-            container.innerHTML = '<p class="text-sm text-slate-400 italic text-center py-8">No expenses for this date.</p>';
+            container.innerHTML = '<p class="text-sm text-slate-400 italic text-center py-8">' + window.__('operations_ui.finance.no_expenses_date') + '</p>';
             return;
         }
         const maxAmount = Math.max(...expenses.map(e => e.total_amount));
         const currency = window.OperationsCurrencies?.[0];
         const code = currency?.code;
         if (!code) {
-            container.innerHTML = '<p class="text-sm text-rose-500">Currency not configured. Please contact admin.</p>';
+            container.innerHTML = '<p class="text-sm text-rose-500">' + window.__('operations_ui.finance.currency_not_configured') + '</p>';
             return;
         }
         const fmt = (amount) => new Intl.NumberFormat('en-US', { style: 'currency', currency: code, minimumFractionDigits: 0 }).format(amount);
@@ -230,7 +230,7 @@ async function renderExpenseBreakdown(date = '') {
         container.innerHTML = html;
     } catch (e) {
         console.error('Failed to load expense breakdown', e);
-        container.innerHTML = `<p class="text-sm text-rose-500">Failed to load breakdown. <button onclick="renderExpenseBreakdown('${date}')" class="underline">Retry</button></p>`;
+        container.innerHTML = `<p class="text-sm text-rose-500">${window.__('operations_ui.finance.breakdown_failed')} <button onclick="renderExpenseBreakdown('${date}')" class="underline">${window.__('operations_ui.approvals.retry')}</button></p>`;
     }
 }
 

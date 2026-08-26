@@ -8,7 +8,7 @@
         {{-- Header --}}
         <div class="flex items-center justify-between px-6 py-5 border-b border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-800/30">
             <div>
-                <h3 class="text-lg font-black text-gray-900 dark:text-white tracking-tight">Adjust Capacity</h3>
+                <h3 class="text-lg font-black text-gray-900 dark:text-white tracking-tight">{{ __('dashboard::dashboard.scheduler_ui.capacity_modal.title') }}</h3>
                 <p id="capacity-modal-class-name" class="text-xs font-medium text-gray-500 dark:text-gray-400 mt-0.5"></p>
             </div>
             <button id="btn-close-capacity-modal" type="button"
@@ -24,15 +24,15 @@
             {{-- Info cards --}}
             <div class="grid grid-cols-3 gap-3">
                 <div class="bg-gray-50 dark:bg-gray-800/50 rounded-2xl p-3 text-center border border-gray-100 dark:border-gray-800">
-                    <p class="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1">Current</p>
+                    <p class="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1">{{ __('dashboard::dashboard.scheduler_ui.capacity_modal.current') }}</p>
                     <p id="capacity-modal-current" class="text-xl font-black text-gray-900 dark:text-white">—</p>
                 </div>
                 <div class="bg-gray-50 dark:bg-gray-800/50 rounded-2xl p-3 text-center border border-gray-100 dark:border-gray-800">
-                    <p class="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1">Reserved</p>
+                    <p class="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1">{{ __('dashboard::dashboard.scheduler_ui.modal.reserved') }}</p>
                     <p id="capacity-modal-reserved" class="text-xl font-black text-primary-600 dark:text-primary-400">—</p>
                 </div>
                 <div class="bg-gray-50 dark:bg-gray-800/50 rounded-2xl p-3 text-center border border-gray-100 dark:border-gray-800">
-                    <p class="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1">Minimum</p>
+                    <p class="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1">{{ __('dashboard::dashboard.scheduler_ui.capacity_modal.minimum') }}</p>
                     <p id="capacity-modal-min" class="text-xl font-black text-amber-600 dark:text-amber-400">—</p>
                 </div>
             </div>
@@ -47,7 +47,7 @@
 
             {{-- New capacity input --}}
             <div>
-                <label for="capacity-input" class="block text-xs font-black uppercase tracking-widest text-gray-500 dark:text-gray-400 mb-2">New Capacity</label>
+                <label for="capacity-input" class="block text-xs font-black uppercase tracking-widest text-gray-500 dark:text-gray-400 mb-2">{{ __('dashboard::dashboard.scheduler_ui.capacity_modal.new_capacity_label') }}</label>
                 <input id="capacity-input" type="number" min="1" step="1"
                     class="w-full rounded-xl border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800
                            px-4 py-3 text-lg font-black text-gray-900 dark:text-white text-center
@@ -57,12 +57,12 @@
 
             {{-- Reason textarea --}}
             <div>
-                <label for="capacity-reason" class="block text-xs font-black uppercase tracking-widest text-gray-500 dark:text-gray-400 mb-2">Reason</label>
+                <label for="capacity-reason" class="block text-xs font-black uppercase tracking-widest text-gray-500 dark:text-gray-400 mb-2">{{ __('dashboard::dashboard.scheduler_ui.capacity_modal.reason_label') }}</label>
                 <textarea id="capacity-reason" rows="2" maxlength="500"
                     class="w-full rounded-xl border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800
                            px-4 py-3 text-sm font-medium text-gray-900 dark:text-white
                            focus:border-primary-500 focus:ring-0 focus:outline-none transition-colors resize-none"
-                    placeholder="Why is this capacity change needed?"></textarea>
+                    placeholder="{{ __('dashboard::dashboard.scheduler_ui.capacity_modal.reason_placeholder') }}"></textarea>
             </div>
         </div>
 
@@ -71,14 +71,14 @@
             <button id="btn-cancel-capacity" type="button"
                 class="px-5 py-2.5 rounded-xl text-sm font-bold text-gray-700 dark:text-gray-300
                        hover:bg-gray-100 dark:hover:bg-gray-800 transition-all">
-                Cancel
+                {{ __('dashboard::dashboard.scheduler_ui.capacity_modal.cancel') }}
             </button>
             <button id="btn-save-capacity" type="button"
                 class="px-5 py-2.5 rounded-xl text-sm font-bold text-white
                        bg-primary-600 shadow-lg shadow-primary-500/20
                        hover:bg-primary-500 active:scale-95 transition-all
                        disabled:opacity-40 disabled:cursor-not-allowed disabled:active:scale-100">
-                <span id="btn-save-capacity-text">Save Capacity</span>
+                <span id="btn-save-capacity-text">{{ __('dashboard::dashboard.scheduler_ui.capacity_modal.save') }}</span>
             </button>
         </div>
     </div>

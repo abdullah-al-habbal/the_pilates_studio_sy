@@ -55,14 +55,14 @@ export async function updateGlobalStats(date = '') {
     const container = document.getElementById('quick-stats-currency-list');
     if (!container) return;
 
-    container.innerHTML = '<p class="text-sm text-slate-400">Loading snapshot...</p>';
+    container.innerHTML = '<p class="text-sm text-slate-400">' + window.__('operations_ui.common.initializing') + '</p>';
 
     try {
         const result = await OperationsAPI.getDailyBalance(date, []);
         OperationsUI.renderDailySnapshot(result.data);
     } catch (e) {
         console.error('Failed to load global stats:', e);
-        container.innerHTML = `<p class="text-rose-500 text-sm">Snapshot unavailable. <button onclick="window.updateGlobalStats()" class="underline">Retry</button></p>`;
+        container.innerHTML = `<p class="text-rose-500 text-sm">${window.__('operations_ui.finance.load_failed')} <button onclick="window.updateGlobalStats()" class="underline">${window.__('operations_ui.approvals.retry')}</button></p>`;
     }
 }
 

@@ -61,7 +61,7 @@
                 }
             } catch (err) {
                 console.error('Session Details Error:', err);
-                state.modal.error = err.message || 'Unable to load session attendees.';
+                state.modal.error = err.message || window.__('scheduler_ui.modal_errors.load_attendees_failed');
                 state.modal.bookings = [];
             } finally {
                 state.modal.loading = false;
@@ -98,17 +98,17 @@
             const val = parseInt(c.newCapacity, 10);
 
             if (!val || val < 1) {
-                c.error = 'Capacity must be at least 1.';
+                c.error = window.__('scheduler_ui.modal_errors.capacity_min');
                 render.capacityModal();
                 return;
             }
             if (val < c.minAllowed) {
-                c.error = `Capacity cannot be less than ${c.minAllowed} already reserved booking(s).`;
+                c.error = window.__('scheduler_ui.modal_errors.capacity_reserved').replace(':min', c.minAllowed);
                 render.capacityModal();
                 return;
             }
             if (!c.reason.trim()) {
-                c.error = 'Please provide a reason for this change.';
+                c.error = window.__('scheduler_ui.modal_errors.reason_required');
                 render.capacityModal();
                 return;
             }
@@ -121,18 +121,18 @@
                 const json = await api.postCapacity(state.modal.sessionId, val, c.reason.trim());
                 if (json.success) {
                     state.capacity.show = false;
-                    S.modal.showToast('Capacity updated successfully.');
+                    S.modal.showToast(window.__('scheduler_ui.modal_errors.capacity_updated'));
                     await S.modal.fetchDetails(state.modal.sessionId);
                     await S.events.loadSessions();
                 } else {
-                    c.error = json.message || 'Failed to update capacity.';
+                    c.error = json.message || window.__('scheduler_ui.modal_errors.capacity_update_failed');
                 }
             } catch (err) {
                 console.error('Capacity Update Error:', err);
                 if (err.status === 422 && err.errors) {
                     c.error = Object.values(err.errors).flat().join(' ');
                 } else {
-                    c.error = err.message || 'Failed to update capacity. Please try again.';
+                    c.error = err.message || window.__('scheduler_ui.modal_errors.capacity_update_retry');
                 }
             } finally {
                 c.saving = false;

@@ -18,7 +18,7 @@
             const select = ui.$('input-instructor');
             if (!select) return;
 
-            select.innerHTML = '<option value="">All Instructors</option>' +
+            select.innerHTML = `<option value="">${window.__('scheduler_ui.header.all_instructors')}</option>` +
                 state.instructors.map(i => `
                     <option value="${i.id}" ${state.selectedInstructorId == i.id ? 'selected' : ''}>
                         ${i.name}
@@ -226,7 +226,7 @@
                 const users = S.walkin.filter();
                 if (users.length === 0) {
                     ui.html('walkin-dropdown',
-                        '<div class="px-4 py-3 text-sm text-gray-500 dark:text-gray-400 italic">No members found...</div>');
+                        `<div class="px-4 py-3 text-sm text-gray-500 dark:text-gray-400 italic">${window.__('scheduler_ui.render.no_members_found')}</div>`);
                 } else {
                     ui.html('walkin-dropdown', users.map(u => `
                         <button onclick="Scheduler.walkin.select(${JSON.stringify(u).replace(/"/g, '&quot;')})"
@@ -281,10 +281,10 @@
                 submitBtn.disabled = w.selected.length === 0 || w.submitting;
                 ui.text('btn-submit-existing-text',
                     w.submitting
-                        ? 'Adding...'
+                        ? window.__('scheduler_ui.render.adding')
                         : w.selected.length > 0
-                            ? `Confirm ${w.selected.length} Walk-in${w.selected.length !== 1 ? 's' : ''}`
-                            : 'Select Members'
+                            ? `${window.__('scheduler_ui.render.confirm_prefix')} ${w.selected.length} ${w.selected.length !== 1 ? window.__('scheduler_ui.render.walkin_plural') : window.__('scheduler_ui.render.walkin_singular')}`
+                            : window.__('scheduler_ui.modal.select_members_button')
                 );
             }
         },
@@ -293,7 +293,7 @@
             const w         = state.walkin;
             const submitBtn = ui.$('btn-submit-new');
             if (submitBtn) submitBtn.disabled = w.submitting;
-            ui.text('btn-submit-new-text', w.submitting ? 'Creating...' : 'Register & Add Walk-in');
+            ui.text('btn-submit-new-text', w.submitting ? window.__('scheduler_ui.render.creating') : window.__('scheduler_ui.modal.register_walkin_button'));
 
             const FIELD_MAP = {
                 fullname:     'fullname',
@@ -353,7 +353,7 @@
 
             const saveBtn = ui.$('btn-save-capacity');
             if (saveBtn) saveBtn.disabled = c.saving;
-            ui.text('btn-save-capacity-text', c.saving ? 'Saving...' : 'Save Capacity');
+            ui.text('btn-save-capacity-text', c.saving ? window.__('scheduler_ui.render.creating') : window.__('scheduler_ui.capacity_modal.save'));
         },
     };
 

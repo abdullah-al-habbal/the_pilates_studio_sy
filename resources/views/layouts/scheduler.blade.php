@@ -6,7 +6,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>Scheduler – {{ config('app.name') }}</title>
+    <title>{{ __('dashboard::dashboard.scheduler_ui.header.dashboard') }} – {{ config('app.name') }}</title>
 
     <script>
         if (localStorage.getItem('scheduler-theme') === 'dark') {
@@ -26,6 +26,18 @@
 
     <div id="toaster-stack" class="fixed top-4 right-4 z-[9999] flex flex-col gap-2 pointer-events-none"
         aria-live="polite" aria-atomic="false"></div>
+
+    @php
+        $schedulerTranslations = \Illuminate\Support\Arr::dot(
+            __('dashboard::dashboard.scheduler_ui')
+        );
+    @endphp
+    <script>
+        window.__ = function(key) {
+            var t = @json($schedulerTranslations);
+            return t[key] || key;
+        };
+    </script>
 
     <script src="{{ asset('js/scheduler/state.js') }}"></script>
     <script src="{{ asset('js/scheduler/ui.js') }}"></script>
