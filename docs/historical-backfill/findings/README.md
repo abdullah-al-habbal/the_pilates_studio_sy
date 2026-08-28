@@ -1,4 +1,4 @@
-# Findings A01–A14
+# Findings A01–A15
 
 Each finding was verified against code on branch `fix/booking-overbooking` (2026-08-27).
 A finding records **what the code does**. It never records a ruling — see [`../decisions/`](../decisions/README.md).
@@ -19,3 +19,4 @@ A finding records **what the code does**. It never records a ruling — see [`..
 | [A12](A12-test-coverage.md) | Bookings have near-zero test coverage | Medium | Accepted |
 | [A13](A13-revenue-contamination.md) | Backfill contaminates today's cash reconciliation | **Highest** | Decided — [D-A13](../decisions/D-A13-global-purchased-at-adoption.md) |
 | [A14](A14-sessions-never-completed.md) | `class_sessions` never transition to `completed` | Medium | Accepted |
+| [A15](A15-booking-session-business-date.md) | `booking_sessions` had no business date either | Medium | Decided — [D-A15](../decisions/D-A15-booking-sessions-business-date.md) |

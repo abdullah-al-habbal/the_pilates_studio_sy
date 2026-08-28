@@ -44,6 +44,7 @@ queries.
 | [D-A03](../decisions/D-A03-exchange-rate-override.md) — exchange-rate override | Phase 2, 4, 5, 6, 7 |
 | [D-A05](../decisions/D-A05-purchased-at-column.md) — `purchased_at` column | Phase 1, 2, 7 |
 | [D-A13](../decisions/D-A13-global-purchased-at-adoption.md) — global `purchased_at` business date | Phase 1, 1.5, 2, 7 |
+| [D-A15](../decisions/D-A15-booking-sessions-business-date.md) — `booking_sessions` business date | Phase 1.5, 2, 7 |
 
 All decisions are closed. The plan is ready for implementation.
 

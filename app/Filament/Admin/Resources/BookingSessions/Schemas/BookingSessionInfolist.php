@@ -84,9 +84,10 @@ class BookingSessionInfolist
 
                                     TextEntry::make('classSession.start_time')
                                         ->label(__('dashboard.resources.booking_sessions.fields.time'))
-                                        ->state(fn ($record) => $record->classSession ?
-                                            substr($record->classSession->start_time, 0, 5).' - '.
-                                            substr($record->classSession->end_time, 0, 5) : '—'
+                                        ->state(
+                                            fn ($record) => $record->classSession ?
+                                            substr($record->classSession->start_time, 0, 5) . ' - ' .
+                                            substr($record->classSession->end_time, 0, 5) : '—',
                                         )
                                         ->icon('heroicon-o-clock'),
 

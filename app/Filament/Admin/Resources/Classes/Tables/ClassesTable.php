@@ -48,7 +48,7 @@ class ClassesTable
                     ->limit(30)
                     ->tooltip(fn ($record) => $record->title)
                     ->formatStateUsing(
-                        fn ($state, $record) => $record->getTranslation('title', app()->getLocale())
+                        fn ($state, $record) => $record->getTranslation('title', app()->getLocale()),
                     ),
 
                 TextColumn::make('instructor.name')
@@ -61,7 +61,7 @@ class ClassesTable
                             Instructor::select('name')
                                 ->whereColumn('instructors.id', 'classes.instructor_id')
                                 ->limit(1),
-                            $direction
+                            $direction,
                         );
                     })
                     ->icon('heroicon-o-user')
@@ -95,12 +95,13 @@ class ClassesTable
                     ->label(__('dashboard.resources.classes.fields.schedule_mode'))
                     ->badge()
                     ->color(fn (Classes $record) => $record->hasWeekdaySchedule() ? 'info' : 'gray')
-                    ->state(fn (Classes $record) => $record->hasWeekdaySchedule()
+                    ->state(
+                        fn (Classes $record) => $record->hasWeekdaySchedule()
                         ? collect($record->weekdayCases())
                             ->map(fn (WeekdayEnum $day) => Str::substr($day->getLabel(), 0, 3))
                             ->implode(', ')
                         : ($record->recurrencePattern?->getTranslation('label', app()->getLocale())
-                            ?? __('dashboard.resources.classes.placeholders.no_recurrence'))
+                            ?? __('dashboard.resources.classes.placeholders.no_recurrence')),
                     )
                     ->toggleable(),
 

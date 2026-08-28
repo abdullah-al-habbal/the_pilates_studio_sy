@@ -80,7 +80,7 @@ class ClassesForm
                                 ->createOptionAction(
                                     fn ($action) => $action
                                         ->modalHeading(__('dashboard.resources.classes.actions.create_instructor'))
-                                        ->modalWidth('md')
+                                        ->modalWidth('md'),
                                 )
                                 ->createOptionUsing(fn (array $data): int => self::createInstructor($data))
                                 ->helperText(__('dashboard.resources.classes.helpers.instructor'))
@@ -147,7 +147,7 @@ class ClassesForm
                             ->afterStateHydrated(function (ToggleButtons $component, ?Classes $record): void {
                                 if ($record?->exists) {
                                     $component->state(
-                                        $record->hasWeekdaySchedule() ? self::MODE_WEEKDAYS : self::MODE_INTERVAL
+                                        $record->hasWeekdaySchedule() ? self::MODE_WEEKDAYS : self::MODE_INTERVAL,
                                     );
                                 }
                             })
@@ -254,9 +254,10 @@ class ClassesForm
                                 ->minValue(1)
                                 ->maxValue(999)
                                 ->default(20)
-                                ->helperText(fn (?Classes $record) => $record?->exists && $record->hasBookedSessions()
+                                ->helperText(
+                                    fn (?Classes $record) => $record?->exists && $record->hasBookedSessions()
                                     ? __('Reducing capacity below current reservations is blocked by the system.')
-                                    : __(key: 'dashboard.resources.classes.helpers.total_spots')
+                                    : __(key: 'dashboard.resources.classes.helpers.total_spots'),
                                 )
                                 ->suffix('spots')
                                 ->columnSpan(1),
@@ -336,6 +337,7 @@ class ClassesForm
      * Nulling the unused column explicitly is what makes mode switching work.
      *
      * @param  array<string, mixed>  $data
+     *
      * @return array<string, mixed>
      */
     public static function normaliseScheduleMode(array $data): array

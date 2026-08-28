@@ -176,6 +176,32 @@ class BookingEloquentRepository
         return Booking::create($data);
     }
 
+    /**
+     * The booking, if any, currently occupying `active_user_id` for this user.
+     *
+     * The predicate is deliberately `status = active AND remaining_credits > 0` with **no expiry
+     * clause**, because that is exactly the generated column behind the
+     * `unique_active_booking_per_user` unique index. `existsActiveWithCredits()` below also filters
+     * on expiry and therefore misses stale rows — bookings past `expires_at` that still say
+     * `active`, which are routine since nothing expires them on a schedule. Those rows still
+     * occupy the index, so a guard built on the narrower predicate lets the caller through and
+     * then dies on a raw 1062.
+     *
+     * The package is eager-loaded so one query serves both the conflict check and the placeholders
+     * in the rejection message.
+     *
+     * @see docs/historical-backfill/decisions/D-A01-active-booking-conflict.md §C1
+     */
+    public function findBlockingActiveBooking(int $userId): ?Booking
+    {
+        return Booking::query()
+            ->with('package')
+            ->where('user_id', $userId)
+            ->where('status', BookingStatusEnum::ACTIVE)
+            ->where('remaining_credits', '>', 0)
+            ->first();
+    }
+
     public function existsActiveWithCredits(int $userId): bool
     {
         return Booking::where('user_id', $userId)

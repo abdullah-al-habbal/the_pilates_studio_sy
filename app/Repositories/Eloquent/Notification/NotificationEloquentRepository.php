@@ -16,7 +16,9 @@ class NotificationEloquentRepository
     {
         return $user->notifications()
             ->latest()
-            ->when(isset($filters['unread']), fn (Builder $query) => $filters['unread'] ? $query->whereNull('read_at') : $query->whereNotNull('read_at')
+            ->when(
+                isset($filters['unread']),
+                fn (Builder $query) => $filters['unread'] ? $query->whereNull('read_at') : $query->whereNotNull('read_at'),
             )
             ->paginate(20);
     }

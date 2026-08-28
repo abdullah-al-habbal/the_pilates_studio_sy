@@ -10,6 +10,7 @@ restate the evidence.
 | [D-A03](D-A03-exchange-rate-override.md) | Exchange rate — optional admin override, current-rate default | PRD §8.1 / §10 | 2026-08-27 | **Accepted** |
 | [D-A05](D-A05-purchased-at-column.md) | Add the `purchased_at` column | [A05](../findings/A05-purchased-at-column.md) | 2026-08-27 | **Accepted** |
 | [D-A13](D-A13-global-purchased-at-adoption.md) | `purchased_at` becomes the project-wide business date | [A13](../findings/A13-revenue-contamination.md) | 2026-08-27 | **Accepted** |
+| [D-A15](D-A15-booking-sessions-business-date.md) | `class_sessions.date` is the business date for `booking_sessions` | [A15](../findings/A15-booking-session-business-date.md) | 2026-08-28 | **Accepted** |
 
 ## Pending
 

@@ -250,6 +250,16 @@ return [
         ],
     ],
     'operations_ui' => [
+        'historical_backfill' => [
+            'error_package_not_found' => 'Package not found.',
+            'error_null_validity_package' => 'The selected package has no expiry date (unlimited validity). Historical backfill is only allowed for packages with a defined validity period. Please select a different package or contact technical support.',
+            'error_purchase_date_in_future' => 'The purchase date cannot be in the future.',
+            'error_session_overlap' => 'A session cannot be marked both attended and missed.',
+            'error_credit_overflow' => 'You selected :selected sessions, but this package only has :total credits.',
+            'error_session_out_of_range' => 'One or more selected sessions fall outside the package validity window, or have been cancelled.',
+            'error_duplicate_session' => 'This client is already recorded in session #:session_id under another booking.',
+            'error_active_booking_conflict' => 'Cannot add historical booking for :client_name because they currently have an active booking (:package_name — :remaining_credits sessions remaining). Available options: complete or refund the current booking first; enter historical data with zero remaining credits (attended + missed = total); or contact technical support if this is an exceptional case.',
+        ],
         'sidebar' => [
             'navigation' => 'Navigation',
             'clients_packages' => 'Clients & Packages',

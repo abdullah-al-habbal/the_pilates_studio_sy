@@ -41,10 +41,11 @@ historical client data from paper files into the system.
 | A12 | Bookings have near-zero test coverage | Medium | Accepted |
 | A13 | Backfill contaminates today's cash reconciliation | **Highest** | **Decided** — [D-A13](decisions/D-A13-global-purchased-at-adoption.md) |
 | A14 | `class_sessions` never reach `completed` | Medium | Accepted |
+| A15 | `booking_sessions` had no business date either | Medium | **Decided** — [D-A15](decisions/D-A15-booking-sessions-business-date.md) |
 
 ## Decisions
 
-All five are closed. See [`decisions/`](decisions/README.md).
+All six are closed. See [`decisions/`](decisions/README.md).
 
 | ID | Ruling |
 |---|---|
@@ -53,6 +54,7 @@ All five are closed. See [`decisions/`](decisions/README.md).
 | [D-A03](decisions/D-A03-exchange-rate-override.md) | Exchange rate — optional admin override, current-rate default |
 | [D-A05](decisions/D-A05-purchased-at-column.md) | Add the `purchased_at` column |
 | [D-A13](decisions/D-A13-global-purchased-at-adoption.md) | `purchased_at` becomes the project-wide business date |
+| [D-A15](decisions/D-A15-booking-sessions-business-date.md) | `class_sessions.date` is the business date for `booking_sessions` |
 
 > **D-A13 reaches beyond this feature.** It changes the date semantics of every financial query
 > in the project and migrates existing data. Read it before touching Phase 1 or Phase 1.5.

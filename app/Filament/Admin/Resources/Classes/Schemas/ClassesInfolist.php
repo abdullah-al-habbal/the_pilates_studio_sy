@@ -23,7 +23,6 @@ class ClassesInfolist
         $locale = app()->getLocale();
 
         return $schema->components([
-
             Grid::make(2)
                 ->schema([
                     Section::make(__('dashboard.resources.classes.sections.class_overview'))
@@ -62,7 +61,7 @@ class ClassesInfolist
                                     ->icon('heroicon-o-user-circle')
                                     ->iconPosition(IconPosition::Before)
                                     ->formatStateUsing(
-                                        fn ($state, $record) => $record->instructor?->getTranslation('name', $locale) ?? '—'
+                                        fn ($state, $record) => $record->instructor?->getTranslation('name', $locale) ?? '—',
                                     ),
 
                                 TextEntry::make('instructor.email')
@@ -106,7 +105,7 @@ class ClassesInfolist
 
                     TextEntry::make('duration_minutes')
                         ->label(__('dashboard.resources.classes.fields.duration'))
-                        ->suffix(' '.__('dashboard.resources.classes.units.minutes'))
+                        ->suffix(' ' . __('dashboard.resources.classes.units.minutes'))
                         ->icon('heroicon-o-arrow-path')
                         ->iconPosition(IconPosition::Before)
                         ->color('info')
@@ -125,9 +124,10 @@ class ClassesInfolist
                         ->badge()
                         ->color('info')
                         ->visible(fn ($record) => $record->hasWeekdaySchedule())
-                        ->state(fn ($record) => collect($record->weekdayCases())
-                            ->map(fn (WeekdayEnum $day) => $day->getLabel())
-                            ->all()
+                        ->state(
+                            fn ($record) => collect($record->weekdayCases())
+                                ->map(fn (WeekdayEnum $day) => $day->getLabel())
+                                ->all(),
                         ),
 
                     IconEntry::make('recurrence_pattern_id')
@@ -138,7 +138,7 @@ class ClassesInfolist
                         ->state(
                             fn ($record) => $record->recurrencePattern?->getTranslation('label', $locale) ??
                             $record->recurrencePattern?->name ??
-                            __('dashboard.resources.classes.placeholders.no_recurrence')
+                            __('dashboard.resources.classes.placeholders.no_recurrence'),
                         ),
                 ]),
 

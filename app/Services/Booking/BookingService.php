@@ -21,7 +21,7 @@ use Illuminate\Validation\ValidationException;
 class BookingService
 {
     public function __construct(
-        private readonly BookingEloquentRepository $repository
+        private readonly BookingEloquentRepository $repository,
     ) {}
 
     public function userHasActiveCreditBooking(User $user): bool
@@ -75,6 +75,7 @@ class BookingService
                 'remaining_credits' => $package->total_credits,
                 'status' => BookingStatusEnum::ACTIVE->value,
                 'expires_at' => $expiresAt,
+                'purchased_at' => now(),
                 'currency_id' => $currencyId,
                 'paid_amount' => $paidAmount,
                 'exchange_rate_snapshot' => $exchangeRateSnapshot,
@@ -82,7 +83,7 @@ class BookingService
         });
     }
 
-    public function adjustCredits(Booking $booking, int $amount, string $reason = 'Manual adjustment'): void
+    public function adjustCredits(Booking $booking, int $amount): void
     {
         DB::transaction(function () use ($booking, $amount): void {
             $locked = $this->find($booking->id, lockForUpdate: true);
