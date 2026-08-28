@@ -4,18 +4,31 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Carbon;
+use Spatie\Translatable\Attributes\Translatable;
 use Spatie\Translatable\HasTranslations;
 
+/**
+ * @property int $id
+ * @property int $user_id
+ * @property string $type
+ * @property string $title
+ * @property string $message
+ * @property array $data
+ * @property string|null $image
+ * @property Carbon|null $read_at
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
+ */
+#[Fillable(['user_id', 'type', 'title', 'message', 'data', 'image', 'read_at'])]
+#[Translatable(['title', 'message'])]
 class AppNotification extends Model
 {
     use HasFactory, HasTranslations;
-
-    public array $translatable = ['title', 'message'];
-
-    protected $fillable = ['user_id', 'type', 'title', 'message', 'data', 'image', 'read_at'];
 
     protected function casts(): array
     {

@@ -24,8 +24,13 @@ return new class extends Migration
                 ->restrictOnDelete();
 
             $table->foreignId('recurrence_pattern_id')
+                ->nullable()
                 ->constrained('recurrence_patterns')
                 ->restrictOnDelete();
+
+            $table->json('weekdays')
+                ->nullable()
+                ->comment('Weekday-mode schedule, e.g. ["sunday","wednesday"]. Null when using recurrence_pattern_id.');
 
             $table->json('title');
             $table->json('about')->nullable();

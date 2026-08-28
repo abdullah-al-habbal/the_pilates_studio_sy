@@ -6,7 +6,11 @@ namespace App\Models;
 
 use App\Enums\ClassStatusEnum;
 use App\Enums\WeekdayEnum;
+use App\Observers\ClassesObserver;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Attributes\ObservedBy;
+use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -16,32 +20,32 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Spatie\Translatable\Attributes\Translatable;
 use Spatie\Translatable\HasTranslations;
 
 /**
  * @method string getTranslation(string $key, string $locale = null)
  * @method void setTranslation(string $key, string $locale, string $value)
  */
+#[Fillable([
+    'instructor_id',
+    'class_category_id',
+    'recurrence_pattern_id',
+    'weekdays',
+    'title',
+    'about',
+    'start_time',
+    'end_time',
+    'start_date',
+    'end_date',
+    'total_spots',
+    'status',
+])]
+#[ObservedBy([ClassesObserver::class])]
+#[Translatable(['title', 'about'])]
 class Classes extends Model
 {
     use HasFactory, HasTranslations, SoftDeletes;
-
-    public array $translatable = ['title', 'about'];
-
-    protected $fillable = [
-        'instructor_id',
-        'class_category_id',
-        'recurrence_pattern_id',
-        'weekdays',
-        'title',
-        'about',
-        'start_time',
-        'end_time',
-        'start_date',
-        'end_date',
-        'total_spots',
-        'status',
-    ];
 
     protected function casts(): array
     {
@@ -59,11 +63,6 @@ class Classes extends Model
         return $this->status === ClassStatusEnum::ACTIVE;
     }
 
-    /**
-     * A class is scheduled either by explicit weekdays or by a recurrence
-     * pattern's interval. Exactly one mode is set; see
-     * ClassScheduleValidationService::assertExactlyOneMode().
-     */
     public function hasWeekdaySchedule(): bool
     {
         return $this->weekdayCases() !== [];
@@ -139,7 +138,8 @@ class Classes extends Model
             ->exists();
     }
 
-    public function scopeDashboardSearch(Builder $query, string $term, array $locales = ['en', 'ar']): Builder
+    #[Scope]
+    public function dashboardSearch(Builder $query, string $term, array $locales = ['en', 'ar']): Builder
     {
         $term = trim($term);
         $like = '%'.addcslashes($term, '\\%_').'%';

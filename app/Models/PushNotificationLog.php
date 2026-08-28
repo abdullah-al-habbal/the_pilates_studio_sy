@@ -4,20 +4,20 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 
+#[Fillable([
+    'notifiable_type',
+    'notifiable_id',
+    'notification_class',
+    'data',
+    'channel',
+    'sent_at',
+])]
 class PushNotificationLog extends Model
 {
-    protected $fillable = [
-        'notifiable_type',
-        'notifiable_id',
-        'notification_class',
-        'data',
-        'channel',
-        'sent_at',
-    ];
-
     protected function casts(): array
     {
         return [

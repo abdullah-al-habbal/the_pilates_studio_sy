@@ -7,16 +7,16 @@ namespace App\Console\Commands;
 use App\Enums\ClassSessionStatusEnum;
 use App\Models\ClassSession;
 use App\Notifications\SessionReminderNotification;
+use Illuminate\Console\Attributes\Description;
+use Illuminate\Console\Attributes\Signature;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Log;
 use Throwable;
 
+#[Signature('sessions:send-reminders')]
+#[Description('Send reminders for class sessions starting within the next hour')]
 final class SendSessionRemindersCommand extends Command
 {
-    protected $signature = 'sessions:send-reminders';
-
-    protected $description = 'Send reminders for class sessions starting within the next hour';
-
     public function handle(): int
     {
         Log::info('Session reminder command started');

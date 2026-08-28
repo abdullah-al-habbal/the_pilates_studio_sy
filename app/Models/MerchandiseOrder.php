@@ -5,7 +5,11 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Observers\MerchandiseOrderObserver;
 use App\Services\Currency\PricingService;
+use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Attributes\ObservedBy;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -13,22 +17,22 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 /**
  * @property-read float|null $exchange_rate_snapshot Immutable rate at transaction time for audit accuracy
  */
+#[Fillable([
+    'merchandise_id',
+    'quantity',
+    'customer_id',
+    'created_by',
+    'ordered_at',
+    'currency_id',
+    'paid_amount',
+    'exchange_rate_snapshot',
+    'merchandise_name_snapshot',
+    'merchandise_unit_price_snapshot',
+])]
+#[ObservedBy([MerchandiseOrderObserver::class])]
 class MerchandiseOrder extends Model
 {
     use HasFactory;
-
-    protected $fillable = [
-        'merchandise_id',
-        'quantity',
-        'customer_id',
-        'created_by',
-        'ordered_at',
-        'currency_id',
-        'paid_amount',
-        'exchange_rate_snapshot',
-        'merchandise_name_snapshot',
-        'merchandise_unit_price_snapshot',
-    ];
 
     protected function casts(): array
     {
@@ -42,25 +46,29 @@ class MerchandiseOrder extends Model
         ];
     }
 
-    public function getTotalPriceAttribute(): int
+    protected function totalPrice(): Attribute
     {
-        if ($this->paid_amount !== null) {
-            return $this->paid_amount;
-        }
+        return Attribute::make(
+            get: function (): int {
+                if ($this->paid_amount !== null) {
+                    return $this->paid_amount;
+                }
 
-        if ($this->merchandise_unit_price_snapshot !== null) {
-            return $this->merchandise_unit_price_snapshot * $this->quantity;
-        }
+                if ($this->merchandise_unit_price_snapshot !== null) {
+                    return $this->merchandise_unit_price_snapshot * $this->quantity;
+                }
 
-        if ($this->merchandise) {
-            $pricing = app(PricingService::class);
-            $basePrice = $pricing->getBasePrice($this->merchandise);
-            if ($basePrice !== null && $this->currency_id) {
-                return $pricing->calculateAmount($basePrice * $this->quantity, $this->currency_id);
-            }
-        }
+                if ($this->merchandise) {
+                    $pricing = app(PricingService::class);
+                    $basePrice = $pricing->getBasePrice($this->merchandise);
+                    if ($basePrice !== null && $this->currency_id) {
+                        return $pricing->calculateAmount($basePrice * $this->quantity, $this->currency_id);
+                    }
+                }
 
-        return 0;
+                return 0;
+            },
+        );
     }
 
     public function merchandise(): BelongsTo

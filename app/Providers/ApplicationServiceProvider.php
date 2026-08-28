@@ -4,12 +4,10 @@
 
 namespace App\Providers;
 
-use App\Models\BookingSession;
 use App\Models\Classes;
 use App\Models\ClassSession;
 use App\Models\Package;
 use App\Models\Testimonial;
-use App\Policies\BookingSessionPolicy;
 use App\Repositories\Eloquent\AppSetting\AppSettingEloquentRepository;
 use App\Repositories\Eloquent\Booking\BookingEloquentRepository;
 use App\Repositories\Eloquent\BookingSession\BookingSessionEloquentRepository;
@@ -41,7 +39,6 @@ use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\URL;
@@ -51,10 +48,6 @@ use Illuminate\Validation\Rules\Password;
 
 class ApplicationServiceProvider extends ServiceProvider
 {
-    protected array $policies = [
-        BookingSession::class => BookingSessionPolicy::class,
-    ];
-
     public function register(): void
     {
         $this->app->bind(ClassesEloquentRepository::class, function ($app) {
@@ -104,8 +97,6 @@ class ApplicationServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
-        $this->registerPolicies();
-
         LanguageSwitch::configureUsing(function (LanguageSwitch $switch) {
             $switch
                 ->locales(['ar', 'en'])
@@ -130,13 +121,6 @@ class ApplicationServiceProvider extends ServiceProvider
                 'defaultCurrency' => $currencyService->getDefaultCurrency(),
             ]);
         });
-    }
-
-    protected function registerPolicies(): void
-    {
-        foreach ($this->policies as $model => $policy) {
-            Gate::policy($model, $policy);
-        }
     }
 
     protected function configureModelProtections(): void

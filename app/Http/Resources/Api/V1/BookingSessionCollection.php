@@ -7,12 +7,12 @@ declare(strict_types=1);
 namespace App\Http\Resources\Api\V1;
 
 use Illuminate\Http\Request;
+use Illuminate\Http\Resources\Attributes\Collects;
 use Illuminate\Http\Resources\Json\ResourceCollection;
 
+#[Collects(BookingSessionResource::class)]
 class BookingSessionCollection extends ResourceCollection
 {
-    public $collects = BookingSessionResource::class;
-
     public function toArray(Request $request): array
     {
         return [

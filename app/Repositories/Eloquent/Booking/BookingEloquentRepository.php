@@ -23,8 +23,8 @@ class BookingEloquentRepository
             ->selectRaw('currency_id, SUM(paid_amount) as total, COUNT(*) as count')
             ->whereNotNull('paid_amount')
             ->when($creatorId, fn ($q) => $q->where('created_by', $creatorId))
-            ->when($startDate, fn ($q) => $q->where('created_at', '>=', $startDate))
-            ->when($endDate, fn ($q) => $q->where('created_at', '<=', $endDate))
+            ->when($startDate, fn ($q) => $q->where('purchased_at', '>=', $startDate))
+            ->when($endDate, fn ($q) => $q->where('purchased_at', '<=', $endDate))
             ->groupBy('currency_id')
             ->get()
             ->map(fn ($item) => (object) [
@@ -49,8 +49,8 @@ class BookingEloquentRepository
             ->whereNotNull('paid_amount')
             ->whereNotNull('exchange_rate_snapshot')
             ->when($creatorId, fn ($q) => $q->where('created_by', $creatorId))
-            ->when($startDate, fn ($q) => $q->where('created_at', '>=', $startDate))
-            ->when($endDate, fn ($q) => $q->where('created_at', '<=', $endDate))
+            ->when($startDate, fn ($q) => $q->where('purchased_at', '>=', $startDate))
+            ->when($endDate, fn ($q) => $q->where('purchased_at', '<=', $endDate))
             ->groupBy('currency_id')
             ->get()
             ->map(fn ($item) => (object) [
@@ -65,8 +65,8 @@ class BookingEloquentRepository
     {
         return (int) Booking::query()
             ->when($creatorId, fn ($q) => $q->where('created_by', $creatorId))
-            ->when($startDate, fn ($q) => $q->where('created_at', '>=', $startDate))
-            ->when($endDate, fn ($q) => $q->where('created_at', '<=', $endDate))
+            ->when($startDate, fn ($q) => $q->where('purchased_at', '>=', $startDate))
+            ->when($endDate, fn ($q) => $q->where('purchased_at', '<=', $endDate))
             ->count();
     }
 
@@ -219,8 +219,8 @@ class BookingEloquentRepository
     ): int {
         return (int) Booking::query()
             ->where('currency_id', $currencyId)
-            ->when($startDate, fn ($q) => $q->where('created_at', '>=', $startDate))
-            ->when($endDate, fn ($q) => $q->where('created_at', '<=', $endDate))
+            ->when($startDate, fn ($q) => $q->where('purchased_at', '>=', $startDate))
+            ->when($endDate, fn ($q) => $q->where('purchased_at', '<=', $endDate))
             ->sum('paid_amount');
     }
 }

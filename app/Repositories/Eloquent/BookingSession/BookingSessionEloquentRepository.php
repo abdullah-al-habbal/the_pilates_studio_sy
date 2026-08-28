@@ -196,9 +196,12 @@ class BookingSessionEloquentRepository
 
     public function countMissedForMonth(int $month, int $year): int
     {
-        return $this->model->where('attendance_status', AttendanceStatusEnum::MISSED)
-            ->whereMonth('created_at', $month)
-            ->whereYear('created_at', $year)
+        return $this->model->query()
+            ->join('class_sessions', 'booking_sessions.class_session_id', '=', 'class_sessions.id')
+            ->where('booking_sessions.attendance_status', AttendanceStatusEnum::MISSED)
+            ->whereNull('class_sessions.deleted_at')
+            ->whereMonth('class_sessions.date', $month)
+            ->whereYear('class_sessions.date', $year)
             ->count();
     }
 
@@ -211,11 +214,14 @@ class BookingSessionEloquentRepository
     {
         $startDate = now()->subDays($days)->startOfDay();
 
-        return $this->model->where('attendance_status', AttendanceStatusEnum::ATTENDED)
-            ->where('created_at', '>=', $startDate)
-            ->selectRaw('DATE(created_at) as date, COUNT(*) as count')
-            ->groupBy('date')
-            ->orderBy('date')
+        return $this->model->query()
+            ->join('class_sessions', 'booking_sessions.class_session_id', '=', 'class_sessions.id')
+            ->where('booking_sessions.attendance_status', AttendanceStatusEnum::ATTENDED)
+            ->whereNull('class_sessions.deleted_at')
+            ->whereDate('class_sessions.date', '>=', $startDate)
+            ->selectRaw('class_sessions.date as date, COUNT(*) as count')
+            ->groupBy('class_sessions.date')
+            ->orderBy('class_sessions.date')
             ->get()
             ->pluck('count', 'date');
     }

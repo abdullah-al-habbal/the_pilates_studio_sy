@@ -6,29 +6,32 @@ namespace App\Models;
 
 use App\Enums\AttendanceStatusEnum;
 use App\Enums\BookingSessionStatusEnum;
+use App\Policies\BookingSessionPolicy;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Attributes\UsePolicy;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+#[Fillable([
+    'booking_id',
+    'class_session_id',
+    'status',
+    'cancelled_at',
+    'cancellation_reason',
+    'cancelled_by_user_id',
+    'cancelled_by_admin_id',
+    'attendance_status',
+    'attended_at',
+    'attendance_updated_by',
+    'cancellation_type',
+])]
+#[UsePolicy(BookingSessionPolicy::class)]
 class BookingSession extends Model
 {
     use HasFactory;
-
-    protected $fillable = [
-        'booking_id',
-        'class_session_id',
-        'status',
-        'cancelled_at',
-        'cancellation_reason',
-        'cancelled_by_user_id',
-        'cancelled_by_admin_id',
-        'attendance_status',
-        'attended_at',
-        'attendance_updated_by',
-        'cancellation_type',
-    ];
 
     protected function casts(): array
     {

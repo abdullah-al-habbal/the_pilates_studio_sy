@@ -8,18 +8,15 @@ use App\Events\User\UserRegisteredEvent;
 use App\Exceptions\DomainException;
 use App\Repositories\Eloquent\Language\LanguageEloquentRepository;
 use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Queue\InteractsWithQueue;
+use Illuminate\Queue\Attributes\Tries;
 use Illuminate\Support\Facades\Log;
 use Throwable;
 
+#[Tries(3)]
 class CreateDefaultUserSettingListener implements ShouldQueue
 {
-    use InteractsWithQueue;
-
-    public $tries = 3;
-
     public function __construct(
-        private readonly LanguageEloquentRepository $languageRepo
+        private readonly LanguageEloquentRepository $languageRepo,
     ) {}
 
     public function handle(UserRegisteredEvent $event): void
@@ -33,8 +30,10 @@ class CreateDefaultUserSettingListener implements ShouldQueue
         ]);
     }
 
-    public function failed(UserRegisteredEvent $event, Throwable $exception): void
-    {
+    public function failed(
+        UserRegisteredEvent $event,
+        Throwable $exception,
+    ): void {
         Log::error('CreateDefaultUserSettingListener failed permanently', [
             'user_id' => $event->user->id,
             'error' => $exception->getMessage(),

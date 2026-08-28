@@ -7,12 +7,12 @@ use App\Models\ClubExpense;
 use App\Models\ClubExpenseCategory;
 use App\Models\Currency;
 use App\Models\User;
+use Illuminate\Database\Eloquent\Factories\Attributes\UseModel;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
+#[UseModel(ClubExpense::class)]
 class ClubExpenseFactory extends Factory
 {
-    protected $model = ClubExpense::class;
-
     public function definition(): array
     {
         return [

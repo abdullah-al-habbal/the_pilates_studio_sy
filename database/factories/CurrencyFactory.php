@@ -3,12 +3,12 @@
 namespace Database\Factories;
 
 use App\Models\Currency;
+use Illuminate\Database\Eloquent\Factories\Attributes\UseModel;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
+#[UseModel(Currency::class)]
 class CurrencyFactory extends Factory
 {
-    protected $model = Currency::class;
-
     public function definition(): array
     {
         $code = $this->faker->unique()->currencyCode();

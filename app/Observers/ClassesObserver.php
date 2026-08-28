@@ -25,10 +25,6 @@ final class ClassesObserver
 
     public function created(Classes $class): void
     {
-        // Always generate: a class must be scheduled by exactly one mode, and
-        // the generator's validator enforces that. Previously this silently
-        // skipped generation when no recurrence pattern was set, leaving the
-        // class with zero sessions and no error.
         $this->generator->generate($class);
     }
 

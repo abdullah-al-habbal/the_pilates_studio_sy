@@ -6,14 +6,14 @@ declare(strict_types=1);
 namespace App\Console\Commands;
 
 use App\Models\Currency;
+use Illuminate\Console\Attributes\Description;
+use Illuminate\Console\Attributes\Signature;
 use Illuminate\Console\Command;
 
+#[Signature('config:validate-financial')]
+#[Description('Validate financial configuration integrity')]
 class ValidateFinancialConfig extends Command
 {
-    protected $signature = 'config:validate-financial';
-
-    protected $description = 'Validate financial configuration integrity';
-
     public function handle(): int
     {
         $errors = [];

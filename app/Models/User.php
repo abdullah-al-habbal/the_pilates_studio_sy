@@ -9,6 +9,10 @@ use App\Enums\UserRoleEnum;
 use App\Enums\UserStatusEnum;
 use Filament\Models\Contracts\FilamentUser;
 use Filament\Panel;
+use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Attributes\Hidden;
+use Illuminate\Database\Eloquent\Attributes\Scope;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -24,33 +28,31 @@ use Laravel\Sanctum\PersonalAccessToken;
 /**
  * @method PersonalAccessToken|null currentAccessToken()
  */
+#[Fillable([
+    'fullname',
+    'phone_number',
+    'email',
+    'password',
+    'date_of_birth',
+    'email_verified_at',
+    'otp_code',
+    'otp_expires_at',
+    'deactivated_at',
+    'deleted_by',
+    'status',
+    'role',
+    'frozen_at',
+    'freeze_reason',
+])]
+#[Hidden([
+    'password',
+    'otp_code',
+    'otp_expires_at',
+    'remember_token',
+])]
 class User extends Authenticatable implements FilamentUser
 {
     use HasApiTokens, HasFactory, Notifiable, SoftDeletes;
-
-    protected $fillable = [
-        'fullname',
-        'phone_number',
-        'email',
-        'password',
-        'date_of_birth',
-        'email_verified_at',
-        'otp_code',
-        'otp_expires_at',
-        'deactivated_at',
-        'deleted_by',
-        'status',
-        'role',
-        'frozen_at',
-        'freeze_reason',
-    ];
-
-    protected $hidden = [
-        'password',
-        'otp_code',
-        'otp_expires_at',
-        'remember_token',
-    ];
 
     protected function casts(): array
     {
@@ -95,14 +97,16 @@ class User extends Authenticatable implements FilamentUser
         return $this->role === UserRoleEnum::CUSTOMER;
     }
 
-    public function scopeCustomers($query)
+    #[Scope]
+    protected function customers(Builder $query): void
     {
-        return $query->where('role', UserRoleEnum::CUSTOMER->value);
+        $query->where('role', UserRoleEnum::CUSTOMER->value);
     }
 
-    public function scopeAdmins($query)
+    #[Scope]
+    protected function admins(Builder $query): void
     {
-        return $query->whereIn('role', [UserRoleEnum::MAIN_ADMIN->value, UserRoleEnum::ADMIN->value]);
+        $query->whereIn('role', [UserRoleEnum::MAIN_ADMIN->value, UserRoleEnum::ADMIN->value]);
     }
 
     // ─── Status helpers ──────────────────────────────────────────────────────
@@ -172,26 +176,34 @@ class User extends Authenticatable implements FilamentUser
         );
     }
 
-    public function getTotalRemainingCreditsAttribute(): int
+    protected function totalRemainingCredits(): Attribute
     {
-        return (int) $this->bookings()
-            ->where('status', BookingStatusEnum::ACTIVE->value)
-            ->sum('remaining_credits');
+        return Attribute::make(
+            get: fn (): int => (int) $this->bookings()
+                ->where('status', BookingStatusEnum::ACTIVE->value)
+                ->sum('remaining_credits'),
+        );
     }
 
-    public function getAllowNotificationsAttribute(): bool
+    protected function allowNotifications(): Attribute
     {
-        return (bool) $this->settings?->allow_notifications;
+        return Attribute::make(
+            get: fn (): bool => (bool) $this->settings?->allow_notifications,
+        );
     }
 
-    public function getFcmTokenAttribute(): ?string
+    protected function fcmToken(): Attribute
     {
-        return $this->settings?->fcm_token;
+        return Attribute::make(
+            get: fn (): ?string => $this->settings?->fcm_token,
+        );
     }
 
-    public function getPreferredLocaleAttribute(): string
+    protected function preferredLocale(): Attribute
     {
-        return $this->settings?->resolvedLocale() ?? config('app.locale', 'en');
+        return Attribute::make(
+            get: fn (): string => $this->settings?->resolvedLocale() ?? config('app.locale', 'en'),
+        );
     }
 
     public function settings(): HasOne

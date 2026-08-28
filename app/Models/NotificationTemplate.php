@@ -4,17 +4,17 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Spatie\Translatable\Attributes\Translatable;
 use Spatie\Translatable\HasTranslations;
 
+#[Fillable(['key', 'title', 'body', 'data', 'is_active'])]
+#[Translatable(['title', 'body'])]
 class NotificationTemplate extends Model
 {
     use HasFactory, HasTranslations;
-
-    public array $translatable = ['title', 'body'];
-
-    protected $fillable = ['key', 'title', 'body', 'data', 'is_active'];
 
     protected function casts(): array
     {

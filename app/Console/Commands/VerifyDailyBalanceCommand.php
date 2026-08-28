@@ -6,14 +6,14 @@ namespace App\Console\Commands;
 
 use App\Data\Reports\CurrencySummaryData;
 use App\Services\Finance\DailyBalanceService;
+use Illuminate\Console\Attributes\Description;
+use Illuminate\Console\Attributes\Signature;
 use Illuminate\Console\Command;
 
+#[Signature('finance:verify-daily-balance {--date= : Date to verify (Y-m-d)}')]
+#[Description('Verify per-currency daily balance totals for a given date')]
 final class VerifyDailyBalanceCommand extends Command
 {
-    protected $signature = 'finance:verify-daily-balance {--date= : Date to verify (Y-m-d)}';
-
-    protected $description = 'Verify per-currency daily balance totals for a given date';
-
     public function handle(DailyBalanceService $service): int
     {
         $date = $this->option('date') ?? now()->toDateString();

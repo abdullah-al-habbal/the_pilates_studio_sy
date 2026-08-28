@@ -4,18 +4,18 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Spatie\Translatable\Attributes\Translatable;
 use Spatie\Translatable\HasTranslations;
 
+#[Fillable(['code', 'name', 'symbol', 'decimal_places', 'exchange_rate', 'is_active'])]
+#[Translatable(['name'])]
 class Currency extends Model
 {
     use HasFactory, HasTranslations;
-
-    public array $translatable = ['name'];
-
-    protected $fillable = ['code', 'name', 'symbol', 'decimal_places', 'exchange_rate', 'is_active'];
 
     protected function casts(): array
     {

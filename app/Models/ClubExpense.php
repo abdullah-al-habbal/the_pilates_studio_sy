@@ -5,28 +5,28 @@ declare(strict_types=1);
 namespace App\Models;
 
 use App\Enums\ClubExpenseStatusEnum;
+use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+#[Fillable([
+    'category_id',
+    'currency_id',
+    'amount',
+    'notes',
+    'recorded_by',
+    'expense_date',
+    'status',
+    'approved_by',
+    'approved_at',
+    'rejected_by',
+    'rejected_at',
+    'rejection_reason',
+])]
 class ClubExpense extends Model
 {
     use HasFactory;
-
-    protected $fillable = [
-        'category_id',
-        'currency_id',
-        'amount',
-        'notes',
-        'recorded_by',
-        'expense_date',
-        'status',
-        'approved_by',
-        'approved_at',
-        'rejected_by',
-        'rejected_at',
-        'rejection_reason',
-    ];
 
     protected function casts(): array
     {

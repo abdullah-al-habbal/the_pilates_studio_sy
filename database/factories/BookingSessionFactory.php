@@ -9,12 +9,12 @@ use App\Enums\ClassSessionStatusEnum;
 use App\Models\Booking;
 use App\Models\BookingSession;
 use App\Models\ClassSession;
+use Illuminate\Database\Eloquent\Factories\Attributes\UseModel;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
+#[UseModel(BookingSession::class)]
 class BookingSessionFactory extends Factory
 {
-    protected $model = BookingSession::class;
-
     public function definition(): array
     {
         return [

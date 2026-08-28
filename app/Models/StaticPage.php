@@ -4,18 +4,19 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Storage;
+use Spatie\Translatable\Attributes\Translatable;
 use Spatie\Translatable\HasTranslations;
 
+#[Fillable(['slug', 'title', 'image', 'content', 'is_active', 'sort_order'])]
+#[Translatable(['title', 'content'])]
 class StaticPage extends Model
 {
     use HasFactory, HasTranslations;
-
-    public array $translatable = ['title', 'content'];
-
-    protected $fillable = ['slug', 'title', 'image', 'content', 'is_active', 'sort_order'];
 
     protected function casts(): array
     {
@@ -25,8 +26,10 @@ class StaticPage extends Model
         ];
     }
 
-    public function getImageUrlAttribute(): ?string
+    protected function imageUrl(): Attribute
     {
-        return $this->image ? Storage::disk('public')->url($this->image) : null;
+        return Attribute::make(
+            get: fn (): ?string => $this->image ? Storage::disk('public')->url($this->image) : null,
+        );
     }
 }

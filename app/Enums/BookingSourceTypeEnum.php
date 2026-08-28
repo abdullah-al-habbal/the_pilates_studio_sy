@@ -9,4 +9,5 @@ enum BookingSourceTypeEnum: string
     case STANDARD = 'standard';
     case FREEZE_ORIGIN = 'freeze_origin'; // original booking, now frozen
     case FREEZE_RESUME = 'freeze_resume'; // system-generated replacement
+    case HISTORICAL_BACKFILL = 'historical_backfill'; // paper record entered after the fact
 }

@@ -45,6 +45,11 @@ return new class extends Migration
                 ->nullable()
                 ->comment('Expiration timestamp based on package validity');
 
+            $table->timestamp('purchased_at')
+                ->nullable(false)
+                ->useCurrent()
+                ->comment('Business date: when the customer actually purchased. created_at is audit-only.');
+
             $table->unsignedBigInteger('paid_amount')->nullable();
 
             $table->foreignId('currency_id')
@@ -73,6 +78,7 @@ return new class extends Migration
             $table->index(['user_id', 'status'], 'idx_user_status');
             $table->index(['user_id', 'status', 'remaining_credits'], 'idx_user_status_credits');
             $table->index(['status', 'expires_at'], 'idx_bookings_status_expires');
+            $table->index(['user_id', 'purchased_at'], 'idx_bookings_user_purchased');
             $table->index('currency_id');
             $table->index('parent_booking_id');
 

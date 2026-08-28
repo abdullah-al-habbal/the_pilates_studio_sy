@@ -7,12 +7,12 @@ use App\Models\Currency;
 use App\Models\MerchandiseOrder;
 use App\Models\Refund;
 use App\Models\User;
+use Illuminate\Database\Eloquent\Factories\Attributes\UseModel;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
+#[UseModel(Refund::class)]
 class RefundFactory extends Factory
 {
-    protected $model = Refund::class;
-
     public function definition(): array
     {
         $refundableType = $this->faker->randomElement([

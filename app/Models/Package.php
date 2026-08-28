@@ -7,6 +7,7 @@ namespace App\Models;
 use App\Enums\BookingStatusEnum;
 use App\Enums\PackageTypeEnum;
 use App\Services\Currency\PricingService;
+use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Collection;
@@ -17,6 +18,7 @@ use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
+use Spatie\Translatable\Attributes\Translatable;
 use Spatie\Translatable\HasTranslations;
 
 /**
@@ -49,23 +51,21 @@ use Spatie\Translatable\HasTranslations;
  * @method static Builder|Package whereUpdatedAt($value)
  * @method static Builder|Package whereValidityDays($value)
  */
+#[Fillable([
+    'name',
+    'total_credits',
+    'is_active',
+    'type',
+    'generated_reason',
+    'validity_days',
+    'features',
+])]
+#[Translatable(['name'])]
 class Package extends Model
 {
     use HasFactory;
     use HasTranslations;
     use SoftDeletes;
-
-    public array $translatable = ['name'];
-
-    protected $fillable = [
-        'name',
-        'total_credits',
-        'is_active',
-        'type',
-        'generated_reason',
-        'validity_days',
-        'features',
-    ];
 
     protected function casts(): array
     {

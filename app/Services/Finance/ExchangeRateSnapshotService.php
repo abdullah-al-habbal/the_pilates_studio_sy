@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services\Finance;
 
+use App\Enums\BookingSourceTypeEnum;
 use App\Models\Booking;
 use App\Models\Currency;
 use App\Models\MerchandiseOrder;
@@ -25,10 +26,18 @@ final readonly class ExchangeRateSnapshotService
             return 1.0;
         }
 
+        // Keyed on the business date, matching the MerchandiseOrder and Refund branches below.
+        //
+        // Backfilled bookings are excluded, and that exclusion is what makes this safe: a
+        // historical backfill carries today's exchange rate by default while its purchased_at
+        // sits months back, so including it would report today's rate as that period's rate.
+        // With backfills out, every remaining booking has purchased_at == created_at by
+        // construction, so the two columns agree here anyway.
         $snapshot = Booking::where('currency_id', $currencyId)
-            ->whereDate('created_at', '<=', $asOfDate)
+            ->where('source_type', '!=', BookingSourceTypeEnum::HISTORICAL_BACKFILL->value)
+            ->whereDate('purchased_at', '<=', $asOfDate)
             ->whereNotNull('exchange_rate_snapshot')
-            ->orderByDesc('created_at')
+            ->orderByDesc('purchased_at')
             ->value('exchange_rate_snapshot');
 
         if ($snapshot !== null) {

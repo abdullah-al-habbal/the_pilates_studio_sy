@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -12,21 +14,20 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
 /**
  * @property-read float|null $exchange_rate_snapshot Immutable rate at transaction time for audit accuracy
  */
+#[Fillable([
+    'refundable_type',
+    'refundable_id',
+    'user_id',
+    'currency_id',
+    'amount',
+    'reason',
+    'refunded_by',
+    'refunded_at',
+    'exchange_rate_snapshot',
+])]
 class Refund extends Model
 {
     use HasFactory;
-
-    protected $fillable = [
-        'refundable_type',
-        'refundable_id',
-        'user_id',
-        'currency_id',
-        'amount',
-        'reason',
-        'refunded_by',
-        'refunded_at',
-        'exchange_rate_snapshot',
-    ];
 
     protected function casts(): array
     {
@@ -67,12 +68,14 @@ class Refund extends Model
         return $this->refundable_type === (new MerchandiseOrder)->getTable();
     }
 
-    public function getRefundableTitleAttribute(): string
+    protected function refundableTitle(): Attribute
     {
-        return match ($this->refundable_type) {
-            'bookings' => "Booking #{$this->refundable_id}",
-            'merchandise_orders' => "Order #{$this->refundable_id}",
-            default => "Unknown #{$this->refundable_id}",
-        };
+        return Attribute::make(
+            get: fn (): string => match ($this->refundable_type) {
+                'bookings' => "Booking #{$this->refundable_id}",
+                'merchandise_orders' => "Order #{$this->refundable_id}",
+                default => "Unknown #{$this->refundable_id}",
+            },
+        );
     }
 }

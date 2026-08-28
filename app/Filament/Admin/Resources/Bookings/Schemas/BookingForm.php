@@ -207,9 +207,11 @@ class BookingForm
                             $set('remaining_credits', $package->total_credits);
                             $set('validity_days_snapshot', $package->validity_days);
 
-                            // CRITICAL FIX: Use created_at on edit, now() on create
+                            // Mirror Booking::booted(): validity runs from the purchase date on
+                            // edit, from now() on create. Using created_at here would disagree
+                            // with the model for any booking whose purchase predates data entry.
                             $record = $livewire?->record ?? null;
-                            $baseDate = $record?->created_at ?? now();
+                            $baseDate = $record?->purchased_at ?? now();
 
                             if ($package->validity_days > 0) {
                                 $set('expires_at', $baseDate->copy()->addDays($package->validity_days)->format('Y-m-d H:i:s'));

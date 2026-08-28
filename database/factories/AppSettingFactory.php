@@ -3,12 +3,12 @@
 namespace Database\Factories;
 
 use App\Models\AppSetting;
+use Illuminate\Database\Eloquent\Factories\Attributes\UseModel;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
+#[UseModel(AppSetting::class)]
 class AppSettingFactory extends Factory
 {
-    protected $model = AppSetting::class;
-
     public function definition(): array
     {
         return [

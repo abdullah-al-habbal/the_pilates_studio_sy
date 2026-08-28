@@ -7,12 +7,12 @@ declare(strict_types=1);
 namespace Database\Factories;
 
 use App\Models\CenterMerchandiseCategory;
+use Illuminate\Database\Eloquent\Factories\Attributes\UseModel;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
+#[UseModel(CenterMerchandiseCategory::class)]
 class CenterMerchandiseCategoryFactory extends Factory
 {
-    protected $model = CenterMerchandiseCategory::class;
-
     public function definition(): array
     {
         return [

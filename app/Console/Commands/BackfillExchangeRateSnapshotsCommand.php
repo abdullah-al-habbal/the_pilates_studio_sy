@@ -8,14 +8,14 @@ use App\Models\Booking;
 use App\Models\Currency;
 use App\Models\MerchandiseOrder;
 use App\Models\Refund;
+use Illuminate\Console\Attributes\Description;
+use Illuminate\Console\Attributes\Signature;
 use Illuminate\Console\Command;
 
+#[Signature('finance:backfill-exchange-snapshots {--dry-run : Report only, do not write}')]
+#[Description('Backfill missing exchange_rate_snapshot on financial records using current currency rates')]
 final class BackfillExchangeRateSnapshotsCommand extends Command
 {
-    protected $signature = 'finance:backfill-exchange-snapshots {--dry-run : Report only, do not write}';
-
-    protected $description = 'Backfill missing exchange_rate_snapshot on financial records using current currency rates';
-
     public function handle(): int
     {
         $dryRun = (bool) $this->option('dry-run');

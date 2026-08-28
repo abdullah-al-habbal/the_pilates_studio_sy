@@ -6,7 +6,10 @@ namespace App\Models;
 
 use App\Enums\BookingSessionStatusEnum;
 use App\Enums\ClassSessionStatusEnum;
+use App\Observers\ClassSessionObserver;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -14,18 +17,18 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
+#[Fillable([
+    'class_id',
+    'date',
+    'start_time',
+    'end_time',
+    'total_spots',
+    'status',
+])]
+#[ObservedBy([ClassSessionObserver::class])]
 class ClassSession extends Model
 {
     use HasFactory, SoftDeletes;
-
-    protected $fillable = [
-        'class_id',
-        'date',
-        'start_time',
-        'end_time',
-        'total_spots',
-        'status',
-    ];
 
     protected function casts(): array
     {
@@ -153,13 +156,17 @@ class ClassSession extends Model
             && ! $this->is_past;
     }
 
-    public function getAvailableSpotsAttribute(): int
+    protected function availableSpots(): Attribute
     {
-        $reserved = $this->bookingSessions()
-            ->where('status', BookingSessionStatusEnum::RESERVED->value)
-            ->count();
+        return Attribute::make(
+            get: function (): int {
+                $reserved = $this->bookingSessions()
+                    ->where('status', BookingSessionStatusEnum::RESERVED->value)
+                    ->count();
 
-        return max(0, $this->total_spots - $reserved);
+                return max(0, $this->total_spots - $reserved);
+            },
+        );
     }
 
     public function isFull(): bool

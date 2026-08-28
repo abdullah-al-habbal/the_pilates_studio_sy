@@ -4,19 +4,21 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Attributes\Scope;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+#[Fillable([
+    'center_merchandise_id',
+    'url',
+    'is_primary',
+])]
 class CenterMerchandiseImage extends Model
 {
     use HasFactory;
-
-    protected $fillable = [
-        'center_merchandise_id',
-        'url',
-        'is_primary',
-    ];
 
     protected function casts(): array
     {
@@ -25,9 +27,10 @@ class CenterMerchandiseImage extends Model
         ];
     }
 
-    public function scopePrimary($query)
+    #[Scope]
+    protected function primary(Builder $query): void
     {
-        return $query->where('is_primary', true);
+        $query->where('is_primary', true);
     }
 
     public function merchandise(): BelongsTo
