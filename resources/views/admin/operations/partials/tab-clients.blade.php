@@ -5,13 +5,19 @@
             <h2 class="text-2xl font-bold tracking-tight">{{ __('dashboard.operations_ui.clients.title') }}</h2>
             <p class="text-slate-500">{{ __('dashboard.operations_ui.clients.description') }}</p>
         </div>
-        <div class="relative w-full max-w-sm">
+        <div class="flex items-center gap-3 w-full max-w-xl">
+            <button type="button" onclick="window.showCreateClient()"
+                class="shrink-0 bg-primary-600 text-white px-5 py-3 rounded-xl font-bold text-sm hover:bg-primary-700 transition-colors">
+                + {{ __('dashboard.operations_ui.clients.add_client_button') }}
+            </button>
+            <div class="relative flex-1">
             <input type="text" id="client-search" placeholder="{{ __('dashboard.operations_ui.clients.search_placeholder') }}"
                 class="w-full pl-10 pr-4 py-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none shadow-sm transition-all">
             <svg class="w-5 h-5 absolute left-3 top-3.5 text-slate-400" fill="none" stroke="currentColor"
                 viewBox="0 0 24 24">
                 <path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
             </svg>
+            </div>
         </div>
     </div>
     <div class="flex flex-wrap gap-2" id="client-filter-pills">

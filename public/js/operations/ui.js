@@ -240,3 +240,31 @@ const OperationsUI = {
             .join("");
     },
 };
+
+// Dismissing a modal: ESC anywhere, or a click that lands on the backdrop rather than the panel.
+// Registered once at load, not per openModal() — binding on each open would stack a fresh
+// listener every time a step re-renders, and the stepper re-renders on every selection.
+(function registerModalDismissal() {
+    const overlay = () => document.getElementById("modal-overlay");
+
+    const isOpen = () => {
+        const el = overlay();
+        return Boolean(el) && !el.classList.contains("hidden");
+    };
+
+    document.addEventListener("keydown", (event) => {
+        if (event.key !== "Escape" || !isOpen()) return;
+
+        // SweetAlert2 sits above our modal and closes itself on ESC; dismissing the modal
+        // underneath at the same time would drop the admin two levels in one keypress.
+        if (document.querySelector(".swal2-container")) return;
+
+        OperationsUI.closeModal();
+    });
+
+    document.addEventListener("click", (event) => {
+        if (!isOpen() || event.target !== overlay()) return;
+
+        OperationsUI.closeModal();
+    });
+})();

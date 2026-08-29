@@ -38,6 +38,16 @@ class ClassesSeeder extends Seeder
             throw new SeederDependencyMissingException('RecurrencePattern seed dependency missing.');
         }
 
+        /*
+         * Keep the seeded classes relative to the current date.
+         *
+         * The schedule starts several months in the past and ends one month
+         * in the past, giving ClassSessionSeeder enough historical sessions
+         * for testing Record Past Purchase.
+         */
+        $startDate = now()->subMonths(7)->startOfDay();
+        $endDate = now()->subMonth()->endOfMonth()->startOfDay();
+
         $fixed = [
 
             [
@@ -55,8 +65,8 @@ class ClassesSeeder extends Seeder
                 ],
                 'start_time' => '08:00:00',
                 'end_time' => '08:50:00',
-                'start_date' => '2026-01-30',
-                'end_date' => '2026-06-30',
+                'start_date' => $startDate->toDateString(),
+                'end_date' => $endDate->toDateString(),
                 'total_spots' => 8,
                 'status' => ClassStatusEnum::ACTIVE->value,
             ],
@@ -77,8 +87,8 @@ class ClassesSeeder extends Seeder
                 ],
                 'start_time' => '09:30:00',
                 'end_time' => '10:15:00',
-                'start_date' => '2026-01-30',
-                'end_date' => '2026-06-30',
+                'start_date' => $startDate->toDateString(),
+                'end_date' => $endDate->toDateString(),
                 'total_spots' => 8,
                 'status' => ClassStatusEnum::ACTIVE->value,
             ],
@@ -98,14 +108,14 @@ class ClassesSeeder extends Seeder
                 ],
                 'start_time' => '08:00:00',
                 'end_time' => '08:50:00',
-                'start_date' => '2026-01-30',
-                'end_date' => '2026-06-30',
+                'start_date' => $startDate->toDateString(),
+                'end_date' => $endDate->toDateString(),
                 'total_spots' => 10,
                 'status' => ClassStatusEnum::ACTIVE->value,
             ],
         ];
 
-        Classes::withoutEvents(function () use ($fixed) {
+        Classes::withoutEvents(function () use ($fixed): void {
             foreach ($fixed as $class) {
                 Classes::firstOrCreate(
                     [

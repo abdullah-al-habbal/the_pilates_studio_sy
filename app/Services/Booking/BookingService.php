@@ -6,6 +6,7 @@ declare(strict_types=1);
 
 namespace App\Services\Booking;
 
+use App\Commands\Booking\CreateBookingCommand;
 use App\Enums\BookingStatusEnum;
 use App\Models\Booking;
 use App\Models\Package;
@@ -31,7 +32,14 @@ class BookingService
 
     public function createBookingFromPackage(User $user, Package $package, ?Carbon $expiresAt = null, ?int $currencyId = null, ?int $paidAmount = null, ?float $exchangeRateSnapshot = null): Booking
     {
-        return $this->createFromPackage($user, $package, $expiresAt, $currencyId, $paidAmount, $exchangeRateSnapshot);
+        return $this->createFromPackage(new CreateBookingCommand(
+            user: $user,
+            package: $package,
+            expiresAt: $expiresAt,
+            currencyId: $currencyId,
+            paidAmount: $paidAmount,
+            exchangeRateSnapshot: $exchangeRateSnapshot,
+        ));
     }
 
     public function find(int $id, bool $lockForUpdate = false, array $relations = []): Booking
@@ -53,32 +61,51 @@ class BookingService
         return $this->repository->listUserBookings($userId, $filters);
     }
 
-    public function assertNoActiveBooking(User $user): void
+    public function assertNoActiveBooking(User $user, bool $lock = false): void
     {
-        if ($this->repository->existsActiveWithCredits($user->id)) {
-            throw ValidationException::withMessages([
-                'user_id' => 'User already has an active booking with remaining credits.',
-            ]);
+        // findBlockingActiveBooking() matches the generated column behind
+        // unique_active_booking_per_user exactly: status=active AND remaining_credits>0, with no
+        // expiry clause. The expiry-filtered predicate this used to call was blind to a booking
+        // past expires_at that still says active with credits left — routine, since nothing
+        // expires bookings on a schedule — so the guard passed and the insert died on a raw 1062.
+        $conflict = $this->repository->findBlockingActiveBooking($user->id, $lock);
+
+        if ($conflict === null) {
+            return;
         }
+
+        throw ValidationException::withMessages([
+            'user_id' => __('dashboard.operations_ui.errors.active_booking_exists', [
+                'package_name' => $conflict->package?->name ?? '—',
+                'remaining_credits' => $conflict->remaining_credits,
+            ]),
+        ]);
     }
 
-    public function createFromPackage(User $user, Package $package, ?Carbon $expiresAt = null, ?int $currencyId = null, ?int $paidAmount = null, ?float $exchangeRateSnapshot = null, ?int $createdBy = null): Booking
+    public function createFromPackage(CreateBookingCommand $command): Booking
     {
-        $this->assertNoActiveBooking($user);
+        return DB::transaction(function () use ($command): Booking {
+            // Reconcile first: a row past its expiry that still says active holds the index for
+            // no reason, and would otherwise block a purchase the client is entitled to make.
+            $this->repository->expireStaleActiveBookings($command->user->id);
 
-        return DB::transaction(function () use ($user, $package, $expiresAt, $currencyId, $paidAmount, $exchangeRateSnapshot, $createdBy): Booking {
+            // Guard runs INSIDE the transaction and takes a row lock. Outside it, two concurrent
+            // requests for the same user both passed the check and both inserted — a transaction
+            // alone would not have stopped that, since it gives atomicity, not mutual exclusion.
+            $this->assertNoActiveBooking($command->user, lock: true);
+
             return $this->repository->create([
-                'user_id' => $user->id,
-                'created_by' => $createdBy,
-                'package_id' => $package->id,
-                'total_credits' => $package->total_credits,
-                'remaining_credits' => $package->total_credits,
+                'user_id' => $command->user->id,
+                'created_by' => $command->createdBy,
+                'package_id' => $command->package->id,
+                'total_credits' => $command->package->total_credits,
+                'remaining_credits' => $command->package->total_credits,
                 'status' => BookingStatusEnum::ACTIVE->value,
-                'expires_at' => $expiresAt,
+                'expires_at' => $command->expiresAt,
                 'purchased_at' => now(),
-                'currency_id' => $currencyId,
-                'paid_amount' => $paidAmount,
-                'exchange_rate_snapshot' => $exchangeRateSnapshot,
+                'currency_id' => $command->currencyId,
+                'paid_amount' => $command->paidAmount,
+                'exchange_rate_snapshot' => $command->exchangeRateSnapshot,
             ]);
         });
     }

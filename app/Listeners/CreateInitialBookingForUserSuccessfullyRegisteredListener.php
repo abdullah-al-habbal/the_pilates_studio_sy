@@ -6,6 +6,7 @@ declare(strict_types=1);
 
 namespace App\Listeners;
 
+use App\Commands\Booking\CreateBookingCommand;
 use App\Events\UserSuccessfullyRegisteredEvent;
 use App\Services\Booking\BookingService;
 use App\Services\Package\PackageService;
@@ -38,6 +39,10 @@ class CreateInitialBookingForUserSuccessfullyRegisteredListener implements Shoul
             return;
         }
 
-        $this->bookingService->createFromPackage($user, $package, Carbon::now()->addDays(10));
+        $this->bookingService->createFromPackage(new CreateBookingCommand(
+            user: $user,
+            package: $package,
+            expiresAt: Carbon::now()->addDays(10),
+        ));
     }
 }

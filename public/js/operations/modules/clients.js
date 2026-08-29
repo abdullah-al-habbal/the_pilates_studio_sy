@@ -194,11 +194,31 @@ export async function showClientDetails(userId) {
         const currentPackage = user.frozen_package ?? user.active_package;
         const isFrozen = Boolean(user.frozen_package);
 
+        // blocking_package is what the database would refuse: active with credits, regardless of
+        // expiry. active_package filters expiry, so a stale row leaves it null and the button used
+        // to render enabled — the admin clicked straight into a 422.
+        const blocking = user.blocking_package;
+        const blockedNotice = blocking
+            ? `<div class="text-right">
+                   <button disabled
+                           class="bg-slate-300 dark:bg-slate-700 text-slate-500 px-5 py-2.5 rounded-xl font-bold text-sm cursor-not-allowed">
+                       ${window.__('operations_ui.clients.assign_package')}
+                   </button>
+                   <p class="text-xs text-amber-600 mt-1 max-w-xs">
+                       ${window.__('operations_ui.errors.active_booking_exists')
+                           .replace(':package_name', blocking.name ?? '—')
+                           .replace(':remaining_credits', blocking.remaining_credits ?? 0)}
+                   </p>
+               </div>`
+            : null;
+
         const actionButton = isFrozen
             ? `<button onclick="window.handleUnfreeze(${user.frozen_package.id}, ${user.id})"
                        class="bg-primary-600 text-white px-5 py-2.5 rounded-xl font-bold text-sm hover:scale-105 transition-all btn-single-action">
                        🔓 ${window.__('operations_ui.clients.unfreeze_button')}
                    </button>`
+            : blockedNotice
+            ? blockedNotice
             : user.active_package?.remaining_credits === 0
               ? `<button onclick="window.showPackageAssignment(${user.id})"
                         class="bg-primary-600 text-white px-5 py-2.5 rounded-xl font-bold text-sm hover:scale-105 transition-all btn-single-action">
@@ -284,10 +304,14 @@ export async function showClientDetails(userId) {
                                                     ⚠ ${window.__('operations_ui.clients.fully_used')}<br>
                                                     <strong>${window.__('operations_ui.clients.assign_new_to_continue')}</strong>
                                                 </div>
-                                                <button onclick="window.showPackageAssignment(${user.id})"
+                                                ${blocking
+                                                    ? `<button disabled class="w-full bg-slate-300 dark:bg-slate-700 text-slate-500 py-2.5 rounded-lg font-bold text-sm cursor-not-allowed">
+                                                           ${window.__('operations_ui.clients.assign_package')}
+                                                       </button>`
+                                                    : `<button onclick="window.showPackageAssignment(${user.id})"
                                                     class="w-full bg-primary-600 text-white py-2.5 rounded-lg font-bold text-sm hover:bg-primary-700 transition-colors btn-single-action">
                           ${window.__('operations_ui.clients.assign_package')}
-                                                </button>
+                                                </button>`}
                                             </div>`
                                               : (() => {
                                                     const paidAmount =

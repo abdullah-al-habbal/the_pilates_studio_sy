@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services\Validation;
 
+use App\Commands\Admin\Operations\HistoricalBackfillCommand;
 use App\Data\Booking\HistoricalBackfillPlan;
 use App\Enums\BookingStatusEnum;
 use App\Enums\ClassSessionStatusEnum;
@@ -15,15 +16,6 @@ use App\Services\Currency\PricingService;
 use Carbon\CarbonInterface;
 use Illuminate\Validation\ValidationException;
 
-/**
- * Validates a historical backfill and resolves it into a writable plan.
- *
- * Rule order is load-bearing; see validate().
- *
- * @see docs/historical-backfill/decisions/D-A01-active-booking-conflict.md
- * @see docs/historical-backfill/decisions/D-A02-null-validity-packages.md
- * @see docs/historical-backfill/decisions/D-A03-exchange-rate-override.md
- */
 final readonly class HistoricalBackfillValidatorService
 {
     private const LANG = 'dashboard.operations_ui.historical_backfill.';
@@ -34,21 +26,12 @@ final readonly class HistoricalBackfillValidatorService
         private BookingEloquentRepository $bookingRepository,
     ) {}
 
-    /**
-     * @param  list<int>  $attendedSessionIds
-     * @param  list<int>  $missedSessionIds
-     */
     public function validate(
         User $user,
-        int $packageId,
-        CarbonInterface $purchasedAt,
-        ?int $currencyId,
-        ?int $paidAmount,
-        array $attendedSessionIds,
-        array $missedSessionIds,
-        ?float $exchangeRateOverride = null,
+        HistoricalBackfillCommand $command,
     ): HistoricalBackfillPlan {
-        $package = Package::find($packageId);
+        $purchasedAt = $command->purchasedAt;
+        $package = Package::find($command->packageId);
 
         if ($package === null) {
             throw ValidationException::withMessages([
@@ -56,22 +39,18 @@ final readonly class HistoricalBackfillValidatorService
             ]);
         }
 
-        // 1. Validity gate (D-A02) — FIRST, before price and before the terminal-status
-        //    computation, which calls addDays($package->validity_days) and would fatal on null.
         $this->assertPackageHasValidity($package);
 
         $this->assertPurchaseDateIsPast($purchasedAt);
 
         $expiresAt = $purchasedAt->copy()->addDays($package->validity_days);
 
-        // 2. Price — reuses the standard assign-package rules verbatim.
-        $currencyId ??= $this->pricingService->getBaseCurrencyId();
+        $currencyId = $command->currencyId ?? $this->pricingService->getBaseCurrencyId();
         $resolvedAmount = $this->assignPackageValidator
-            ->validateAndComputeAmount($package->id, $currencyId, $paidAmount);
+            ->validateAndComputeAmount($package->id, $currencyId, $command->paidAmount);
 
-        // 3. Everything else.
-        $attendedSessionIds = $this->normaliseIds($attendedSessionIds);
-        $missedSessionIds = $this->normaliseIds($missedSessionIds);
+        $attendedSessionIds = $this->normaliseIds($command->attendedSessionIds);
+        $missedSessionIds = $this->normaliseIds($command->missedSessionIds);
 
         $this->assertNoOverlap($attendedSessionIds, $missedSessionIds);
 
@@ -88,7 +67,6 @@ final readonly class HistoricalBackfillValidatorService
         $remainingCredits = $package->total_credits - $attended - $missed;
         $terminalStatus = $this->resolveTerminalStatus($remainingCredits, $expiresAt);
 
-        // 4. Conflict guard (D-A01) — only when the result would occupy active_user_id.
         if ($terminalStatus === BookingStatusEnum::ACTIVE) {
             $this->assertNoBlockingActiveBooking($user);
         }
@@ -102,8 +80,8 @@ final readonly class HistoricalBackfillValidatorService
             expiresAt: $expiresAt,
             currencyId: $currencyId,
             paidAmount: $resolvedAmount,
-            exchangeRateSnapshot: $exchangeRateOverride ?? $currentRate,
-            exchangeRateWasOverridden: $exchangeRateOverride !== null,
+            exchangeRateSnapshot: $command->exchangeRateOverride ?? $currentRate,
+            exchangeRateWasOverridden: $command->exchangeRateOverride !== null,
             currentExchangeRate: $currentRate,
             attendedSessionIds: $attendedSessionIds,
             missedSessionIds: $missedSessionIds,
@@ -112,14 +90,6 @@ final readonly class HistoricalBackfillValidatorService
         );
     }
 
-    /**
-     * A package with no defined validity can never expire, so a backfill leaving credits on it
-     * would be permanently ACTIVE and permanently occupy active_user_id.
-     *
-     * Tests `> 0`, not `=== null`: validity_days = 0 is reachable (CreatePackageRequest allows
-     * min:0), is displayed to admins as "Unlimited" (PackageInfolist), and behaves identically to
-     * null everywhere — including in the observer that derives expires_at.
-     */
     private function assertPackageHasValidity(Package $package): void
     {
         if (! ($package->validity_days > 0)) {
@@ -138,10 +108,6 @@ final readonly class HistoricalBackfillValidatorService
         }
     }
 
-    /**
-     * @param  list<int>  $attended
-     * @param  list<int>  $missed
-     */
     private function assertNoOverlap(array $attended, array $missed): void
     {
         $overlap = array_intersect($attended, $missed);
@@ -165,9 +131,6 @@ final readonly class HistoricalBackfillValidatorService
         }
     }
 
-    /**
-     * @param  list<int>  $sessionIds
-     */
     private function assertSessionsExistWithinWindow(
         array $sessionIds,
         CarbonInterface $purchasedAt,
@@ -193,10 +156,6 @@ final readonly class HistoricalBackfillValidatorService
         }
     }
 
-    /**
-     * Exhausted wins over expired when both apply: it is the more informative label, and either
-     * way the generated column resolves to NULL so there is no conflict to guard against.
-     */
     private function resolveTerminalStatus(int $remainingCredits, CarbonInterface $expiresAt): BookingStatusEnum
     {
         return match (true) {
@@ -206,10 +165,6 @@ final readonly class HistoricalBackfillValidatorService
         };
     }
 
-    /**
-     * Uses the unfiltered predicate that matches the generated column, NOT
-     * BookingService::assertNoActiveBooking(), which filters on expiry and so misses stale rows.
-     */
     private function assertNoBlockingActiveBooking(User $user): void
     {
         $conflict = $this->bookingRepository->findBlockingActiveBooking($user->id);
@@ -227,11 +182,6 @@ final readonly class HistoricalBackfillValidatorService
         ]);
     }
 
-    /**
-     * @param  list<int>  $ids
-     *
-     * @return list<int>
-     */
     private function normaliseIds(array $ids): array
     {
         return array_values(array_unique(array_map(intval(...), $ids)));

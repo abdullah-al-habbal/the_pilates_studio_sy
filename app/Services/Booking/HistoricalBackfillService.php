@@ -14,6 +14,7 @@ use App\Repositories\Eloquent\Booking\BookingEloquentRepository;
 use App\Repositories\Eloquent\BookingSession\BookingSessionEloquentRepository;
 use App\Repositories\Eloquent\ClassSession\ClassSessionEloquentRepository;
 use App\Services\Log\LoggingService;
+use App\Support\Booking\ActiveBookingConstraint;
 use Carbon\Carbon;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\DB;
@@ -30,8 +31,6 @@ use Illuminate\Validation\ValidationException;
 final readonly class HistoricalBackfillService
 {
     private const LANG = 'dashboard.operations_ui.historical_backfill.';
-
-    private const DUPLICATE_KEY = 1062;
 
     public function __construct(
         private BookingEloquentRepository $bookingRepository,
@@ -191,10 +190,7 @@ final readonly class HistoricalBackfillService
         HistoricalBackfillPlan $plan,
         ?int $createdBy,
     ): \Throwable {
-        $isDuplicateActiveBooking = ($e->errorInfo[1] ?? null) === self::DUPLICATE_KEY
-            && str_contains($e->getMessage(), 'unique_active_booking_per_user');
-
-        if (! $isDuplicateActiveBooking) {
+        if (! ActiveBookingConstraint::isViolatedBy($e)) {
             $this->logFailure('Historical backfill failed with a database error.', $plan, $createdBy, $e->getMessage());
 
             return $e;

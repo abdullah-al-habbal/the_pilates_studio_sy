@@ -134,7 +134,7 @@ class User extends Authenticatable implements FilamentUser
     protected function hasCredits(): Attribute
     {
         return Attribute::make(
-            get: fn () => $this->total_remaining_credits > 0
+            get: fn () => $this->total_remaining_credits > 0,
         );
     }
 
@@ -144,35 +144,35 @@ class User extends Authenticatable implements FilamentUser
             get: fn () => ! $this->bookings()
                 ->where('status', BookingStatusEnum::ACTIVE)
                 ->where('remaining_credits', '>', 0)
-                ->exists()
+                ->exists(),
         );
     }
 
     protected function canReserveClass(): Attribute
     {
         return Attribute::make(
-            get: fn () => $this->total_remaining_credits > 0 && $this->isActive()
+            get: fn () => $this->total_remaining_credits > 0 && $this->isActive(),
         );
     }
 
     protected function isVerified(): Attribute
     {
         return Attribute::make(
-            get: fn () => ! is_null($this->email_verified_at)
+            get: fn () => ! is_null($this->email_verified_at),
         );
     }
 
     protected function isDeactivated(): Attribute
     {
         return Attribute::make(
-            get: fn () => ! is_null($this->deactivated_at)
+            get: fn () => ! is_null($this->deactivated_at),
         );
     }
 
     protected function hasActiveBooking(): Attribute
     {
         return Attribute::make(
-            get: fn () => ! is_null($this->activeCreditBooking)
+            get: fn () => ! is_null($this->activeCreditBooking),
         );
     }
 
@@ -239,6 +239,24 @@ class User extends Authenticatable implements FilamentUser
                 $query->whereNull('expires_at')
                     ->orWhere('expires_at', '>', now());
             })
+            ->latest();
+    }
+
+    /**
+     * The booking, if any, occupying `active_user_id` and therefore blocking a new purchase.
+     *
+     * Deliberately WITHOUT the expiry clause its neighbour above carries: this must match the
+     * generated column behind `unique_active_booking_per_user`, which tests status and credits
+     * only. `activeCreditBooking()` is the right shape for "what package can this client use
+     * today" — this one answers "what would the database refuse", which is a different question.
+     *
+     * @see docs/historical-backfill/findings/A16-booking-insert-paths.md
+     */
+    public function blockingActiveBooking(): HasOne
+    {
+        return $this->hasOne(Booking::class)
+            ->where('status', BookingStatusEnum::ACTIVE)
+            ->where('remaining_credits', '>', 0)
             ->latest();
     }
 

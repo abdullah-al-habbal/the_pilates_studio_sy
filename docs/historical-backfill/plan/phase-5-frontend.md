@@ -3,6 +3,27 @@
 **Blocking on:** Phase 3, Phase 4.
 **Context:** [A09](../findings/A09-frontend-reality.md) — less is reusable than PRD §11 assumes.
 
+## Three steps, not five
+
+PRD §11.2 sketches a five-step indicator beginning with customer selection. **Decided
+2026-08-28: the stepper has three steps and no customer step.**
+
+The flow is only ever reached from the client details modal
+(`public/js/operations/modules/clients.js`), so the client is already chosen. There is no
+general entry point without a preselected client, and a step whose answer is already known is
+friction, not guidance.
+
+| Step | Content |
+|---|---|
+| 1 | Package, historical purchase date, currency, optional exchange-rate override |
+| 2 | Session selection, fed by `GET /bookings/backfill/sessions` with `user_id` |
+| 3 | Review and submit |
+
+The PRD's separate "Select Attended" and "Select Missed" steps are collapsed into step 2: one
+list where each row is toggled to attended, missed, or unselected. That removes the need to
+re-page the same window twice, and makes the mutual-exclusion rule structural rather than a
+cross-step validation.
+
 ## Steps
 
 ### 5.1 API layer
@@ -10,7 +31,7 @@
 `public/js/operations/api.js`
 
 - `getBackfillSessions(purchasedAt, expiresAt, cursor, perPage)`
-- `submitBackfill(payload)`
+- ~~`submitBackfill(payload)`~~ — removed; `assignPackage()` takes an optional backfill payload as its fourth argument instead
 
 Both through the existing `request()` wrapper (`:1-37`) — CSRF, 10 s `AbortController`, shared
 error shape.
@@ -30,7 +51,8 @@ error shape.
 
 ### 5.3 Exchange-rate field — [D-A03](../decisions/D-A03-exchange-rate-override.md)
 
-In the financial-details step, beside the currency selector:
+In **step 1**, beside the currency selector — the rate belongs with the money, and putting it on
+the review step would invite editing a figure the admin has already mentally signed off:
 
 | Property | Value |
 |---|---|

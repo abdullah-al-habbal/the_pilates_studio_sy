@@ -115,15 +115,14 @@ class Booking extends Model
             )
             ->where(function (Builder $query): void {
                 $query
+                    // No expiry clause on the ACTIVE branch: it must match the generated column
+                    // behind unique_active_booking_per_user, which tests status and credits only.
+                    // With the clause, a stale row slipped past Filament's validation and the
+                    // insert then crashed as an unhandled Livewire exception.
                     ->where(function (Builder $query): void {
                         $query
                             ->where('status', BookingStatusEnum::ACTIVE)
-                            ->where('remaining_credits', '>', 0)
-                            ->where(
-                                fn (Builder $query) => $query
-                                    ->whereNull('expires_at')
-                                    ->orWhere('expires_at', '>', now()),
-                            );
+                            ->where('remaining_credits', '>', 0);
                     })
                     ->orWhere(function (Builder $query): void {
                         $query

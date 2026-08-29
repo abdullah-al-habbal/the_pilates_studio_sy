@@ -77,7 +77,7 @@ class BookingSessionService
                 : Carbon::parse($classSession->date);
 
             $cutoff = Carbon::parse(
-                $date->format('Y-m-d').' '.$classSession->start_time
+                $date->format('Y-m-d') . ' ' . $classSession->start_time,
             )->subHours(24);
 
             if (now()->greaterThanOrEqualTo($cutoff)) {
@@ -131,9 +131,30 @@ class BookingSessionService
                 return;
             }
 
+            // Reconcile before looking: a row past its expiry that still says active is useless
+            // to spend from, yet still holds unique_active_booking_per_user — so without this the
+            // lookup below returns null, the walk-in branch inserts a second active row, and the
+            // insert dies on the index with nothing catching it.
+            $this->bookingRepo->expireStaleActiveBookings($userId);
+
             $booking = $this->bookingRepo->findActiveWithCreditsForUser($userId);
 
             if (! $booking) {
+                // Deliberately NOT widening the lookup above to the index predicate: spending a
+                // credit from an expired booking would be wrong. If something still occupies the
+                // index after reconciliation it is a valid booking, and creating a walk-in
+                // alongside it is what the constraint exists to prevent.
+                $blocking = $this->bookingRepo->findBlockingActiveBooking($userId, lock: true);
+
+                if ($blocking !== null) {
+                    throw ValidationException::withMessages([
+                        'user_id' => __('dashboard.operations_ui.errors.active_booking_exists', [
+                            'package_name' => $blocking->package?->name ?? '—',
+                            'remaining_credits' => $blocking->remaining_credits,
+                        ]),
+                    ]);
+                }
+
                 $price = (int) $this->appSettings->get('walk_in_price', 16);
                 $package = $this->packageRepo->findOrCreateWalkInPackage($price);
 

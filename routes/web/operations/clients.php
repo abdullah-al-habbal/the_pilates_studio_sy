@@ -4,10 +4,12 @@
 declare(strict_types=1);
 
 use App\Http\Actions\Web\Admin\Client\ClientDetailsAction;
+use App\Http\Actions\Web\Admin\Operations\CreateClientAction;
 use App\Http\Actions\Web\Admin\Operations\GetClientsAction;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('clients')->name('clients.')->group(function (): void {
     Route::get('/', GetClientsAction::class)->name('index');
+    Route::post('/', CreateClientAction::class)->name('store');
     Route::get('/{userId}/details', ClientDetailsAction::class)->name('details');
 });

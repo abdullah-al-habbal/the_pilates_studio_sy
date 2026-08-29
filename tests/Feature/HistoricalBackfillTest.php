@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Feature;
 
+use App\Commands\Admin\Operations\HistoricalBackfillCommand;
 use App\Enums\AttendanceStatusEnum;
 use App\Enums\BookingSessionStatusEnum;
 use App\Enums\BookingSourceTypeEnum;
@@ -144,8 +145,8 @@ final class HistoricalBackfillTest extends TestCase
         ?float $rateOverride = null,
         ?int $paidAmount = null,
     ): Booking {
-        $plan = $this->validator->validate(
-            user: $this->client,
+        $plan = $this->validator->validate($this->client, new HistoricalBackfillCommand(
+            userId: $this->client->id,
             packageId: ($package ?? $this->package)->id,
             purchasedAt: $purchasedAt,
             currencyId: $this->currency->id,
@@ -153,7 +154,7 @@ final class HistoricalBackfillTest extends TestCase
             attendedSessionIds: $attended,
             missedSessionIds: $missed,
             exchangeRateOverride: $rateOverride,
-        );
+        ));
 
         return $this->service->backfill($plan, $this->admin->id);
     }
@@ -314,15 +315,15 @@ final class HistoricalBackfillTest extends TestCase
 
         $this->expectException(ValidationException::class);
 
-        $this->validator->validate(
-            user: $this->client,
+        $this->validator->validate($this->client, new HistoricalBackfillCommand(
+            userId: $this->client->id,
             packageId: $this->package->id,
             purchasedAt: $purchasedAt,
             currencyId: $this->currency->id,
             paidAmount: null,
             attendedSessionIds: $ids,
             missedSessionIds: [],
-        );
+        ));
     }
 
     #[Test]
@@ -335,15 +336,15 @@ final class HistoricalBackfillTest extends TestCase
 
         $this->expectException(ValidationException::class);
 
-        $this->validator->validate(
-            user: $this->client,
+        $this->validator->validate($this->client, new HistoricalBackfillCommand(
+            userId: $this->client->id,
             packageId: $this->package->id,
             purchasedAt: $purchasedAt,
             currencyId: $this->currency->id,
             paidAmount: null,
             attendedSessionIds: $ids,
             missedSessionIds: [],
-        );
+        ));
     }
 
     #[Test]

@@ -7,13 +7,15 @@ namespace App\Services\Booking;
 use App\Enums\BookingSourceTypeEnum;
 use App\Enums\BookingStatusEnum;
 use App\Models\Booking;
+use App\Repositories\Eloquent\Booking\BookingEloquentRepository;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
 class BookingFreezeService
 {
     public function __construct(
-        private readonly BookingService $bookingService
+        private readonly BookingService $bookingService,
+        private readonly BookingEloquentRepository $bookingRepository,
     ) {}
 
     /**
@@ -75,6 +77,22 @@ class BookingFreezeService
             }
 
             $remainingCredits = $booking->remaining_credits;
+
+            // The replacement below is always active with credits, so it always contends for
+            // unique_active_booking_per_user. Without this check the insert raised a raw 1062 and
+            // UnfreezeBookingAction handed the SQL string straight to the admin.
+            $this->bookingRepository->expireStaleActiveBookings($booking->user_id);
+
+            $blocking = $this->bookingRepository->findBlockingActiveBooking($booking->user_id, lock: true);
+
+            if ($blocking !== null) {
+                throw ValidationException::withMessages([
+                    'booking_id' => __('dashboard.operations_ui.errors.active_booking_exists', [
+                        'package_name' => $blocking->package?->name ?? '—',
+                        'remaining_credits' => $blocking->remaining_credits,
+                    ]),
+                ]);
+            }
 
             $booking->update([
                 'unfrozen_at' => now(),

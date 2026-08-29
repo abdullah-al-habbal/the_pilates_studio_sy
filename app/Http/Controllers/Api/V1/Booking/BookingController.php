@@ -6,6 +6,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Api\V1\Booking;
 
+use App\Commands\Booking\CreateBookingCommand;
 use App\Enums\Api\SuccessCodeEnum;
 use App\Http\Controllers\Api\BaseApiController;
 use App\Http\Requests\Api\V1\Booking\CreateBookingRequest;
@@ -74,22 +75,21 @@ class BookingController extends BaseApiController
         $paidAmount = $this->assignPackageValidator->validateAndComputeAmount(
             $package->id,
             $currencyId,
-            $request->filled('paid_amount') ? (int) $request->input('paid_amount') : null
+            $request->filled('paid_amount') ? (int) $request->input('paid_amount') : null,
         );
 
-        $booking = $this->bookingService->createFromPackage(
-            $user,
-            $package,
-            null,
-            $currencyId,
-            $paidAmount,
-            $this->pricingService->getExchangeRateForSnapshot($currencyId)
-        );
+        $booking = $this->bookingService->createFromPackage(new CreateBookingCommand(
+            user: $user,
+            package: $package,
+            currencyId: $currencyId,
+            paidAmount: $paidAmount,
+            exchangeRateSnapshot: $this->pricingService->getExchangeRateForSnapshot($currencyId),
+        ));
 
         return $this->created(
             new BookingResource($booking),
             SuccessCodeEnum::BOOKING_CREATED,
-            'Booking created successfully.'
+            'Booking created successfully.',
         );
     }
 }

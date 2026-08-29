@@ -20,7 +20,13 @@ const OperationsAPI = {
             const data = await response.json();
 
             if (!response.ok) {
-                throw new Error(data.message || "Something went wrong");
+                const error = new Error(data.message || "Something went wrong");
+                // Laravel returns { errors: { field: [msg, ...] } } on 422. Without carrying it
+                // across, callers can only ever show one flattened sentence and cannot attach a
+                // message to the input that caused it.
+                error.errors = data.errors ?? null;
+                error.status = response.status;
+                throw error;
             }
 
             return data;
@@ -63,13 +69,15 @@ const OperationsAPI = {
         return this.request("/admin/operations/packages");
     },
 
-    assignPackage(userId, packageId, currencyId) {
+    assignPackage(userId, packageId, currencyId, backfill = null) {
         return this.request(
             `/admin/operations/packages/${packageId}/assign`,
             "POST",
             {
                 user_id: userId,
                 currency_id: parseInt(currencyId, 10),
+                // Only a historical entry sends these; their absence is what marks a live sale.
+                ...(backfill ?? {}),
             },
         );
     },
@@ -179,6 +187,24 @@ const OperationsAPI = {
             currency_id: parseInt(data.currency_id, 10),
             amount: parseInt(data.amount, 10),
         });
+    },
+
+    getBackfillSessions({ userId, packageId, purchasedAt, cursor = null, perPage = 20, month = null, year = null }) {
+        const params = new URLSearchParams({
+            user_id: userId,
+            package_id: packageId,
+            purchased_at: purchasedAt,
+            per_page: perPage,
+        });
+        if (cursor) params.set("cursor", cursor);
+        if (month) params.set("month", month);
+        if (year) params.set("year", year);
+
+        return this.request(`/admin/operations/bookings/backfill/sessions?${params.toString()}`);
+    },
+
+    createClient(payload) {
+        return this.request("/admin/operations/clients", "POST", payload);
     },
 
     getPendingExpenses() {

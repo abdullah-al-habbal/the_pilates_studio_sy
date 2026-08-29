@@ -138,6 +138,7 @@
                 <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
                 Connected
             </div>
+            @include('admin.operations.partials.language-switcher')
             <button id="theme-toggle"
                 class="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -163,14 +164,19 @@
     <div id="toast-container" class="fixed bottom-6 right-6 z-[200] flex flex-col gap-3"></div>
 
     @php
-        $operationsTranslations = \Illuminate\Support\Arr::dot(
-            __('dashboard.operations_ui')
-        );
+        // Keyed WITH the operations_ui prefix, because that is how the JS asks for them:
+        // window.__('operations_ui.clients.no_clients'). Flattening the inner array alone
+        // yielded 'clients.no_clients', so every JS lookup missed and rendered its own key.
+        $operationsTranslations = \Illuminate\Support\Arr::dot([
+            'operations_ui' => __('dashboard.operations_ui'),
+        ]);
     @endphp
     <script>
+        // Hoisted out of the closure: this literal used to be re-materialised on every __()
+        // call, so every new key taxed every existing lookup.
+        window.OperationsTranslations = @json($operationsTranslations);
         window.__ = function(key) {
-            var t = @json($operationsTranslations);
-            return t[key] || key;
+            return window.OperationsTranslations[key] || key;
         };
     </script>
 

@@ -1,5 +1,13 @@
 # Phase 4 — Submit endpoint
 
+> **Superseded 2026-08-28.** The dedicated endpoint was merged into the assign endpoint:
+> historical entries now POST to `/admin/operations/packages/{packageId}/assign`, and the
+> presence of `purchased_at` is what routes them down the backfill path. `HistoricalBackfillAction`,
+> `HistoricalBackfillRequest` and `HistoricalBackfillHandler` were deleted; their behaviour lives in
+> `AssignPackageAction`, `AssignPackageRequest` and `AssignPackageHandler::recordHistorical()`.
+> The 19 endpoint tests moved with it and grew to 26. Everything below describes the original
+> shape and is kept for the reasoning, not the routes.
+
 **Blocking on:** Phase 2.
 
 ## Steps

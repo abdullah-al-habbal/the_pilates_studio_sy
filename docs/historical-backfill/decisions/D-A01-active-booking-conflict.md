@@ -44,7 +44,7 @@ Three defects were found while verifying the draft against the codebase.
 | Symbol | Location | Filters expiry? | Matches the DB column? |
 |---|---|---|---|
 | `BookingEloquentRepository::userHasActiveCreditBooking(int)` | `:73` | **No** | **Yes — correct predicate** |
-| `BookingEloquentRepository::existsActiveWithCredits(int)` | `:179` | Yes | No — leaky |
+| ~~`existsActiveWithCredits(int)`~~ | — | Yes | Deleted 2026-08-29; see [A16](../findings/A16-booking-insert-paths.md) |
 | `BookingService::assertNoActiveBooking(User)` | `BookingService.php:56` | Yes (via `:179`) | No — leaky |
 | `User::activeCreditBooking(): HasOne` | `User.php:233` | Yes | No — leaky |
 | `User::hasActiveBooking` attribute | `User.php:167` | Yes (via relation) | No — leaky |

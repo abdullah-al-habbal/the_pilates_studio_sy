@@ -6,6 +6,7 @@ import { initStoreTab } from './modules/store.js';
 import { initFinanceTab } from './modules/finance.js';
 import { initNotificationsTab } from './modules/notifications.js';
 import { initApprovalsTab } from './modules/approvals.js';
+import './modules/create-client.js';
 
 document.addEventListener('DOMContentLoaded', () => {
     initTheme();

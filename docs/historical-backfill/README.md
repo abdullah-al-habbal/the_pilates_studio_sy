@@ -42,6 +42,7 @@ historical client data from paper files into the system.
 | A13 | Backfill contaminates today's cash reconciliation | **Highest** | **Decided** — [D-A13](decisions/D-A13-global-purchased-at-adoption.md) |
 | A14 | `class_sessions` never reach `completed` | Medium | Accepted |
 | A15 | `booking_sessions` had no business date either | Medium | **Decided** — [D-A15](decisions/D-A15-booking-sessions-business-date.md) |
+| A16 | Five write paths, four descriptions of one index | High | **Fixed** — [A16](findings/A16-booking-insert-paths.md) |
 
 ## Decisions
 

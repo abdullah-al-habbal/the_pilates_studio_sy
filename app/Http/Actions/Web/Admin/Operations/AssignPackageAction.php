@@ -9,35 +9,38 @@ use App\Http\Requests\Admin\Operations\AssignPackageRequest;
 use App\Traits\ApiResponseTrait;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Validation\ValidationException;
 
 final readonly class AssignPackageAction
 {
     use ApiResponseTrait;
 
     public function __construct(
-        private AssignPackageHandler $handler
+        private AssignPackageHandler $handler,
     ) {}
 
     public function __invoke(AssignPackageRequest $request, int $packageId): JsonResponse
     {
+        $isHistorical = $request->isHistorical();
+
         try {
-            $booking = $this->handler->handle(
-                (int) $request->user_id,
-                $packageId,
-                $request->has('currency_id') ? (int) $request->currency_id : null,
-                $request->has('paid_amount') ? (int) $request->paid_amount : null,
-                createdBy: (int) auth()->id()
-            );
+            $command = $request->toCommand($packageId);
+            $booking = $this->handler->handle($command);
 
             return $this->created(
                 data: $booking,
-                message: 'Package assigned successfully.'
+                message: $isHistorical
+                    ? __('dashboard.operations_ui.historical_backfill.success')
+                    : __('dashboard.operations_ui.assign_package.success'),
             );
+        } catch (ValidationException $e) {
+            throw $e;
         } catch (\Throwable $e) {
-            Log::error('Operations - AssignPackage failed: '.$e->getMessage(), [
+            Log::error('Operations - AssignPackage failed: ' . $e->getMessage(), [
                 'exception' => $e,
                 'package_id' => $packageId,
-                'user_id' => $request->user_id,
+                'user_id' => $request->input('user_id'),
+                'historical' => $isHistorical,
             ]);
 
             return $this->unprocessable($e->getMessage());

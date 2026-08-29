@@ -20,3 +20,4 @@ A finding records **what the code does**. It never records a ruling — see [`..
 | [A13](A13-revenue-contamination.md) | Backfill contaminates today's cash reconciliation | **Highest** | Decided — [D-A13](../decisions/D-A13-global-purchased-at-adoption.md) |
 | [A14](A14-sessions-never-completed.md) | `class_sessions` never transition to `completed` | Medium | Accepted |
 | [A15](A15-booking-session-business-date.md) | `booking_sessions` had no business date either | Medium | Decided — [D-A15](../decisions/D-A15-booking-sessions-business-date.md) |
+| [A16](A16-booking-insert-paths.md) | Five write paths, four descriptions of one index | High | Fixed 2026-08-29 |

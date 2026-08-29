@@ -181,8 +181,8 @@ class BookingEloquentRepository
      *
      * The predicate is deliberately `status = active AND remaining_credits > 0` with **no expiry
      * clause**, because that is exactly the generated column behind the
-     * `unique_active_booking_per_user` unique index. `existsActiveWithCredits()` below also filters
-     * on expiry and therefore misses stale rows — bookings past `expires_at` that still say
+     * `unique_active_booking_per_user` unique index. An expiry-filtered predicate would miss
+     * stale rows — bookings past `expires_at` that still say
      * `active`, which are routine since nothing expires them on a schedule. Those rows still
      * occupy the index, so a guard built on the narrower predicate lets the caller through and
      * then dies on a raw 1062.
@@ -192,23 +192,35 @@ class BookingEloquentRepository
      *
      * @see docs/historical-backfill/decisions/D-A01-active-booking-conflict.md §C1
      */
-    public function findBlockingActiveBooking(int $userId): ?Booking
+    public function findBlockingActiveBooking(int $userId, bool $lock = false): ?Booking
     {
         return Booking::query()
             ->with('package')
             ->where('user_id', $userId)
             ->where('status', BookingStatusEnum::ACTIVE)
             ->where('remaining_credits', '>', 0)
+            ->when($lock, fn ($q) => $q->lockForUpdate())
             ->first();
     }
 
-    public function existsActiveWithCredits(int $userId): bool
+    /**
+     * Flip rows that are past their expiry but still marked active.
+     *
+     * Nothing expires bookings on a schedule, so these accumulate: useless to every feature that
+     * reads them, yet still occupying `active_user_id` and blocking the next purchase. This
+     * records a state change that already happened and was never written down.
+     *
+     * It only ever touches rows whose `expires_at` is in the past. A booking with credits and a
+     * future expiry is left alone and still blocks — this is reconciliation, not supersession.
+     */
+    public function expireStaleActiveBookings(int $userId): int
     {
-        return Booking::where('user_id', $userId)
+        return Booking::query()
+            ->where('user_id', $userId)
             ->where('status', BookingStatusEnum::ACTIVE)
-            ->where('remaining_credits', '>', 0)
-            ->where(fn ($q) => $q->whereNull('expires_at')->orWhere('expires_at', '>', now()))
-            ->exists();
+            ->whereNotNull('expires_at')
+            ->where('expires_at', '<', now())
+            ->update(['status' => BookingStatusEnum::EXPIRED->value]);
     }
 
     public function updateStatus(int $id, BookingStatusEnum $status): void

@@ -29,8 +29,12 @@ findBlockingActiveBooking(int $userId): ?Booking
 - **no expiry filter** — must match the generated column, per [D-A01 §C1](../decisions/D-A01-active-booking-conflict.md)
 - eager-load `package`, so one query serves both the boolean guard and the message placeholders
 
-Do **not** reuse `existsActiveWithCredits()` or `assertNoActiveBooking()`: both filter expiry
-and therefore miss stale active bookings ([A04](../findings/A04-no-expiry-scheduler.md)).
+> **Updated 2026-08-29.** This section used to warn against reusing `existsActiveWithCredits()`
+> and `assertNoActiveBooking()` because both filtered expiry and so missed stale rows
+> ([A04](../findings/A04-no-expiry-scheduler.md)). `existsActiveWithCredits()` has since been
+> deleted and `assertNoActiveBooking()` now uses this same predicate, under a row lock, after
+> reconciling stale rows. See [A16](../findings/A16-booking-insert-paths.md), which converged all
+> five write paths onto it.
 
 ### 2.2 Validator
 

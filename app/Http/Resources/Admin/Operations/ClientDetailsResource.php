@@ -23,6 +23,10 @@ class ClientDetailsResource extends JsonResource
             'status' => ClientDisplayStatusResolver::resolve($this->resource),
             'active_package' => BookingPackageMapper::toArray($this->activeCreditBooking),
             'frozen_package' => BookingPackageMapper::toArray($this->frozenCreditBooking),
+            // What the database would refuse, which is not the same as what the client can use:
+            // a booking past its expiry still holds the index. The UI needs this to disable the
+            // assign button rather than letting the admin click into a 422.
+            'blocking_package' => BookingPackageMapper::toArray($this->blockingActiveBooking),
             'activity_snapshot' => [
                 'total_sessions_attended' => $this->bookingSessions()
                     ->where('booking_sessions.attendance_status', 'attended')
