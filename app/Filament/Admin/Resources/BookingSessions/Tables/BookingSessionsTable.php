@@ -15,6 +15,7 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Carbon;
 
 class BookingSessionsTable
 {
@@ -34,7 +35,7 @@ class BookingSessionsTable
                     ->searchable(query: function (Builder $query, string $search): Builder {
                         return $query->whereHas(
                             'booking',
-                            fn ($q) => $q->where('id', 'like', "%{$search}%")
+                            fn ($q) => $q->where('id', 'like', "%{$search}%"),
                         );
                     })
                     ->toggleable(),
@@ -44,7 +45,7 @@ class BookingSessionsTable
                     ->searchable(query: function (Builder $query, string $search): Builder {
                         return $query->whereHas(
                             'booking.user',
-                            fn ($q) => $q->where('fullname', 'like', "%{$search}%")
+                            fn ($q) => $q->where('fullname', 'like', "%{$search}%"),
                         );
                     })
                     ->sortable(query: function (Builder $query, string $direction): Builder {
@@ -53,7 +54,7 @@ class BookingSessionsTable
                                 ->join('bookings', 'users.id', '=', 'bookings.user_id')
                                 ->whereColumn('bookings.id', 'booking_sessions.booking_id')
                                 ->limit(1),
-                            $direction
+                            $direction,
                         );
                     })
                     ->toggleable(),
@@ -84,7 +85,7 @@ class BookingSessionsTable
 
                 TextColumn::make('classSession.start_time')
                     ->label(__('dashboard.resources.booking_sessions.fields.start_time'))
-                    ->time('H:i')
+                    ->time('g:i A')
                     ->sortable()
                     ->toggleable(),
 
@@ -147,9 +148,9 @@ class BookingSessionsTable
                                 $classTitle = $session->class?->getTranslation('title', $locale);
 
                                 return [
-                                    $session->id => $classTitle.' - '.
-                                        $session->date->format('M d, Y').' '.
-                                        substr($session->start_time, 0, 5),
+                                    $session->id => $classTitle . ' - ' .
+                                        $session->date->format('M d, Y') . ' ' .
+                                        Carbon::parse($session->start_time)->format('g:i A'),
                                 ];
                             })
                             ->toArray();

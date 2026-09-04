@@ -9,6 +9,7 @@ use App\Enums\BookingSessionStatusEnum;
 use App\Models\Classes;
 use App\Repositories\Eloquent\Classes\ClassesEloquentRepository;
 use App\Repositories\Eloquent\ClassSession\ClassSessionEloquentRepository;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -48,7 +49,7 @@ final readonly class ApplyCapacityToFutureSessionsHandler
                 ->count();
 
             if ($reserved > $newCapacity) {
-                $failures[] = "Session on {$session->date->format('M j, Y')} at {$session->start_time} has {$reserved} reserved booking(s), which exceeds the new capacity of {$newCapacity}.";
+                $failures[] = "Session on {$session->date->format('M j, Y')} at " . Carbon::parse($session->start_time)->format('g:i A') . " has {$reserved} reserved booking(s), which exceeds the new capacity of {$newCapacity}.";
             }
         }
 
@@ -81,7 +82,7 @@ final readonly class ApplyCapacityToFutureSessionsHandler
             'sessions' => $futureSessions->map(fn ($s) => [
                 'id' => $s->id,
                 'date' => $s->date->format('M j, Y'),
-                'time' => substr($s->start_time, 0, 5),
+                'time' => Carbon::parse($s->start_time)->format('g:i A'),
             ])->toArray(),
         ];
     }

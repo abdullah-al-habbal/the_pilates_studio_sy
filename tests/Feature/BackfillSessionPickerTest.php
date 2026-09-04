@@ -228,14 +228,20 @@ final class BackfillSessionPickerTest extends TestCase
         $this->pastSession(now()->subDays(30));
         $this->pastSession(now()->subDays(10), start: '07:00:00');
 
-        $dates = collect($this->fetch()->assertOk()->json('data'))
-            ->map(fn (array $s) => $s['date'] . ' ' . $s['start_time'])
+        // Display strings like "9:00 AM" do not sort lexically, so the expected
+        // order must come from the raw columns the query actually orders by.
+        $responseIds = collect($this->fetch()->assertOk()->json('data'))
+            ->pluck('id')
             ->all();
 
-        $sorted = $dates;
-        sort($sorted);
+        $expectedIds = ClassSession::query()
+            ->orderBy('date')
+            ->orderBy('start_time')
+            ->orderBy('id')
+            ->pluck('id')
+            ->all();
 
-        $this->assertSame($sorted, $dates);
+        $this->assertSame($expectedIds, $responseIds);
     }
 
     #[Test]
@@ -247,8 +253,8 @@ final class BackfillSessionPickerTest extends TestCase
 
         $this->assertSame($session->id, $row['id']);
         $this->assertSame($session->date->toDateString(), $row['date']);
-        $this->assertSame('09:00', $row['start_time']);
-        $this->assertSame('10:00', $row['end_time']);
+        $this->assertSame('9:00 AM', $row['start_time']);
+        $this->assertSame('10:00 AM', $row['end_time']);
         $this->assertSame('Layla', $row['instructor_name']);
         $this->assertNotNull($row['class_title']);
         $this->assertSame(12, $row['total_spots']);

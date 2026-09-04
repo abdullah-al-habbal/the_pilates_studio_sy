@@ -28,17 +28,12 @@
         aria-live="polite" aria-atomic="false"></div>
 
     @php
-        // Keyed WITH the scheduler_ui prefix, because that is how the JS asks for them:
-        // window.__('scheduler_ui.templates.manage_button'). Flattening the inner array
-        // alone yielded 'templates.manage_button', so every JS lookup missed and
-        // rendered its own key instead of the translation.
-        $schedulerTranslations = \Illuminate\Support\Arr::dot([
+        use Illuminate\Support\Arr;
+        $schedulerTranslations = Arr::dot([
             'scheduler_ui' => __('dashboard.scheduler_ui'),
         ]);
     @endphp
     <script>
-        // Hoisted out of the closure: this literal used to be re-materialised on every __()
-        // call, so every new key taxed every existing lookup.
         window.SchedulerTranslations = @json($schedulerTranslations);
         window.__ = function(key) {
             return window.SchedulerTranslations[key] || key;

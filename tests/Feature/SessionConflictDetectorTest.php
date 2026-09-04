@@ -125,7 +125,7 @@ final class SessionConflictDetectorTest extends TestCase
         $this->assertCount(
             $expectConflict ? 1 : 0,
             $conflicts,
-            "{$start}-{$end} against 16:00-17:00"
+            "{$start}-{$end} against 16:00-17:00",
         );
     }
 
@@ -280,7 +280,7 @@ final class SessionConflictDetectorTest extends TestCase
             '2026-08-02',
             '16:00:00',
             '17:00:00',
-            status: ClassSessionStatusEnum::CANCELLED->value
+            status: ClassSessionStatusEnum::CANCELLED->value,
         );
 
         $this->assertSame([], $this->detect('2026-08-02', '16:00', '17:00'));
@@ -301,7 +301,7 @@ final class SessionConflictDetectorTest extends TestCase
             '2026-08-02',
             '16:00:00',
             '17:00:00',
-            status: ClassSessionStatusEnum::COMPLETED->value
+            status: ClassSessionStatusEnum::COMPLETED->value,
         );
 
         $this->assertCount(1, $this->detect('2026-08-02', '16:00', '17:00'));
@@ -342,7 +342,7 @@ final class SessionConflictDetectorTest extends TestCase
             $message = collect($exception->errors())->flatten()->implode(' ');
 
             $this->assertStringContainsString('2026-09-09', $message);
-            $this->assertStringContainsString('16:00-17:00', $message);
+            $this->assertStringContainsString('4:00 PM-5:00 PM', $message);
         }
     }
 
@@ -356,7 +356,7 @@ final class SessionConflictDetectorTest extends TestCase
         $this->detector->assertNoDuplicates(
             [Carbon::parse('2026-08-09'), Carbon::parse('2026-08-09')],
             '16:00',
-            $class->id
+            $class->id,
         );
     }
 
@@ -373,7 +373,7 @@ final class SessionConflictDetectorTest extends TestCase
         $this->detector->assertNoDuplicates(
             [Carbon::parse('2026-08-02')],
             '16:00',
-            $class->id
+            $class->id,
         );
     }
 }

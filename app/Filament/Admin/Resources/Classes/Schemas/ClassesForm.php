@@ -219,7 +219,7 @@ class ClassesForm
                                     ->required()
                                     ->live()
                                     ->rule(self::scheduleWindowRule())
-                                    ->displayFormat('H:i')
+                                    ->displayFormat('g:i A')
                                     ->native(false)
                                     ->seconds(false)
                                     ->disabled(fn (?Classes $record) => $record?->exists && $record->hasBookedSessions())
@@ -231,7 +231,7 @@ class ClassesForm
                                     ->required()
                                     ->live()
                                     ->rule(self::scheduleWindowRule())
-                                    ->displayFormat('H:i')
+                                    ->displayFormat('g:i A')
                                     ->native(false)
                                     ->seconds(false)
                                     ->after('start_time')
@@ -281,6 +281,7 @@ class ClassesForm
                         Repeater::make('images')
                             ->label(__('dashboard.resources.classes.fields.additional_images'))
                             ->relationship('images')
+                            ->defaultItems(0)
                             ->schema([
                                 FileUpload::make('url')
                                     ->label(__('dashboard.resources.classes.fields.image'))
@@ -290,7 +291,7 @@ class ClassesForm
                                     ->maxSize(5120)
                                     ->directory('classes/gallery')
                                     ->visibility('public')
-                                    ->required(fn (string $operation) => $operation === 'create')
+                                    ->required()
                                     ->columnSpan(2),
 
                                 Toggle::make('is_primary')

@@ -6,6 +6,7 @@ namespace App\Http\Resources\Admin\Scheduler;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
+use Illuminate\Support\Carbon;
 
 final class DailySessionResource extends JsonResource
 {
@@ -36,8 +37,8 @@ final class DailySessionResource extends JsonResource
             'id' => $session->id,
             'title' => $title,
             'instructor' => $instructor,
-            'start_time' => substr($session->start_time ?? '00:00', 0, 5),
-            'end_time' => substr($session->end_time ?? '00:00', 0, 5),
+            'start_time' => Carbon::parse($session->start_time ?? '00:00')->format('g:i A'),
+            'end_time' => Carbon::parse($session->end_time ?? '00:00')->format('g:i A'),
             'duration_minutes' => $session->duration_minutes,
             'capacity' => $capacity,
             'reserved' => $reserved,

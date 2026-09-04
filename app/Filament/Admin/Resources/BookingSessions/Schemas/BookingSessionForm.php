@@ -12,6 +12,7 @@ use Filament\Forms\Components\Select;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
+use Illuminate\Support\Carbon;
 
 class BookingSessionForm
 {
@@ -59,11 +60,11 @@ class BookingSessionForm
                                             $classTitle = $session->class?->getTranslation('title', $locale);
 
                                             return [
-                                                $session->id => $classTitle.' - '.
-                                                    $session->date->format('M d, Y').' '.
-                                                    substr($session->start_time, 0, 5).'-'.
-                                                    substr($session->end_time, 0, 5).
-                                                    " ({$session->available_spots} ".__('dashboard.resources.booking_sessions.units.spots_left').')',
+                                                $session->id => $classTitle . ' - ' .
+                                                    $session->date->format('M d, Y') . ' ' .
+                                                    Carbon::parse($session->start_time)->format('g:i A') . '-' .
+                                                    Carbon::parse($session->end_time)->format('g:i A') .
+                                                    " ({$session->available_spots} " . __('dashboard.resources.booking_sessions.units.spots_left') . ')',
                                             ];
                                         });
                                 })

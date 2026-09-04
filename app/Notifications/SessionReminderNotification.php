@@ -8,6 +8,7 @@ use App\Notifications\Channels\FcmChannel;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Notification;
+use Illuminate\Support\Carbon;
 
 class SessionReminderNotification extends Notification implements ShouldQueue
 {
@@ -55,7 +56,7 @@ class SessionReminderNotification extends Notification implements ShouldQueue
         $instructor = $class->instructor?->name ?? 'Instructor';
 
         $date = $this->session->date->format('M d, Y');
-        $time = $this->session->start_time;
+        $time = Carbon::parse($this->session->start_time)->format('g:i A');
 
         $template = NotificationTemplate::query()
             ->where('key', 'session_reminder')
@@ -71,14 +72,14 @@ class SessionReminderNotification extends Notification implements ShouldQueue
             $classTitle,
             $instructor,
             $time,
-            $date
+            $date,
         );
 
         $body = $template
             ? str_replace(
                 [':class', ':instructor', ':time', ':date'],
                 [$classTitle, $instructor, $time, $date],
-                $template->getResolvedBody($locale)
+                $template->getResolvedBody($locale),
             )
             : $defaultBody;
 

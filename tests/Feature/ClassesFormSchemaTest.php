@@ -6,7 +6,10 @@ namespace Tests\Feature;
 
 use App\Filament\Admin\Resources\Classes\Schemas\ClassesForm;
 use App\Models\Instructor;
+use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TimePicker;
 use Filament\Schemas\Schema;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use PHPUnit\Framework\Attributes\Test;
@@ -80,6 +83,67 @@ final class ClassesFormSchemaTest extends TestCase
         $this->assertSame(3, $data['recurrence_pattern_id']);
     }
 
+    // ------------------------------------------------------- display format
+
+    #[Test]
+    public function the_class_times_use_the_12_hour_display_format(): void
+    {
+        $schema = ClassesForm::configure(Schema::make());
+
+        $pickers = [];
+
+        $collect = function (array $components) use (&$collect, &$pickers): void {
+            foreach ($components as $component) {
+                if ($component instanceof TimePicker && in_array($component->getName(), ['start_time', 'end_time'], true)) {
+                    $pickers[$component->getName()] = $component;
+                }
+
+                if (method_exists($component, 'getDefaultChildComponents')) {
+                    $collect($component->getDefaultChildComponents());
+                }
+            }
+        };
+
+        $collect($schema->getComponents());
+
+        $this->assertSame('g:i A', $pickers['start_time']->getDisplayFormat());
+        $this->assertSame('g:i A', $pickers['end_time']->getDisplayFormat());
+    }
+
+    // ----------------------------------------------------------- image items
+
+    #[Test]
+    public function the_images_repeater_seeds_no_items_and_requires_an_upload_per_item(): void
+    {
+        $schema = ClassesForm::configure(Schema::make());
+
+        $repeater = null;
+        $urlUpload = null;
+
+        $collect = function (array $components) use (&$collect, &$repeater, &$urlUpload): void {
+            foreach ($components as $component) {
+                if ($component instanceof Repeater && $component->getName() === 'images') {
+                    $repeater = $component;
+                }
+
+                if ($component instanceof FileUpload && $component->getName() === 'url') {
+                    $urlUpload = $component;
+                }
+
+                if (method_exists($component, 'getDefaultChildComponents')) {
+                    $collect($component->getDefaultChildComponents());
+                }
+            }
+        };
+
+        $collect($schema->getComponents());
+
+        $this->assertNotNull($repeater, 'The images repeater is missing from the form.');
+        $this->assertNotNull($urlUpload, 'The url FileUpload is missing from the images repeater.');
+        $this->assertSame([], $repeater->getDefaultState(), 'The repeater must start with zero items.');
+        $this->assertTrue($urlUpload->isRequired(), 'Every image item must require an uploaded file.');
+    }
+
     #[Test]
     public function an_empty_weekday_list_is_treated_as_interval_mode(): void
     {
@@ -129,7 +193,7 @@ final class ClassesFormSchemaTest extends TestCase
         $this->assertNotNull($select, 'instructor_id select is missing from the form.');
         $this->assertTrue(
             $select->hasCreateOptionActionFormSchema(),
-            'instructor_id should let an admin add an instructor without leaving the page.'
+            'instructor_id should let an admin add an instructor without leaving the page.',
         );
     }
 

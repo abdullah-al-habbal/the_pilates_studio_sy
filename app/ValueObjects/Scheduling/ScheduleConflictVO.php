@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\ValueObjects\Scheduling;
 
+use Illuminate\Support\Carbon;
+
 class ScheduleConflictVO
 {
     public const REASON_INSTRUCTOR = 'instructor';
@@ -33,10 +35,10 @@ class ScheduleConflictVO
     {
         return __('dashboard.resources.classes.validation.conflict_line', [
             'date' => $this->date,
-            'start' => substr($this->startTime, 0, 5),
-            'end' => substr($this->endTime, 0, 5),
+            'start' => Carbon::parse($this->startTime)->format('g:i A'),
+            'end' => Carbon::parse($this->endTime)->format('g:i A'),
             'class' => $this->classTitle,
-            'reason' => __('dashboard.resources.classes.validation.conflict_reason_'.$this->reason),
+            'reason' => __('dashboard.resources.classes.validation.conflict_reason_' . $this->reason),
         ]);
     }
 }

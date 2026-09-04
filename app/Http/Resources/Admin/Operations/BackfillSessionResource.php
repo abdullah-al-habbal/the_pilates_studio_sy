@@ -7,6 +7,7 @@ namespace App\Http\Resources\Admin\Operations;
 use App\Models\ClassSession;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
+use Illuminate\Support\Carbon;
 
 /**
  * One selectable past session in the historical backfill picker.
@@ -26,8 +27,8 @@ final class BackfillSessionResource extends JsonResource
         return [
             'id' => $session->id,
             'date' => $session->date->toDateString(),
-            'start_time' => substr((string) $session->start_time, 0, 5),
-            'end_time' => substr((string) $session->end_time, 0, 5),
+            'start_time' => Carbon::parse($session->start_time)->format('g:i A'),
+            'end_time' => Carbon::parse($session->end_time)->format('g:i A'),
             'class_title' => $class?->getTranslation('title', app()->getLocale()),
             'instructor_name' => $class?->instructor?->name,
             'total_spots' => $session->total_spots,

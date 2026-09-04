@@ -86,7 +86,7 @@ class ClassesTable
 
                 TextColumn::make('start_time')
                     ->label(__('dashboard.resources.classes.fields.start_time'))
-                    ->time('H:i')
+                    ->time('g:i A')
                     ->sortable()
                     ->icon('heroicon-o-clock')
                     ->toggleable(),

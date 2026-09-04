@@ -93,13 +93,13 @@ class ClassesInfolist
 
                     TextEntry::make('start_time')
                         ->label(__('dashboard.resources.classes.fields.start_time'))
-                        ->time('H:i')
+                        ->time('g:i A')
                         ->icon('heroicon-o-play')
                         ->iconPosition(IconPosition::Before),
 
                     TextEntry::make('end_time')
                         ->label(__('dashboard.resources.classes.fields.end_time'))
-                        ->time('H:i')
+                        ->time('g:i A')
                         ->icon('heroicon-o-stop')
                         ->iconPosition(IconPosition::Before),
 

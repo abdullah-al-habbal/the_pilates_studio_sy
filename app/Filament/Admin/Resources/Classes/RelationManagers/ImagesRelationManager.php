@@ -43,7 +43,7 @@ class ImagesRelationManager extends RelationManager
                     ->maxSize(5120)
                     ->directory('classes/gallery')
                     ->visibility('public')
-                    ->required(fn (string $operation) => $operation === 'create')
+                    ->required()
                     ->columnSpanFull(),
 
                 Toggle::make('is_primary')
@@ -156,7 +156,7 @@ class ImagesRelationManager extends RelationManager
                 }
                 $imageUrl = $record->image_url;
 
-                return '<img src="'.e($imageUrl).'" alt="Image" style="width:50px;height:50px;object-fit:cover;border-radius:9999px;" />';
+                return '<img src="' . e($imageUrl) . '" alt="Image" style="width:50px;height:50px;object-fit:cover;border-radius:9999px;" />';
             })
             ->html();
     }

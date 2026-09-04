@@ -61,7 +61,7 @@ class SessionsRelationManager extends RelationManager
                         ->required()
                         ->live()
                         ->rule($this->conflictRule())
-                        ->displayFormat('H:i')
+                        ->displayFormat('g:i A')
                         ->native(false)
                         ->seconds(false),
 
@@ -70,7 +70,7 @@ class SessionsRelationManager extends RelationManager
                         ->required()
                         ->live()
                         ->rule($this->conflictRule())
-                        ->displayFormat('H:i')
+                        ->displayFormat('g:i A')
                         ->native(false)
                         ->seconds(false)
                         ->after('start_time'),
@@ -105,12 +105,12 @@ class SessionsRelationManager extends RelationManager
 
                     TextEntry::make('start_time')
                         ->label(__('dashboard.resources.class_sessions.fields.start_time'))
-                        ->time('H:i')
+                        ->time('g:i A')
                         ->icon('heroicon-o-play'),
 
                     TextEntry::make('end_time')
                         ->label(__('dashboard.resources.class_sessions.fields.end_time'))
-                        ->time('H:i')
+                        ->time('g:i A')
                         ->icon('heroicon-o-stop'),
 
                     TextEntry::make('total_spots')
@@ -138,12 +138,12 @@ class SessionsRelationManager extends RelationManager
 
                 TextColumn::make('start_time')
                     ->label(__('dashboard.resources.class_sessions.fields.start_time'))
-                    ->time('H:i')
+                    ->time('g:i A')
                     ->sortable(),
 
                 TextColumn::make('end_time')
                     ->label(__('dashboard.resources.class_sessions.fields.end_time'))
-                    ->time('H:i')
+                    ->time('g:i A')
                     ->sortable(),
 
                 TextColumn::make('total_spots')

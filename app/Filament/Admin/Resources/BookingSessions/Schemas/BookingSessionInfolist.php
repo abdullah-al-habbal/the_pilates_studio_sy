@@ -9,6 +9,7 @@ use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Filament\Support\Enums\FontWeight;
 use Filament\Support\Enums\IconPosition;
+use Illuminate\Support\Carbon;
 
 class BookingSessionInfolist
 {
@@ -86,8 +87,8 @@ class BookingSessionInfolist
                                         ->label(__('dashboard.resources.booking_sessions.fields.time'))
                                         ->state(
                                             fn ($record) => $record->classSession ?
-                                            substr($record->classSession->start_time, 0, 5) . ' - ' .
-                                            substr($record->classSession->end_time, 0, 5) : '—',
+                                            Carbon::parse($record->classSession->start_time)->format('g:i A') . ' - ' .
+                                            Carbon::parse($record->classSession->end_time)->format('g:i A') : '—',
                                         )
                                         ->icon('heroicon-o-clock'),
 

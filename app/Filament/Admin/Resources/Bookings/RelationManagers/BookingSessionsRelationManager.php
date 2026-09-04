@@ -18,6 +18,7 @@ use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Carbon;
 
 class BookingSessionsRelationManager extends RelationManager
 {
@@ -37,7 +38,7 @@ class BookingSessionsRelationManager extends RelationManager
                     )
                     ->modifyQueryUsing(fn (Builder $query) => $query->where('status', ClassSessionStatusEnum::SCHEDULED->value))
                     ->getOptionLabelFromRecordUsing(
-                        fn (ClassSession $record) => "{$record->date} {$record->start_time}"
+                        fn (ClassSession $record) => "{$record->date} " . Carbon::parse($record->start_time)->format('g:i A'),
                     )
                     ->searchable()
                     ->preload()
@@ -68,7 +69,7 @@ class BookingSessionsRelationManager extends RelationManager
 
                 TextColumn::make('classSession.start_time')
                     ->label('Start')
-                    ->time('H:i'),
+                    ->time('g:i A'),
 
                 TextColumn::make('status')
                     ->label(__('dashboard.resources.booking_sessions.fields.status'))

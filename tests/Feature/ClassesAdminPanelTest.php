@@ -65,8 +65,9 @@ final class ClassesAdminPanelTest extends TestCase
             'total_spots' => 8,
             'status' => 'active',
 
-            // The images Repeater seeds one empty row whose upload is required
-            // on create; this feature has nothing to say about it.
+            // The images Repeater seeds zero items (defaultItems(0)): a class
+            // may be created without images, and any added item requires an
+            // uploaded file. This feature has nothing to say about it.
             'images' => [],
         ], $overrides);
     }

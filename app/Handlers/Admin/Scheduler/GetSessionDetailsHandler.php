@@ -9,12 +9,13 @@ use App\Models\BookingSession;
 use App\Queries\Admin\Scheduler\GetSessionDetailsQuery;
 use App\Repositories\Eloquent\ClassSession\ClassSessionEloquentRepository;
 use App\Services\Log\LoggingService;
+use Illuminate\Support\Carbon;
 
 final readonly class GetSessionDetailsHandler
 {
     public function __construct(
         private ClassSessionEloquentRepository $repository,
-        private LoggingService $logger
+        private LoggingService $logger,
     ) {}
 
     public function handle(GetSessionDetailsQuery $query): array
@@ -57,7 +58,7 @@ final readonly class GetSessionDetailsHandler
                         'name' => $bs->booking->user->fullname ?? '[MISSING:user.fullname]',
                         'phone' => $bs->booking->user->phone_number ?? '[MISSING:user.phone_number]',
                         'initial' => mb_strtoupper(
-                            mb_substr($bs->booking->user->fullname ?? '?', 0, 1)
+                            mb_substr($bs->booking->user->fullname ?? '?', 0, 1),
                         ),
                         'credits' => $bs->booking->user->total_remaining_credits ?? 0,
                     ]
@@ -78,8 +79,8 @@ final readonly class GetSessionDetailsHandler
             'title' => $title,
             'instructor' => $instructor,
             'date' => $session->date?->format('M j, Y') ?? '[MISSING:session.date]',
-            'start_time' => isset($session->start_time) ? substr($session->start_time, 0, 5) : '[MISSING:session.start_time]',
-            'end_time' => isset($session->end_time) ? substr($session->end_time, 0, 5) : '[MISSING:session.end_time]',
+            'start_time' => isset($session->start_time) ? Carbon::parse($session->start_time)->format('g:i A') : '[MISSING:session.start_time]',
+            'end_time' => isset($session->end_time) ? Carbon::parse($session->end_time)->format('g:i A') : '[MISSING:session.end_time]',
             'capacity' => $capacity,
             'reserved' => $reserved,
             'fill_pct' => $fillPct,

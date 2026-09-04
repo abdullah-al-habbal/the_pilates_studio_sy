@@ -37,14 +37,7 @@ class ClassesSeeder extends Seeder
         if (! $weeklyId || ! $biweeklyId) {
             throw new SeederDependencyMissingException('RecurrencePattern seed dependency missing.');
         }
-
-        /*
-         * Keep the seeded classes relative to the current date.
-         *
-         * The schedule starts several months in the past and ends one month
-         * in the past, giving ClassSessionSeeder enough historical sessions
-         * for testing Record Past Purchase.
-         */
+        
         $startDate = now()->subMonths(7)->startOfDay();
         $endDate = now()->subMonth()->endOfMonth()->startOfDay();
 
@@ -74,7 +67,6 @@ class ClassesSeeder extends Seeder
             [
                 'instructor_id' => $adamId,
                 'class_category_id' => $matId,
-                // Weekday mode: runs only on Sundays and Wednesdays.
                 'recurrence_pattern_id' => null,
                 'weekdays' => [WeekdayEnum::SUNDAY->value, WeekdayEnum::WEDNESDAY->value],
                 'title' => [

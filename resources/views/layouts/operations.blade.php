@@ -149,7 +149,6 @@
         </div>
     </nav>
 
-    <!-- <main class="w-full px-4 py-6 lg:px-6"></main> -->
     <main class="w-full px-6 py-6">
         @yield('content')
     </main>
@@ -164,16 +163,12 @@
     <div id="toast-container" class="fixed bottom-6 right-6 z-[200] flex flex-col gap-3"></div>
 
     @php
-        // Keyed WITH the operations_ui prefix, because that is how the JS asks for them:
-        // window.__('operations_ui.clients.no_clients'). Flattening the inner array alone
-        // yielded 'clients.no_clients', so every JS lookup missed and rendered its own key.
-        $operationsTranslations = \Illuminate\Support\Arr::dot([
+        use Illuminate\Support\Arr;
+        $operationsTranslations = Arr::dot([
             'operations_ui' => __('dashboard.operations_ui'),
         ]);
     @endphp
     <script>
-        // Hoisted out of the closure: this literal used to be re-materialised on every __()
-        // call, so every new key taxed every existing lookup.
         window.OperationsTranslations = @json($operationsTranslations);
         window.__ = function(key) {
             return window.OperationsTranslations[key] || key;
