@@ -186,7 +186,7 @@ class ClassesForm
                             ->helperText(__('dashboard.resources.classes.helpers.recurrence_pattern'))
                             ->columnSpanFull(),
 
-                        Grid::make(3)->schema([
+                        Grid::make(2)->schema([
                             DatePicker::make('start_date')
                                 ->label(__('dashboard.resources.classes.fields.start_date'))
                                 ->required()
@@ -211,28 +211,28 @@ class ClassesForm
                                 ->disabled(fn (?Classes $record) => $record?->exists && $record->hasBookedSessions())
                                 ->helperText(__('dashboard.resources.classes.helpers.end_date'))
                                 ->columnSpan(1),
-
-                            Grid::make(2)->schema([
-                                AmPmTimePicker::make('start_time')
-                                    ->label(__('dashboard.resources.classes.fields.start_time'))
-                                    ->required()
-                                    ->live()
-                                    ->rule(self::scheduleWindowRule())
-                                    ->disabled(fn (?Classes $record) => $record?->exists && $record->hasBookedSessions())
-                                    ->helperText(__('dashboard.resources.classes.helpers.start_time'))
-                                    ->columnSpan(1),
-
-                                AmPmTimePicker::make('end_time')
-                                    ->label(__('dashboard.resources.classes.fields.end_time'))
-                                    ->required()
-                                    ->live()
-                                    ->rule(self::scheduleWindowRule())
-                                    ->after('start_time')
-                                    ->disabled(fn (?Classes $record) => $record?->exists && $record->hasBookedSessions())
-                                    ->helperText(__('dashboard.resources.classes.helpers.end_time'))
-                                    ->columnSpan(1),
-                            ])->columnSpan(1),
                         ]),
+
+                        Grid::make(2)->schema([
+                            AmPmTimePicker::make('start_time')
+                                ->label(__('dashboard.resources.classes.fields.start_time'))
+                                ->required()
+                                ->live()
+                                ->rule(self::scheduleWindowRule())
+                                ->disabled(fn (?Classes $record) => $record?->exists && $record->hasBookedSessions())
+                                ->helperText(__('dashboard.resources.classes.helpers.start_time'))
+                                ->columnSpan(1),
+
+                            AmPmTimePicker::make('end_time')
+                                ->label(__('dashboard.resources.classes.fields.end_time'))
+                                ->required()
+                                ->live()
+                                ->rule(self::scheduleWindowRule())
+                                ->after('start_time')
+                                ->disabled(fn (?Classes $record) => $record?->exists && $record->hasBookedSessions())
+                                ->helperText(__('dashboard.resources.classes.helpers.end_time'))
+                                ->columnSpan(1),
+                        ])->columnSpanFull(),
                     ]),
 
                 Section::make(__('dashboard.resources.classes.sections.capacity'))
