@@ -44,6 +44,7 @@ class ClassesForm
                 Section::make(__('dashboard.resources.classes.sections.basic_info'))
                     ->description(__('dashboard.resources.classes.sections.basic_info_desc'))
                     ->icon('heroicon-o-information-circle')
+                    ->columnSpanFull()
                     ->schema([
                         Grid::make(2)->schema([
                             Select::make('instructor_id')
@@ -107,8 +108,12 @@ class ClassesForm
 
                         RichEditor::make('about')
                             ->label(__('dashboard.resources.classes.fields.about'))
-                            ->required()
                             ->columnSpanFull()
+                            ->dehydrateStateUsing(static function (?string $state): ?string {
+                                logger('ABOUT_DEHYDRATE', ['received' => $state]);
+
+                                return blank(strip_tags((string) $state)) ? null : $state;
+                            })
                             ->helperText(__('dashboard.resources.classes.helpers.about')),
                     ]),
 
@@ -121,6 +126,7 @@ class ClassesForm
                 Section::make(__('dashboard.resources.classes.sections.schedule'))
                     ->description(__('dashboard.resources.classes.sections.schedule_desc'))
                     ->icon('heroicon-o-calendar')
+                    ->columnSpanFull()
                     ->schema([
                         ToggleButtons::make('schedule_mode')
                             ->label(__('dashboard.resources.classes.fields.schedule_mode'))
@@ -232,6 +238,7 @@ class ClassesForm
                 Section::make(__('dashboard.resources.classes.sections.capacity'))
                     ->description(__('dashboard.resources.classes.sections.capacity_desc'))
                     ->icon('heroicon-o-users')
+                    ->columnSpanFull()
                     ->schema([
                         Grid::make(2)->schema([
                             TextInput::make('total_spots')
@@ -264,6 +271,7 @@ class ClassesForm
                     ->description(__('dashboard.resources.classes.sections.images_desc'))
                     ->icon('heroicon-o-photo')
                     ->collapsible()
+                    ->columnSpanFull()
                     ->schema([
                         Repeater::make('images')
                             ->label(__('dashboard.resources.classes.fields.additional_images'))

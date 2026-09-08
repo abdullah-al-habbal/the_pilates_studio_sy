@@ -15,6 +15,7 @@ use App\Models\RecurrencePattern;
 use App\Models\User;
 use Filament\Facades\Filament;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
 use Livewire\Livewire;
 use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
@@ -195,6 +196,31 @@ final class ClassesAdminPanelTest extends TestCase
             ->assertHasFormErrors();
 
         $this->assertSame(1, Classes::count());
+    }
+
+    #[Test]
+    public function a_class_can_be_created_without_an_about_description(): void
+    {
+        Livewire::test(CreateClasses::class)
+            ->fillForm($this->formData(['about' => null]))
+            ->call('create')
+            ->assertHasNoFormErrors();
+
+        $class = Classes::firstOrFail();
+
+        // The about column is genuinely nullable at the schema level, and a
+        // blank editor persists a missing translation (null) rather than an
+        // empty document. Spatie renders a null translation as ''.
+        $this->assertSame(1, Classes::count());
+        $this->assertSame('YES', DB::selectOne('SHOW COLUMNS FROM classes LIKE "about"')->Null);
+        $this->assertNull($class->getTranslations('about')['en'] ?? null);
+        $this->assertSame('', $class->about);
+
+        // Edit mode loads the class and the editor represents the missing
+        // description as an empty paragraph (no content, stable round trip).
+        Livewire::test(EditClasses::class, ['record' => $class->getKey()])
+            ->assertSuccessful()
+            ->assertFormSet(['about' => '<p></p>']);
     }
 
     #[Test]
