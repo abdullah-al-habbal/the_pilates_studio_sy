@@ -886,6 +886,8 @@ return [
                 'end_date' => 'End Date',
                 'start_time' => 'Start Time',
                 'end_time' => 'End Time',
+                'start_time_hour' => 'Hour',
+                'start_time_minutes' => 'Minutes',
                 'duration' => 'Duration',
                 'total_spots' => 'Total Spots',
                 'status' => 'Status',

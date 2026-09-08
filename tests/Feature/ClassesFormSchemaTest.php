@@ -5,11 +5,11 @@ declare(strict_types=1);
 namespace Tests\Feature;
 
 use App\Filament\Admin\Resources\Classes\Schemas\ClassesForm;
+use App\Filament\Forms\Components\AmPmTimePicker;
 use App\Models\Instructor;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
-use Filament\Forms\Components\TimePicker;
 use Filament\Schemas\Schema;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use PHPUnit\Framework\Attributes\Test;
@@ -83,10 +83,10 @@ final class ClassesFormSchemaTest extends TestCase
         $this->assertSame(3, $data['recurrence_pattern_id']);
     }
 
-    // ------------------------------------------------------- display format
+    // ------------------------------------------------------- time picker
 
     #[Test]
-    public function the_class_times_use_the_12_hour_display_format(): void
+    public function the_class_times_use_the_12_hour_am_pm_picker(): void
     {
         $schema = ClassesForm::configure(Schema::make());
 
@@ -94,7 +94,7 @@ final class ClassesFormSchemaTest extends TestCase
 
         $collect = function (array $components) use (&$collect, &$pickers): void {
             foreach ($components as $component) {
-                if ($component instanceof TimePicker && in_array($component->getName(), ['start_time', 'end_time'], true)) {
+                if ($component instanceof AmPmTimePicker && in_array($component->getName(), ['start_time', 'end_time'], true)) {
                     $pickers[$component->getName()] = $component;
                 }
 
@@ -106,8 +106,8 @@ final class ClassesFormSchemaTest extends TestCase
 
         $collect($schema->getComponents());
 
-        $this->assertSame('g:i A', $pickers['start_time']->getDisplayFormat());
-        $this->assertSame('g:i A', $pickers['end_time']->getDisplayFormat());
+        $this->assertArrayHasKey('start_time', $pickers);
+        $this->assertArrayHasKey('end_time', $pickers);
     }
 
     // ----------------------------------------------------------- image items

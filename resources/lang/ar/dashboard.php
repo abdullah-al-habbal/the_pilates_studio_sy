@@ -362,6 +362,8 @@ return [
                 'end_date' => 'تاريخ الانتهاء',
                 'start_time' => 'وقت البداية',
                 'end_time' => 'وقت الانتهاء',
+                'start_time_hour' => 'الساعة',
+                'start_time_minutes' => 'الدقائق',
                 'duration' => 'المدة',
                 'total_spots' => 'إجمالي المقاعد',
                 'status' => 'الحالة',

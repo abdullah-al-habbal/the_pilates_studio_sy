@@ -155,6 +155,30 @@ final class ClassesAdminPanelTest extends TestCase
     }
 
     #[Test]
+    public function times_round_trip_to_the_database_in_24h_format_and_edit_renders_the_12h_picker(): void
+    {
+        Livewire::test(CreateClasses::class)
+            ->fillForm($this->formData(['start_time' => '15:00', 'end_time' => '17:00']))
+            ->call('create')
+            ->assertHasNoFormErrors();
+
+        $class = Classes::firstOrFail();
+
+        // MySQL normalises time columns to H:i:s — the picker writes 24-hour
+        // values, so the schedule is stored the way the rest of the system reads it.
+        $this->assertSame('15:00:00', $class->start_time);
+        $this->assertSame('17:00:00', $class->end_time);
+        $this->assertSame('15:00:00', $class->sessions()->first()->start_time);
+
+        // Edit mode rehydrates the stored 24-hour value into the AM/PM controls.
+        Livewire::test(EditClasses::class, ['record' => $class->getKey()])
+            ->assertSuccessful()
+            ->assertFormSet(['start_time' => '15:00:00', 'end_time' => '17:00:00'])
+            ->assertSee('fi-fo-ampm-time-picker-period')
+            ->assertSee('fi-fo-ampm-time-picker-separator');
+    }
+
+    #[Test]
     public function the_form_surfaces_an_instructor_conflict_instead_of_creating_the_class(): void
     {
         Livewire::test(CreateClasses::class)

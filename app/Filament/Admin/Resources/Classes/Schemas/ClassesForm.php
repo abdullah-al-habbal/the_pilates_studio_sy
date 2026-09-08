@@ -6,6 +6,7 @@ namespace App\Filament\Admin\Resources\Classes\Schemas;
 
 use App\Enums\ClassStatusEnum;
 use App\Enums\WeekdayEnum;
+use App\Filament\Forms\Components\AmPmTimePicker;
 use App\Models\ClassCategory;
 use App\Models\Classes;
 use App\Models\Instructor;
@@ -20,7 +21,6 @@ use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\TimePicker;
 use Filament\Forms\Components\Toggle;
 use Filament\Forms\Components\ToggleButtons;
 use Filament\Schemas\Components\Grid;
@@ -61,11 +61,6 @@ class ClassesForm
                                 ->required()
                                 ->loadingMessage(__('dashboard.messages.loading'))
                                 ->searchPrompt(__('dashboard.messages.search_prompt'))
-                                // Instructors are a small lookup an admin often has to add
-                                // mid-flow. The dedicated InstructorForm cannot be reused
-                                // here: it relies on the resource's locale switcher, which a
-                                // modal has no access to, so the locales are asked for
-                                // explicitly instead.
                                 ->createOptionForm([
                                     TextInput::make('name.en')
                                         ->label(__('dashboard.resources.classes.fields.instructor_name_en'))
@@ -140,8 +135,6 @@ class ClassesForm
                             ->inline()
                             ->required()
                             ->live()
-                            // Form-only field: the mode is implied by which of the
-                            // two columns ends up set, so it is never persisted.
                             ->dehydrated(false)
                             ->default(self::MODE_WEEKDAYS)
                             ->afterStateHydrated(function (ToggleButtons $component, ?Classes $record): void {
@@ -214,26 +207,20 @@ class ClassesForm
                                 ->columnSpan(1),
 
                             Grid::make(2)->schema([
-                                TimePicker::make('start_time')
+                                AmPmTimePicker::make('start_time')
                                     ->label(__('dashboard.resources.classes.fields.start_time'))
                                     ->required()
                                     ->live()
                                     ->rule(self::scheduleWindowRule())
-                                    ->displayFormat('g:i A')
-                                    ->native(false)
-                                    ->seconds(false)
                                     ->disabled(fn (?Classes $record) => $record?->exists && $record->hasBookedSessions())
                                     ->helperText(__('dashboard.resources.classes.helpers.start_time'))
                                     ->columnSpan(1),
 
-                                TimePicker::make('end_time')
+                                AmPmTimePicker::make('end_time')
                                     ->label(__('dashboard.resources.classes.fields.end_time'))
                                     ->required()
                                     ->live()
                                     ->rule(self::scheduleWindowRule())
-                                    ->displayFormat('g:i A')
-                                    ->native(false)
-                                    ->seconds(false)
                                     ->after('start_time')
                                     ->disabled(fn (?Classes $record) => $record?->exists && $record->hasBookedSessions())
                                     ->helperText(__('dashboard.resources.classes.helpers.end_time'))
@@ -309,16 +296,6 @@ class ClassesForm
             ]);
     }
 
-    /**
-     * Persist an instructor created from the Select's modal.
-     *
-     * `name` is a translatable json column, so a blank Arabic name would be
-     * stored as an explicit null and render an empty option label in the
-     * Arabic panel. Falling back to the English name mirrors InstructorFactory
-     * and keeps every option labelled in both locales.
-     *
-     * @param  array<string, mixed>  $data
-     */
     public static function createInstructor(array $data): int
     {
         $en = trim((string) ($data['name']['en'] ?? ''));
@@ -329,18 +306,6 @@ class ClassesForm
         ])->id;
     }
 
-    /**
-     * Force exactly one scheduling mode into the payload.
-     *
-     * Hidden Filament components are not dehydrated, so on edit the field for
-     * the mode that is *not* selected never reaches $data — which would leave a
-     * stale value in the database and produce a class with both modes set.
-     * Nulling the unused column explicitly is what makes mode switching work.
-     *
-     * @param  array<string, mixed>  $data
-     *
-     * @return array<string, mixed>
-     */
     public static function normaliseScheduleMode(array $data): array
     {
         unset($data['schedule_mode']);
@@ -359,12 +324,6 @@ class ClassesForm
         return $data;
     }
 
-    /**
-     * Live window validation, shared by every field that can invalidate it.
-     *
-     * In weekday mode there is no interval, so the minimum-span rule is skipped
-     * and only the start/end ordering is checked.
-     */
     private static function scheduleWindowRule(): Closure
     {
         return function (Get $get): Closure {
