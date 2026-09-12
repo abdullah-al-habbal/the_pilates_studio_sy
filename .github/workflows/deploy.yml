@@ -52,7 +52,6 @@ jobs:
           envs: FRESH
           timeout: 60s
           command_timeout: 30m
-          script_stop: true
           script: |
             set -Eeuo pipefail
 
