@@ -34,8 +34,10 @@ jobs:
 
       - name: Check for fresh-migration flag
         id: check_fresh
+        env:
+          HEAD_MSG: ${{ github.event.head_commit.message }}
         run: |
-          if echo "${{ github.event.head_commit.message }}" | grep -qF '[fresh-migrate]'; then
+          if echo "$HEAD_MSG" | grep -qF '[fresh-migrate]'; then
             echo "FRESH=true" >> $GITHUB_ENV
             echo "✅ Fresh migration flag detected"
           else
