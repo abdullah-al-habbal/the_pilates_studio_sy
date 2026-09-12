@@ -29,7 +29,7 @@ jobs:
             echo "TARGET=/home/${{ secrets.HOSTINGER_SSH_USERNAME }}/domains/dev.pilatesstudiosy.com/public_html/dev" >> $GITHUB_ENV
             echo "ENVIRONMENT=dev" >> $GITHUB_ENV
             echo "COMPOSER_FLAGS=--optimize-autoloader --no-interaction" >> $GITHUB_ENV
-            echo "HEALTHCHECK_URL=https://dev.pilatesstudiosy.com/api/v1/public/app-version" >> $GITHUB_ENV
+            echo "HEALTHCHECK_URL=https://dev.pilatesstudiosy.com/api/v1/public/__fail_probe__" >> $GITHUB_ENV
           fi
 
       - name: Check for fresh-migration flag
