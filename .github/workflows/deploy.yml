@@ -24,10 +24,12 @@ jobs:
             echo "TARGET=/home/${{ secrets.HOSTINGER_SSH_USERNAME }}/domains/pilatesstudiosy.com/public_html/production" >> $GITHUB_ENV
             echo "ENVIRONMENT=production" >> $GITHUB_ENV
             echo "COMPOSER_FLAGS=--no-dev --optimize-autoloader --no-interaction" >> $GITHUB_ENV
+            echo "HEALTHCHECK_URL=https://pilatesstudiosy.com/api/v1/public/app-version" >> $GITHUB_ENV
           else
             echo "TARGET=/home/${{ secrets.HOSTINGER_SSH_USERNAME }}/domains/dev.pilatesstudiosy.com/public_html/dev" >> $GITHUB_ENV
             echo "ENVIRONMENT=dev" >> $GITHUB_ENV
             echo "COMPOSER_FLAGS=--optimize-autoloader --no-interaction" >> $GITHUB_ENV
+            echo "HEALTHCHECK_URL=https://dev.pilatesstudiosy.com/api/v1/public/app-version" >> $GITHUB_ENV
           fi
 
       - name: Check for fresh-migration flag
@@ -57,6 +59,7 @@ jobs:
             TARGET="${{ env.TARGET }}"
             ENVIRONMENT="${{ env.ENVIRONMENT }}"
             COMPOSER_FLAGS="${{ env.COMPOSER_FLAGS }}"
+            HEALTHCHECK_URL="${{ env.HEALTHCHECK_URL }}"
             DEPLOY_KEY="/home/${{ secrets.HOSTINGER_SSH_USERNAME }}/.ssh/pilates_deploy_key"
             
             export GIT_SSH_COMMAND="ssh -i $DEPLOY_KEY -o IdentitiesOnly=yes -o StrictHostKeyChecking=no"
@@ -93,6 +96,13 @@ jobs:
 
             chmod -R 775 storage bootstrap/cache
 
+            # Early cache clear: remove stale caches before dependency/migration phases
+            # so a later phase failure can never leave a stale cache behind.
+            # Guarded: if vendor is out of sync with a composer.json bump, artisan may
+            # not boot yet — continue; composer install + phase 5 will fix and clear it.
+            echo "🪣 Clearing stale caches (pre-build)..."
+            $PHP_BIN artisan optimize:clear || echo "⚠️ Early clear failed — vendor may be stale, continuing"
+
             # ── Storage symlink (Hostinger disables exec(), artisan storage:link fails) ──
             rm -f public/storage
             ln -s ../storage/app/public public/storage
@@ -124,10 +134,24 @@ jobs:
             echo "🧹 Clearing and caching..."
             $PHP_BIN artisan optimize:clear
             $PHP_BIN artisan config:cache
-            $PHP_BIN artisan route:cache
             $PHP_BIN artisan view:cache
 
             echo "✅ Verifying application..."
             $PHP_BIN artisan about
+
+            echo "🩺 Health check..."
+            HTTP_CODE=$(curl -s -o /tmp/hc.json -w "%{http_code}" -X POST $HEALTHCHECK_URL \
+              -H 'Accept: application/json' \
+              -H 'Content-Type: application/json' \
+              -H 'X-App-Name: customer' \
+              -H 'X-App-Platform: android' \
+              -H 'X-App-Version: 1.0.1' \
+              -H 'X-Device-ID: deploy-healthcheck')
+            if [ "$HTTP_CODE" != "200" ] || ! grep -q '"success":true' /tmp/hc.json; then
+              echo "❌ HEALTH CHECK FAILED — HTTP $HTTP_CODE"
+              cat /tmp/hc.json
+              exit 1
+            fi
+            echo "✅ Health check passed"
 
             echo "🎉 Deployment to $ENVIRONMENT completed successfully"
