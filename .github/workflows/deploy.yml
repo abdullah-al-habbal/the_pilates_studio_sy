@@ -95,7 +95,8 @@ jobs:
               rm -rf storage/app.bak.*
             fi
 
-            chmod -R 775 storage bootstrap/cache
+            find storage bootstrap/cache -type d -exec chmod 775 {} \;
+            find storage bootstrap/cache -type f -exec chmod 664 {} \;
 
             # Early cache clear: remove stale caches before dependency/migration phases
             # so a later phase failure can never leave a stale cache behind.
