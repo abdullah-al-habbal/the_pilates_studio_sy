@@ -7,6 +7,7 @@ declare(strict_types=1);
 namespace App\Repositories\Eloquent\ClassSession;
 
 use App\Enums\BookingSessionStatusEnum;
+use App\Enums\ClassSessionStatusEnum;
 use App\Models\ClassSession;
 use Carbon\Carbon;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
@@ -18,7 +19,7 @@ use Illuminate\Support\Facades\Log;
 class ClassSessionEloquentRepository
 {
     public function __construct(
-        private readonly ClassSession $model
+        private readonly ClassSession $model,
     ) {}
 
     public function getSessionsBetween(string $startDate, string $endDate): Collection
@@ -46,7 +47,7 @@ class ClassSessionEloquentRepository
         ?string $dateBefore,
         ?string $startAfter,
         ?int $classId,
-        int $perPage
+        int $perPage,
     ): LengthAwarePaginator {
         return $this->model->newQuery()
             ->with(['class.instructor', 'class.primaryImage', 'class.category'])
@@ -55,7 +56,11 @@ class ClassSessionEloquentRepository
             ->when($dateBefore, fn ($q) => $q->whereDate('date', '<=', $dateBefore))
             ->when($startAfter, fn ($q, $time) => $q->where('start_time', '>=', $time))
             ->when($classId, fn ($q, $id) => $q->where('class_id', $id))
-            ->whereDate('date', '>=', now()->toDateString())
+            ->when(
+                $date === null && $dateAfter === null && $dateBefore === null,
+                fn ($q) => $q->whereDate('date', '>=', now()->toDateString()),
+            )
+            ->where('status', ClassSessionStatusEnum::SCHEDULED->value)
             ->orderBy('date')
             ->orderBy('start_time')
             ->paginate($perPage);
@@ -78,7 +83,6 @@ class ClassSessionEloquentRepository
             ])->find($id);
     }
 
-    // todo: we must add data type for the variable
     public function getSessionsByDate($date): Collection
     {
         return $this->model->newQuery()
@@ -149,7 +153,7 @@ class ClassSessionEloquentRepository
                 'bookingSessions',
                 fn ($query) => $query->where('status', BookingSessionStatusEnum::RESERVED->value),
                 '>=',
-                DB::raw('class_sessions.total_spots')
+                DB::raw('class_sessions.total_spots'),
             )
             ->count();
     }
@@ -176,14 +180,10 @@ class ClassSessionEloquentRepository
 
         $capacity = (int) ($session->total_spots ?? 0);
 
-        // A session with no capacity has no spots. This previously returned
-        // PHP_INT_MAX, which made a zero-capacity session infinitely bookable.
         if ($capacity <= 0) {
             return 0;
         }
 
-        // Only live reservations consume a spot. Counting cancelled rows too
-        // meant a cancelled booking held its seat forever.
         $reserved = $session->bookingSessions()
             ->where('status', BookingSessionStatusEnum::RESERVED->value)
             ->count();
