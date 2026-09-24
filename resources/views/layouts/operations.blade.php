@@ -1,6 +1,6 @@
 {{-- filePath: /home/lenovo/work/projects/the_pilates_studio_sy/resources/views/layouts/operations.blade.php --}}
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" dir="{{ app()->isLocale('ar') ? 'rtl' : 'ltr' }}">
 
 <head>
     <meta charset="utf-8">
@@ -10,8 +10,11 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/ar.js"></script>
     <script>
         tailwind.config = {
             darkMode: 'class',
@@ -94,6 +97,46 @@
             min-width: 0;
         }
 
+        .flatpickr-calendar {
+            font-family: 'Outfit', sans-serif;
+        }
+
+        html[dir="rtl"] .flatpickr-calendar,
+        html[dir="rtl"] .flatpickr-months,
+        html[dir="rtl"] .flatpickr-weekdays {
+            direction: rtl;
+        }
+
+        .dark .flatpickr-calendar,
+        .dark .flatpickr-months .flatpickr-month,
+        .dark .flatpickr-current-month .flatpickr-monthDropdown-months,
+        .dark .flatpickr-current-month input.cur-year,
+        .dark .flatpickr-time input,
+        .dark .flatpickr-time .flatpickr-am-pm {
+            background: #0f172a;
+            color: #f8fafc;
+        }
+
+        .dark .flatpickr-day,
+        .dark span.flatpickr-weekday,
+        .dark .flatpickr-time .flatpickr-time-separator {
+            color: #cbd5e1;
+        }
+
+        .dark .flatpickr-day:hover,
+        .dark .flatpickr-day:focus,
+        .dark .flatpickr-time input:hover,
+        .dark .flatpickr-time .flatpickr-am-pm:hover {
+            background: #1e293b;
+            border-color: #334155;
+        }
+
+        .dark .flatpickr-day.selected {
+            background: #0284c7;
+            border-color: #0284c7;
+            color: #fff;
+        }
+
         .btn-spinner {
             display: none;
             width: 1em;
@@ -104,6 +147,19 @@
             animation: spin .6s linear infinite;
             margin-right: .4em;
         }
+
+        .field {
+            width: 100%; margin-top: .35rem; padding: .65rem .85rem; border-radius: .75rem;
+            border: 1px solid rgb(203 213 225); background: transparent; outline: none;
+        }
+        .field:focus { border-color: rgb(14 165 233); box-shadow: 0 0 0 2px rgb(14 165 233 / .2); }
+        .dark .field { border-color: rgb(51 65 85); }
+
+        select { color-scheme: light; font-family: inherit; }
+        .dark select { color-scheme: dark; }
+        .dark select option { background-color: #0f172a; color: #f8fafc; }
+        select option:checked, select option:hover { background-color: #0284c7; color: #fff; }
+        html[dir="rtl"] [data-combo-clear] { right: auto !important; left: .5rem; }
 
         @keyframes spin {
             to {

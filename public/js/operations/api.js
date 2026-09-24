@@ -17,6 +17,8 @@ const OperationsAPI = {
         try {
             const response = await fetch(url, config);
             clearTimeout(timer);
+            if (response.status === 204) return null;
+
             const data = await response.json();
 
             if (!response.ok) {
@@ -220,4 +222,35 @@ const OperationsAPI = {
             rejection_reason: reason,
         });
     },
+
+    getClasses(params = {}) {
+        return this.request(`/admin/operations/classes?${new URLSearchParams(params).toString()}`);
+    },
+
+    searchClassOptions(type, { search = '', page = 1, perPage = 10 } = {}) {
+        return this.request(`/admin/operations/classes/lookup?${new URLSearchParams({ type, search, page, per_page: perPage }).toString()}`);
+    },
+
+    getClassOptions() { return this.request('/admin/operations/classes/options'); },
+    getClass(classId) { return this.request(`/admin/operations/classes/${classId}`); },
+    previewClass(payload) { return this.request('/admin/operations/classes/preview', 'POST', payload); },
+    createClass(payload) { return this.request('/admin/operations/classes', 'POST', payload); },
+    updateClass(classId, payload) { return this.request(`/admin/operations/classes/${classId}`, 'PUT', payload); },
+    setClassStatus(classId, status) { return this.request(`/admin/operations/classes/${classId}/status`, 'POST', { status }); },
+    deleteClass(classId) { return this.request(`/admin/operations/classes/${classId}`, 'DELETE'); },
+    restoreClass(classId) { return this.request(`/admin/operations/classes/${classId}/restore`, 'POST'); },
+    forceDeleteClass(classId) { return this.request(`/admin/operations/classes/${classId}/force`, 'DELETE'); },
+
+    async uploadClassImage(classId, file, isPrimary = false) {
+        const form = new FormData(); form.append('image', file); form.append('is_primary', isPrimary ? '1' : '0');
+        const response = await fetch(`/admin/operations/classes/${classId}/images`, { method: 'POST', headers: { Accept: 'application/json', 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content }, body: form });
+        const data = await response.json();
+        if (!response.ok) { const error = new Error(data.message || 'Image upload failed.'); error.errors = data.errors ?? null; throw error; }
+        return data;
+    },
+    deleteClassImage(classId, imageId) { return this.request(`/admin/operations/classes/${classId}/images/${imageId}`, 'DELETE'); },
+    setPrimaryClassImage(classId, imageId) { return this.request(`/admin/operations/classes/${classId}/images/${imageId}/primary`, 'POST'); },
+    createClassSession(classId, payload) { return this.request(`/admin/operations/classes/${classId}/sessions`, 'POST', payload); },
+    updateClassSession(classId, sessionId, payload) { return this.request(`/admin/operations/classes/${classId}/sessions/${sessionId}`, 'PUT', payload); },
+    deleteClassSession(classId, sessionId) { return this.request(`/admin/operations/classes/${classId}/sessions/${sessionId}`, 'DELETE'); },
 };

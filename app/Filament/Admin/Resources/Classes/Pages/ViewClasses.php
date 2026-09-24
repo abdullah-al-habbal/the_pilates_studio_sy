@@ -1,11 +1,15 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Filament\Admin\Resources\Classes\Pages;
 
 use App\Actions\ApplyCapacityToFutureSessionsAction;
 use App\Enums\ClassSessionStatusEnum;
 use App\Enums\ClassStatusEnum;
 use App\Filament\Admin\Resources\Classes\ClassesResource;
+use App\Models\Classes;
+use App\Services\Classes\ClassLifecycleService;
 use Filament\Actions\Action;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
@@ -58,7 +62,10 @@ class ViewClasses extends ViewRecord
                 ->modalSubmitActionLabel('Yes, cancel it')
                 ->visible(fn () => $this->getRecord()->status === ClassStatusEnum::ACTIVE)
                 ->action(function (): void {
-                    $this->getRecord()->update(['status' => ClassStatusEnum::INACTIVE->value]);
+                    app(ClassLifecycleService::class)->setStatus(
+                        (int) $this->getRecord()->getKey(),
+                        ClassStatusEnum::INACTIVE,
+                    );
                     $this->refreshFormData(['status']);
                     Notification::make()
                         ->title('Class has been cancelled.')
@@ -83,7 +90,7 @@ class ViewClasses extends ViewRecord
 
                     Placeholder::make('affected_count')
                         ->label('Affected Future Sessions')
-                        ->content(fn () => (string) $futureSessionsCount.' session(s)')
+                        ->content(fn () => (string) $futureSessionsCount . ' session(s)')
                         ->columnSpanFull(),
 
                     Textarea::make('reason')
@@ -113,12 +120,27 @@ class ViewClasses extends ViewRecord
             EditAction::make(),
 
             DeleteAction::make()
+                ->using(function (Classes $record): bool {
+                    app(ClassLifecycleService::class)->softDelete((int) $record->getKey());
+
+                    return true;
+                })
                 ->successNotificationTitle('Class deleted successfully.'),
 
             RestoreAction::make()
+                ->using(function (Classes $record): bool {
+                    app(ClassLifecycleService::class)->restore((int) $record->getKey());
+
+                    return true;
+                })
                 ->successNotificationTitle('Class restored successfully.'),
 
             ForceDeleteAction::make()
+                ->using(function (Classes $record): bool {
+                    app(ClassLifecycleService::class)->forceDelete((int) $record->getKey());
+
+                    return true;
+                })
                 ->successNotificationTitle('Class permanently deleted.'),
         ];
     }

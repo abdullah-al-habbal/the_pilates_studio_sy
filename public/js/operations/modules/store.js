@@ -195,7 +195,7 @@ export async function showQuickSale(itemId) {
                         ${(window.OperationsCurrencies || [])
                             .map(
                                 (c) =>
-                                    `<option value="${c.id}" ${c.id === defaultCurrencyId ? "selected" : ""}>${c.code} (${c.symbol})</option>`,
+                                    `<option value="${c.id}" ${c.id === defaultCurrencyId ? "selected" : ""}>${OperationsUI.currencyLabel(c)}</option>`,
                             )
                             .join("")}
                     </select>

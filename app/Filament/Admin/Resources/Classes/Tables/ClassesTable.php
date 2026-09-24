@@ -2,6 +2,8 @@
 
 // filePath: app/Filament/Admin/Resources/Classes/Tables/ClassesTable.php
 
+declare(strict_types=1);
+
 namespace App\Filament\Admin\Resources\Classes\Tables;
 
 use App\Enums\ClassStatusEnum;
@@ -9,6 +11,7 @@ use App\Enums\WeekdayEnum;
 use App\Filament\Admin\Resources\Classes\ClassesResource;
 use App\Models\Classes;
 use App\Models\Instructor;
+use App\Services\Classes\ClassLifecycleService;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
@@ -217,12 +220,30 @@ class ClassesTable
             ->toolbarActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make()
+                        ->using(function (DeleteBulkAction $action, $records): void {
+                            $count = app(ClassLifecycleService::class)->softDeleteMany(
+                                $records->map(fn (Classes $record): int => (int) $record->getKey())->all(),
+                            );
+                            $action->reportBulkProcessingSuccessfulRecordsCount($count);
+                        })
                         ->label(__('dashboard.actions.delete_selected'))
                         ->icon('heroicon-o-trash'),
                     ForceDeleteBulkAction::make()
+                        ->using(function (ForceDeleteBulkAction $action, $records): void {
+                            $count = app(ClassLifecycleService::class)->forceDeleteMany(
+                                $records->map(fn (Classes $record): int => (int) $record->getKey())->all(),
+                            );
+                            $action->reportBulkProcessingSuccessfulRecordsCount($count);
+                        })
                         ->label(__('dashboard.actions.force_delete_selected'))
                         ->icon('heroicon-o-trash'),
                     RestoreBulkAction::make()
+                        ->using(function (RestoreBulkAction $action, $records): void {
+                            $count = app(ClassLifecycleService::class)->restoreMany(
+                                $records->map(fn (Classes $record): int => (int) $record->getKey())->all(),
+                            );
+                            $action->reportBulkProcessingSuccessfulRecordsCount($count);
+                        })
                         ->label(__('dashboard.actions.restore_selected'))
                         ->icon('heroicon-o-arrow-path'),
                 ]),

@@ -44,13 +44,15 @@ final class ClassSessionGenerationService
 
             $this->conflicts->assertNoDuplicates($dates, $class->start_time, (int) $class->id);
 
-            $this->conflicts->assertNoConflicts(
-                dates: $dates,
-                startTime: $class->start_time,
-                endTime: $class->end_time,
-                instructorId: $class->instructor_id === null ? null : (int) $class->instructor_id,
-                classId: (int) $class->id,
-            );
+            if ($class->isActive()) {
+                $this->conflicts->assertNoConflicts(
+                    dates: $dates,
+                    startTime: $class->start_time,
+                    endTime: $class->end_time,
+                    instructorId: $class->instructor_id === null ? null : (int) $class->instructor_id,
+                    classId: (int) $class->id,
+                );
+            }
 
             // NOTE: a bulk insert fires no model events, so ClassSessionObserver
             // does not run for generated rows. Nothing currently depends on it
@@ -77,18 +79,19 @@ final class ClassSessionGenerationService
             );
         }
 
-        $interval = $class->recurrencePattern?->interval_days;
+        $pattern = $class->recurrencePattern;
 
-        if ($interval === null) {
+        if ($pattern === null) {
             throw ValidationException::withMessages([
                 'recurrence_pattern_id' => __('dashboard.resources.classes.validation.missing_pattern'),
             ]);
         }
 
-        return $this->calculator->forInterval(
+        return $this->calculator->forRecurrence(
             $class->start_date,
             $class->end_date,
-            (int) $interval,
+            $pattern->resolvedFrequencyUnit(),
+            $pattern->resolvedFrequencyInterval(),
         );
     }
 
@@ -123,8 +126,103 @@ final class ClassSessionGenerationService
     public function hasBookings(Classes $class): bool
     {
         return $class->sessions()
+            ->withTrashed()
             ->whereHas('bookingSessions')
             ->exists();
+    }
+
+    public function assertRestorable(Classes $class): void
+    {
+        if (! $class->isActive()) {
+            return;
+        }
+
+        $sessions = $class->sessions()->withTrashed()->get();
+
+        if ($sessions->isEmpty()) {
+            $this->validator->validate($class);
+            $dates = $this->datesFor($class);
+
+            if ($dates === []) {
+                throw ValidationException::withMessages([
+                    'end_date' => __('dashboard.resources.classes.validation.no_sessions_generated'),
+                ]);
+            }
+
+            $this->conflicts->assertNoConflicts(
+                dates: $dates,
+                startTime: $class->start_time,
+                endTime: $class->end_time,
+                instructorId: $class->instructor_id === null ? null : (int) $class->instructor_id,
+                classId: (int) $class->id,
+                errorKey: 'class',
+            );
+
+            return;
+        }
+
+        foreach ($sessions as $session) {
+            $this->conflicts->assertNoConflicts(
+                dates: [$session->date->copy()->startOfDay()],
+                startTime: $session->start_time,
+                endTime: $session->end_time,
+                instructorId: $class->instructor_id === null ? null : (int) $class->instructor_id,
+                classId: (int) $class->id,
+                errorKey: 'class',
+            );
+        }
+    }
+
+    public function assertActivatable(Classes $class): void
+    {
+        $sessions = $class->sessions()->get();
+
+        if ($sessions->isEmpty()) {
+            $this->validator->validate($class);
+            $dates = $this->datesFor($class);
+
+            if ($dates === []) {
+                throw ValidationException::withMessages([
+                    'end_date' => __('dashboard.resources.classes.validation.no_sessions_generated'),
+                ]);
+            }
+
+            $this->conflicts->assertNoConflicts(
+                dates: $dates,
+                startTime: $class->start_time,
+                endTime: $class->end_time,
+                instructorId: $class->instructor_id === null ? null : (int) $class->instructor_id,
+                classId: (int) $class->id,
+                errorKey: 'status',
+            );
+
+            return;
+        }
+
+        foreach ($sessions as $session) {
+            $this->conflicts->assertNoConflicts(
+                dates: [$session->date->copy()->startOfDay()],
+                startTime: $session->start_time,
+                endTime: $session->end_time,
+                instructorId: $class->instructor_id === null ? null : (int) $class->instructor_id,
+                classId: (int) $class->id,
+                ignoreSessionId: (int) $session->id,
+                errorKey: 'status',
+            );
+        }
+    }
+
+    public function restoreOrGenerate(Classes $class): void
+    {
+        $sessions = $class->sessions()->withTrashed();
+
+        if ($sessions->exists()) {
+            $sessions->restore();
+
+            return;
+        }
+
+        $this->generate($class);
     }
 
     public function hasActiveBookings(Classes $class): bool
@@ -150,6 +248,7 @@ final class ClassSessionGenerationService
 
     /**
      * @param  list<Carbon>  $dates
+     *
      * @return list<array<string, mixed>>
      */
     private function rowsFor(Classes $class, array $dates): array

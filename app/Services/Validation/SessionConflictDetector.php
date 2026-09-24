@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Services\Validation;
 
 use App\Enums\ClassSessionStatusEnum;
+use App\Enums\ClassStatusEnum;
 use App\Models\ClassSession;
 use App\ValueObjects\Scheduling\ScheduleConflictVO;
 use Carbon\Carbon;
@@ -30,6 +31,7 @@ final readonly class SessionConflictDetector
 {
     /**
      * @param  list<Carbon>  $dates
+     *
      * @return list<ScheduleConflictVO>
      */
     public function detect(
@@ -48,13 +50,14 @@ final readonly class SessionConflictDetector
         $end = $this->normaliseTime($endTime);
 
         $dateStrings = array_values(array_unique(
-            array_map(fn (Carbon $date) => $date->toDateString(), $dates)
+            array_map(fn (Carbon $date) => $date->toDateString(), $dates),
         ));
 
         $rows = ClassSession::query()
             ->join('classes', 'classes.id', '=', 'class_sessions.class_id')
             ->whereNull('class_sessions.deleted_at')
             ->whereNull('classes.deleted_at')
+            ->where('classes.status', ClassStatusEnum::ACTIVE->value)
             ->where('class_sessions.status', '!=', ClassSessionStatusEnum::CANCELLED->value)
             ->whereIn('class_sessions.date', $dateStrings)
             // Half-open overlap: strict comparisons on both sides, so that
@@ -76,12 +79,12 @@ final readonly class SessionConflictDetector
                         if ($classId !== null) {
                             $query->orWhere('class_sessions.class_id', $classId);
                         }
-                    }
-                )
+                    },
+                ),
             )
             ->when(
                 $ignoreSessionId !== null,
-                fn (Builder $query) => $query->where('class_sessions.id', '!=', $ignoreSessionId)
+                fn (Builder $query) => $query->where('class_sessions.id', '!=', $ignoreSessionId),
             )
             ->orderBy('class_sessions.date')
             ->orderBy('class_sessions.start_time')
@@ -216,12 +219,12 @@ final readonly class SessionConflictDetector
             $decoded = json_decode($title, true);
 
             if (is_array($decoded)) {
-                return (string) ($decoded[app()->getLocale()] ?? reset($decoded) ?: '#'.$row->class_id);
+                return (string) ($decoded[app()->getLocale()] ?? reset($decoded) ?: '#' . $row->class_id);
             }
 
             return $title;
         }
 
-        return '#'.$row->class_id;
+        return '#' . $row->class_id;
     }
 }

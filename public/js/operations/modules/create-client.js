@@ -3,6 +3,8 @@
 // "Add new client" modal for the Clients & Packages tab. Creates a user with role `customer`
 // via POST /admin/operations/clients.
 
+import { localDateValue } from "./pickers.js";
+
 const t = (key) => window.__(`operations_ui.clients.${key}`);
 
 function field({ id, label, type = "text", required = false, hint = "", attrs = "" }) {
@@ -19,7 +21,7 @@ function field({ id, label, type = "text", required = false, hint = "", attrs = 
 }
 
 export function showCreateClient() {
-    const today = new Date().toISOString().slice(0, 10);
+    const today = localDateValue();
 
     OperationsUI.openModal(t("add_client_title"), `
         <form id="create-client-form" class="space-y-5" onsubmit="return false;">
@@ -27,7 +29,7 @@ export function showCreateClient() {
                 ${field({ id: "cc-fullname", label: t("field_fullname"), required: true })}
                 ${field({ id: "cc-phone", label: t("field_phone"), required: true, attrs: 'inputmode="tel"' })}
                 ${field({ id: "cc-email", label: t("field_email"), type: "email" })}
-                ${field({ id: "cc-dob", label: t("field_date_of_birth"), type: "date", attrs: `max="${today}"` })}
+                ${field({ id: "cc-dob", label: t("field_date_of_birth"), attrs: `data-operations-picker="date" data-max-date="${today}"` })}
             </div>
 
             ${field({

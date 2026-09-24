@@ -10,11 +10,12 @@ Route::prefix('admin/operations')
     ->name('admin.operations.')
     ->group(function (): void {
         Route::get('/', OperationsIndexAction::class)->name('index');
-        require __DIR__.'/packages.php';
-        require __DIR__.'/store.php';
-        require __DIR__.'/finance.php';
-        require __DIR__.'/clients.php';
-        require __DIR__.'/notifications.php';
-        require __DIR__.'/bookings.php';
-        require __DIR__.'/approvals.php';
+        require __DIR__ . '/packages.php';
+        require __DIR__ . '/store.php';
+        require __DIR__ . '/finance.php';
+        require __DIR__ . '/clients.php';
+        require __DIR__ . '/notifications.php';
+        require __DIR__ . '/bookings.php';
+        require __DIR__ . '/approvals.php';
+        require __DIR__ . '/classes.php';
     });

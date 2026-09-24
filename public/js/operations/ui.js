@@ -64,6 +64,17 @@ const OperationsUI = {
         );
     },
 
+    currencyLabel(currency) {
+        if (!currency) return "";
+
+        const name =
+            currency.display_name ||
+            (typeof currency.name === "string" ? currency.name : currency.code);
+        const identifier = `${currency.code} (${currency.symbol})`;
+
+        return name === currency.code ? identifier : `${name} — ${identifier}`;
+    },
+
     formatCurrency(amount, currencyId = null) {
         let decimals;
         let code;

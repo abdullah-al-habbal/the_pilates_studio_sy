@@ -47,6 +47,9 @@ class Classes extends Model
 {
     use HasFactory, HasTranslations, SoftDeletes;
 
+    /** @var list<string> */
+    public array $pendingForceDeleteImagePaths = [];
+
     protected function casts(): array
     {
         return [
@@ -85,7 +88,7 @@ class Classes extends Model
     {
         return Attribute::make(
             get: fn () => (int) Carbon::parse($this->start_time)
-                ->diffInMinutes(Carbon::parse($this->end_time))
+                ->diffInMinutes(Carbon::parse($this->end_time)),
         );
     }
 
@@ -127,7 +130,7 @@ class Classes extends Model
             'class_id',
             'class_session_id',
             'id',
-            'id'
+            'id',
         );
     }
 
@@ -142,19 +145,25 @@ class Classes extends Model
     public function dashboardSearch(Builder $query, string $term, array $locales = ['en', 'ar']): Builder
     {
         $term = trim($term);
-        $like = '%'.addcslashes($term, '\\%_').'%';
+        $like = '%' . addcslashes($term, '\\%_') . '%';
 
         return $query->where(function (Builder $q) use ($like, $locales) {
             $q->where(function (Builder $titleQuery) use ($like, $locales) {
                 foreach ($locales as $locale) {
-                    $titleQuery->orWhere("title->{$locale}", 'like', $like);
+                    $titleQuery->orWhereRaw(
+                        'LOWER(JSON_UNQUOTE(JSON_EXTRACT(title, ?))) LIKE ?',
+                        ['$.' . $locale, mb_strtolower($like)],
+                    );
                 }
             });
 
             $q->orWhereHas('instructor', function (Builder $instructorQuery) use ($like, $locales) {
                 $instructorQuery->where(function (Builder $nested) use ($like, $locales) {
                     foreach ($locales as $locale) {
-                        $nested->orWhere("name->{$locale}", 'like', $like);
+                        $nested->orWhereRaw(
+                            'LOWER(JSON_UNQUOTE(JSON_EXTRACT(name, ?))) LIKE ?',
+                            ['$.' . $locale, mb_strtolower($like)],
+                        );
                     }
                 });
             });
@@ -162,7 +171,10 @@ class Classes extends Model
             $q->orWhereHas('category', function (Builder $categoryQuery) use ($like, $locales) {
                 $categoryQuery->where(function (Builder $nested) use ($like, $locales) {
                     foreach ($locales as $locale) {
-                        $nested->orWhere("name->{$locale}", 'like', $like);
+                        $nested->orWhereRaw(
+                            'LOWER(JSON_UNQUOTE(JSON_EXTRACT(name, ?))) LIKE ?',
+                            ['$.' . $locale, mb_strtolower($like)],
+                        );
                     }
                 });
             });

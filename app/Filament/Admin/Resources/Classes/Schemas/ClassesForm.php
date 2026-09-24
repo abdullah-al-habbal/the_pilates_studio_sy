@@ -2,6 +2,8 @@
 
 // filePath: app/Filament/Admin/Resources/Classes/Schemas/ClassesForm.php
 
+declare(strict_types=1);
+
 namespace App\Filament\Admin\Resources\Classes\Schemas;
 
 use App\Enums\ClassStatusEnum;
@@ -11,8 +13,10 @@ use App\Models\ClassCategory;
 use App\Models\Classes;
 use App\Models\Instructor;
 use App\Models\RecurrencePattern;
+use App\Services\Classes\ClassInputNormalizer;
 use App\Services\Validation\ClassScheduleValidationService;
 use Closure;
+use Filament\Forms\Components\BaseFileUpload;
 use Filament\Forms\Components\CheckboxList;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\FileUpload;
@@ -27,7 +31,10 @@ use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
+use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 
 class ClassesForm
 {
@@ -277,6 +284,7 @@ class ClassesForm
                             ->label(__('dashboard.resources.classes.fields.additional_images'))
                             ->relationship('images')
                             ->defaultItems(0)
+                            ->rule(self::singlePrimaryImageRule())
                             ->schema([
                                 FileUpload::make('url')
                                     ->label(__('dashboard.resources.classes.fields.image'))
@@ -286,6 +294,15 @@ class ClassesForm
                                     ->maxSize(5120)
                                     ->directory('classes/gallery')
                                     ->visibility('public')
+                                    ->saveUploadedFileUsing(function (BaseFileUpload $component, TemporaryUploadedFile $file): ?string {
+                                        $path = $component->saveUploadedFile($file);
+
+                                        if ($path !== null && DB::transactionLevel() > 0) {
+                                            DB::afterRollBack(fn (): bool => Storage::disk('public')->delete($path));
+                                        }
+
+                                        return $path;
+                                    })
                                     ->required()
                                     ->columnSpan(2),
 
@@ -316,20 +333,7 @@ class ClassesForm
 
     public static function normaliseScheduleMode(array $data): array
     {
-        unset($data['schedule_mode']);
-
-        $weekdays = $data['weekdays'] ?? null;
-
-        if (is_array($weekdays) && $weekdays !== []) {
-            $data['weekdays'] = array_values($weekdays);
-            $data['recurrence_pattern_id'] = null;
-
-            return $data;
-        }
-
-        $data['weekdays'] = null;
-
-        return $data;
+        return app(ClassInputNormalizer::class)->normalizeSchedule($data);
     }
 
     private static function scheduleWindowRule(): Closure
@@ -339,6 +343,8 @@ class ClassesForm
                 $isWeekdayMode = $get('schedule_mode') === self::MODE_WEEKDAYS;
 
                 $intervalDays = null;
+                $frequencyUnit = null;
+                $frequencyInterval = null;
 
                 if (! $isWeekdayMode) {
                     $pattern = RecurrencePattern::find((int) $get('recurrence_pattern_id'));
@@ -348,6 +354,8 @@ class ClassesForm
                     }
 
                     $intervalDays = $pattern->interval_days;
+                    $frequencyUnit = $pattern->resolvedFrequencyUnit();
+                    $frequencyInterval = $pattern->resolvedFrequencyInterval();
                 }
 
                 $validator = app(ClassScheduleValidationService::class);
@@ -359,11 +367,33 @@ class ClassesForm
                         $get('start_date'),
                         $get('end_date'),
                         $intervalDays,
+                        $frequencyUnit,
+                        $frequencyInterval,
                     );
                 } catch (ValidationException $exception) {
                     $fail(collect($exception->errors())->flatten()->first());
                 }
             };
+        };
+    }
+
+    private static function singlePrimaryImageRule(): Closure
+    {
+        return function (string $attribute, mixed $value, Closure $fail): void {
+            if (! is_array($value)) {
+                return;
+            }
+
+            $primaryCount = collect($value)
+                ->filter(fn (mixed $image): bool => is_array($image) && filter_var(
+                    $image['is_primary'] ?? false,
+                    FILTER_VALIDATE_BOOL,
+                ))
+                ->count();
+
+            if ($primaryCount > 1) {
+                $fail(__('dashboard.resources.classes.validation.only_one_primary_image'));
+            }
         };
     }
 }

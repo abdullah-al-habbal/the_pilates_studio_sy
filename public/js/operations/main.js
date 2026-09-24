@@ -6,11 +6,18 @@ import { initStoreTab } from './modules/store.js';
 import { initFinanceTab } from './modules/finance.js';
 import { initNotificationsTab } from './modules/notifications.js';
 import { initApprovalsTab } from './modules/approvals.js';
+import { initClassDetailPage, initClassEditPage, initClassesTab } from './modules/classes.js';
+import { observeOperationsPickers } from './modules/pickers.js';
+import { observeComboSelects } from './modules/combo.js';
 import './modules/create-client.js';
 
 document.addEventListener('DOMContentLoaded', () => {
     initTheme();
+    observeOperationsPickers();
+    observeComboSelects();
     initTabs();
+    initClassDetailPage();
+    initClassEditPage();
     
     const balanceDate = document.getElementById('balance-date')?.value || '';
     updateGlobalStats(balanceDate);

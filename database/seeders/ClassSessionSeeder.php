@@ -11,11 +11,10 @@ use App\Services\Classes\SessionDateCalculator;
 use Carbon\Carbon;
 use Illuminate\Database\Seeder;
 
-
 class ClassSessionSeeder extends Seeder
 {
     public function __construct(
-        private readonly SessionDateCalculator $calculator = new SessionDateCalculator
+        private readonly SessionDateCalculator $calculator = new SessionDateCalculator,
     ) {}
 
     public function run(): void
@@ -47,13 +46,18 @@ class ClassSessionSeeder extends Seeder
                 return $this->calculator->forWeekdays($class->start_date, $end, $class->weekdayCases());
             }
 
-            $interval = $class->recurrencePattern?->interval_days;
+            $pattern = $class->recurrencePattern;
 
-            if ($interval === null || $interval <= 0) {
+            if ($pattern === null) {
                 return [];
             }
 
-            return $this->calculator->forInterval($class->start_date, $end, (int) $interval);
+            return $this->calculator->forRecurrence(
+                $class->start_date,
+                $end,
+                $pattern->resolvedFrequencyUnit(),
+                $pattern->resolvedFrequencyInterval(),
+            );
         } catch (\Throwable) {
             return [];
         }

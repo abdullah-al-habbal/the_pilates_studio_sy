@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services\Classes;
 
+use App\Enums\RecurrenceUnitEnum;
 use App\Enums\WeekdayEnum;
 use Carbon\Carbon;
 use Illuminate\Validation\ValidationException;
@@ -27,6 +28,7 @@ final readonly class SessionDateCalculator
      * Dates falling on the selected weekdays, inclusive of both bounds.
      *
      * @param  list<WeekdayEnum>  $weekdays
+     *
      * @return list<Carbon>
      */
     public function forWeekdays(mixed $startDate, mixed $endDate, array $weekdays): array
@@ -64,18 +66,55 @@ final readonly class SessionDateCalculator
      */
     public function forInterval(mixed $startDate, mixed $endDate, int $intervalDays): array
     {
-        if ($intervalDays <= 0) {
-            throw new InvalidArgumentException('Interval days must be greater than zero.');
+        return $this->forRecurrence(
+            $startDate,
+            $endDate,
+            RecurrenceUnitEnum::DAY,
+            $intervalDays,
+        );
+    }
+
+    /**
+     * Calendar-aware recurrence anchored to the original start date.
+     *
+     * Month calculations always start from the original anchor. This prevents a
+     * January 31 schedule from drifting to the 28th after passing through February.
+     *
+     * @return list<Carbon>
+     */
+    public function forRecurrence(
+        mixed $startDate,
+        mixed $endDate,
+        RecurrenceUnitEnum $unit,
+        int $interval,
+    ): array {
+        if ($interval <= 0) {
+            throw new InvalidArgumentException('Recurrence interval must be greater than zero.');
         }
 
         [$start, $end] = $this->normaliseRange($startDate, $endDate);
 
         $dates = [];
-        $cursor = $start->copy();
+        $occurrence = 0;
 
-        while ($cursor->lessThanOrEqualTo($end)) {
+        while (true) {
+            $offset = $occurrence * $interval;
+            $cursor = match ($unit) {
+                RecurrenceUnitEnum::DAY => $start->copy()->addDays($offset),
+                RecurrenceUnitEnum::WEEK => $start->copy()->addWeeks($offset),
+                RecurrenceUnitEnum::MONTH => $start->copy()->addMonthsNoOverflow($offset),
+            };
+
+            if ($cursor->greaterThan($end)) {
+                break;
+            }
+
             $dates[] = $cursor->copy();
-            $cursor->addDays($intervalDays);
+            $occurrence++;
+
+            if (count($dates) > self::MAX_SESSIONS) {
+                return $this->guardVolume($dates);
+            }
         }
 
         return $this->guardVolume($dates);
@@ -108,6 +147,7 @@ final readonly class SessionDateCalculator
 
     /**
      * @param  list<Carbon>  $dates
+     *
      * @return list<Carbon>
      */
     private function guardVolume(array $dates): array

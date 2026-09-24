@@ -24,6 +24,13 @@
                 </svg>
                 <span>{{ __('dashboard.operations_ui.sidebar.finance_balance') }}</span>
             </button>
+            <button data-tab="classes"
+                class="w-full text-left px-4 py-3 rounded-xl transition-all flex items-center gap-3 hover:bg-slate-100 dark:hover:bg-slate-800">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v11.494m-9-5.747h18M5.636 5.636l12.728 12.728M18.364 5.636L5.636 18.364" />
+                </svg>
+                <span>{{ __('dashboard.operations_ui.sidebar.class_management') }}</span>
+            </button>
             <button data-tab="notifications"
                 class="w-full text-left px-4 py-3 rounded-xl transition-all flex items-center gap-3 hover:bg-slate-100 dark:hover:bg-slate-800">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

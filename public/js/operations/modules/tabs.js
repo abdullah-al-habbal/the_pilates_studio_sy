@@ -4,14 +4,29 @@ import { initStoreTab } from './store.js';
 import { initFinanceTab } from './finance.js';
 import { initNotificationsTab } from './notifications.js';
 import { initApprovalsTab } from './approvals.js';
+import { initClassesTab } from './classes.js';
 
 export function initTabs() {
     const buttons = document.querySelectorAll('[data-tab]');
-    
+    const CLASS_QUERY_KEYS = ['search', 'status', 'scope', 'per_page', 'page'];
+
+    const stripClassParams = () => {
+        const url = new URL(window.location.href);
+        let changed = false;
+        CLASS_QUERY_KEYS.forEach((key) => {
+            if (url.searchParams.has(key)) {
+                url.searchParams.delete(key);
+                changed = true;
+            }
+        });
+        if (changed) history.replaceState({}, '', url);
+    };
+
     const switchTabFromHash = () => {
         const hash = window.location.hash.replace('#', '');
-        const tab = ['clients', 'store', 'finance', 'notifications', 'approvals'].includes(hash) ? hash : 'clients';
-        
+        const tab = ['clients', 'store', 'finance', 'classes', 'notifications', 'approvals'].includes(hash) ? hash : 'clients';
+        if (tab !== 'classes') stripClassParams();
+
         loadTab(tab);
 
         buttons.forEach(b => {
@@ -28,7 +43,15 @@ export function initTabs() {
 
     buttons.forEach(btn => {
         btn.addEventListener('click', () => {
-            window.location.hash = btn.dataset.tab;
+            const tab = btn.dataset.tab;
+            if (window.location.hash === `#${tab}`) { switchTabFromHash(); return; }
+            const url = new URL(window.location.href);
+            if (tab !== 'classes') {
+                CLASS_QUERY_KEYS.forEach((key) => url.searchParams.delete(key));
+            }
+            url.hash = tab;
+            history.pushState({}, '', url);
+            switchTabFromHash();
         });
     });
 
@@ -47,6 +70,7 @@ export function loadTab(tab) {
     if (tab === 'clients') setTimeout(initClientsTab, 0);
     if (tab === 'store')   setTimeout(initStoreTab, 0);
     if (tab === 'finance') setTimeout(initFinanceTab, 0);
+    if (tab === 'classes') setTimeout(initClassesTab, 0);
     if (tab === 'notifications') setTimeout(initNotificationsTab, 0);
     if (tab === 'approvals') setTimeout(initApprovalsTab, 0);
 }

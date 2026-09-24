@@ -1,5 +1,6 @@
 // public\js\operations\modules\packages.js
 import { renderClients, showClientDetails } from "./clients.js";
+import { localDateValue } from "./pickers.js";
 
 const bf = (key) => window.__(`operations_ui.historical_backfill.${key}`);
 
@@ -216,14 +217,14 @@ function renderStepper() {
 }
 
 function renderHistoricalFields() {
-    const today = new Date().toISOString().slice(0, 10);
+    const today = localDateValue();
     const currencies = window.OperationsCurrencies || [];
 
     return `
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-5">
             <div>
                 <label class="block text-xs font-bold text-slate-400 uppercase mb-2">${bf("purchased_at_label")}</label>
-                <input type="date" id="bf-purchased-at" value="${backfill.purchasedAt}" max="${today}"
+                <input type="text" data-operations-picker="date" id="bf-purchased-at" value="${backfill.purchasedAt}" data-max-date="${today}"
                        onchange="window.backfillDateChanged(this.value)"
                        class="w-full rounded-xl border-2 border-slate-200 dark:border-slate-700 bg-transparent px-4 py-2.5 text-sm">
             </div>
@@ -231,7 +232,7 @@ function renderHistoricalFields() {
                 <label class="block text-xs font-bold text-slate-400 uppercase mb-2">${bf("currency_label")}</label>
                 <select id="bf-currency" onchange="window.backfillCurrencyChanged(this.value)"
                         class="w-full rounded-xl border-2 border-slate-200 dark:border-slate-700 bg-transparent px-4 py-2.5 text-sm">
-                    ${currencies.map((c) => `<option value="${c.id}" ${Number(backfill.currencyId) === Number(c.id) ? "selected" : ""}>${c.code}</option>`).join("")}
+                    ${currencies.map((c) => `<option value="${c.id}" ${Number(backfill.currencyId) === Number(c.id) ? "selected" : ""}>${OperationsUI.currencyLabel(c)}</option>`).join("")}
                 </select>
             </div>
             <div>
@@ -278,7 +279,7 @@ function renderPackageCard(p, userId) {
                 <div class="flex gap-2">
                     <select id="currency-${p.id}" onchange="window.updatePackageAmount(${p.id})"
                             class="flex-1 px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-sm outline-none focus:ring-2 focus:ring-primary-500">
-                        ${(window.OperationsCurrencies || []).map((c) => `<option value="${c.id}" ${c.id == selectedCurrencyId ? "selected" : ""}>${c.code} (${c.symbol})</option>`).join("")}
+                        ${(window.OperationsCurrencies || []).map((c) => `<option value="${c.id}" ${c.id == selectedCurrencyId ? "selected" : ""}>${OperationsUI.currencyLabel(c)}</option>`).join("")}
                     </select>
                     <input type="number" id="amount-${p.id}" value="${amount}" min="0" readonly
                            class="flex-1 px-3 py-2 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm outline-none cursor-not-allowed"
@@ -334,7 +335,7 @@ function renderPackageForm(context, userId, packageData = null) {
                 <div>
                     <label class="text-xs font-bold text-slate-500 uppercase">Currency</label>
                     <select id="${context}-pkg-currency" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-sm outline-none focus:ring-2 focus:ring-primary-500">
-                        ${(window.OperationsCurrencies || []).map((c) => `<option value="${c.id}" ${c.id == defaultCurrId ? "selected" : ""}>${c.code} (${c.symbol})</option>`).join("")}
+                        ${(window.OperationsCurrencies || []).map((c) => `<option value="${c.id}" ${c.id == defaultCurrId ? "selected" : ""}>${OperationsUI.currencyLabel(c)}</option>`).join("")}
                     </select>
                 </div>
                 <div>
@@ -655,7 +656,7 @@ function renderConfirmStep() {
             ${row(bf("summary_package"), escapeHtml(p.name))}
             ${row(bf("summary_total"), `${p.total_credits} ${bf("credits_suffix")}`)}
             ${row(bf("summary_window_to"), eligible ? `${p.validity_days} ${bf("days_suffix")}` : window.__('operations_ui.packages.no_expiry'))}
-            ${row(bf("currency_label"), currency ? `${currency.code} (${currency.symbol})` : "—")}
+            ${row(bf("currency_label"), currency ? OperationsUI.currencyLabel(currency) : "—")}
             ${row(window.__('operations_ui.packages.price_label'), amount)}
         </div>
 

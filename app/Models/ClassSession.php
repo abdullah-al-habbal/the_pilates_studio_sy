@@ -48,7 +48,7 @@ class ClassSession extends Model
     {
         return Attribute::make(
             get: fn () => (int) Carbon::parse($this->start_time)
-                ->diffInMinutes(Carbon::parse($this->end_time))
+                ->diffInMinutes(Carbon::parse($this->end_time)),
         );
     }
 
@@ -62,14 +62,14 @@ class ClassSession extends Model
                         $this->date?->month ?? null,
                         $this->date?->day ?? null,
                         (int) explode(':', $this->end_time)[0],
-                        (int) explode(':', $this->end_time)[1] ?? 0
+                        (int) explode(':', $this->end_time)[1] ?? 0,
                     );
 
                     return $endDateTime->isPast();
                 } catch (\Exception) {
                     return false;
                 }
-            }
+            },
         );
     }
 
@@ -83,21 +83,24 @@ class ClassSession extends Model
                         $this->date?->month ?? null,
                         $this->date?->day ?? null,
                         (int) explode(':', $this->start_time)[0],
-                        (int) explode(':', $this->start_time)[1] ?? 0
+                        (int) explode(':', $this->start_time)[1] ?? 0,
                     );
 
                     return $startDateTime->isFuture();
                 } catch (\Exception) {
                     return false;
                 }
-            }
+            },
         );
     }
 
     protected function isAvailable(): Attribute
     {
         return Attribute::make(
-            get: fn () => $this->isScheduled() && ! $this->isFull() && ! $this->is_past
+            get: fn () => ($this->class?->isActive() ?? false)
+                && $this->isScheduled()
+                && ! $this->isFull()
+                && ! $this->is_past,
         );
     }
 
@@ -111,7 +114,7 @@ class ClassSession extends Model
                         $this->date?->month ?? null,
                         $this->date?->day ?? null,
                         (int) explode(':', $this->start_time)[0],
-                        (int) explode(':', $this->start_time)[1] ?? 0
+                        (int) explode(':', $this->start_time)[1] ?? 0,
                     );
                     $cutoff = $startDateTime->subHours(24);
 
@@ -119,7 +122,7 @@ class ClassSession extends Model
                 } catch (\Exception) {
                     return true;
                 }
-            }
+            },
         );
     }
 
@@ -133,14 +136,14 @@ class ClassSession extends Model
                         $this->date?->month ?? null,
                         $this->date?->day ?? null,
                         (int) explode(':', $this->start_time)[0],
-                        (int) explode(':', $this->start_time)[1] ?? 0
+                        (int) explode(':', $this->start_time)[1] ?? 0,
                     );
 
                     return $startDateTime->between(now(), now()->addHour());
                 } catch (\Exception) {
                     return false;
                 }
-            }
+            },
         );
     }
 

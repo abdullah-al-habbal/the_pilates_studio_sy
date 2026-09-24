@@ -75,7 +75,7 @@ class ClassesResource extends Resource
 
     public static function getRecordTitle(?Model $record): string
     {
-        return $record?->getTranslation('title', app()->getLocale()) ?? 'Class #'.$record->id;
+        return $record?->getTranslation('title', app()->getLocale()) ?? 'Class #' . $record->id;
     }
 
     public static function form(Schema $schema): Schema
@@ -118,7 +118,7 @@ class ClassesResource extends Resource
             ->with([
                 'instructor:id,name',
                 'category:id,name',
-                'recurrencePattern:id,name,label,interval_days',
+                'recurrencePattern:id,name,label,interval_days,frequency_unit,frequency_interval',
                 'primaryImage',
             ])
             ->withCount([

@@ -2,11 +2,14 @@
 
 // filePath: app/Filament/Admin/Resources/Classes/Pages/CreateClasses.php
 
+declare(strict_types=1);
+
 namespace App\Filament\Admin\Resources\Classes\Pages;
 
 use App\Filament\Admin\Resources\Classes\ClassesResource;
-use App\Filament\Admin\Resources\Classes\Schemas\ClassesForm;
+use App\Services\Classes\ClassLifecycleService;
 use Filament\Resources\Pages\CreateRecord;
+use Illuminate\Database\Eloquent\Model;
 use LaraZeus\SpatieTranslatable\Actions\LocaleSwitcher;
 use LaraZeus\SpatieTranslatable\Resources\Pages\CreateRecord\Concerns\Translatable;
 
@@ -33,10 +36,11 @@ class CreateClasses extends CreateRecord
 
     /**
      * @param  array<string, mixed>  $data
+     *
      * @return array<string, mixed>
      */
-    protected function mutateFormDataBeforeCreate(array $data): array
+    protected function handleRecordCreation(array $data): Model
     {
-        return ClassesForm::normaliseScheduleMode($data);
+        return app(ClassLifecycleService::class)->create($data);
     }
 }

@@ -8,6 +8,7 @@ namespace App\Repositories\Eloquent\ClassSession;
 
 use App\Enums\BookingSessionStatusEnum;
 use App\Enums\ClassSessionStatusEnum;
+use App\Enums\ClassStatusEnum;
 use App\Models\ClassSession;
 use Carbon\Carbon;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
@@ -26,8 +27,9 @@ class ClassSessionEloquentRepository
     {
         $query = $this->model->newQuery()
             ->with(['class.instructor'])
+            ->whereHas('class', fn (Builder $query) => $query->where('status', ClassStatusEnum::ACTIVE->value))
             ->whereBetween('date', [$startDate, $endDate])
-            ->where('status', 'scheduled')
+            ->where('status', ClassSessionStatusEnum::SCHEDULED->value)
             ->orderBy('date')
             ->orderBy('start_time');
 
@@ -51,6 +53,7 @@ class ClassSessionEloquentRepository
     ): LengthAwarePaginator {
         return $this->model->newQuery()
             ->with(['class.instructor', 'class.primaryImage', 'class.category'])
+            ->whereHas('class', fn (Builder $query) => $query->where('status', ClassStatusEnum::ACTIVE->value))
             ->when($date, fn ($q) => $q->whereDate('date', $date))
             ->when($dateAfter, fn ($q) => $q->whereDate('date', '>=', $dateAfter))
             ->when($dateBefore, fn ($q) => $q->whereDate('date', '<=', $dateBefore))
@@ -80,7 +83,9 @@ class ClassSessionEloquentRepository
                 'class.instructor',
                 'class.category',
                 'class.primaryImage',
-            ])->find($id);
+            ])
+            ->whereHas('class', fn (Builder $query) => $query->where('status', ClassStatusEnum::ACTIVE->value))
+            ->find($id);
     }
 
     public function getSessionsByDate($date): Collection
@@ -142,6 +147,7 @@ class ClassSessionEloquentRepository
         $now = now();
 
         return $this->model->newQuery()
+            ->whereHas('class', fn (Builder $query) => $query->where('status', ClassStatusEnum::ACTIVE->value))
             ->where(function ($query) use ($now) {
                 $query->whereDate('date', '>', $now->toDateString())
                     ->orWhere(function ($q) use ($now) {
@@ -173,8 +179,12 @@ class ClassSessionEloquentRepository
 
     public function getAvailableSpots(int $id): int
     {
-        $session = $this->model->newQuery()->find($id);
+        $session = $this->model->newQuery()->with('class')->find($id);
         if (! $session) {
+            return 0;
+        }
+
+        if (! ($session->class?->isActive() ?? false) || ! $session->isScheduled()) {
             return 0;
         }
 

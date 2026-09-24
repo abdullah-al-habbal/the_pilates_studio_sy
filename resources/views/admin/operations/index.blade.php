@@ -1,13 +1,6 @@
 {{-- filePath: resources/views/admin/operations/index.blade.php --}}
 @extends('layouts.operations')
 
-@php
-    use App\Services\Currency\CurrencyService;
-    $currencyService = app(
-    CurrencyService::class);
-    $activeCurrencies = $currencyService->getAllActiveCurrencies();
-@endphp
-
 @section('content')
     <script>
         window.OperationsCurrencies = @json($activeCurrencies);
@@ -35,6 +28,9 @@
     </template>
     <template id="tpl-finance">
         @include('admin.operations.partials.tab-finance')
+    </template>
+    <template id="tpl-classes">
+        @include('admin.operations.partials.tab-classes')
     </template>
     <template id="tpl-notifications">
         @include('admin.operations.partials.tab-notifications')

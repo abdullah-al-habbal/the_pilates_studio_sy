@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services\Validation;
 
+use App\Enums\RecurrenceUnitEnum;
 use App\Enums\WeekdayEnum;
 use App\Models\Classes;
 use Carbon\Carbon;
@@ -23,6 +24,8 @@ final readonly class ClassScheduleValidationService
      */
     public function validate(Classes $class): void
     {
+        $pattern = $class->hasWeekdaySchedule() ? null : $class->recurrencePattern;
+
         $this->assertExactlyOneMode($class->recurrence_pattern_id, $class->weekdayCases());
         $this->assertValidTimes($class->start_time, $class->end_time);
         $this->assertEndDatePresent($class->end_date);
@@ -30,7 +33,9 @@ final readonly class ClassScheduleValidationService
         $this->assertValidWindow(
             $class->start_date,
             $class->end_date,
-            $class->hasWeekdaySchedule() ? null : $class->recurrencePattern?->interval_days,
+            $pattern?->interval_days,
+            $pattern?->resolvedFrequencyUnit(),
+            $pattern?->resolvedFrequencyInterval(),
         );
     }
 
@@ -102,8 +107,13 @@ final readonly class ClassScheduleValidationService
      * $intervalDays is null in weekday mode, where the minimum-span rule makes
      * no sense.
      */
-    public function assertValidWindow(mixed $startDate, mixed $endDate, ?int $intervalDays): void
-    {
+    public function assertValidWindow(
+        mixed $startDate,
+        mixed $endDate,
+        ?int $intervalDays,
+        ?RecurrenceUnitEnum $frequencyUnit = null,
+        ?int $frequencyInterval = null,
+    ): void {
         if ($startDate === null || $endDate === null) {
             return;
         }
@@ -119,21 +129,30 @@ final readonly class ClassScheduleValidationService
             ]);
         }
 
-        if ($intervalDays === null) {
+        if ($intervalDays === null && $frequencyUnit === null) {
             return;
         }
 
-        if ($intervalDays <= 0) {
+        $resolvedUnit = $frequencyUnit ?? RecurrenceUnitEnum::DAY;
+        $resolvedInterval = $frequencyInterval ?? $intervalDays;
+
+        if ($resolvedInterval === null || $resolvedInterval <= 0) {
             throw ValidationException::withMessages([
                 'recurrence_pattern_id' => __('dashboard.resources.classes.validation.invalid_interval'),
             ]);
         }
 
-        if ($start->diffInDays($end) < $intervalDays) {
+        $minimumEnd = match ($resolvedUnit) {
+            RecurrenceUnitEnum::DAY => $start->copy()->addDays($resolvedInterval),
+            RecurrenceUnitEnum::WEEK => $start->copy()->addWeeks($resolvedInterval),
+            RecurrenceUnitEnum::MONTH => $start->copy()->addMonthsNoOverflow($resolvedInterval),
+        };
+
+        if ($end->lessThan($minimumEnd)) {
             throw ValidationException::withMessages([
                 'end_date' => __('dashboard.resources.classes.validation.window_too_short', [
-                    'days' => $intervalDays,
-                    'date' => $start->copy()->addDays($intervalDays)->toDateString(),
+                    'days' => $start->diffInDays($minimumEnd),
+                    'date' => $minimumEnd->toDateString(),
                 ]),
             ]);
         }

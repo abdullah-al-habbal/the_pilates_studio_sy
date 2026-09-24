@@ -14,7 +14,7 @@
             <h2 class="text-2xl font-bold tracking-tight">{{ __('dashboard.operations_ui.finance.title') }}</h2>
             <p class="text-slate-500">{{ __('dashboard.operations_ui.finance.description') }}</p>
         </div>
-        <input type="date" id="balance-date" value="{{ date('Y-m-d') }}"
+        <input type="text" data-operations-picker="date" id="balance-date" value="{{ date('Y-m-d') }}"
                class="px-4 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl focus:ring-2 focus:ring-primary-500 outline-none">
     </div>
 
@@ -77,7 +77,7 @@
                 </div>
                 <div class="space-y-1">
                     <label class="text-xs font-semibold text-slate-500 uppercase">{{ __('dashboard.operations_ui.finance.expense_date_label') }}</label>
-                    <input type="date" name="date" value="{{ date('Y-m-d') }}"
+                    <input type="text" data-operations-picker="date" name="date" value="{{ date('Y-m-d') }}"
                            class="w-full px-4 py-2 bg-slate-50 dark:bg-slate-800 rounded-lg border-transparent focus:ring-2 focus:ring-primary-500 outline-none">
                 </div>
                 <div class="space-y-1">
