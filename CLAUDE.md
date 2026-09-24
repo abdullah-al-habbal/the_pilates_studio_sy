@@ -34,6 +34,7 @@ Files live in `storage/app/public/`, served via `public/storage → ../storage/a
 - Push to `production` → production server
 - `[fresh-migrate]` in commit message → destructive reseed
 - Normal pushes are always safe
+- For release commits and synchronizing `production`, `dev`, and `main`, follow [`.agents/skills/release-sync/SKILL.md`](.agents/skills/release-sync/SKILL.md).
 
 ## File Locations
 

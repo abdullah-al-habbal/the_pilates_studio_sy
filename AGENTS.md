@@ -50,6 +50,10 @@ See `docs/DEPLOYMENT.md` for full storage architecture and troubleshooting.
 
 See `docs/DEPLOYMENT.md` for full deployment guide.
 
+## Release synchronization skill
+
+For requests to commit approved work, align `production`, `dev`, and `main`, or push deployment branches, read and follow [`.agents/skills/release-sync/SKILL.md`](.agents/skills/release-sync/SKILL.md). It defines the required validation, branch ancestry checks, and push safety boundaries.
+
 ## Coding Standards
 
 - PHP 8.4+, strict types
