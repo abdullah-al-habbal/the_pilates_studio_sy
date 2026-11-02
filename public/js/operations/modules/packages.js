@@ -182,7 +182,7 @@ function renderPackageStep() {
                 ${window.__('operations_ui.packages.new_package_button')}
             </button>
         </div>
-        <div id="package-grid" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div id="package-grid" class="grid grid-cols-1 md:grid-cols-2 gap-4 min-w-0">
             ${backfill.packages.map((p) => renderPackageCard(p, userId)).join("")}
         </div>
         <div id="create-package-form" class="hidden space-y-4">${renderPackageForm("create", userId, null)}</div>
@@ -269,10 +269,10 @@ function renderPackageCard(p, userId) {
     const amount = getPackageAmount(p, selectedCurrencyId);
 
     return `
-        <div id="card-${p.id}" class="flex flex-col p-6 rounded-2xl border-2 border-slate-100 dark:border-slate-800 transition-all text-left group">
-            <div class="flex justify-between items-start">
-                <span class="text-lg font-bold text-slate-900 dark:text-white">${p.name}</span>
-                <div class="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+        <div id="card-${p.id}" class="flex flex-col min-w-0 p-5 sm:p-6 rounded-2xl border-2 border-slate-100 dark:border-slate-800 transition-all text-left group">
+            <div class="flex justify-between items-start gap-2">
+                <span class="min-w-0 break-words text-lg font-bold text-slate-900 dark:text-white">${p.name}</span>
+                <div class="flex shrink-0 gap-1 opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity">
                     <button onclick="window.editPackage(${userId}, ${p.id})" title="${window.__('operations_ui.packages.edit_title')}" class="p-1 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
                     </button>
@@ -285,13 +285,13 @@ function renderPackageCard(p, userId) {
                 ${p.total_credits} ${window.__('operations_ui.packages.sessions_unit')} &bull; ${p.validity_days ? `${p.validity_days} ${window.__('operations_ui.packages.days_unit')}` : window.__('operations_ui.packages.no_expiry')}
             </span>
             <div class="space-y-3 mt-auto">
-                <div class="flex gap-2">
+                <div class="grid grid-cols-1 gap-2 min-w-0">
                     <select id="currency-${p.id}" onchange="window.updatePackageAmount(${p.id})"
-                            class="flex-1 px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-sm outline-none focus:ring-2 focus:ring-primary-500">
+                            class="block w-full min-w-0 truncate px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-sm outline-none focus:ring-2 focus:ring-primary-500">
                         ${(window.OperationsCurrencies || []).map((c) => `<option value="${c.id}" ${c.id == selectedCurrencyId ? "selected" : ""}>${OperationsUI.currencyLabel(c)}</option>`).join("")}
                     </select>
                     <input type="number" id="amount-${p.id}" value="${amount}" min="0" readonly
-                           class="flex-1 px-3 py-2 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm outline-none cursor-not-allowed"
+                           class="block w-full min-w-0 px-3 py-2 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm outline-none cursor-not-allowed"
                            placeholder="${window.__('operations_ui.packages.amount_placeholder')}"
                            data-prices="${pricesJson}"
                            data-base-price="${p.base_price ?? 0}">

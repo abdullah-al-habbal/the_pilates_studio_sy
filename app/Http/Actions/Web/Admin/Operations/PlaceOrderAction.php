@@ -10,13 +10,14 @@ use App\Http\Requests\Admin\Operations\PlaceOrderRequest;
 use App\Traits\ApiResponseTrait;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Validation\ValidationException;
 
 final readonly class PlaceOrderAction
 {
     use ApiResponseTrait;
 
     public function __construct(
-        private PlaceOrderHandler $handler
+        private PlaceOrderHandler $handler,
     ) {}
 
     public function __invoke(PlaceOrderRequest $request): JsonResponse
@@ -34,10 +35,13 @@ final readonly class PlaceOrderAction
 
             return $this->created(
                 data: $order,
-                message: 'Order placed successfully.'
+                message: __('dashboard.operations_ui.store.sale_success'),
             );
+        } catch (ValidationException $e) {
+            // Domain rule (e.g. insufficient stock): let Laravel render field errors as 422.
+            throw $e;
         } catch (\Throwable $e) {
-            Log::error('Operations - PlaceOrder failed: '.$e->getMessage(), [
+            Log::error('Operations - PlaceOrder failed: ' . $e->getMessage(), [
                 'exception' => $e,
                 'customer_id' => $request->customer_id,
                 'merchandise_id' => $request->merchandise_id,

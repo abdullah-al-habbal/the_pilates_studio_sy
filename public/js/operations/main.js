@@ -11,6 +11,7 @@ import { observeOperationsPickers } from './modules/pickers.js';
 import { observeComboSelects } from './modules/combo.js';
 import './modules/create-client.js';
 import './modules/booking-sessions.js';
+import './modules/client-order.js';
 
 document.addEventListener('DOMContentLoaded', () => {
     initTheme();

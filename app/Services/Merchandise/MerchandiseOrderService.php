@@ -41,11 +41,9 @@ class MerchandiseOrderService
 
             $paidAmount = $this->pricingService->calculateAmount($basePrice * $dto->quantity, $dto->currencyId);
 
-            $item->decrement('stock_quantity', $dto->quantity);
-
             $exchangeRateSnapshot = $this->pricingService->getExchangeRateForSnapshot($dto->currencyId);
 
-            return MerchandiseOrder::create([
+            $order = MerchandiseOrder::create([
                 'merchandise_id' => $dto->merchandiseId,
                 'customer_id' => $dto->customerId,
                 'created_by' => $dto->createdBy,
@@ -55,6 +53,10 @@ class MerchandiseOrderService
                 'paid_amount' => $paidAmount,
                 'exchange_rate_snapshot' => $exchangeRateSnapshot,
             ]);
+
+            $item->decrement('stock_quantity', $dto->quantity);
+
+            return $order;
         });
     }
 

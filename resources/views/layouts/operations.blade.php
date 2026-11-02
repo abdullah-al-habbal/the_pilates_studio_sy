@@ -212,7 +212,7 @@
     <div id="modal-overlay"
         class="fixed inset-0 bg-slate-950/50 backdrop-blur-sm z-[100] hidden flex items-center justify-center p-4">
         <div id="modal-container"
-            class="glass-card rounded-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto shadow-2xl scale-95 opacity-0 transition-all duration-300">
+            class="glass-card rounded-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto overflow-x-hidden shadow-2xl scale-95 opacity-0 transition-all duration-300">
         </div>
     </div>
 

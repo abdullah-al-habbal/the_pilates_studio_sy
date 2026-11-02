@@ -166,6 +166,15 @@ function renderPagination(meta) {
         </div>`;
 }
 
+function escapeHtml(value) {
+    return String(value ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+}
+
 export async function showClientDetails(userId) {
     OperationsUI.openModal(
         window.__('operations_ui.clients.modal_title'),
@@ -231,6 +240,14 @@ export async function showClientDetails(userId) {
                       </button>`
                 : "";
 
+        // Store purchases are independent of packages and of the frozen state, so this is always
+        // offered. The name travels through a data attribute, never an inline JS string.
+        const orderButton = `<button data-client-name="${escapeHtml(user.fullname)}"
+                       onclick="window.showClientOrder(${Number(user.id)}, this.dataset.clientName)"
+                       class="bg-slate-900 dark:bg-white dark:text-slate-900 text-white px-5 py-2.5 rounded-xl font-bold text-sm hover:scale-105 transition-all">
+                       🛍 ${window.__('operations_ui.store.quick_order')}
+                   </button>`;
+
         const remainingDaysRaw = currentPackage?.remaining_days;
         const daysLeftText = humanizeRemainingDays(remainingDaysRaw);
         const daysBadge =
@@ -253,14 +270,14 @@ export async function showClientDetails(userId) {
                 <div class="flex items-start justify-between flex-wrap gap-4">
                     <div class="flex gap-4 items-center">
                         <div class="w-16 h-16 bg-slate-100 dark:bg-slate-800 rounded-2xl flex items-center justify-center text-2xl font-bold text-slate-400">
-                            ${(user.fullname ?? "?").charAt(0).toUpperCase()}
+                            ${escapeHtml((user.fullname ?? "?").charAt(0).toUpperCase())}
                         </div>
                         <div>
-                            <h4 class="text-2xl font-bold">${user.fullname}</h4>
-                            <p class="text-slate-500">${user.phone_number} &bull; ${window.__('operations_ui.clients.member_since')} ${user.member_since ?? "—"}</p>
+                            <h4 class="text-2xl font-bold">${escapeHtml(user.fullname)}</h4>
+                            <p class="text-slate-500">${escapeHtml(user.phone_number)} &bull; ${window.__('operations_ui.clients.member_since')} ${user.member_since ?? "—"}</p>
                         </div>
                     </div>
-                    ${actionButton}
+                    <div class="flex flex-wrap items-start gap-2">${orderButton}${actionButton}</div>
                 </div>
 
                 <!-- Package + Activity -->
@@ -422,9 +439,9 @@ export async function showClientDetails(userId) {
                                         .map(
                                             (o) => `
                                         <tr>
-                                            <td class="px-4 py-3">${o.item_name}</td>
+                                            <td class="px-4 py-3">${escapeHtml(o.item_name ?? "—")}</td>
                                             <td class="px-4 py-3 text-slate-500">${o.quantity} ${window.__('operations_ui.clients.unit_singular')}</td>
-                                            <td class="px-4 py-3 font-bold">${OperationsUI.formatCurrency(o.total_price ?? 0)}</td>
+                                            <td class="px-4 py-3 font-bold">${OperationsUI.formatCurrency(o.total_price ?? 0, o.currency_id)}</td>
                                             <td class="px-4 py-3 text-right text-xs text-slate-400">${o.ordered_at ?? ""}</td>
                                         </tr>`,
                                         )
@@ -450,7 +467,7 @@ export async function showClientDetails(userId) {
                           d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
                 </svg>
                 <p class="text-rose-500 font-bold">${window.__('operations_ui.clients.client_details_failed')}</p>
-                <p class="text-sm text-slate-400">${e.message}</p>
+                <p class="text-sm text-slate-400">${escapeHtml(e.message)}</p>
                 <button onclick="OperationsUI.closeModal()" class="px-4 py-2 bg-slate-100 dark:bg-slate-800 rounded-xl text-sm font-medium">${window.__('operations_ui.clients.close_button')}</button>
             </div>`,
         );

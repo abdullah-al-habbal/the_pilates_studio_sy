@@ -23,9 +23,6 @@ class ClientDetailsResource extends JsonResource
             'status' => ClientDisplayStatusResolver::resolve($this->resource),
             'active_package' => BookingPackageMapper::toArray($this->activeCreditBooking),
             'frozen_package' => BookingPackageMapper::toArray($this->frozenCreditBooking),
-            // What the database would refuse, which is not the same as what the client can use:
-            // a booking past its expiry still holds the index. The UI needs this to disable the
-            // assign button rather than letting the admin click into a 422.
             'blocking_package' => BookingPackageMapper::toArray($this->blockingActiveBooking),
             'activity_snapshot' => [
                 'total_sessions_attended' => $this->bookingSessions()
@@ -49,12 +46,22 @@ class ClientDetailsResource extends JsonResource
                 ->limit(5)
                 ->get()
                 ->map(fn ($order) => [
-                    'item_name' => $order->merchandise?->getTranslation('name', app()->getLocale()),
+                    'item_name' => $order->merchandise?->getTranslation('name', app()->getLocale())
+                        ?? $this->snapshotName($order->merchandise_name_snapshot),
                     'quantity' => $order->quantity,
                     'total_price' => $order->paid_amount,
                     'currency_id' => $order->currency_id,
                     'ordered_at' => $order->ordered_at?->format('M d, Y'),
                 ]),
         ];
+    }
+
+    private function snapshotName(?array $snapshot): ?string
+    {
+        if (empty($snapshot)) {
+            return null;
+        }
+
+        return $snapshot[app()->getLocale()] ?? array_values($snapshot)[0] ?? null;
     }
 }
