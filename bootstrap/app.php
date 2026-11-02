@@ -10,6 +10,7 @@ use App\Http\Middleware\EnsureUserIsAdmin;
 use App\Http\Middleware\FreezeUserMiddleware;
 use App\Http\Middleware\MobileAppVersion\CheckAppVersionMiddleware;
 use App\Http\Middleware\SetLocaleMiddleware;
+use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Auth\Middleware\Authenticate;
 use Illuminate\Auth\Middleware\AuthenticateWithBasicAuth;
@@ -39,6 +40,7 @@ use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 use Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful;
+use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 $app = Application::configure(basePath: dirname(__DIR__))
@@ -152,6 +154,23 @@ $app = Application::configure(basePath: dirname(__DIR__))
                 'timestamp' => Carbon::now()->toISOString(),
                 'status_code' => 404,
             ], 404);
+        });
+
+        $exceptions->render(function (HttpExceptionInterface|AuthorizationException $e, Request $request) {
+            $isForbidden = $e instanceof AuthorizationException
+                || ($e instanceof HttpExceptionInterface && $e->getStatusCode() === 403);
+
+            if (! $isForbidden || ! $request->expectsJson()) {
+                return null;
+            }
+
+            return response()->json([
+                'success' => false,
+                'code' => 'FORBIDDEN',
+                'message' => 'You do not have permission to perform this action.',
+                'timestamp' => Carbon::now()->toISOString(),
+                'status_code' => 403,
+            ], 403);
         });
 
         $exceptions->render(function (Throwable $e, Request $request) {

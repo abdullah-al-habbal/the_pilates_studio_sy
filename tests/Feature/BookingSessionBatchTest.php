@@ -227,7 +227,7 @@ final class BookingSessionBatchTest extends TestCase
         $url = "/admin/operations/bookings/{$reservation->booking_id}/sessions/batch";
         $payload = ['items' => [['booking_session_id' => $reservation->id, 'status' => 'attended']]];
 
-        $this->actingAs($this->ownerOf($reservation))->postJson($url, $payload)->assertStatus(500); // legacy: global JSON handler turns abort(403) into 500; data stays untouched
+        $this->actingAs($this->ownerOf($reservation))->postJson($url, $payload)->assertForbidden();
         $this->assertSame(AttendanceStatusEnum::MISSED, $reservation->fresh()->attendance_status);
 
         $this->actingAs($this->admin())->postJson($url, $payload)->assertOk();
