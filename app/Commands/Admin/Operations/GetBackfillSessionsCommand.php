@@ -16,5 +16,8 @@ final readonly class GetBackfillSessionsCommand
         public ?int $month = null,
         public ?int $year = null,
         public ?int $excludeUserId = null,
+        public ?string $date = null,
+        public ?int $instructorId = null,
+        public ?int $categoryId = null,
     ) {}
 }

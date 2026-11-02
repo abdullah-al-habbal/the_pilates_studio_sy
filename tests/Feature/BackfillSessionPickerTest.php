@@ -340,4 +340,38 @@ final class BackfillSessionPickerTest extends TestCase
 
         $this->assertSame($expected, $seen, 'Both rows must be served exactly once across the pages.');
     }
+
+    #[Test]
+    public function it_filters_by_date_instructor_and_category(): void
+    {
+        $target = $this->pastSession(now()->subDays(10));
+        $otherDay = $this->pastSession(now()->subDays(12));
+
+        $otherClass = Classes::withoutEvents(fn () => Classes::factory()
+            ->onWeekdays([WeekdayEnum::SUNDAY])
+            ->create([
+                'instructor_id' => Instructor::factory()->create()->id,
+                'class_category_id' => ClassCategory::factory()->create()->id,
+                'total_spots' => 12,
+            ]));
+        $foreign = ClassSession::factory()->create([
+            'class_id' => $otherClass->id,
+            'date' => now()->subDays(10)->toDateString(),
+            'start_time' => '11:00:00',
+            'end_time' => '12:00:00',
+            'status' => ClassSessionStatusEnum::SCHEDULED->value,
+            'total_spots' => 12,
+        ]);
+
+        $ids = fn (array $q) => collect($this->fetch($q)->assertOk()->json('data'))->pluck('id')->sort()->values()->all();
+
+        $this->assertSame([$target->id], $ids(['date' => now()->subDays(10)->toDateString(), 'instructor_id' => $this->class()->instructor_id]));
+        $expectedPair = collect([$target->id, $otherDay->id])->sort()->values()->all();
+        $this->assertSame($expectedPair, $ids(['category_id' => $this->class()->class_category_id]));
+        $this->assertSame([$foreign->id], $ids(['instructor_id' => $otherClass->instructor_id]));
+        $this->assertSame([$otherDay->id], $ids(['date' => now()->subDays(12)->toDateString()]));
+        $this->assertContains($target->id, $ids([]));
+
+        $this->fetch(['category_id' => 999999])->assertUnprocessable();
+    }
 }

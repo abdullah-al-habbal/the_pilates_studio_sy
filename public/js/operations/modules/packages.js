@@ -25,6 +25,10 @@ const backfill = {
     loading: false,
     window: null,
     submitting: false,
+    filters: { date: "", instructorId: "", categoryId: "" },
+    options: null,
+    known: new Map(),
+    requestToken: 0,
 };
 
 function resetBackfill(userId) {
@@ -46,6 +50,9 @@ function resetBackfill(userId) {
         loading: false,
         window: null,
         submitting: false,
+        filters: { date: "", instructorId: "", categoryId: "" },
+        known: new Map(),
+        requestToken: 0,
     });
 }
 
@@ -58,6 +65,8 @@ function clearSelections() {
     backfill.cursor = null;
     backfill.hasMore = false;
     backfill.window = null;
+    backfill.known = new Map();
+    backfill.filters = { date: "", instructorId: "", categoryId: "" };
 }
 
 function selectedCount() {
@@ -621,6 +630,7 @@ function renderSessionRows() {
                     <p class="text-xs text-slate-500">
                         ${s.date} &bull; ${s.start_time}–${s.end_time}
                         ${s.instructor_name ? `&bull; ${escapeHtml(s.instructor_name)}` : ""}
+                        ${s.category_name ? `&bull; <span class="font-semibold text-primary-600">${escapeHtml(s.category_name)}</span>` : ""}
                     </p>
                 </div>
                 <div class="flex gap-1 shrink-0">
@@ -687,11 +697,47 @@ function renderConfirmStep() {
         </div>`);
 }
 
+function filterSelect(id, label, items, selected, handler) {
+    const options = (items || []).map((o) =>
+        `<option value="${o.id}" ${String(o.id) === String(selected) ? "selected" : ""}>${escapeHtml(o.name)}</option>`).join("");
+    return `<select id="${id}" aria-label="${escapeHtml(label)}" onchange="${handler}(this.value)"
+                    class="min-w-0 flex-1 rounded-xl border-2 border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 px-3 py-2 text-xs">
+                <option value="">${escapeHtml(label)}</option>${options}
+            </select>`;
+}
+
+function renderSessionFilters() {
+    const opts = backfill.options || {};
+    return `
+        <div id="bf-filters" class="flex flex-wrap gap-2 mb-3">
+            <input type="date" id="bf-filter-date" value="${escapeHtml(backfill.filters.date)}"
+                   min="${backfill.window?.from ?? ""}" max="${backfill.window?.to ?? ""}"
+                   aria-label="${escapeHtml(bf("filter_date"))}" onchange="window.backfillFilterChanged('date', this.value)"
+                   class="min-w-0 flex-1 rounded-xl border-2 border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 px-3 py-2 text-xs">
+            ${filterSelect("bf-filter-instructor", bf("filter_instructor"), opts.instructors, backfill.filters.instructorId, "window.backfillFilterInstructor")}
+            ${filterSelect("bf-filter-category", bf("filter_category"), opts.categories, backfill.filters.categoryId, "window.backfillFilterCategory")}
+        </div>`;
+}
+
+// Re-renders only what a selection or a page of rows changed. Rebuilding the whole modal on every
+// toggle froze the picker and threw the scroll position away.
+function patchSessionStep() {
+    const list = document.getElementById("bf-session-list");
+    const summary = document.getElementById("bf-summary");
+    if (!list || !summary) return renderSessionStep();
+
+    const top = list.scrollTop;
+    summary.innerHTML = renderSummaryBar();
+    list.innerHTML = renderSessionRows();
+    list.scrollTop = top;
+}
+
 function renderSessionStep() {
     OperationsUI.openModal(window.__('operations_ui.packages.assign_modal_title'), `
         ${renderStepper()}
-        ${renderSummaryBar()}
-        <p class="text-sm text-slate-500 mb-4">${bf("step_2_hint")}</p>
+        <div id="bf-summary">${renderSummaryBar()}</div>
+        <p class="text-sm text-slate-500 mb-3">${bf("step_2_hint")}</p>
+        ${renderSessionFilters()}
         <div id="bf-session-list"
              class="max-h-80 overflow-y-auto rounded-2xl border-2 border-slate-100 dark:border-slate-800 divide-y divide-slate-100 dark:divide-slate-800">
             ${renderSessionRows()}
@@ -721,7 +767,7 @@ function renderReviewStep() {
     const overridden = backfill.rateTouched && backfill.exchangeRate !== "";
 
     const listed = (ids) => [...ids].map((id) => {
-        const s = backfill.sessions.find((x) => x.id === id);
+        const s = backfill.known.get(id) ?? backfill.sessions.find((x) => x.id === id);
         return `<li class="text-slate-600 dark:text-slate-300">${s ? `${s.date} · ${escapeHtml(s.class_title ?? "")}` : `#${id}`}</li>`;
     }).join("");
 
@@ -764,31 +810,80 @@ function renderReviewStep() {
         </div>`);
 }
 
+async function ensureBackfillOptions() {
+    if (backfill.options) return;
+    try {
+        const result = await OperationsAPI.getClassOptions();
+        backfill.options = result.data ?? {};
+    } catch (e) {
+        backfill.options = {};
+    }
+}
+
 async function loadBackfillSessions(replace = false) {
-    if (backfill.loading) return;
+    if (backfill.loading && !replace) return;
+
+    // A newer request supersedes an older one, so a slow response can never overwrite fresh rows.
+    const token = ++backfill.requestToken;
     backfill.loading = true;
 
     try {
+        if (!backfill.options) {
+            await ensureBackfillOptions();
+            if (token === backfill.requestToken && document.getElementById("bf-filters")) {
+                document.getElementById("bf-filters").outerHTML = renderSessionFilters();
+            }
+        }
+
         const result = await OperationsAPI.getBackfillSessions({
             userId: backfill.userId,
             packageId: backfill.package.id,
             purchasedAt: backfill.purchasedAt,
             cursor: replace ? null : backfill.cursor,
+            date: backfill.filters.date,
+            instructorId: backfill.filters.instructorId,
+            categoryId: backfill.filters.categoryId,
         });
 
+        if (token !== backfill.requestToken) return;
+
         const rows = result.data || [];
+        rows.forEach((row) => backfill.known.set(row.id, row));
         backfill.sessions = replace ? rows : [...backfill.sessions, ...rows];
         backfill.cursor = result.meta?.next_cursor ?? null;
         backfill.hasMore = Boolean(result.meta?.has_more);
         backfill.window = result.meta?.window ?? null;
     } catch (e) {
+        if (token !== backfill.requestToken) return;
         console.error("Failed to load backfill sessions:", e);
         OperationsUI.toast(e.message || bf("load_sessions_failed"), "error");
     } finally {
-        backfill.loading = false;
-        if (backfill.active && backfill.step === 3) renderSessionStep();
+        if (token === backfill.requestToken) {
+            backfill.loading = false;
+            if (backfill.active && backfill.step === 3) {
+                if (document.getElementById("bf-session-list")) patchSessionStep();
+                else renderSessionStep();
+            }
+        }
     }
 }
+
+let filterTimer = null;
+function applyBackfillFilters() {
+    clearTimeout(filterTimer);
+    filterTimer = setTimeout(() => {
+        backfill.cursor = null;
+        backfill.hasMore = false;
+        loadBackfillSessions(true);
+    }, 300);
+}
+
+window.backfillFilterChanged = (key, value) => {
+    backfill.filters[key] = value;
+    applyBackfillFilters();
+};
+window.backfillFilterInstructor = (value) => window.backfillFilterChanged("instructorId", value);
+window.backfillFilterCategory = (value) => window.backfillFilterChanged("categoryId", value);
 
 // ------------------------------------------------------- historical: handlers
 
@@ -929,7 +1024,7 @@ window.backfillToggleSession = (sessionId, kind) => {
         target.add(sessionId);
     }
 
-    renderSessionStep();
+    patchSessionStep();
 };
 
 window.backfillSubmit = async () => {

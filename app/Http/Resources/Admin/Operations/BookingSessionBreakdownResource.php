@@ -32,6 +32,8 @@ final class BookingSessionBreakdownResource extends JsonResource
             'class_session_id' => $bookingSession->class_session_id,
             'class_title' => $class?->getTranslation('title', app()->getLocale()),
             'instructor_name' => $class?->instructor?->name,
+            'category_name' => $class?->category?->getTranslation('name', app()->getLocale(), false)
+                ?: $class?->category?->getTranslation('name', 'en', false),
             'date' => $classSession?->date?->toDateString(),
             'starts_at' => $startsAt?->format('g:i A'),
             'status' => $bookingSession->status->value,

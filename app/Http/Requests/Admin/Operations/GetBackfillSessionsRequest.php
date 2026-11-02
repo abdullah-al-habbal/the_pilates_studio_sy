@@ -34,6 +34,9 @@ final class GetBackfillSessionsRequest extends FormRequest
             'month' => ['nullable', 'integer', 'min:1', 'max:12'],
             'year' => ['nullable', 'integer', 'min:2000', 'max:2100'],
             'user_id' => ['nullable', 'integer', 'exists:users,id'],
+            'date' => ['nullable', 'date_format:Y-m-d'],
+            'instructor_id' => ['nullable', 'integer', 'exists:instructors,id'],
+            'category_id' => ['nullable', 'integer', 'exists:class_categories,id'],
         ];
     }
 
@@ -58,6 +61,9 @@ final class GetBackfillSessionsRequest extends FormRequest
             month: $this->input('month') !== null ? $this->integer('month') : null,
             year: $this->input('year') !== null ? $this->integer('year') : null,
             excludeUserId: $this->input('user_id') !== null ? $this->integer('user_id') : null,
+            date: $this->filled('date') ? $this->string('date')->toString() : null,
+            instructorId: $this->filled('instructor_id') ? $this->integer('instructor_id') : null,
+            categoryId: $this->filled('category_id') ? $this->integer('category_id') : null,
         );
     }
 }

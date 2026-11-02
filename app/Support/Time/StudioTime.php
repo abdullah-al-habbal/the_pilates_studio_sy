@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Support\Time;
 
+use Carbon\Carbon;
 use Carbon\CarbonImmutable;
 
 /**
@@ -27,6 +28,15 @@ final class StudioTime
     /**
      * Combine a date and a `H:i[:s]` time into an instant in the studio timezone.
      */
+    /**
+     * Last instant of the studio day on which a package of $days days stops being valid,
+     * expressed in the application timezone so it is stored consistently.
+     */
+    public static function validUntil(int $days): Carbon
+    {
+        return Carbon::instance(self::now()->addDays($days)->endOfDay())->setTimezone(config('app.timezone'));
+    }
+
     public static function at(string $date, string $time): CarbonImmutable
     {
         return CarbonImmutable::parse($date . ' ' . $time, self::timezone());

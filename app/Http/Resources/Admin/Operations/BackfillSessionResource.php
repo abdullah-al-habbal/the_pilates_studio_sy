@@ -31,6 +31,8 @@ final class BackfillSessionResource extends JsonResource
             'end_time' => Carbon::parse($session->end_time)->format('g:i A'),
             'class_title' => $class?->getTranslation('title', app()->getLocale()),
             'instructor_name' => $class?->instructor?->name,
+            'category_name' => $class?->category?->getTranslation('name', app()->getLocale(), false)
+                ?: $class?->category?->getTranslation('name', 'en', false),
             'total_spots' => $session->total_spots,
             // Context only. Capacity does not block a backfill — the class already happened, so a
             // full session is a historical fact rather than a reason to refuse the record.

@@ -8,13 +8,14 @@ use App\Enums\BookingStatusEnum;
 use App\Models\Booking;
 use App\Models\Package;
 use App\Models\User;
+use App\Support\Time\StudioTime;
 use Carbon\Carbon;
 
 class CreateBookingFromPackageHandler
 {
     public function __invoke(User $user, Package $package, ?Carbon $expiresAt = null): Booking
     {
-        $expiresAt = $expiresAt ?? ($package->validity_days ? now()->addDays($package->validity_days) : null);
+        $expiresAt = $expiresAt ?? ($package->validity_days ? StudioTime::validUntil($package->validity_days) : null);
 
         return Booking::create([
             'user_id' => $user->id,

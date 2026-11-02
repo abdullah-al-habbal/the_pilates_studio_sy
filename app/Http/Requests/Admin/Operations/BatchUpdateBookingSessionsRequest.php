@@ -17,8 +17,10 @@ final class BatchUpdateBookingSessionsRequest extends FormRequest
     {
         return [
             'items' => ['required', 'array', 'min:1', 'max:50'],
-            'items.*.booking_session_id' => ['required', 'integer', 'distinct'],
-            'items.*.status' => ['required', 'string', 'in:attended,missed,cancelled'],
+            'items.*.booking_session_id' => ['nullable', 'integer', 'required_without:items.*.class_session_id'],
+            'items.*.class_session_id' => ['nullable', 'integer', 'exists:class_sessions,id', 'required_without:items.*.booking_session_id'],
+            'items.*.new_class_session_id' => ['nullable', 'integer', 'exists:class_sessions,id', 'required_if:items.*.status,swap'],
+            'items.*.status' => ['required', 'string', 'in:attended,missed,cancelled,late_cancelled,swap,reserved'],
             'items.*.override' => ['sometimes', 'boolean'],
             'items.*.reason' => ['nullable', 'string', 'max:255'],
         ];

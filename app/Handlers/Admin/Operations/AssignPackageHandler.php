@@ -16,6 +16,7 @@ use App\Services\Booking\HistoricalBackfillService;
 use App\Services\Currency\PricingService;
 use App\Services\Validation\AssignPackageValidatorService;
 use App\Services\Validation\HistoricalBackfillValidatorService;
+use App\Support\Time\StudioTime;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Validation\ValidationException;
@@ -64,7 +65,7 @@ final readonly class AssignPackageHandler
     private function assignLive(User $user, AssignPackageCommand $command): Booking
     {
         $package = Package::findOrFail($command->packageId);
-        $expiresAt = $package->validity_days ? now()->addDays($package->validity_days) : null;
+        $expiresAt = $package->validity_days ? StudioTime::validUntil($package->validity_days) : null;
 
         $resolvedCurrencyId = $command->currencyId ?? $this->pricingService->getBaseCurrencyId();
 

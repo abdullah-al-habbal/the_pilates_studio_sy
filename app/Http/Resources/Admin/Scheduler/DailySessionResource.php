@@ -27,10 +27,10 @@ final class DailySessionResource extends JsonResource
         $instructor = $session->class?->instructor?->name
             ?? ($session->class ? '[MISSING:instructor.name]' : '[MISSING:class_relation→instructor]');
 
-        $reserved = $session->bookingSessions->count();
+        $reserved = $session->bookingSessions->filter(fn ($bs) => $bs->isReserved())->count();
         $capacity = (int) ($session->total_spots ?? 0);
         $attended = $session->bookingSessions
-            ->filter(fn ($bs) => $bs->attendance_status?->value === 'attended')
+            ->filter(fn ($bs) => $bs->isReserved() && $bs->attendance_status?->value === 'attended')
             ->count();
 
         return [

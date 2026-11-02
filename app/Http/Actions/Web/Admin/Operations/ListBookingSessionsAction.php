@@ -25,7 +25,7 @@ final readonly class ListBookingSessionsAction
             }
 
             $sessions = $booking->bookingSessions()
-                ->with(['classSession.class.instructor'])
+                ->with(['classSession.class.instructor', 'classSession.class.category'])
                 ->join('class_sessions', 'class_sessions.id', '=', 'booking_sessions.class_session_id')
                 ->orderBy('class_sessions.date')
                 ->orderBy('class_sessions.start_time')

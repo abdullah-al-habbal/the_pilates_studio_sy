@@ -40,13 +40,16 @@ final readonly class GetSessionDetailsHandler
         $instructor = $session->class?->instructor?->name
             ?? ($session->class ? '[MISSING:instructor.name]' : '[MISSING:class_relation→instructor]');
 
-        $reserved = $session->bookingSessions->count();
+        $activeSessions = $session->bookingSessions
+            ->filter(fn (BookingSession $bs) => $bs->isReserved());
+
+        $reserved = $activeSessions->count();
         $capacity = (int) ($session->total_spots ?? 0);
         $fillPct = $capacity > 0
             ? min(100, (int) round($reserved / $capacity * 100))
             : 0;
 
-        $bookings = $session->bookingSessions
+        $bookings = $activeSessions
             ->filter(fn (BookingSession $bs) => $bs->attendance_status !== AttendanceStatusEnum::MISSED)
             ->map(fn (BookingSession $bs) => [
                 'id' => $bs->id,

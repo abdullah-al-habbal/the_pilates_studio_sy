@@ -26,7 +26,7 @@ class ClassSessionEloquentRepository
     public function getSessionsBetween(string $startDate, string $endDate): Collection
     {
         $query = $this->model->newQuery()
-            ->with(['class.instructor'])
+            ->with(['class.instructor', 'class.category'])
             ->whereHas('class', fn (Builder $query) => $query->where('status', ClassStatusEnum::ACTIVE->value))
             ->whereBetween('date', [$startDate, $endDate])
             ->where('status', ClassSessionStatusEnum::SCHEDULED->value)
@@ -72,7 +72,7 @@ class ClassSessionEloquentRepository
     public function getSchedulerQuery(): Builder
     {
         return $this->model->newQuery()
-            ->with(['class.instructor', 'bookingSessions'])
+            ->with(['class.instructor', 'class.category', 'bookingSessions'])
             ->latest('date');
     }
 
@@ -95,6 +95,7 @@ class ClassSessionEloquentRepository
             ->where('status', 'scheduled')
             ->with([
                 'class.instructor',
+                'class.category',
                 'bookingSessions.booking.user.bookings' => fn ($q) => $q->where('status', 'active')->where('remaining_credits', '>', 0),
             ])
             ->orderBy('start_time')
@@ -111,6 +112,7 @@ class ClassSessionEloquentRepository
         return $this->model->newQuery()
             ->with([
                 'class.instructor',
+                'class.category',
                 'bookingSessions',
             ])
             ->when($instructorId, fn ($q, $id) => $q->whereHas('class', fn ($q) => $q->where('instructor_id', $id)))
@@ -126,6 +128,7 @@ class ClassSessionEloquentRepository
         return $this->model->newQuery()
             ->with([
                 'class.instructor',
+                'class.category',
                 'bookingSessions.booking.user',
             ])->findOrFail($id);
     }

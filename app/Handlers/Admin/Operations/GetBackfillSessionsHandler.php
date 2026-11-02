@@ -19,7 +19,7 @@ final readonly class GetBackfillSessionsHandler
         $cursor = $command->cursor !== null ? Cursor::fromEncoded($command->cursor) : null;
 
         return ClassSession::query()
-            ->with(['class:id,title,instructor_id', 'class.instructor:id,name'])
+            ->with(['class:id,title,instructor_id,class_category_id', 'class.instructor:id,name', 'class.category:id,name'])
             ->withCount([
                 'bookingSessions as booking_sessions_count' => fn ($q) => $q
                     ->where('status', BookingSessionStatusEnum::RESERVED->value),
@@ -30,6 +30,9 @@ final readonly class GetBackfillSessionsHandler
                 $command->purchasedAt->toDateString(),
                 ($command->expiresAt ?? StudioTime::now())->toDateString(),
             ])
+            ->when($command->date, fn ($q, $date) => $q->whereDate('date', $date))
+            ->when($command->instructorId, fn ($q, $id) => $q->whereHas('class', fn ($c) => $c->where('instructor_id', $id)))
+            ->when($command->categoryId, fn ($q, $id) => $q->whereHas('class', fn ($c) => $c->where('class_category_id', $id)))
             ->when($command->month, fn ($q, $month) => $q->whereMonth('date', $month))
             ->when($command->year, fn ($q, $year) => $q->whereYear('date', $year))
             ->when(

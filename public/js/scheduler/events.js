@@ -13,7 +13,7 @@
                 S.events.loadSessions();
             });
 
-            ui.$('btn-refresh')?.addEventListener('click', S.events.loadSessions);
+            ui.$('btn-refresh')?.addEventListener('click', () => S.events.loadSessions());
 
             ui.$('input-date')?.addEventListener('change', (e) => {
                 state.selectedDate      = e.target.value;
@@ -38,7 +38,7 @@
             ui.$('btn-next')?.addEventListener('click',
                 () => S.events.changePage(state.meta.current_page + 1));
 
-            ui.$('btn-retry')?.addEventListener('click', S.events.loadSessions);
+            ui.$('btn-retry')?.addEventListener('click', () => S.events.loadSessions());
 
             ui.$('btn-close-modal')?.addEventListener('click', modal.close);
             ui.$('modal-backdrop')?.addEventListener('click', modal.close);
@@ -108,10 +108,15 @@
             ui.$('btn-submit-new')?.addEventListener('click', walkin.submitNew);
         },
 
-        loadSessions: async () => {
-            state.loading = true;
-            state.error   = null;
-            render.all();
+        loadSessions: async (opts = {}) => {
+            // A silent refresh keeps the current cards on screen and the scroll where it was.
+            const silent = opts && opts.silent === true;
+            const pageY  = window.scrollY;
+            if (!silent) {
+                state.loading = true;
+                state.error   = null;
+                render.all();
+            }
             try {
                 const json = await api.getSessions(
                     state.selectedDate,
@@ -142,6 +147,7 @@
             } finally {
                 state.loading = false;
                 render.all();
+                if (silent) window.scrollTo(window.scrollX, pageY);
             }
         },
 
@@ -234,8 +240,15 @@
             const booking = state.modal.bookings.find(b => b.id === bookingId);
             if (!booking || booking._pending) return;
 
+            // The modal body scrolls, not the page: remember where it was and put it back after
+            // the partial update, so toggling a client never jumps the list to the top.
+            const scroller  = ui.$('attendees-list')?.closest('.overflow-y-auto');
+            const scrollTop = scroller ? scroller.scrollTop : 0;
+            const restore   = () => { if (scroller) scroller.scrollTop = scrollTop; };
+
             booking._pending = true;
             render.attendeesTab();
+            restore();
 
             try {
                 const json = await api.postAttendance(state.modal.sessionId, bookingId, status);
@@ -243,8 +256,17 @@
                 if (json.success) {
                     const label = status === 'attended' ? window.__('scheduler_ui.events.marked_attended') : window.__('scheduler_ui.events.marked_missed');
                     S.toaster.success(`${window.__('scheduler_ui.events.attendance_prefix')} ${label} ${window.__('scheduler_ui.events.success_suffix')}`);
-                    await modal.fetchDetails(state.modal.sessionId);
-                    await S.events.loadSessions();
+
+                    // Patch the one row in place instead of refetching and rebuilding everything.
+                    booking.attendance = status;
+                    booking._pending   = false;
+                    if (status === 'missed') {
+                        state.modal.bookings = state.modal.bookings.filter(b => b.id !== bookingId);
+                    }
+                    render.attendeesTab();
+                    restore();
+
+                    S.events.loadSessions({ silent: true });
                 } else {
                     S.toaster.error(json.message || window.__('scheduler_ui.events.attendance_failed'));
                 }
@@ -252,7 +274,9 @@
                 console.error('[Scheduler:events] toggleAttendance error:', err);
                 S.toaster.error(window.__('scheduler_ui.events.attendance_retry'));
             } finally {
+                booking._pending = false;
                 render.attendeesTab();
+                restore();
             }
         },
     };

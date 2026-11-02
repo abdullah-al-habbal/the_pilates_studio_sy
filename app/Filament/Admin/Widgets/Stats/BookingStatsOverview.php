@@ -57,7 +57,9 @@ class BookingStatsOverview extends BaseWidget
             BookingSessionStatusEnum::RESERVED->value => BookingSession::where('status', BookingSessionStatusEnum::RESERVED->value)->count(),
             'attended' => BookingSession::where('attendance_status', AttendanceStatusEnum::ATTENDED->value)->count(),
             BookingSessionStatusEnum::CANCELLED->value => BookingSession::where('status', BookingSessionStatusEnum::CANCELLED->value)->count(),
-            'missed' => BookingSession::where('attendance_status', AttendanceStatusEnum::MISSED->value)->count(),
+            'missed' => BookingSession::where('status', BookingSessionStatusEnum::RESERVED->value)
+                ->where('attendance_status', AttendanceStatusEnum::MISSED->value)
+                ->count(),
         ];
     }
 

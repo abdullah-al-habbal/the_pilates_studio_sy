@@ -77,6 +77,14 @@ class BookingSessionsTable
                     })
                     ->toggleable(),
 
+                TextColumn::make('classSession.class.category.name')
+                    ->label(__('dashboard.resources.booking_sessions.fields.category'))
+                    ->state(fn ($record) => $record->classSession?->class?->category?->getTranslation('name', app()->getLocale(), false)
+                        ?: $record->classSession?->class?->category?->getTranslation('name', 'en', false)
+                        ?: '—')
+                    ->badge()
+                    ->toggleable(),
+
                 TextColumn::make('classSession.date')
                     ->label(__('dashboard.resources.booking_sessions.fields.date'))
                     ->date('M d, Y')

@@ -29,7 +29,7 @@ class BookingSessionEloquentRepository
             $this->logger->info('Fetching user booking sessions', ['user_id' => $userId]);
 
             $query = $this->baseUserSessionsQuery($userId)
-                ->with(['classSession.class'])
+                ->with(['classSession.class.category'])
                 ->when($filters['status'] ?? null, fn ($q, $status) => $q->where('status', $status))
                 ->latest();
 
@@ -161,7 +161,7 @@ class BookingSessionEloquentRepository
     private function paginateWithEager(Builder $query, int $perPage): LengthAwarePaginator
     {
         return $query
-            ->with(['classSession.class.instructor', 'classSession.class.primaryImage'])
+            ->with(['classSession.class.instructor', 'classSession.class.category', 'classSession.class.primaryImage'])
             ->latest()
             ->paginate($perPage);
     }
@@ -239,13 +239,16 @@ class BookingSessionEloquentRepository
 
     public function countMissed(): int
     {
-        return $this->model->where('attendance_status', AttendanceStatusEnum::MISSED)->count();
+        return $this->model->where('status', BookingSessionStatusEnum::RESERVED)
+            ->where('attendance_status', AttendanceStatusEnum::MISSED)
+            ->count();
     }
 
     public function countMissedForMonth(int $month, int $year): int
     {
         return $this->model->query()
             ->join('class_sessions', 'booking_sessions.class_session_id', '=', 'class_sessions.id')
+            ->where('booking_sessions.status', BookingSessionStatusEnum::RESERVED)
             ->where('booking_sessions.attendance_status', AttendanceStatusEnum::MISSED)
             ->whereNull('class_sessions.deleted_at')
             ->whereMonth('class_sessions.date', $month)

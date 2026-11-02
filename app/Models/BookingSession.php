@@ -59,7 +59,8 @@ class BookingSession extends Model
 
     public function isMissed(): bool
     {
-        return $this->attendance_status === AttendanceStatusEnum::MISSED;
+        // A cancelled reservation keeps the column default ("missed"), so it must never count as missed.
+        return $this->isReserved() && $this->attendance_status === AttendanceStatusEnum::MISSED;
     }
 
     public function markAttended(): void

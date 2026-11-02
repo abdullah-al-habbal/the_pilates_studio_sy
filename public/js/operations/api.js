@@ -210,7 +210,7 @@ const OperationsAPI = {
         });
     },
 
-    getBackfillSessions({ userId, packageId, purchasedAt, cursor = null, perPage = 20, month = null, year = null }) {
+    getBackfillSessions({ userId, packageId, purchasedAt, cursor = null, perPage = 20, month = null, year = null, date = null, instructorId = null, categoryId = null }) {
         const params = new URLSearchParams({
             user_id: userId,
             package_id: packageId,
@@ -220,6 +220,9 @@ const OperationsAPI = {
         if (cursor) params.set("cursor", cursor);
         if (month) params.set("month", month);
         if (year) params.set("year", year);
+        if (date) params.set("date", date);
+        if (instructorId) params.set("instructor_id", instructorId);
+        if (categoryId) params.set("category_id", categoryId);
 
         return this.request(`/admin/operations/bookings/backfill/sessions?${params.toString()}`);
     },
@@ -250,6 +253,12 @@ const OperationsAPI = {
         return this.request(`/admin/operations/classes/lookup?${new URLSearchParams({ type, search, page, per_page: perPage }).toString()}`);
     },
 
+    getSchedulerSessions(date, instructorId = null, categoryId = null) {
+        const params = new URLSearchParams({ date, page: 1, per_page: 50 });
+        if (instructorId) params.set('instructor_id', instructorId);
+        if (categoryId) params.set('category_id', categoryId);
+        return this.request(`/admin/scheduler/sessions?${params.toString()}`);
+    },
     getClassOptions() { return this.request('/admin/operations/classes/options'); },
     getClass(classId) { return this.request(`/admin/operations/classes/${classId}`); },
     previewClass(payload) { return this.request('/admin/operations/classes/preview', 'POST', payload); },

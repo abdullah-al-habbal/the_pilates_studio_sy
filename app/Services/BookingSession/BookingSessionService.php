@@ -9,6 +9,7 @@ namespace App\Services\BookingSession;
 use App\Enums\AttendanceStatusEnum;
 use App\Enums\BookingSessionStatusEnum;
 use App\Enums\BookingStatusEnum;
+use App\Enums\ClassSessionStatusEnum;
 use App\Models\Booking;
 use App\Models\BookingSession;
 use App\Models\ClassSession;
@@ -125,7 +126,16 @@ class BookingSessionService
 
         DB::transaction(function () use ($bookingId, $items, $admin): void {
             $byId = [];
+            $adds = [];
             foreach ($items as $item) {
+                if (empty($item['booking_session_id'])) {
+                    $adds[] = $item;
+
+                    continue;
+                }
+                if (isset($byId[(int) $item['booking_session_id']])) {
+                    throw ValidationException::withMessages(['items' => 'A reservation can only appear once in a batch.']);
+                }
                 $byId[(int) $item['booking_session_id']] = $item;
             }
 
@@ -139,7 +149,10 @@ class BookingSessionService
             }
 
             $classSessions = [];
-            $classIds = collect($probes)->pluck('class_session_id')->map(intval(...))->unique()->sort()->values();
+            $classIds = collect($probes)->pluck('class_session_id')->map(intval(...))
+                ->merge(collect($adds)->pluck('class_session_id')->map(intval(...)))
+                ->merge(collect($byId)->pluck('new_class_session_id')->filter()->map(intval(...)))
+                ->unique()->sort()->values();
             foreach ($classIds as $classId) {
                 $classSessions[$classId] = $this->classSessionService->find($classId, true);
             }
@@ -173,6 +186,15 @@ class BookingSessionService
                             (bool) ($item['override'] ?? false),
                             $item['reason'] ?? null,
                         ),
+                        'late_cancelled' => $this->lateCancelLocked($bookingSession, $classSession),
+                        'swap' => $this->swapLocked(
+                            $bookingSession,
+                            $classSession,
+                            $classSessions[(int) ($item['new_class_session_id'] ?? 0)] ?? throw ValidationException::withMessages(['new_class_session_id' => 'Choose the class to swap to.']),
+                            $admin,
+                            (bool) ($item['override'] ?? false),
+                            $item['reason'] ?? null,
+                        ),
                         'attended', 'missed' => $this->applyAttendanceLocked(
                             $bookingSession,
                             AttendanceStatusEnum::from($item['status']),
@@ -186,7 +208,115 @@ class BookingSessionService
                     ]);
                 }
             }
+
+            foreach ($adds as $index => $item) {
+                try {
+                    $this->addLocked(
+                        $bookingId,
+                        $classSessions[(int) $item['class_session_id']],
+                        (string) ($item['status'] ?? 'reserved'),
+                        $admin,
+                    );
+                } catch (ValidationException $e) {
+                    throw ValidationException::withMessages([
+                        "adds.{$index}" => collect($e->errors())->flatten()->first() ?? 'Invalid change.',
+                    ]);
+                }
+            }
         });
+    }
+
+    /**
+     * Cancels one reservation (credit restored) and books another class on the same package.
+     */
+    private function swapLocked(
+        BookingSession $bookingSession,
+        ClassSession $oldClass,
+        ClassSession $newClass,
+        User $admin,
+        bool $isOverride,
+        ?string $reason,
+    ): void {
+        $this->cancelLocked($bookingSession, $oldClass, $admin, $isOverride, $reason);
+
+        $this->addLocked((int) $bookingSession->booking_id, $newClass, 'reserved', $admin);
+    }
+
+    /**
+     * Adds a class to an existing package: a future class is reserved, a past one is recorded as
+     * attended or missed. Each add uses one credit; the same rules as a normal reservation apply.
+     */
+    private function addLocked(int $bookingId, ClassSession $classSession, string $status, User $admin): void
+    {
+        if (! in_array($status, ['reserved', 'attended', 'missed'], true)) {
+            throw ValidationException::withMessages(['status' => 'Unknown status.']);
+        }
+
+        $booking = $this->bookingService->find($bookingId, true);
+
+        if (in_array($booking->status, [BookingStatusEnum::CANCELLED, BookingStatusEnum::FROZEN], true)) {
+            throw ValidationException::withMessages(['booking_id' => 'Classes cannot be added to a cancelled or frozen package.']);
+        }
+
+        if ($classSession->status === ClassSessionStatusEnum::CANCELLED) {
+            throw ValidationException::withMessages(['class_session_id' => 'This class has been cancelled.']);
+        }
+
+        $this->assertBookingHasCredits($booking);
+        $this->assertNoDuplicateSessionForUser($booking->user_id, $classSession->id);
+
+        $started = $this->cancellationPolicy->hasStarted($classSession);
+
+        if ($status === 'reserved') {
+            if ($started) {
+                throw ValidationException::withMessages(['class_session_id' => 'This class has already started. Add it as attended or missed.']);
+            }
+            $this->assertBookingIsValid($booking);
+            $this->assertSessionHasAvailableSpots($classSession->id);
+        } elseif (! $started) {
+            throw ValidationException::withMessages(['class_session_id' => 'Attendance can only be recorded for a class that has started.']);
+        }
+
+        $this->bookingService->decrementCredits($booking);
+        $booking->refresh();
+
+        if (! $this->bookingService->hasCreditsRemaining($booking)) {
+            $this->bookingService->updateStatus($booking, BookingStatusEnum::EXHAUSTED);
+        }
+
+        $row = $this->repository->reviveCancelled($bookingId, $classSession->id)
+            ?? $this->repository->create([
+                'booking_id' => $bookingId,
+                'class_session_id' => $classSession->id,
+                'status' => BookingSessionStatusEnum::RESERVED,
+            ]);
+
+        if ($status === 'attended') {
+            $this->repository->markAttended($row->id, $admin->id);
+        } elseif ($status === 'missed') {
+            $this->repository->markMissed($row->id, $admin->id);
+        }
+    }
+
+    /**
+     * A cancellation inside the 24h window (or a no-show): the reservation stays, is recorded as
+     * Missed and the credit remains spent.
+     */
+    private function lateCancelLocked(BookingSession $bookingSession, ClassSession $classSession): void
+    {
+        if (! $bookingSession->isReserved()) {
+            throw ValidationException::withMessages(['status' => 'Only a reserved session can be marked as a late cancellation.']);
+        }
+
+        if ($bookingSession->attended_at !== null || $bookingSession->isAttended()) {
+            throw ValidationException::withMessages(['status' => 'Attendance has already been recorded for this session.']);
+        }
+
+        if (! $this->cancellationPolicy->isInsideWindow($classSession)) {
+            throw ValidationException::withMessages(['status' => 'This class is still outside the 24h window. Cancel it normally to restore the credit.']);
+        }
+
+        $this->repository->markMissed($bookingSession->id, null);
     }
 
     private function applyAttendanceLocked(BookingSession $bookingSession, AttendanceStatusEnum $status, User $admin): void
