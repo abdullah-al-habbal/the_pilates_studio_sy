@@ -60,11 +60,11 @@ ls -la public/storage  # → ../storage/app/public
 php artisan tinker --execute="echo \App\Models\ClassImage::first()->image_url;"
 ```
 
-**Important:** Never use `php artisan storage:link` on production (Hostinger disables `exec()`). The deploy script creates it automatically. See [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md).
+**Important:** Never use `php artisan storage:link` on production (Hostinger disables `exec()`). The deploy script creates it automatically.
 
 ## Deployment
 
-Push to `dev` or `production` branch to trigger CI/CD deploy. See [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) for full guide.
+Push to `dev` or `production` branch to trigger CI/CD deploy.
 
 ```bash
 # Normal deploy (safe, preserves admin data)

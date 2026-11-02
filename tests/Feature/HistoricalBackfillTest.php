@@ -31,11 +31,6 @@ use Illuminate\Validation\ValidationException;
 use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
-/**
- * Phase 2 — historical backfill domain core.
- *
- * @see docs/historical-backfill/plan/phase-2-domain-core.md
- */
 final class HistoricalBackfillTest extends TestCase
 {
     use RefreshDatabase;

@@ -45,7 +45,6 @@ Files live in `storage/app/public/`, served via `public/storage → ../storage/a
 | Filament image CRUD | `app/Filament/Admin/Resources/Classes/RelationManagers/ImagesRelationManager.php` |
 | Storage config | `config/filesystems.php` (public disk) |
 | Deploy script | `.github/workflows/deploy.yml` |
-| Deployment docs | `docs/DEPLOYMENT.md` |
 
 ## Common Tasks
 

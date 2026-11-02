@@ -36,8 +36,6 @@ URL: /storage/class-images/1/2026/07/18/123-primary.webp
 Models with image accessors: `ClassImage`, `Instructor`, `StaticPage`, `Testimonial`.
 All use `Storage::disk('public')->url()` — do NOT change to `url()` or `asset()`.
 
-See `docs/DEPLOYMENT.md` for full storage architecture and troubleshooting.
-
 ## Deployment
 
 - Push to `dev` → deploys to dev server
@@ -47,8 +45,6 @@ See `docs/DEPLOYMENT.md` for full storage architecture and troubleshooting.
 
 **NEVER** run `migrate:fresh` on production without `[fresh-migrate]` flag.
 **NEVER** commit `public/storage` — it's a symlink, gitignored.
-
-See `docs/DEPLOYMENT.md` for full deployment guide.
 
 ## Release synchronization skill
 
