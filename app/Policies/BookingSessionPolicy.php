@@ -19,6 +19,16 @@ class BookingSessionPolicy
             && $classSession->available_spots > 0;
     }
 
+    /**
+     * A reservation may be cancelled by the client who owns it or by an admin.
+     * The 24h window is a separate rule (CancellationPolicyService), not an authorization concern.
+     */
+    public function cancel(User $user, BookingSession $bookingSession): bool
+    {
+        return $user->isAdmin()
+            || $bookingSession->booking?->user_id === $user->id;
+    }
+
     public function viewAny(User $user): bool
     {
         return false;

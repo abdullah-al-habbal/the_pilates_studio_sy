@@ -147,6 +147,35 @@ class BookingService
         });
     }
 
+    /**
+     * Gives back the credit of a cancelled reservation.
+     *
+     * The caller must already hold the booking row lock. The credit never exceeds the package
+     * total, and an EXHAUSTED booking is re-activated only when it is still usable: not expired,
+     * and the client has no other active booking (the unique active-booking index would reject it).
+     * A frozen booking keeps its status; it simply gets the credit back.
+     */
+    public function restoreCreditAfterCancellation(Booking $booking): void
+    {
+        if ($booking->remaining_credits < $booking->total_credits) {
+            $this->repository->refundCredit($booking->id);
+        }
+
+        $booking->refresh();
+
+        if ($booking->status !== BookingStatusEnum::EXHAUSTED
+            || $booking->remaining_credits <= 0
+            || $booking->isExpired()) {
+            return;
+        }
+
+        $blocking = $this->repository->findBlockingActiveBooking($booking->user_id, lock: true);
+
+        if ($blocking === null || $blocking->id === $booking->id) {
+            $this->repository->updateStatus($booking->id, BookingStatusEnum::ACTIVE);
+        }
+    }
+
     public function expireBooking(Booking $booking): void
     {
         $this->repository->expire($booking->id);

@@ -2,6 +2,7 @@
 
 // routes/web/operations/bookings.php
 declare(strict_types=1);
+use App\Http\Actions\Web\Admin\Operations\CancelBookingSessionAction;
 use App\Http\Actions\Web\Admin\Operations\FreezeBookingAction;
 use App\Http\Actions\Web\Admin\Operations\GetBackfillSessionsAction;
 use App\Http\Actions\Web\Admin\Operations\ProcessBookingRefundAction;
@@ -10,6 +11,8 @@ use Illuminate\Support\Facades\Route;
 
 Route::prefix('bookings')->name('bookings.')->group(function (): void {
     Route::get('/backfill/sessions', GetBackfillSessionsAction::class)->name('backfill.sessions');
+
+    Route::post('/sessions/{bookingSessionId}/cancel', CancelBookingSessionAction::class)->name('sessions.cancel');
 
     Route::post('/{bookingId}/freeze', FreezeBookingAction::class)->name('freeze');
     Route::post('/{bookingId}/unfreeze', UnfreezeBookingAction::class)->name('unfreeze');

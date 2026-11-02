@@ -7,7 +7,6 @@ namespace App\Models;
 use App\Enums\AttendanceStatusEnum;
 use App\Enums\BookingSessionStatusEnum;
 use App\Policies\BookingSessionPolicy;
-use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\UsePolicy;
 use Illuminate\Database\Eloquent\Casts\Attribute;
@@ -93,7 +92,7 @@ class BookingSession extends Model
                 } catch (\Exception) {
                     return false;
                 }
-            }
+            },
         );
     }
 
@@ -105,19 +104,13 @@ class BookingSession extends Model
                     if (! $this->isReserved() || ! $this->classSession) {
                         return false;
                     }
-                    $startDateTime = Carbon::create(
-                        $this->classSession->date?->year ?? null,
-                        $this->classSession->date?->month ?? null,
-                        $this->classSession->date?->day ?? null,
-                        (int) explode(':', $this->classSession->start_time)[0],
-                        (int) explode(':', $this->classSession->start_time)[1] ?? 0
-                    );
+                    $startsAt = $this->classSession->startsAt();
 
-                    return $startDateTime->isPast();
+                    return $startsAt !== null && $startsAt->isPast();
                 } catch (\Exception) {
                     return false;
                 }
-            }
+            },
         );
     }
 
@@ -129,26 +122,20 @@ class BookingSession extends Model
                     if (! $this->isReserved() || ! $this->classSession) {
                         return false;
                     }
-                    $endDateTime = Carbon::create(
-                        $this->classSession->date?->year ?? null,
-                        $this->classSession->date?->month ?? null,
-                        $this->classSession->date?->day ?? null,
-                        (int) explode(':', $this->classSession->end_time)[0],
-                        (int) explode(':', $this->classSession->end_time)[1] ?? 0
-                    );
+                    $endsAt = $this->classSession->endsAt();
 
-                    return $endDateTime->isPast();
+                    return $endsAt !== null && $endsAt->isPast();
                 } catch (\Exception) {
                     return false;
                 }
-            }
+            },
         );
     }
 
     protected function isRefundable(): Attribute
     {
         return Attribute::make(
-            get: fn () => $this->can_cancel
+            get: fn () => $this->can_cancel,
         );
     }
 
@@ -165,7 +152,7 @@ class BookingSession extends Model
                 } catch (\Exception) {
                     return false;
                 }
-            }
+            },
         );
     }
 

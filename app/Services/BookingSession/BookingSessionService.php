@@ -22,15 +22,19 @@ use App\Services\Booking\BookingService;
 use App\Services\ClassSession\ClassSessionService;
 use App\Services\Currency\PricingService;
 use App\Services\Log\LoggingService;
-use Carbon\Carbon;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\ValidationException;
 
 class BookingSessionService
 {
+    private const CANCELLATION_USER_INITIATED = 0;
+
+    private const CANCELLATION_ADMIN_OVERRIDE = 1;
+
     public function __construct(
         private readonly BookingSessionEloquentRepository $repository,
         private readonly BookingEloquentRepository $bookingRepo,
@@ -42,6 +46,7 @@ class BookingSessionService
         private readonly LoggingService $logger,
         private readonly PricingService $pricingService,
         private readonly AppSettingService $appSettings,
+        private readonly CancellationPolicyService $cancellationPolicy,
     ) {}
 
     public function listUserSessions(int $userId, array $filters = []): LengthAwarePaginator
@@ -57,12 +62,42 @@ class BookingSessionService
             ?? throw new ModelNotFoundException;
     }
 
-    public function cancel(int $bookingSessionId, ?int $cancelledByAdminId = null): void
-    {
-        $this->logger->info('Cancelling booking session', ['session_id' => $bookingSessionId]);
+    /**
+     * Cancels a reservation and gives the credit back.
+     *
+     * Locks are taken in the same order as reserve(): class session, reservation, booking.
+     * A caller who may not cancel this reservation gets "not found", so ids cannot be probed.
+     * Only an admin actor can use the override, and even then not once the class has started.
+     */
+    public function cancel(
+        int $bookingSessionId,
+        User $actor,
+        bool $adminOverride = false,
+        ?string $reason = null,
+    ): BookingSession {
+        $isOverride = $adminOverride && $actor->isAdmin();
 
-        DB::transaction(function () use ($bookingSessionId, $cancelledByAdminId) {
-            $bookingSession = $this->findById($bookingSessionId, true);
+        $this->logger->info('Cancelling booking session', [
+            'session_id' => $bookingSessionId,
+            'actor_id' => $actor->id,
+            'admin_override' => $isOverride,
+        ]);
+
+        return DB::transaction(function () use ($bookingSessionId, $actor, $isOverride, $reason): BookingSession {
+            $probe = $this->repository->find($bookingSessionId) ?? throw $this->notFound($bookingSessionId);
+
+            $classSession = $this->classSessionService->find($probe->class_session_id, true);
+
+            $bookingSession = $this->repository->find($bookingSessionId, true) ?? throw $this->notFound($bookingSessionId);
+
+            if (! Gate::forUser($actor)->allows('cancel', $bookingSession)) {
+                $this->logger->warning('Cancel denied for booking session', [
+                    'session_id' => $bookingSessionId,
+                    'actor_id' => $actor->id,
+                ]);
+
+                throw $this->notFound($bookingSessionId);
+            }
 
             if ($bookingSession->isCancelled()) {
                 throw ValidationException::withMessages([
@@ -70,27 +105,33 @@ class BookingSessionService
                 ]);
             }
 
-            $classSession = $this->classSessionService->find($bookingSession->class_session_id, true);
-
-            $date = $classSession->date instanceof Carbon
-                ? $classSession->date
-                : Carbon::parse($classSession->date);
-
-            $cutoff = Carbon::parse(
-                $date->format('Y-m-d') . ' ' . $classSession->start_time,
-            )->subHours(24);
-
-            if (now()->greaterThanOrEqualTo($cutoff)) {
+            if ($bookingSession->attended_at !== null) {
                 throw ValidationException::withMessages([
-                    'cancelled_at' => 'Cancellation window has passed (24h before session).',
+                    'status' => 'Attendance has already been recorded for this session.',
                 ]);
             }
 
-            $this->repository->updateStatus($bookingSessionId, BookingSessionStatusEnum::CANCELLED->value);
-            $this->repository->setCancelledAt($bookingSessionId, $cancelledByAdminId);
-            $booking = $this->bookingService->find($bookingSession->booking_id);
-            $this->bookingService->refundCredit($booking);
+            $this->cancellationPolicy->assertCancellable($classSession, $isOverride);
+
+            $booking = $this->bookingService->find($bookingSession->booking_id, true);
+
+            $this->repository->markCancelled(
+                id: $bookingSessionId,
+                actorId: $actor->id,
+                adminId: $actor->isAdmin() ? $actor->id : null,
+                cancellationType: $isOverride ? self::CANCELLATION_ADMIN_OVERRIDE : self::CANCELLATION_USER_INITIATED,
+                reason: $reason,
+            );
+
+            $this->bookingService->restoreCreditAfterCancellation($booking);
+
+            return $bookingSession->refresh();
         });
+    }
+
+    private function notFound(int $bookingSessionId): ModelNotFoundException
+    {
+        return (new ModelNotFoundException)->setModel(BookingSession::class, [$bookingSessionId]);
     }
 
     public function markAttended(int $bookingSessionId, ?int $updatedByAdminId = null): void
@@ -237,11 +278,12 @@ class BookingSessionService
                 $this->bookingService->updateStatus($booking, BookingStatusEnum::EXHAUSTED);
             }
 
-            return $this->repository->create([
-                'booking_id' => $bookingId,
-                'class_session_id' => $classSessionId,
-                'status' => BookingSessionStatusEnum::RESERVED,
-            ]);
+            return $this->repository->reviveCancelled($bookingId, $classSessionId)
+                ?? $this->repository->create([
+                    'booking_id' => $bookingId,
+                    'class_session_id' => $classSessionId,
+                    'status' => BookingSessionStatusEnum::RESERVED,
+                ]);
         });
     }
 

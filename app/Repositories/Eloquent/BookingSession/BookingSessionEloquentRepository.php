@@ -20,7 +20,7 @@ class BookingSessionEloquentRepository
 {
     public function __construct(
         private readonly BookingSession $model,
-        private readonly LoggingService $logger
+        private readonly LoggingService $logger,
     ) {}
 
     public function listUserSessions(int $userId, array $filters = []): LengthAwarePaginator
@@ -164,6 +164,54 @@ class BookingSessionEloquentRepository
             ->with(['classSession.class.instructor', 'classSession.class.primaryImage'])
             ->latest()
             ->paginate($perPage);
+    }
+
+    /**
+     * Re-reserves a previously cancelled row for the same booking and class session.
+     *
+     * (booking_id, class_session_id) is unique, so a client who cancels and rebooks the same
+     * class must reuse the cancelled row rather than insert a second one.
+     */
+    public function reviveCancelled(int $bookingId, int $classSessionId): ?BookingSession
+    {
+        $row = $this->model->newQuery()
+            ->where('booking_id', $bookingId)
+            ->where('class_session_id', $classSessionId)
+            ->where('status', BookingSessionStatusEnum::CANCELLED->value)
+            ->lockForUpdate()
+            ->first();
+
+        if ($row === null) {
+            return null;
+        }
+
+        $row->update([
+            'status' => BookingSessionStatusEnum::RESERVED->value,
+            'cancelled_at' => null,
+            'cancellation_reason' => null,
+            'cancellation_type' => null,
+            'cancelled_by_user_id' => null,
+            'cancelled_by_admin_id' => null,
+            'attended_at' => null,
+        ]);
+
+        return $row->refresh();
+    }
+
+    /**
+     * Cancels a reservation and records who did it and why, in a single write.
+     * 0 = user initiated, 1 = admin override (see the booking_sessions migration).
+     */
+    public function markCancelled(int $id, int $actorId, ?int $adminId, int $cancellationType, ?string $reason = null): bool
+    {
+        return (bool) $this->model->where('id', $id)->update([
+            'status' => BookingSessionStatusEnum::CANCELLED->value,
+            'cancelled_at' => now(),
+            'cancelled_by_user_id' => $actorId,
+            'cancelled_by_admin_id' => $adminId,
+            'cancellation_type' => $cancellationType,
+            'cancellation_reason' => $reason,
+        ]);
     }
 
     public function markAttended(int $id, ?int $updatedByAdminId = null): bool

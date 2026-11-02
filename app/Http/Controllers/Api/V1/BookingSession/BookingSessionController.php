@@ -6,6 +6,8 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Api\V1\BookingSession;
 
+use App\Commands\BookingSession\CancelBookingSessionCommand;
+use App\Handlers\BookingSession\CancelBookingSessionHandler;
 use App\Http\Controllers\Api\BaseApiController;
 use App\Http\Requests\Api\V1\BookingSession\ListBookingSessionsRequest;
 use App\Http\Requests\Api\V1\BookingSession\ReserveSessionRequest;
@@ -21,7 +23,7 @@ use Illuminate\Http\Request;
 class BookingSessionController extends BaseApiController
 {
     public function __construct(
-        private readonly BookingSessionService $bookingSessionService
+        private readonly BookingSessionService $bookingSessionService,
     ) {}
 
     #[Endpoint('Reserve class session', description: 'Books a class session using booking credits. Requires active booking with credits.')]
@@ -31,7 +33,7 @@ class BookingSessionController extends BaseApiController
 
         $bookingSession = $this->bookingSessionService->reserve(
             bookingId: (int) $activeBooking->id,
-            classSessionId: (int) $request->class_session_id
+            classSessionId: (int) $request->class_session_id,
         );
 
         return $this->created(new BookingSessionResource($bookingSession));
@@ -55,9 +57,13 @@ class BookingSessionController extends BaseApiController
     }
 
     #[Endpoint('Cancel booking session', description: 'Cancels a reserved booking session and refunds credit if within policy.')]
-    public function cancel(int $id): JsonResponse
+    public function cancel(Request $request, CancelBookingSessionHandler $handler, int $id): JsonResponse
     {
-        $this->bookingSessionService->cancel($id);
+        // Mobile clients never get the admin override; ownership is enforced by BookingSessionPolicy.
+        $handler->handle(new CancelBookingSessionCommand(
+            bookingSessionId: $id,
+            actorId: (int) $request->user()->id,
+        ));
 
         return $this->success([
             'id' => $id,

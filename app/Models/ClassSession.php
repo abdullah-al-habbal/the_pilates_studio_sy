@@ -7,7 +7,10 @@ namespace App\Models;
 use App\Enums\BookingSessionStatusEnum;
 use App\Enums\ClassSessionStatusEnum;
 use App\Observers\ClassSessionObserver;
+use App\Services\BookingSession\CancellationPolicyService;
+use App\Support\Time\StudioTime;
 use Carbon\Carbon;
+use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Casts\Attribute;
@@ -52,45 +55,43 @@ class ClassSession extends Model
         );
     }
 
+    /**
+     * Start/end instants in the studio timezone (null when the stored time is unreadable).
+     */
+    public function startsAt(): ?CarbonImmutable
+    {
+        return $this->studioInstant($this->start_time);
+    }
+
+    public function endsAt(): ?CarbonImmutable
+    {
+        return $this->studioInstant($this->end_time);
+    }
+
+    private function studioInstant(?string $time): ?CarbonImmutable
+    {
+        if ($this->date === null || $time === null || $time === '') {
+            return null;
+        }
+
+        try {
+            return StudioTime::at($this->date->format('Y-m-d'), $time);
+        } catch (\Throwable) {
+            return null;
+        }
+    }
+
     protected function isPast(): Attribute
     {
         return Attribute::make(
-            get: function () {
-                try {
-                    $endDateTime = Carbon::create(
-                        $this->date?->year ?? null,
-                        $this->date?->month ?? null,
-                        $this->date?->day ?? null,
-                        (int) explode(':', $this->end_time)[0],
-                        (int) explode(':', $this->end_time)[1] ?? 0,
-                    );
-
-                    return $endDateTime->isPast();
-                } catch (\Exception) {
-                    return false;
-                }
-            },
+            get: fn () => ($endsAt = $this->endsAt()) !== null && $endsAt->isPast(),
         );
     }
 
     protected function isUpcoming(): Attribute
     {
         return Attribute::make(
-            get: function () {
-                try {
-                    $startDateTime = Carbon::create(
-                        $this->date?->year ?? null,
-                        $this->date?->month ?? null,
-                        $this->date?->day ?? null,
-                        (int) explode(':', $this->start_time)[0],
-                        (int) explode(':', $this->start_time)[1] ?? 0,
-                    );
-
-                    return $startDateTime->isFuture();
-                } catch (\Exception) {
-                    return false;
-                }
-            },
+            get: fn () => ($startsAt = $this->startsAt()) !== null && $startsAt->isFuture(),
         );
     }
 
@@ -107,22 +108,7 @@ class ClassSession extends Model
     protected function isWithinCancellationWindow(): Attribute
     {
         return Attribute::make(
-            get: function () {
-                try {
-                    $startDateTime = Carbon::create(
-                        $this->date?->year ?? null,
-                        $this->date?->month ?? null,
-                        $this->date?->day ?? null,
-                        (int) explode(':', $this->start_time)[0],
-                        (int) explode(':', $this->start_time)[1] ?? 0,
-                    );
-                    $cutoff = $startDateTime->subHours(24);
-
-                    return now()->greaterThanOrEqualTo($cutoff);
-                } catch (\Exception) {
-                    return true;
-                }
-            },
+            get: fn () => app(CancellationPolicyService::class)->isInsideWindow($this),
         );
     }
 
@@ -130,19 +116,10 @@ class ClassSession extends Model
     {
         return Attribute::make(
             get: function () {
-                try {
-                    $startDateTime = Carbon::create(
-                        $this->date?->year ?? null,
-                        $this->date?->month ?? null,
-                        $this->date?->day ?? null,
-                        (int) explode(':', $this->start_time)[0],
-                        (int) explode(':', $this->start_time)[1] ?? 0,
-                    );
+                $startsAt = $this->startsAt();
 
-                    return $startDateTime->between(now(), now()->addHour());
-                } catch (\Exception) {
-                    return false;
-                }
+                return $startsAt !== null
+                    && $startsAt->between(StudioTime::now(), StudioTime::now()->addHour());
             },
         );
     }

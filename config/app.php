@@ -9,6 +9,9 @@ return [
     'debug' => (bool) env('APP_DEBUG'),
     'url' => env('APP_URL'),
     'timezone' => 'UTC',
+    // Studio wall-clock timezone: class date/start_time/end_time are stored in this zone.
+    // Read here only (config is cached in production); never call env() elsewhere.
+    'studio_timezone' => env('STUDIO_TIMEZONE', 'Asia/Damascus'),
     'locale' => env('APP_LOCALE'),
     'fallback_locale' => env('APP_FALLBACK_LOCALE'),
     'faker_locale' => env('APP_FAKER_LOCALE'),
@@ -16,7 +19,7 @@ return [
     'key' => env('APP_KEY'),
     'previous_keys' => [
         ...array_filter(
-            explode(',', (string) env('APP_PREVIOUS_KEYS', ''))
+            explode(',', (string) env('APP_PREVIOUS_KEYS', '')),
         ),
     ],
     'maintenance' => [

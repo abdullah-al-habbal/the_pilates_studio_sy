@@ -7,6 +7,7 @@ namespace App\Console\Commands;
 use App\Enums\ClassSessionStatusEnum;
 use App\Models\ClassSession;
 use App\Notifications\SessionReminderNotification;
+use App\Support\Time\StudioTime;
 use Illuminate\Console\Attributes\Description;
 use Illuminate\Console\Attributes\Signature;
 use Illuminate\Console\Command;
@@ -21,7 +22,7 @@ final class Send24HourSessionReminders extends Command
     {
         Log::info('24-hour session reminder command started');
 
-        $target = now()->addDay()->startOfDay();
+        $target = StudioTime::now()->addDay()->startOfDay();
 
         $sessions = ClassSession::query()
             ->where('status', ClassSessionStatusEnum::SCHEDULED)
