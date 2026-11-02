@@ -20,14 +20,6 @@ use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
-/**
- * Writes a validated historical backfill: one booking plus one booking_session per selected
- * class session, atomically.
- *
- * Expects a plan already produced by HistoricalBackfillValidatorService — it recomputes nothing.
- *
- * @see docs/historical-backfill/plan/phase-2-domain-core.md
- */
 final readonly class HistoricalBackfillService
 {
     private const LANG = 'dashboard.operations_ui.historical_backfill.';
@@ -45,10 +37,6 @@ final readonly class HistoricalBackfillService
 
         try {
             $booking = DB::transaction(function () use ($plan, $createdBy): Booking {
-                // Lock order is class_sessions -> booking, matching reserve() and oneTimeAttend().
-                // Those two once acquired them in opposite orders, which is a deadlock waiting to
-                // happen; every write path now takes the same order. IDs are sorted so concurrent
-                // backfills also agree with each other.
                 $sessions = $this->lockSessions($plan->allSessionIds());
 
                 $this->assertNoDuplicateSessionsForUser($plan);
@@ -72,28 +60,17 @@ final readonly class HistoricalBackfillService
         return $booking;
     }
 
-    /**
-     * @param  list<int>  $sessionIds
-     *
-     * @return array<int, ClassSession> keyed by id
-     */
     private function lockSessions(array $sessionIds): array
     {
         $sessions = [];
 
         foreach ($sessionIds as $id) {
-            // No capacity assert: the class already happened, so a full session is a historical
-            // fact rather than a reason to refuse the record.
             $sessions[$id] = $this->classSessionRepository->findOrFailForUpdate($id);
         }
 
         return $sessions;
     }
 
-    /**
-     * The DB unique is (booking_id, class_session_id), which cannot see across bookings. Entering
-     * several historical packages for one client is exactly the case that would slip past it.
-     */
     private function assertNoDuplicateSessionsForUser(HistoricalBackfillPlan $plan): void
     {
         foreach ($plan->allSessionIds() as $sessionId) {
@@ -124,15 +101,10 @@ final readonly class HistoricalBackfillService
             'expires_at' => $plan->expiresAt,
             'currency_id' => $plan->currencyId,
             'paid_amount' => $plan->paidAmount,
-            // Passed explicitly and non-zero, which suppresses the observer's saving-time
-            // auto-compute and preserves an admin-supplied historical rate.
             'exchange_rate_snapshot' => $plan->exchangeRateSnapshot,
         ]);
     }
 
-    /**
-     * @param  array<int, ClassSession>  $sessions
-     */
     private function createSessions(
         HistoricalBackfillPlan $plan,
         Booking $booking,
@@ -162,12 +134,6 @@ final readonly class HistoricalBackfillService
         }
     }
 
-    /**
-     * The moment the class actually ran — not now(). Attendance reporting keys on the session's
-     * own date, so stamping the entry time here would misdate the record.
-     *
-     * @see docs/historical-backfill/decisions/D-A15-booking-sessions-business-date.md
-     */
     private function sessionStartsAt(ClassSession $session): Carbon
     {
         $date = $session->date instanceof Carbon
@@ -177,14 +143,6 @@ final readonly class HistoricalBackfillService
         return Carbon::parse($date->format('Y-m-d') . ' ' . $session->start_time);
     }
 
-    /**
-     * The validator's conflict guard should make this unreachable. It survives as a net for the
-     * race between two concurrent backfills for the same client.
-     *
-     * Narrowed to driver code 1062 plus the index name: SQLSTATE 23000 alone also covers foreign
-     * key violations, and reporting one of those as "this client has an active booking" would
-     * send an admin chasing the wrong problem.
-     */
     private function translateDuplicateActiveBooking(
         QueryException $e,
         HistoricalBackfillPlan $plan,
@@ -230,8 +188,6 @@ final readonly class HistoricalBackfillService
             return;
         }
 
-        // Recorded because the rate is an approximation: the transaction is historical but the
-        // rate is today's.
         $this->logger->warning('Historical backfill used the current exchange rate for an old transaction.', [
             'admin_id' => $createdBy,
             'user_id' => $plan->user->id,
@@ -247,10 +203,6 @@ final readonly class HistoricalBackfillService
             'reason' => $reason,
         ]);
     }
-
-    /**
-     * @return array<string, mixed>
-     */
     private function context(HistoricalBackfillPlan $plan, ?int $createdBy): array
     {
         return [

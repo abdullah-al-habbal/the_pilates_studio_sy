@@ -16,14 +16,6 @@ use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
-
-/**
- * Locked display contract: every user-facing time uses the 12-hour `g:i A`
- * format. The boundary cases that are easy to get wrong — midnight and noon —
- * are pinned here so a regression in the formatting is caught immediately.
- *
- * @see docs/historical-backfill/plan/phase-3-session-picker-endpoint.md
- */
 final class TimeDisplayFormatTest extends TestCase
 {
     use RefreshDatabase;

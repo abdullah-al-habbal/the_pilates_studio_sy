@@ -242,16 +242,6 @@ class User extends Authenticatable implements FilamentUser
             ->latest();
     }
 
-    /**
-     * The booking, if any, occupying `active_user_id` and therefore blocking a new purchase.
-     *
-     * Deliberately WITHOUT the expiry clause its neighbour above carries: this must match the
-     * generated column behind `unique_active_booking_per_user`, which tests status and credits
-     * only. `activeCreditBooking()` is the right shape for "what package can this client use
-     * today" — this one answers "what would the database refuse", which is a different question.
-     *
-     * @see docs/historical-backfill/findings/A16-booking-insert-paths.md
-     */
     public function blockingActiveBooking(): HasOne
     {
         return $this->hasOne(Booking::class)

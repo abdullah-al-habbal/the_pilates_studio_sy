@@ -16,12 +16,6 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
-
-/**
- * `purchased_at` as the canonical business date.
- *
- * See docs/historical-backfill/decisions/D-A13-global-purchased-at-adoption.md
- */
 final class BookingPurchasedAtTest extends TestCase
 {
     use RefreshDatabase;

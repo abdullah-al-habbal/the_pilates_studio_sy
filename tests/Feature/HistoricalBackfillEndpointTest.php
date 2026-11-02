@@ -27,14 +27,6 @@ use Illuminate\Testing\TestResponse;
 use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
-/**
- * Historical entries through POST /admin/operations/packages/{packageId}/assign.
- *
- * The presence of `purchased_at` is what routes the request down the backfill path; without it
- * the same endpoint performs an ordinary live assignment.
- *
- * @see docs/historical-backfill/plan/phase-4-submit-endpoint.md
- */
 final class HistoricalBackfillEndpointTest extends TestCase
 {
     use RefreshDatabase;

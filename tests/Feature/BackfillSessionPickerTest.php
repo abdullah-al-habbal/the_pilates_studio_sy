@@ -22,12 +22,6 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Testing\TestResponse;
 use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
-
-/**
- * Phase 3 — the historical backfill session picker.
- *
- * @see docs/historical-backfill/plan/phase-3-session-picker-endpoint.md
- */
 final class BackfillSessionPickerTest extends TestCase
 {
     use RefreshDatabase;
@@ -67,16 +61,10 @@ final class BackfillSessionPickerTest extends TestCase
             'start_time' => $start,
             'end_time' => '10:00:00',
             'status' => $status ?? ClassSessionStatusEnum::SCHEDULED->value,
-            // class_sessions.total_spots is its own snapshot, taken from the class at generation
-            // time — not a live read of classes.total_spots. Pinned here so the assertion is not
-            // at the mercy of the factory default.
             'total_spots' => 12,
         ]);
     }
 
-    /**
-     * @param  array<string, mixed>  $overrides
-     */
     private function fetch(array $overrides = []): TestResponse
     {
         return $this->actingAs($this->admin)->getJson(self::URI . '?' . http_build_query([
@@ -86,7 +74,6 @@ final class BackfillSessionPickerTest extends TestCase
         ]));
     }
 
-    // ----------------------------------------------------------------- access
 
     #[Test]
     public function it_is_unreachable_without_authentication(): void
@@ -94,7 +81,6 @@ final class BackfillSessionPickerTest extends TestCase
         $this->getJson(self::URI)->assertUnauthorized();
     }
 
-    // ------------------------------------------------------------- filtering
 
     #[Test]
     public function it_returns_past_sessions_inside_the_validity_window(): void
@@ -132,8 +118,6 @@ final class BackfillSessionPickerTest extends TestCase
     #[Test]
     public function it_includes_scheduled_sessions_that_were_never_marked_completed(): void
     {
-        // Sentinel for A14: nothing in this system ever writes `completed`, so a picker filtering
-        // on that status would return an empty list for every real database.
         $this->pastSession(now()->subDays(30), status: ClassSessionStatusEnum::SCHEDULED->value);
 
         $response = $this->fetch()->assertOk();
@@ -147,7 +131,6 @@ final class BackfillSessionPickerTest extends TestCase
         $purchasedAt = now()->subDays(60);
 
         $this->pastSession($purchasedAt->copy()->addDays(10));
-        // Package validity is 90 days, so this one predates the purchase.
         $this->pastSession($purchasedAt->copy()->subDays(10), start: '11:00:00');
 
         $response = $this->fetch(['purchased_at' => $purchasedAt->toDateString()])->assertOk();
@@ -176,8 +159,6 @@ final class BackfillSessionPickerTest extends TestCase
     #[Test]
     public function it_excludes_sessions_the_client_is_already_recorded_in(): void
     {
-        // A07: the write path refuses these, so offering them would let an admin build a
-        // selection guaranteed to fail on submit.
         $client = User::factory()->create();
         $taken = $this->pastSession(now()->subDays(30));
         $this->pastSession(now()->subDays(25), start: '11:00:00');
@@ -200,12 +181,10 @@ final class BackfillSessionPickerTest extends TestCase
         $this->assertNotSame($taken->id, $response->json('data.0.id'));
     }
 
-    // ------------------------------------------------------------- behaviour
 
     #[Test]
     public function it_rejects_a_package_with_no_validity_window(): void
     {
-        // Same D-A02 gate as the write path; an unlimited package has no window to page.
         $package = Package::factory()->create(['validity_days' => null]);
 
         $this->fetch(['package_id' => $package->id])
@@ -228,8 +207,6 @@ final class BackfillSessionPickerTest extends TestCase
         $this->pastSession(now()->subDays(30));
         $this->pastSession(now()->subDays(10), start: '07:00:00');
 
-        // Display strings like "9:00 AM" do not sort lexically, so the expected
-        // order must come from the raw columns the query actually orders by.
         $responseIds = collect($this->fetch()->assertOk()->json('data'))
             ->pluck('id')
             ->all();
@@ -287,7 +264,6 @@ final class BackfillSessionPickerTest extends TestCase
         $this->assertSame($purchasedAt->copy()->addDays(90)->toDateString(), $meta['window']['to']);
     }
 
-    // ------------------------------------------------------------ pagination
 
     #[Test]
     public function it_pages_through_results_with_a_cursor(): void
@@ -330,8 +306,6 @@ final class BackfillSessionPickerTest extends TestCase
     #[Test]
     public function sessions_sharing_a_date_and_time_still_page_deterministically(): void
     {
-        // (date, start_time) is not unique across classes, so the cursor needs the id tiebreaker
-        // or rows silently repeat or vanish between pages.
         $otherClass = Classes::withoutEvents(fn () => Classes::factory()
             ->onWeekdays([WeekdayEnum::SUNDAY])
             ->create([
@@ -358,9 +332,6 @@ final class BackfillSessionPickerTest extends TestCase
 
         $second = $this->fetch(['per_page' => 1, 'cursor' => $first->json('meta.next_cursor')])->assertOk();
 
-        // Asserting the second page is non-empty is the point. Without the id tiebreaker the
-        // cursor is built from (date, start_time) alone, both rows compare equal, and page two
-        // comes back empty — so a bare "the ids differ" check would pass against null.
         $this->assertCount(1, $second->json('data'), 'The second page must not be empty.');
 
         $seen = [$first->json('data.0.id'), $second->json('data.0.id')];
