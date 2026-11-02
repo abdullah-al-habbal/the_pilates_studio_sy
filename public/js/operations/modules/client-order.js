@@ -219,6 +219,12 @@ function renderOrderForm() {
                 </div>
             </div>
 
+            <div class="space-y-2">
+                <label class="text-sm font-bold text-slate-600 dark:text-slate-400" for="qo-ordered-at">${esc(t("purchase_date_label"))}</label>
+                <input type="datetime-local" id="qo-ordered-at" max="${esc(nowLocalValue())}" class="${INPUT_CLS}">
+                <p class="text-xs text-slate-400">${esc(t("purchase_date_hint"))}</p>
+            </div>
+
             <p id="qo-error" class="hidden text-sm font-medium text-rose-600 rounded-xl bg-rose-50 dark:bg-rose-900/20 px-4 py-3"></p>
 
             <div id="qo-preview"></div>
@@ -236,13 +242,22 @@ function renderOrderForm() {
     const cur = document.getElementById("qo-currency");
     qty?.addEventListener("input", refreshPreview);
     cur?.addEventListener("change", refreshPreview);
+    document.getElementById("qo-ordered-at")?.addEventListener("input", refreshPreview);
     refreshPreview();
+}
+
+/** Current local time as a datetime-local value (YYYY-MM-DDTHH:mm). */
+function nowLocalValue() {
+    const d = new Date();
+    d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
+    return d.toISOString().slice(0, 16);
 }
 
 function readForm() {
     const quantity = Number(document.getElementById("qo-quantity")?.value);
     const currencyId = Number(document.getElementById("qo-currency")?.value);
-    return { quantity, currencyId };
+    const orderedAt = document.getElementById("qo-ordered-at")?.value || null;
+    return { quantity, currencyId, orderedAt };
 }
 
 function showError(message) {
@@ -253,11 +268,12 @@ function showError(message) {
 }
 
 /** Returns an error message, or null when the form can be submitted. */
-function validate({ quantity, currencyId }) {
+function validate({ quantity, currencyId, orderedAt }) {
     const item = state.selected;
     if (!item) return t("select_item_required");
     if (!currencyId) return t("select_currency");
     if (!Number.isInteger(quantity) || quantity < 1) return t("quantity_invalid");
+    if (orderedAt && orderedAt > nowLocalValue()) return t("purchase_date_future");
     if (quantity > Number(item.stock_quantity)) {
         return t("insufficient_stock").replace(":stock", Number(item.stock_quantity));
     }
@@ -333,7 +349,7 @@ export async function submitQuickOrder() {
     }
 
     try {
-        await OperationsAPI.placeOrder(state.userId, state.selected.id, form.quantity, form.currencyId);
+        await OperationsAPI.placeOrder(state.userId, state.selected.id, form.quantity, form.currencyId, form.orderedAt);
 
         OperationsUI.toast(esc(t("sale_success")), "success");
         updateGlobalStats();

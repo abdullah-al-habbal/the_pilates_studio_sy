@@ -8,6 +8,7 @@ use App\DTOs\Operations\PlaceOrderDTO;
 use App\Handlers\Admin\Operations\PlaceOrderHandler;
 use App\Http\Requests\Admin\Operations\PlaceOrderRequest;
 use App\Traits\ApiResponseTrait;
+use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
@@ -29,6 +30,7 @@ final readonly class PlaceOrderAction
                 quantity: (int) $request->quantity,
                 currencyId: (int) $request->currency_id,
                 createdBy: $request->user()?->id,
+                orderedAt: $request->filled('ordered_at') ? Carbon::parse((string) $request->input('ordered_at')) : null,
             );
 
             $order = $this->handler->handle($dto);

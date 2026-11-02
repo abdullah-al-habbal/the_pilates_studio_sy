@@ -34,6 +34,8 @@ class PlaceOrderRequest extends FormRequest
                 Rule::exists('center_merchandises', 'id')->whereNull('deleted_at'),
             ],
             'quantity' => ['required', 'integer', 'min:1', 'max:1000'],
+            // Optional back-dating for data entry; defaults to the server time. Never in the future.
+            'ordered_at' => ['nullable', 'date', 'after:2000-01-01', 'before_or_equal:now'],
             'currency_id' => [
                 'required',
                 'integer',
@@ -46,6 +48,7 @@ class PlaceOrderRequest extends FormRequest
     {
         return [
             'customer_id.exists' => __('dashboard.operations_ui.store.customer_not_eligible'),
+            'ordered_at.before_or_equal' => __('dashboard.operations_ui.store.purchase_date_future'),
             'currency_id.exists' => __('dashboard.operations_ui.store.currency_not_available'),
         ];
     }

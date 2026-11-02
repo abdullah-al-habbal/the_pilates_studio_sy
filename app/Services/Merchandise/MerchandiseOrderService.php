@@ -48,7 +48,7 @@ class MerchandiseOrderService
                 'customer_id' => $dto->customerId,
                 'created_by' => $dto->createdBy,
                 'quantity' => $dto->quantity,
-                'ordered_at' => now(),
+                'ordered_at' => $dto->orderedAt ?? now(),
                 'currency_id' => $dto->currencyId,
                 'paid_amount' => $paidAmount,
                 'exchange_rate_snapshot' => $exchangeRateSnapshot,

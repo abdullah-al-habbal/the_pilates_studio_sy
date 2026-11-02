@@ -103,6 +103,33 @@ final class QuickOrderTest extends TestCase
     }
 
     #[Test]
+    public function it_defaults_the_purchase_time_to_now(): void
+    {
+        $this->order()->assertCreated();
+
+        $this->assertTrue(MerchandiseOrder::sole()->ordered_at->diffInSeconds(now(), true) < 5);
+    }
+
+    #[Test]
+    public function it_records_a_back_dated_purchase(): void
+    {
+        $this->order(['ordered_at' => '2026-03-14 10:30:00'])->assertCreated();
+
+        $this->assertSame('2026-03-14 10:30:00', MerchandiseOrder::sole()->ordered_at->format('Y-m-d H:i:s'));
+    }
+
+    #[Test]
+    public function it_rejects_future_or_invalid_purchase_dates(): void
+    {
+        $this->order(['ordered_at' => now()->addDay()->toDateTimeString()])
+            ->assertUnprocessable()->assertJsonValidationErrors('ordered_at');
+        $this->order(['ordered_at' => 'not-a-date'])->assertUnprocessable()->assertJsonValidationErrors('ordered_at');
+        $this->order(['ordered_at' => '1999-01-01'])->assertUnprocessable()->assertJsonValidationErrors('ordered_at');
+
+        $this->assertSame(0, MerchandiseOrder::count());
+    }
+
+    #[Test]
     public function it_converts_to_the_chosen_currency_and_snapshots_the_rate(): void
     {
         $this->order(['currency_id' => $this->syp->id])->assertCreated();

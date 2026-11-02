@@ -88,12 +88,13 @@ const OperationsAPI = {
         return this.request("/admin/operations/store/items");
     },
 
-    placeOrder(customerId, merchandiseId, quantity, currencyId) {
+    placeOrder(customerId, merchandiseId, quantity, currencyId, orderedAt = null) {
         return this.request("/admin/operations/store/orders", "POST", {
             customer_id: customerId,
             merchandise_id: merchandiseId,
             quantity: parseInt(quantity, 10),
             currency_id: parseInt(currencyId, 10),
+            ...(orderedAt ? { ordered_at: orderedAt } : {}),
         });
     },
 
