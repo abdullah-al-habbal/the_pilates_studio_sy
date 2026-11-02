@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Feature;
 
+use App\Enums\RecurrenceUnitEnum;
 use App\Enums\WeekdayEnum;
 use App\Filament\Admin\Resources\Classes\Pages\CreateClasses;
 use App\Filament\Admin\Resources\Classes\Pages\EditClasses;
@@ -130,6 +131,8 @@ final class ClassesAdminPanelTest extends TestCase
             'name' => 'weekly',
             'label' => ['en' => 'Weekly'],
             'interval_days' => 7,
+            'frequency_unit' => RecurrenceUnitEnum::WEEK,
+            'frequency_interval' => 1,
         ]);
 
         Livewire::test(CreateClasses::class)

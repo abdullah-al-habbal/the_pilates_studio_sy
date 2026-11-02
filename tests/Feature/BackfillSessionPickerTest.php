@@ -22,6 +22,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Testing\TestResponse;
 use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
+
 final class BackfillSessionPickerTest extends TestCase
 {
     use RefreshDatabase;
@@ -74,13 +75,11 @@ final class BackfillSessionPickerTest extends TestCase
         ]));
     }
 
-
     #[Test]
     public function it_is_unreachable_without_authentication(): void
     {
         $this->getJson(self::URI)->assertUnauthorized();
     }
-
 
     #[Test]
     public function it_returns_past_sessions_inside_the_validity_window(): void
@@ -144,7 +143,7 @@ final class BackfillSessionPickerTest extends TestCase
         $target = now()->subMonths(1)->startOfMonth()->addDays(3);
 
         $this->pastSession($target);
-        $this->pastSession(now()->subDays(2), start: '11:00:00');
+        $this->pastSession(now(), start: '11:00:00');
 
         $response = $this->fetch([
             'purchased_at' => now()->subDays(80)->toDateString(),
@@ -180,7 +179,6 @@ final class BackfillSessionPickerTest extends TestCase
         $this->assertCount(1, $response->json('data'));
         $this->assertNotSame($taken->id, $response->json('data.0.id'));
     }
-
 
     #[Test]
     public function it_rejects_a_package_with_no_validity_window(): void
@@ -263,7 +261,6 @@ final class BackfillSessionPickerTest extends TestCase
         $this->assertSame($purchasedAt->toDateString(), $meta['window']['from']);
         $this->assertSame($purchasedAt->copy()->addDays(90)->toDateString(), $meta['window']['to']);
     }
-
 
     #[Test]
     public function it_pages_through_results_with_a_cursor(): void

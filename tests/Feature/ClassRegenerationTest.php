@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Feature;
 
+use App\Enums\RecurrenceUnitEnum;
 use App\Enums\WeekdayEnum;
 use App\Models\BookingSession;
 use App\Models\ClassCategory;
@@ -114,6 +115,8 @@ final class ClassRegenerationTest extends TestCase
             'name' => 'weekly',
             'label' => ['en' => 'Weekly'],
             'interval_days' => 7,
+            'frequency_unit' => RecurrenceUnitEnum::WEEK,
+            'frequency_interval' => 1,
         ]);
 
         $class = $this->createClass([
@@ -203,6 +206,12 @@ final class ClassRegenerationTest extends TestCase
         $class = $this->createClass();
 
         $class->delete();
+
+        // A soft delete hides the sessions (they come back on restore)...
+        $this->assertSame(0, $class->sessions()->count());
+
+        // ...and a force delete removes them for good.
+        $class->forceDelete();
 
         $this->assertSame(0, $class->sessions()->withTrashed()->count());
     }

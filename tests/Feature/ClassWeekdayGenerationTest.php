@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tests\Feature;
 
 use App\Enums\ClassSessionStatusEnum;
+use App\Enums\RecurrenceUnitEnum;
 use App\Enums\WeekdayEnum;
 use App\Models\ClassCategory;
 use App\Models\Classes;
@@ -87,7 +88,7 @@ final class ClassWeekdayGenerationTest extends TestCase
             $this->assertContains(
                 Carbon::parse($date)->format('l'),
                 ['Sunday', 'Wednesday'],
-                "{$date} is not a Sunday or Wednesday"
+                "{$date} is not a Sunday or Wednesday",
             );
         }
     }
@@ -121,6 +122,8 @@ final class ClassWeekdayGenerationTest extends TestCase
             'name' => 'weekly',
             'label' => ['en' => 'Weekly'],
             'interval_days' => 7,
+            'frequency_unit' => RecurrenceUnitEnum::WEEK,
+            'frequency_interval' => 1,
         ]);
 
         $class = $this->createClass([
@@ -151,6 +154,8 @@ final class ClassWeekdayGenerationTest extends TestCase
             'name' => 'weekly',
             'label' => ['en' => 'Weekly'],
             'interval_days' => 7,
+            'frequency_unit' => RecurrenceUnitEnum::WEEK,
+            'frequency_interval' => 1,
         ]);
 
         $this->expectException(ValidationException::class);
@@ -232,7 +237,7 @@ final class ClassWeekdayGenerationTest extends TestCase
         } catch (ValidationException $exception) {
             $this->assertStringContainsString(
                 '2026-09-09',
-                collect($exception->errors())->flatten()->implode(' ')
+                collect($exception->errors())->flatten()->implode(' '),
             );
         }
 

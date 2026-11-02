@@ -47,6 +47,16 @@ class Classes extends Model
 {
     use HasFactory, HasTranslations, SoftDeletes;
 
+    /**
+     * Mirrors the database default so a class created without an explicit status is active
+     * in memory too (session generation and conflict checks branch on isActive()).
+     *
+     * @var array<string, mixed>
+     */
+    protected $attributes = [
+        'status' => 'active',
+    ];
+
     /** @var list<string> */
     public array $pendingForceDeleteImagePaths = [];
 

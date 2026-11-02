@@ -100,11 +100,19 @@ final class PublicClassSessionApiTest extends TestCase
             ->assertJsonMissing(['id' => $excluded->id]);
     }
 
+    private int $sessionCounter = 0;
+
     private function classSession(string $date, ClassSessionStatusEnum $status): ClassSession
     {
+        // A distinct start time per call: the factory picks a random hour, and two sessions of
+        // one class on the same date collide on the unique_class_session index.
+        $hour = 6 + $this->sessionCounter++;
+
         return ClassSession::factory()->create([
             'class_id' => $this->class->id,
             'date' => $date,
+            'start_time' => sprintf('%02d:00:00', $hour),
+            'end_time' => sprintf('%02d:50:00', $hour),
             'status' => $status->value,
         ]);
     }

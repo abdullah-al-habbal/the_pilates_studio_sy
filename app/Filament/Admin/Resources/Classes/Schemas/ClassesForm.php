@@ -148,7 +148,9 @@ class ClassesForm
                             ->inline()
                             ->required()
                             ->live()
-                            ->dehydrated(false)
+                            // Dehydrated on purpose: ClassInputNormalizer needs the chosen mode to clear
+                            // the weekdays/pattern of the mode that was switched away from. It strips the
+                            // key before the model is filled.
                             ->default(self::MODE_WEEKDAYS)
                             ->afterStateHydrated(function (ToggleButtons $component, ?Classes $record): void {
                                 if ($record?->exists) {
@@ -284,7 +286,8 @@ class ClassesForm
                             ->label(__('dashboard.resources.classes.fields.additional_images'))
                             ->relationship('images')
                             ->defaultItems(0)
-                            ->rule(self::singlePrimaryImageRule())
+                            // Wrapped: Filament evaluates rule closures itself and cannot inject Laravel's $attribute.
+                            ->rule(fn (): Closure => self::singlePrimaryImageRule())
                             ->schema([
                                 FileUpload::make('url')
                                     ->label(__('dashboard.resources.classes.fields.image'))
