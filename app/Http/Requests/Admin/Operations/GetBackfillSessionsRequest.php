@@ -8,7 +8,6 @@ use App\Commands\Admin\Operations\GetBackfillSessionsCommand;
 use App\Models\Package;
 use Carbon\Carbon;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\ValidationException;
 
 final class GetBackfillSessionsRequest extends FormRequest
 {
@@ -30,7 +29,7 @@ final class GetBackfillSessionsRequest extends FormRequest
         return [
             'package_id' => ['required', 'integer', 'exists:packages,id'],
             'purchased_at' => ['required', 'date', 'before_or_equal:today'],
-            'per_page' => ['nullable', 'integer', 'min:1', 'max:'.self::MAX_PER_PAGE],
+            'per_page' => ['nullable', 'integer', 'min:1', 'max:' . self::MAX_PER_PAGE],
             'cursor' => ['nullable', 'string'],
             'month' => ['nullable', 'integer', 'min:1', 'max:12'],
             'year' => ['nullable', 'integer', 'min:2000', 'max:2100'],
@@ -48,20 +47,12 @@ final class GetBackfillSessionsRequest extends FormRequest
     {
         $package = Package::findOrFail($this->integer('package_id'));
 
-        // Same gate as the validator (D-A02). A package with no validity has no window to page
-        // through, and backfilling it is refused anyway — so refuse here too rather than
-        // returning an unbounded list.
-        if (! ($package->validity_days > 0)) {
-            throw ValidationException::withMessages([
-                'package_id' => __(self::LANG.'error_null_validity_package'),
-            ]);
-        }
-
         $purchasedAt = Carbon::parse($this->string('purchased_at')->toString())->startOfDay();
 
         return new GetBackfillSessionsCommand(
             purchasedAt: $purchasedAt,
-            expiresAt: $purchasedAt->copy()->addDays($package->validity_days),
+            // No validity means no expiry: the window runs to today (same rule as the validator).
+            expiresAt: $package->validity_days > 0 ? $purchasedAt->copy()->addDays($package->validity_days) : null,
             perPage: min((int) $this->input('per_page', 15), self::MAX_PER_PAGE),
             cursor: $this->input('cursor'),
             month: $this->input('month') !== null ? $this->integer('month') : null,

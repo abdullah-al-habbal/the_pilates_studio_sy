@@ -35,6 +35,14 @@ class ClientDetailsResource extends JsonResource
                     ->where('booking_sessions.status', 'cancelled')
                     ->count(),
             ],
+            'packages' => ClientBookingHistoryResource::collection(
+                $this->bookings()
+                    ->with('package')
+                    ->withCount('bookingSessions')
+                    ->latest('id')
+                    ->limit(10)
+                    ->get(),
+            )->resolve(),
             'store_purchases' => $this->merchandiseOrders()
                 ->with('merchandise')
                 ->latest()

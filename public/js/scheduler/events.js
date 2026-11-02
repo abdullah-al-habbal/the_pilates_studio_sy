@@ -27,6 +27,12 @@
                 S.events.loadSessions();
             });
 
+            ui.$('input-category')?.addEventListener('change', (e) => {
+                state.selectedCategoryId = e.target.value || null;
+                state.meta.current_page  = 1;
+                S.events.loadSessions();
+            });
+
             ui.$('btn-prev')?.addEventListener('click',
                 () => S.events.changePage(state.meta.current_page - 1));
             ui.$('btn-next')?.addEventListener('click',
@@ -111,7 +117,8 @@
                     state.selectedDate,
                     state.meta.current_page,
                     state.meta.per_page,
-                    state.selectedInstructorId
+                    state.selectedInstructorId,
+                    state.selectedCategoryId
                 );
                 if (json.success) {
                     state.sessions     = json.data;
@@ -208,6 +215,18 @@
                 }
             } catch (err) {
                 console.error('[Scheduler:events] loadInstructors error:', err);
+            }
+        },
+
+        loadCategories: async () => {
+            try {
+                const json = await api.getCategories();
+                if (json.success) {
+                    state.categories = json.data;
+                    render.categoryDropdown();
+                }
+            } catch (err) {
+                console.error('[Scheduler:events] loadCategories error:', err);
             }
         },
 

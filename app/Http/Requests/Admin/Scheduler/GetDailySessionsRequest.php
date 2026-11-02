@@ -20,6 +20,7 @@ final class GetDailySessionsRequest extends FormRequest
             'page' => ['nullable', 'integer', 'min:1'],
             'per_page' => ['nullable', 'integer', 'min:1', 'max:50'],
             'instructor_id' => ['nullable', 'integer', 'exists:instructors,id'],
+            'category_id' => ['nullable', 'integer', 'exists:class_categories,id'],
         ];
     }
 
@@ -31,6 +32,11 @@ final class GetDailySessionsRequest extends FormRequest
     public function getPerPage(): int
     {
         return (int) $this->input('per_page', 10);
+    }
+
+    public function getCategoryId(): ?int
+    {
+        return $this->input('category_id') ? (int) $this->input('category_id') : null;
     }
 
     public function getInstructorId(): ?int

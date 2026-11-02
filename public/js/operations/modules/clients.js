@@ -383,6 +383,31 @@ export async function showClientDetails(userId) {
                     </div>
                 </div>
 
+                <!-- Packages -->
+                <div class="space-y-4">
+                    <h5 class="text-xs font-bold text-slate-400 uppercase">${window.__('operations_ui.clients.packages_heading')}</h5>
+                    <div class="border border-slate-100 dark:border-slate-800 rounded-xl overflow-hidden">
+                        ${
+                            (user.packages ?? []).length > 0
+                                ? `<table class="w-full text-left text-sm"><tbody class="divide-y divide-slate-100 dark:divide-slate-800">
+                                    ${user.packages.map((b) => `
+                                        <tr>
+                                            <td class="px-4 py-3 font-medium">${b.package_name ?? "—"}<div class="text-xs text-slate-400">${b.status}</div></td>
+                                            <td class="px-4 py-3 text-slate-500">${b.remaining_credits}/${b.total_credits}</td>
+                                            <td class="px-4 py-3 text-xs text-slate-400">${b.purchased_at ?? "—"} → ${b.expires_at ?? window.__('operations_ui.clients.never')}</td>
+                                            <td class="px-4 py-3 text-right whitespace-nowrap">
+                                                <button onclick="window.showBookingSessions(${b.id}, ${user.id})"
+                                                        class="text-primary-600 font-bold text-xs mr-3">${window.__('operations_ui.clients.view_classes')}</button>
+                                                ${b.can_edit ? `<button onclick="window.showBookingEdit(${b.id}, ${user.id}, '${b.purchased_at ?? ""}', '${b.expires_at ?? ""}')"
+                                                        class="text-slate-600 font-bold text-xs">${window.__('operations_ui.clients.edit_package')}</button>` : ""}
+                                            </td>
+                                        </tr>`).join("")}
+                                </tbody></table>`
+                                : `<p class="p-6 text-center text-slate-400 italic">${window.__('operations_ui.clients.no_packages')}</p>`
+                        }
+                    </div>
+                </div>
+
                 <!-- Store Purchases -->
                 <div class="space-y-4">
                     <h5 class="text-xs font-bold text-slate-400 uppercase">${window.__('operations_ui.clients.recent_store_purchases')}</h5>

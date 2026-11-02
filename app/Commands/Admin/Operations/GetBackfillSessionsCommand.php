@@ -10,7 +10,7 @@ final readonly class GetBackfillSessionsCommand
 {
     public function __construct(
         public CarbonInterface $purchasedAt,
-        public CarbonInterface $expiresAt,
+        public ?CarbonInterface $expiresAt,
         public int $perPage,
         public ?string $cursor = null,
         public ?int $month = null,

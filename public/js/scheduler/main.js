@@ -4,6 +4,7 @@ document.addEventListener('DOMContentLoaded', () => {
     ui.val('input-date', state.selectedDate);
     events.bind();
     events.loadInstructors();
+    events.loadCategories();
     events.initFlatpickr();
     events.loadSessions();
 });

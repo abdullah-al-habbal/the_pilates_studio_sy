@@ -20,7 +20,7 @@ final class GetDailySessionsAction
 
     public function __construct(
         private readonly GetDailySessionsHandler $handler,
-        private readonly LoggingService $logger
+        private readonly LoggingService $logger,
     ) {}
 
     public function __invoke(GetDailySessionsRequest $request): JsonResponse
@@ -31,6 +31,7 @@ final class GetDailySessionsAction
             $this->logger->info('[Scheduler:GetDailySessions] Fetching sessions', [
                 'date' => $request->getDate(),
                 'instructor_id' => $instructorId,
+                'category_id' => $request->getCategoryId(),
             ]);
 
             $query = new GetDailySessionsQuery(
@@ -38,6 +39,7 @@ final class GetDailySessionsAction
                 perPage: $request->getPerPage(),
                 page: (int) $request->input('page', 1),
                 instructorId: $instructorId,
+                categoryId: $request->getCategoryId(),
             );
 
             $paginator = $this->handler->handle($query);
@@ -66,7 +68,7 @@ final class GetDailySessionsAction
 
             return $this->error(
                 code: ErrorCodeEnum::INTERNAL_SERVER_ERROR,
-                message: 'Failed to retrieve daily sessions.'
+                message: 'Failed to retrieve daily sessions.',
             );
         }
     }

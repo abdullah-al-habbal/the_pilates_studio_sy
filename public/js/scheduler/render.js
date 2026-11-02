@@ -26,6 +26,18 @@
                 `).join('');
         },
 
+        categoryDropdown: () => {
+            const select = ui.$('input-category');
+            if (!select) return;
+
+            select.innerHTML = `<option value="">${window.__('scheduler_ui.header.all_categories')}</option>` +
+                state.categories.map(c => `
+                    <option value="${c.id}" ${state.selectedCategoryId == c.id ? 'selected' : ''}>
+                        ${c.name}
+                    </option>
+                `).join('');
+        },
+
         header: () => {
             ui.text('resolved-date', state.resolvedDate);
             ui.text('sessions-count', state.sessions.length);

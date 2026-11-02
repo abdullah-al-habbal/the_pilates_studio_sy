@@ -15,6 +15,7 @@
         validateField:  `${BASE}/walkin/validate`,
         daysInMonth:    `${BASE}/sessions/days-in-month`,
         instructors:    `${BASE}/instructors`,
+        categories:     `${BASE}/categories`,
     });
 
     const csrf = () => {
@@ -54,9 +55,10 @@
 
     S.api = {
 
-        getSessions: (date, page, perPage, instructorId = null) => {
+        getSessions: (date, page, perPage, instructorId = null, categoryId = null) => {
             const params = new URLSearchParams({ date, page, per_page: perPage });
             if (instructorId) params.append('instructor_id', instructorId);
+            if (categoryId) params.append('category_id', categoryId);
             return request(`${ROUTES.sessions}?${params}`);
         },
 
@@ -102,6 +104,9 @@
 
         getInstructors: () =>
             request(ROUTES.instructors),
+
+        getCategories: () =>
+            request(ROUTES.categories),
     };
 
 })(window.Scheduler);

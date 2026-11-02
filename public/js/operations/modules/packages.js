@@ -637,7 +637,8 @@ function renderSessionRows() {
 
 function renderConfirmStep() {
     const p = backfill.package;
-    const eligible = Number(p.validity_days) > 0;
+    // Packages without validity are eligible too: their window runs from the purchase date to today.
+    const eligible = true;
     const currency = (window.OperationsCurrencies || []).find(
         (c) => Number(c.id) === Number(backfill.currencyId),
     );
@@ -655,7 +656,7 @@ function renderConfirmStep() {
         <div class="glass-card rounded-2xl p-5 mb-5">
             ${row(bf("summary_package"), escapeHtml(p.name))}
             ${row(bf("summary_total"), `${p.total_credits} ${bf("credits_suffix")}`)}
-            ${row(bf("summary_window_to"), eligible ? `${p.validity_days} ${bf("days_suffix")}` : window.__('operations_ui.packages.no_expiry'))}
+            ${row(bf("summary_window_to"), Number(p.validity_days) > 0 ? `${p.validity_days} ${bf("days_suffix")}` : window.__('operations_ui.packages.no_expiry'))}
             ${row(bf("currency_label"), currency ? OperationsUI.currencyLabel(currency) : "—")}
             ${row(window.__('operations_ui.packages.price_label'), amount)}
         </div>

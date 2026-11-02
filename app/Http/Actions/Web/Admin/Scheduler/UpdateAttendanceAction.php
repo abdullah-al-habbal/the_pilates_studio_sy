@@ -11,7 +11,9 @@ use App\Enums\AttendanceStatusEnum;
 use App\Handlers\Admin\Scheduler\UpdateAttendanceHandler;
 use App\Http\Requests\Admin\Scheduler\UpdateAttendanceRequest;
 use App\Traits\ApiResponseTrait;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Validation\ValidationException;
 use Throwable;
 
 final class UpdateAttendanceAction
@@ -19,7 +21,7 @@ final class UpdateAttendanceAction
     use ApiResponseTrait;
 
     public function __construct(
-        private readonly UpdateAttendanceHandler $handler
+        private readonly UpdateAttendanceHandler $handler,
     ) {}
 
     public function __invoke(UpdateAttendanceRequest $request, int $sessionId, int $bookingSessionId): JsonResponse
@@ -31,19 +33,26 @@ final class UpdateAttendanceAction
                     bookingSessionId: $bookingSessionId,
                     status: AttendanceStatusEnum::from($request->validated('status')),
                     updatedByAdminId: (int) auth()->id(),
-                )
+                ),
             );
 
             return $this->success(
                 code: SuccessCodeEnum::UPDATED,
-                message: 'Attendance updated successfully.'
+                message: 'Attendance updated successfully.',
             );
+        } catch (ValidationException $e) {
+            return $this->unprocessable(
+                collect($e->errors())->flatten()->first() ?? 'Validation failed.',
+                $e->errors(),
+            );
+        } catch (ModelNotFoundException) {
+            return $this->notFound('Booking session not found.');
         } catch (Throwable $e) {
             report($e);
 
             return $this->error(
                 code: ErrorCodeEnum::INTERNAL_SERVER_ERROR,
-                message: 'Failed to update attendance.'
+                message: 'Failed to update attendance.',
             );
         }
     }

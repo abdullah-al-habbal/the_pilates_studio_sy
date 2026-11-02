@@ -356,39 +356,45 @@ final class HistoricalBackfillTest extends TestCase
         $this->assertSame(BookingStatusEnum::EXHAUSTED, $booking->status);
     }
 
-    // -------------------------------------------------------- D-A02 rejection
+    // ------------------------------------------- packages without validity (single session)
 
     #[Test]
-    public function it_rejects_backfill_for_null_validity_package(): void
+    public function a_single_session_package_without_validity_can_be_backfilled(): void
     {
-        $this->expectException(ValidationException::class);
+        $purchasedAt = now()->subMonths(2)->startOfDay();
+        $package = $this->package(validityDays: null, totalCredits: 1);
+        $id = $this->classSession($purchasedAt->copy()->addDays(3))->id;
 
-        $this->backfill(now()->subMonths(2)->startOfDay(), package: $this->package(validityDays: null));
+        $booking = $this->backfill($purchasedAt, [$id], package: $package);
+
+        $this->assertNull($booking->expires_at);
+        $this->assertSame(BookingStatusEnum::EXHAUSTED, $booking->status);
+        $this->assertSame(0, $booking->remaining_credits);
     }
 
     #[Test]
-    public function it_rejects_backfill_for_zero_validity_package(): void
+    public function zero_validity_is_treated_as_no_expiry_and_stays_active_with_credits_left(): void
     {
-        // Sentinel: fails if the gate is written as `=== null` instead of `> 0`. validity_days = 0
-        // is reachable and renders to admins as "Unlimited".
-        $this->expectException(ValidationException::class);
+        $purchasedAt = now()->subMonths(2)->startOfDay();
+        $package = $this->package(validityDays: 0, totalCredits: 4);
+        $id = $this->classSession($purchasedAt->copy()->addDays(3))->id;
 
-        $this->backfill(now()->subMonths(2)->startOfDay(), package: $this->package(validityDays: 0));
+        $booking = $this->backfill($purchasedAt, [$id], package: $package);
+
+        $this->assertNull($booking->expires_at);
+        $this->assertSame(BookingStatusEnum::ACTIVE, $booking->status);
+        $this->assertSame(3, $booking->remaining_credits);
     }
 
     #[Test]
-    public function the_validity_gate_runs_before_the_count_checks(): void
+    public function a_no_expiry_window_stops_at_today(): void
     {
-        // Categorical exclusion: even a fully-consumed null-validity package is refused, and the
-        // refusal names the package, not the counts.
-        $package = $this->package(validityDays: null);
+        $purchasedAt = now()->subMonths(2)->startOfDay();
+        $future = $this->classSession(now()->addDays(5))->id;
 
-        try {
-            $this->backfill(now()->subMonths(2)->startOfDay(), package: $package);
-            $this->fail('Expected rejection.');
-        } catch (ValidationException $e) {
-            $this->assertArrayHasKey('package_id', $e->errors());
-        }
+        $this->expectException(ValidationException::class);
+
+        $this->backfill($purchasedAt, [$future], package: $this->package(validityDays: null, totalCredits: 1));
     }
 
     // ------------------------------------------------------------- validation

@@ -106,7 +106,7 @@ class ClassSessionEloquentRepository
         return $this->model->newQuery()->lockForUpdate()->findOrFail($id);
     }
 
-    public function paginateDailySessions(string $date, int $perPage, int $page, ?int $instructorId = null): LengthAwarePaginator
+    public function paginateDailySessions(string $date, int $perPage, int $page, ?int $instructorId = null, ?int $categoryId = null): LengthAwarePaginator
     {
         return $this->model->newQuery()
             ->with([
@@ -114,6 +114,7 @@ class ClassSessionEloquentRepository
                 'bookingSessions',
             ])
             ->when($instructorId, fn ($q, $id) => $q->whereHas('class', fn ($q) => $q->where('instructor_id', $id)))
+            ->when($categoryId, fn ($q, $id) => $q->whereHas('class', fn ($q) => $q->where('class_category_id', $id)))
             ->whereDate('date', $date)
             ->where('status', 'scheduled')
             ->orderBy('start_time')

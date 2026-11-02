@@ -17,6 +17,7 @@ use App\Models\ClassSession;
 use App\Models\Instructor;
 use App\Models\Package;
 use App\Models\User;
+use App\Support\Time\StudioTime;
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Testing\TestResponse;
@@ -181,13 +182,13 @@ final class BackfillSessionPickerTest extends TestCase
     }
 
     #[Test]
-    public function it_rejects_a_package_with_no_validity_window(): void
+    public function a_package_with_no_validity_window_is_bounded_by_today(): void
     {
         $package = Package::factory()->create(['validity_days' => null]);
 
         $this->fetch(['package_id' => $package->id])
-            ->assertStatus(422)
-            ->assertJsonValidationErrors('package_id');
+            ->assertOk()
+            ->assertJsonPath('meta.window.to', StudioTime::now()->toDateString());
     }
 
     #[Test]

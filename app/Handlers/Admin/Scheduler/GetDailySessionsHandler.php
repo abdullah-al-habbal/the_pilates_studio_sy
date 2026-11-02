@@ -11,7 +11,7 @@ use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 final readonly class GetDailySessionsHandler
 {
     public function __construct(
-        private ClassSessionEloquentRepository $repository
+        private ClassSessionEloquentRepository $repository,
     ) {}
 
     public function handle(GetDailySessionsQuery $query): LengthAwarePaginator
@@ -20,7 +20,8 @@ final readonly class GetDailySessionsHandler
             $query->date,
             $query->perPage,
             $query->page,
-            $query->instructorId
+            $query->instructorId,
+            $query->categoryId,
         );
     }
 }

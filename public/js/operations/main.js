@@ -10,6 +10,7 @@ import { initClassDetailPage, initClassEditPage, initClassesTab } from './module
 import { observeOperationsPickers } from './modules/pickers.js';
 import { observeComboSelects } from './modules/combo.js';
 import './modules/create-client.js';
+import './modules/booking-sessions.js';
 
 document.addEventListener('DOMContentLoaded', () => {
     initTheme();

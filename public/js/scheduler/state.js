@@ -9,6 +9,8 @@ window.Scheduler = {
         error:        null,
         instructors:          [],
         selectedInstructorId: null,
+        categories:           [],
+        selectedCategoryId:   null,
         modal: {
             show:       false,
             loading:    false,

@@ -132,6 +132,25 @@ const OperationsAPI = {
         return this.request("/admin/operations/finance/expenses", "POST", data);
     },
 
+    getBookingSessions(bookingId) {
+        return this.request(`/admin/operations/bookings/${bookingId}/sessions`);
+    },
+
+    batchUpdateBookingSessions(bookingId, items) {
+        return this.request(
+            `/admin/operations/bookings/${bookingId}/sessions/batch`,
+            "POST",
+            { items },
+        );
+    },
+
+    updateBooking(bookingId, { purchasedAt, expiresAt }) {
+        return this.request(`/admin/operations/bookings/${bookingId}`, "PUT", {
+            purchased_at: purchasedAt,
+            expires_at: expiresAt || null,
+        });
+    },
+
     freezeBooking(bookingId) {
         return this.request(
             `/admin/operations/bookings/${bookingId}/freeze`,

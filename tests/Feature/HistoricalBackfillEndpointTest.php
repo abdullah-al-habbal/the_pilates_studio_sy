@@ -322,13 +322,13 @@ final class HistoricalBackfillEndpointTest extends TestCase
     }
 
     #[Test]
-    public function an_unlimited_package_is_rejected(): void
+    public function an_unlimited_package_is_accepted_and_never_expires(): void
     {
         $package = Package::factory()->create(['validity_days' => null]);
 
-        $this->submit(['package_id' => $package->id])
-            ->assertStatus(422)
-            ->assertJsonValidationErrors('package_id');
+        $this->submit(['package_id' => $package->id])->assertCreated();
+
+        $this->assertNull(Booking::sole()->expires_at);
     }
 
     #[Test]

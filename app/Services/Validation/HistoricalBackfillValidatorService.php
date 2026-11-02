@@ -13,6 +13,7 @@ use App\Models\Package;
 use App\Models\User;
 use App\Repositories\Eloquent\Booking\BookingEloquentRepository;
 use App\Services\Currency\PricingService;
+use App\Support\Time\StudioTime;
 use Carbon\CarbonInterface;
 use Illuminate\Validation\ValidationException;
 
@@ -39,11 +40,12 @@ final readonly class HistoricalBackfillValidatorService
             ]);
         }
 
-        $this->assertPackageHasValidity($package);
-
         $this->assertPurchaseDateIsPast($purchasedAt);
 
-        $expiresAt = $purchasedAt->copy()->addDays($package->validity_days);
+        // A package without validity never expires, like in a live assignment: its window runs to today.
+        $expiresAt = $package->validity_days > 0
+            ? $purchasedAt->copy()->addDays($package->validity_days)
+            : null;
 
         $currencyId = $command->currencyId ?? $this->pricingService->getBaseCurrencyId();
         $resolvedAmount = $this->assignPackageValidator
@@ -90,15 +92,6 @@ final readonly class HistoricalBackfillValidatorService
         );
     }
 
-    private function assertPackageHasValidity(Package $package): void
-    {
-        if (! ($package->validity_days > 0)) {
-            throw ValidationException::withMessages([
-                'package_id' => __(self::LANG . 'error_null_validity_package'),
-            ]);
-        }
-    }
-
     private function assertPurchaseDateIsPast(CarbonInterface $purchasedAt): void
     {
         if ($purchasedAt->isFuture()) {
@@ -134,7 +127,7 @@ final readonly class HistoricalBackfillValidatorService
     private function assertSessionsExistWithinWindow(
         array $sessionIds,
         CarbonInterface $purchasedAt,
-        CarbonInterface $expiresAt,
+        ?CarbonInterface $expiresAt,
     ): void {
         if ($sessionIds === []) {
             return;
@@ -143,7 +136,7 @@ final readonly class HistoricalBackfillValidatorService
         $found = ClassSession::query()
             ->whereIn('id', $sessionIds)
             ->where('status', '!=', ClassSessionStatusEnum::CANCELLED->value)
-            ->whereBetween('date', [$purchasedAt->toDateString(), $expiresAt->toDateString()])
+            ->whereBetween('date', [$purchasedAt->toDateString(), ($expiresAt ?? StudioTime::now())->toDateString()])
             ->pluck('id')
             ->all();
 
@@ -156,11 +149,11 @@ final readonly class HistoricalBackfillValidatorService
         }
     }
 
-    private function resolveTerminalStatus(int $remainingCredits, CarbonInterface $expiresAt): BookingStatusEnum
+    private function resolveTerminalStatus(int $remainingCredits, ?CarbonInterface $expiresAt): BookingStatusEnum
     {
         return match (true) {
             $remainingCredits <= 0 => BookingStatusEnum::EXHAUSTED,
-            $expiresAt->isPast() => BookingStatusEnum::EXPIRED,
+            $expiresAt?->isPast() === true => BookingStatusEnum::EXPIRED,
             default => BookingStatusEnum::ACTIVE,
         };
     }

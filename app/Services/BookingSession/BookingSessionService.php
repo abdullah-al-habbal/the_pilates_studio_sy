@@ -11,6 +11,7 @@ use App\Enums\BookingSessionStatusEnum;
 use App\Enums\BookingStatusEnum;
 use App\Models\Booking;
 use App\Models\BookingSession;
+use App\Models\ClassSession;
 use App\Models\User;
 use App\Repositories\Eloquent\Booking\BookingEloquentRepository;
 use App\Repositories\Eloquent\BookingSession\BookingSessionEloquentRepository;
@@ -99,34 +100,154 @@ class BookingSessionService
                 throw $this->notFound($bookingSessionId);
             }
 
-            if ($bookingSession->isCancelled()) {
-                throw ValidationException::withMessages([
-                    'status' => 'Session is already cancelled.',
-                ]);
-            }
-
-            if ($bookingSession->attended_at !== null) {
-                throw ValidationException::withMessages([
-                    'status' => 'Attendance has already been recorded for this session.',
-                ]);
-            }
-
-            $this->cancellationPolicy->assertCancellable($classSession, $isOverride);
-
-            $booking = $this->bookingService->find($bookingSession->booking_id, true);
-
-            $this->repository->markCancelled(
-                id: $bookingSessionId,
-                actorId: $actor->id,
-                adminId: $actor->isAdmin() ? $actor->id : null,
-                cancellationType: $isOverride ? self::CANCELLATION_ADMIN_OVERRIDE : self::CANCELLATION_USER_INITIATED,
-                reason: $reason,
-            );
-
-            $this->bookingService->restoreCreditAfterCancellation($booking);
-
-            return $bookingSession->refresh();
+            return $this->cancelLocked($bookingSession, $classSession, $actor, $isOverride, $reason);
         });
+    }
+
+    /**
+     * Cancels several reservations of one booking, or marks attendance, in a single transaction.
+     * One invalid item aborts the whole batch. Every item must belong to $bookingId, otherwise it
+     * is reported as not found. Locks: class sessions (by id), reservations (by id), then booking.
+     *
+     * @param  array<int, array{booking_session_id: int, status: string, override?: bool, reason?: string|null}>  $items
+     */
+    public function applyBatch(int $bookingId, array $items, User $admin): void
+    {
+        if (! $admin->isAdmin()) {
+            throw $this->notFound($bookingId);
+        }
+
+        $this->logger->info('Applying booking session batch', [
+            'booking_id' => $bookingId,
+            'actor_id' => $admin->id,
+            'items' => count($items),
+        ]);
+
+        DB::transaction(function () use ($bookingId, $items, $admin): void {
+            $byId = [];
+            foreach ($items as $item) {
+                $byId[(int) $item['booking_session_id']] = $item;
+            }
+
+            $probes = [];
+            foreach (array_keys($byId) as $id) {
+                $probe = $this->repository->find($id);
+                if ($probe === null || (int) $probe->booking_id !== $bookingId) {
+                    throw $this->notFound($id);
+                }
+                $probes[$id] = $probe;
+            }
+
+            $classSessions = [];
+            $classIds = collect($probes)->pluck('class_session_id')->map(intval(...))->unique()->sort()->values();
+            foreach ($classIds as $classId) {
+                $classSessions[$classId] = $this->classSessionService->find($classId, true);
+            }
+
+            $locked = [];
+            $ids = array_keys($byId);
+            sort($ids);
+            foreach ($ids as $id) {
+                $locked[$id] = $this->repository->find($id, true) ?? throw $this->notFound($id);
+            }
+
+            $booking = $this->bookingService->find($bookingId, true);
+
+            if ($booking->status === BookingStatusEnum::CANCELLED) {
+                throw ValidationException::withMessages([
+                    'booking_id' => 'Sessions of a cancelled or refunded package cannot be changed.',
+                ]);
+            }
+
+            foreach ($ids as $id) {
+                $item = $byId[$id];
+                $bookingSession = $locked[$id]->refresh();
+                $classSession = $classSessions[(int) $bookingSession->class_session_id];
+
+                try {
+                    match ($item['status']) {
+                        'cancelled' => $this->cancelLocked(
+                            $bookingSession,
+                            $classSession,
+                            $admin,
+                            (bool) ($item['override'] ?? false),
+                            $item['reason'] ?? null,
+                        ),
+                        'attended', 'missed' => $this->applyAttendanceLocked(
+                            $bookingSession,
+                            AttendanceStatusEnum::from($item['status']),
+                            $admin,
+                        ),
+                        default => throw ValidationException::withMessages(['status' => 'Unknown status.']),
+                    };
+                } catch (ValidationException $e) {
+                    throw ValidationException::withMessages([
+                        "items.{$id}" => collect($e->errors())->flatten()->first() ?? 'Invalid change.',
+                    ]);
+                }
+            }
+        });
+    }
+
+    private function applyAttendanceLocked(BookingSession $bookingSession, AttendanceStatusEnum $status, User $admin): void
+    {
+        $bookingSession->loadMissing('classSession');
+
+        if (! $bookingSession->isReserved()) {
+            throw ValidationException::withMessages(['status' => 'Attendance cannot be set on a cancelled session.']);
+        }
+
+        if ($bookingSession->attendance_status === $status) {
+            return;
+        }
+
+        $allowed = $status === AttendanceStatusEnum::ATTENDED
+            ? $bookingSession->can_mark_attended
+            : $bookingSession->can_mark_missed;
+
+        if (! $allowed) {
+            throw ValidationException::withMessages(['status' => 'This class has not reached the point where attendance can be set.']);
+        }
+
+        $this->toggleAttendance($bookingSession->id, $status, $admin->id);
+    }
+
+    private function cancelLocked(
+        BookingSession $bookingSession,
+        ClassSession $classSession,
+        User $actor,
+        bool $isOverride,
+        ?string $reason,
+    ): BookingSession {
+        $isOverride = $isOverride && $actor->isAdmin();
+
+        if ($bookingSession->isCancelled()) {
+            throw ValidationException::withMessages([
+                'status' => 'Session is already cancelled.',
+            ]);
+        }
+
+        if ($bookingSession->attended_at !== null) {
+            throw ValidationException::withMessages([
+                'status' => 'Attendance has already been recorded for this session.',
+            ]);
+        }
+
+        $this->cancellationPolicy->assertCancellable($classSession, $isOverride);
+
+        $booking = $this->bookingService->find($bookingSession->booking_id, true);
+
+        $this->repository->markCancelled(
+            id: $bookingSession->id,
+            actorId: $actor->id,
+            adminId: $actor->isAdmin() ? $actor->id : null,
+            cancellationType: $isOverride ? self::CANCELLATION_ADMIN_OVERRIDE : self::CANCELLATION_USER_INITIATED,
+            reason: $reason,
+        );
+
+        $this->bookingService->restoreCreditAfterCancellation($booking);
+
+        return $bookingSession->refresh();
     }
 
     private function notFound(int $bookingSessionId): ModelNotFoundException

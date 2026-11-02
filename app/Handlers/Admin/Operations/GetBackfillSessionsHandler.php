@@ -8,6 +8,7 @@ use App\Commands\Admin\Operations\GetBackfillSessionsCommand;
 use App\Enums\BookingSessionStatusEnum;
 use App\Enums\ClassSessionStatusEnum;
 use App\Models\ClassSession;
+use App\Support\Time\StudioTime;
 use Illuminate\Contracts\Pagination\CursorPaginator as CursorPaginatorContract;
 use Illuminate\Pagination\Cursor;
 
@@ -23,11 +24,11 @@ final readonly class GetBackfillSessionsHandler
                 'bookingSessions as booking_sessions_count' => fn ($q) => $q
                     ->where('status', BookingSessionStatusEnum::RESERVED->value),
             ])
-            ->whereDate('date', '<=', today())
+            ->whereDate('date', '<=', StudioTime::now()->toDateString())
             ->where('status', '!=', ClassSessionStatusEnum::CANCELLED->value)
             ->whereBetween('date', [
                 $command->purchasedAt->toDateString(),
-                $command->expiresAt->toDateString(),
+                ($command->expiresAt ?? StudioTime::now())->toDateString(),
             ])
             ->when($command->month, fn ($q, $month) => $q->whereMonth('date', $month))
             ->when($command->year, fn ($q, $year) => $q->whereYear('date', $year))

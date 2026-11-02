@@ -9,10 +9,12 @@
             + {{ __('dashboard.operations_ui.classes.create') }}
         </button>
     </div>
-    <div class="glass-card rounded-2xl p-4 grid grid-cols-1 md:grid-cols-5 gap-3">
+    <div class="glass-card rounded-2xl p-4 grid grid-cols-1 md:grid-cols-4 lg:grid-cols-7 gap-3">
         <input id="classes-search" type="search" placeholder="{{ __('dashboard.operations_ui.classes.search') }}"
             class="md:col-span-2 w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-4 py-2.5 outline-none focus:ring-2 focus:ring-primary-500">
         <select id="classes-status-filter" class="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-4 py-2.5"></select>
+        <select id="classes-instructor-filter" class="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-4 py-2.5"></select>
+        <select id="classes-category-filter" class="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-4 py-2.5"></select>
         <select id="classes-scope-filter" class="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-4 py-2.5">
             <option value="active">{{ __('dashboard.operations_ui.classes.scope_active') }}</option>
             <option value="all">{{ __('dashboard.operations_ui.classes.scope_all') }}</option>

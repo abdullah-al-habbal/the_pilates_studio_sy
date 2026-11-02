@@ -142,6 +142,14 @@ final readonly class ClassesManagementAction
                 'value' => $day->value,
                 'label' => $day->getLabel(),
             ]),
+            'instructors' => Instructor::query()->orderBy('id')->get()->map(fn (Instructor $instructor) => [
+                'id' => $instructor->id,
+                'name' => $instructor->getTranslation('name', app()->getLocale(), false) ?: $instructor->getTranslation('name', 'en'),
+            ]),
+            'categories' => ClassCategory::query()->orderBy('id')->get()->map(fn (ClassCategory $category) => [
+                'id' => $category->id,
+                'name' => $category->getTranslation('name', app()->getLocale(), false) ?: $category->getTranslation('name', 'en'),
+            ]),
             'statuses' => collect(ClassStatusEnum::cases())->map(fn (ClassStatusEnum $status) => [
                 'value' => $status->value,
                 'label' => $status->getLabel(),

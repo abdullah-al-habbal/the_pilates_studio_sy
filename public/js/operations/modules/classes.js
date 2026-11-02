@@ -6,6 +6,8 @@ const state = {
     perPage: 20,
     search: '',
     status: '',
+    instructorId: '',
+    categoryId: '',
     scope: 'active',
     wizard: null,
     listRequestId: 0,
@@ -50,16 +52,20 @@ async function ensureOptions() {
 export async function initClassesTab() {
     const search = document.getElementById('classes-search');
     const status = document.getElementById('classes-status-filter');
+    const instructor = document.getElementById('classes-instructor-filter');
+    const category = document.getElementById('classes-category-filter');
     const scope = document.getElementById('classes-scope-filter');
     const perPage = document.getElementById('classes-per-page');
     const create = document.getElementById('classes-create-button');
-    if (!search || !status || !scope || !perPage || !create) return;
+    if (!search || !status || !instructor || !category || !scope || !perPage || !create) return;
 
     hydrateListStateFromUrl();
 
     try {
         const options = await ensureOptions();
         status.innerHTML = `<option value="">${escapeHtml(t('all_statuses', 'All statuses'))}</option>${options.statuses.map((item) => `<option value="${item.value}">${escapeHtml(item.label)}</option>`).join('')}`;
+        instructor.innerHTML = `<option value="">${escapeHtml(t('all_instructors', 'All instructors'))}</option>${(options.instructors ?? []).map((item) => `<option value="${item.id}">${escapeHtml(item.name)}</option>`).join('')}`;
+        category.innerHTML = `<option value="">${escapeHtml(t('all_categories', 'All categories'))}</option>${(options.categories ?? []).map((item) => `<option value="${item.id}">${escapeHtml(item.name)}</option>`).join('')}`;
     } catch (error) {
         OperationsUI.toast(error.message, 'error');
         return;
@@ -78,6 +84,8 @@ export async function initClassesTab() {
         searchTimer = setTimeout(loadClasses, 250);
     });
     status.addEventListener('change', () => { state.status = status.value; state.page = 1; syncListUrl(); loadClasses(); });
+    instructor.addEventListener('change', () => { state.instructorId = instructor.value; state.page = 1; syncListUrl(); loadClasses(); });
+    category.addEventListener('change', () => { state.categoryId = category.value; state.page = 1; syncListUrl(); loadClasses(); });
     scope.addEventListener('change', () => { state.scope = scope.value; state.page = 1; syncListUrl(); loadClasses(); });
     perPage.addEventListener('change', () => {
         state.perPage = Number(perPage.value);
@@ -96,6 +104,8 @@ function hydrateListStateFromUrl() {
 
     state.search = params.get('search') ?? '';
     state.status = params.get('status') ?? '';
+    state.instructorId = params.get('instructor_id') ?? '';
+    state.categoryId = params.get('category_id') ?? '';
     state.scope = params.get('scope') ?? 'active';
     state.page = Number.isInteger(page) && page > 0 ? page : 1;
     state.perPage = perPageOptions.includes(perPage) ? perPage : 20;
@@ -104,17 +114,24 @@ function hydrateListStateFromUrl() {
 function normalizeListState() {
     const statuses = state.options?.statuses?.map((item) => item.value) ?? [];
     if (!statuses.includes(state.status)) state.status = '';
+    const knownIds = (list) => (list ?? []).map((item) => String(item.id));
+    if (!knownIds(state.options?.instructors).includes(state.instructorId)) state.instructorId = '';
+    if (!knownIds(state.options?.categories).includes(state.categoryId)) state.categoryId = '';
     if (!['active', 'all', 'trashed'].includes(state.scope)) state.scope = 'active';
 }
 
 function syncListControls() {
     const search = document.getElementById('classes-search');
     const status = document.getElementById('classes-status-filter');
+    const instructor = document.getElementById('classes-instructor-filter');
+    const category = document.getElementById('classes-category-filter');
     const scope = document.getElementById('classes-scope-filter');
     const perPage = document.getElementById('classes-per-page');
 
     if (search) search.value = state.search;
     if (status) status.value = state.status;
+    if (instructor) instructor.value = state.instructorId;
+    if (category) category.value = state.categoryId;
     if (scope) scope.value = state.scope;
     if (perPage) perPage.value = String(state.perPage);
 }
@@ -124,6 +141,8 @@ function syncListUrl({ replace = false } = {}) {
     const params = [
         ['search', state.search, ''],
         ['status', state.status, ''],
+        ['instructor_id', state.instructorId, ''],
+        ['category_id', state.categoryId, ''],
         ['scope', state.scope, 'active'],
         ['per_page', String(state.perPage), '20'],
         ['page', String(state.page), '1'],
@@ -166,6 +185,8 @@ async function loadClasses() {
             per_page: state.perPage,
             search: state.search,
             status: state.status,
+            instructor_id: state.instructorId,
+            category_id: state.categoryId,
             scope: state.scope,
         });
         if (requestId !== state.listRequestId) return;

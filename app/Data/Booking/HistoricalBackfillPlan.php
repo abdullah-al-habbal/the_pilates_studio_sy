@@ -26,7 +26,7 @@ final readonly class HistoricalBackfillPlan
         public User $user,
         public Package $package,
         public CarbonInterface $purchasedAt,
-        public CarbonInterface $expiresAt,
+        public ?CarbonInterface $expiresAt,
         public int $currencyId,
         public int $paidAmount,
         public float $exchangeRateSnapshot,
